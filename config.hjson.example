@@ -1,0 +1,18 @@
+{
+	accounts: {
+		gwaka.t12yb: {
+			authFilePath: /home/me/override/default/auth/file/path
+		}
+	}
+	jobs: [
+		{
+			account: admsommer
+			sourceFolder: /home/me/Downloads/classifieds/uploader-test
+			makeAlbums: {
+                enabled: true
+                use: folderNames
+            }
+			deleteAfterUpload: true
+		}
+	]
+}

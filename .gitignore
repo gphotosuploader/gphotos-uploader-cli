@@ -1,0 +1,5 @@
+.env
+vendor
+config.hjson.perso
+config.hjson
+auth.json
