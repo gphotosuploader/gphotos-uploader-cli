@@ -7,7 +7,7 @@
 	jobs: [
 		{
 			account: admsommer
-			sourceFolder: /home/me/Downloads/classifieds/uploader-test
+			sourceFolder: ~/Downloads/upload
 			makeAlbums: {
                 enabled: true
                 use: folderNames

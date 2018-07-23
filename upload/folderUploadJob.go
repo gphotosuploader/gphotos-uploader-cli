@@ -3,54 +3,113 @@ package upload
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-cookies/filesHandling"
+	"github.com/palantir/stacktrace"
 
-	"github.com/simonedegiacomi/gphotosuploader/auth"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/nmrshll/go-cp"
+
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/datastore"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/filesHandling"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/gphotosapiclient"
 )
 
 const (
 	USEFOLDERNAMES = "folderNames"
 )
 
+// var (
+// 	folderUploadsChan = make(chan struct{})
+// )
+
 type FolderUploadJob struct {
-	Credentials  *auth.CookieCredentials
-	Account      string
-	SourceFolder string
-	MakeAlbums   struct {
-		Enabled bool
-		Use     string
-	}
-	DeleteAfterUpload bool
+	*config.FolderUploadJob
 }
 
-func (j *FolderUploadJob) Run() {
-	err := j.uploadFolder(j.SourceFolder)
+func (folderUploadJob *FolderUploadJob) Run() {
+	sourceFolderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return
+
+	client, err := Authenticate(folderUploadJob)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = folderUploadJob.uploadFolder(client, sourceFolderAbsolutePath)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (j *FolderUploadJob) uploadFolder(folderPath string) error {
+func Authenticate(folderUploadJob *FolderUploadJob) (*gphotosapiclient.PhotosClient, error) {
+	var httpClient *http.Client
+
+	// try to load token from keyring
+	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
+	if err == nil {
+		// if found create client from token
+		httpClient = gphotosapiclient.NewClientFromToken(token)
+	} else {
+		// else whatever the reason authenticate again to grab a new token
+		authorizedClient, err := gphotosapiclient.NewOAuthClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// and store the token into the keyring
+		err = tokenstore.StoreToken(folderUploadJob.Account, *authorizedClient.Token)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed storing token")
+		}
+
+		httpClient = authorizedClient.Client
+	}
+	// if err != nil && err != tokenstore.ErrNotFound {
+	// 	fmt.Println("failed retrieving valid token, browser will open to authenticate again...")
+	// }
+
+	// // if found create a client from the token
+	// if err == nil {
+	// 	// create client from token
+	// }
+
+	// // if not found authenticate the user to create a new OAuthClient and store token in keyring
+	// if err == tokenstore.ErrNotFound {
+	// }
+
+	photosClient, err := gphotosapiclient.New(httpClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return photosClient, nil
+}
+
+func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotosapiclient.PhotosClient, folderPath string) error {
 	if !filesHandling.IsDir(folderPath) {
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
 
-	defer close(fileUploadsChan)
+	// defer close(fileUploadsChan)
+	// NO. TODO: USE ONE CHAN PER FOLDERUPLOADJOB
+
 	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+		spew.Dump(path)
 		if info.IsDir() {
 			return nil
 		}
 		if filesHandling.IsFile(path) {
-			var fu = &FileUpload{FolderUploadJob: j, filePath: path}
+			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: *gphotosClient}
 			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(path))
-				fu.albumName = lastDirName
+				fileUpload.albumName = lastDirName
 			}
-			fileUploadsChan <- fu
+			QueueFileUpload(fileUpload)
 		}
 		// if filepath.Ext(path) == ".sh" {
 		// 	list = append(list, path)

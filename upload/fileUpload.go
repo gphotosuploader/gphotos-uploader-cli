@@ -3,76 +3,65 @@ package upload
 import (
 	"fmt"
 	"log"
-	"os"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/simonedegiacomi/gphotosuploader/api"
-	"gitlab.com/nmrshll/gphotos-uploader-go-cookies/filesHandling"
+	"github.com/palantir/stacktrace"
+
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/gphotosapiclient"
 )
 
 var (
-	fileUploadsChan   = make(chan *FileUpload)
-	maxPhotosToUpload = -1
+	fileUploadsChan = make(chan *FileUpload)
+	// maxPhotosToUpload    = -1
 )
-
-func init() {
-	startFileUploadWorker()
-}
-
-func startFileUploadWorker() {
-	go func() {
-		counter := 0
-		for fileUpload := range fileUploadsChan {
-			fileUpload.upload()
-			if maxPhotosToUpload > 0 {
-				counter++
-				if counter >= maxPhotosToUpload {
-					log.Fatal("done")
-				}
-			}
-		}
-	}()
-}
 
 type FileUpload struct {
 	*FolderUploadJob
-	filePath  string
-	albumName string
+	filePath      string
+	albumName     string
+	gphotosClient gphotosapiclient.PhotosClient
 }
 
-func (fu *FileUpload) upload() error {
-	// Open the file to upload
-	file, err := os.Open(fu.filePath)
+func QueueFileUpload(fileUpload *FileUpload) {
+
+	fileUploadsChan <- fileUpload
+}
+func CloseFileUploadsChan() { close(fileUploadsChan) }
+
+func StartFileUploadWorker() (doneUploading chan struct{}) {
+	doneUploading = make(chan struct{})
+
+	go func() {
+		// counter := 0
+		for fileUpload := range fileUploadsChan {
+			err := fileUpload.upload()
+			if err != nil {
+				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
+			}
+			// if maxPhotosToUpload > 0 {
+			// 	counter++
+			// 	if counter >= maxPhotosToUpload {
+			// 		log.Fatal("done")
+			// 	}
+			// }
+		}
+		doneUploading <- struct{}{}
+	}()
+
+	return doneUploading
+}
+
+func (fileUpload *FileUpload) upload() error {
+	err := fileUpload.gphotosClient.Upload(fileUpload.filePath)
 	if err != nil {
-		return err
+		return stacktrace.Propagate(err, "failed uploading image")
 	}
 
-	// Create an UploadOptions object that describes the upload.
-	options, err := api.NewUploadOptionsFromFile(file)
-	if err != nil {
-		return err
-	}
-	if fu.albumName != "" {
-		options.AlbumId = fu.albumName
-	}
-
-	// Create an upload using the NewUpload method from the api package
-	upload, err := api.NewUpload(options, *fu.FolderUploadJob.Credentials)
-	if err != nil {
-		return err
-	}
-
-	// Finally upload the image
-	err = upload.Upload()
-	if err != nil {
-		return err
-	}
-	spew.Dump(upload)
 	fmt.Println("image uploaded successfully")
 
 	// check phash of uploaded image
-	if fu.DeleteAfterUpload {
-		go filesHandling.CheckUploadedAndDeleteLocal(upload.URLString(), fu.filePath)
-	}
+	// TODO: uncomment and fix
+	// if fu.DeleteAfterUpload {
+	// 	go filesHandling.CheckUploadedAndDeleteLocal(upload.URLString(), fu.filePath)
+	// }
 	return nil
 }

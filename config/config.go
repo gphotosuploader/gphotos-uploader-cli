@@ -6,10 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-cookies/filesHandling"
-	"gitlab.com/nmrshll/gphotos-uploader-go-cookies/upload"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/filesHandling"
 
-	"github.com/gosimple/slug"
 	cp "github.com/nmrshll/go-cp"
 	"github.com/palantir/stacktrace"
 
@@ -17,36 +15,63 @@ import (
 )
 
 const (
-	CONFIGFOLDER = "~/.config/gphotos-uploader-go-cookies"
+	CONFIGFOLDER = "~/.config/gphotos-uploader-go-api"
 )
+
+type APIAppCredentials struct {
+	ClientID     string
+	ClientSecret string
+}
 
 var (
-	CONFIGPATH = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
+	// consts
+	CONFIGPATH          = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
+	API_APP_CREDENTIALS = APIAppCredentials{
+		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+	}
+
+	// vars
+	Cfg *Config
 )
 
-type JobsConfig struct {
+type FolderUploadJob struct {
+	// Credentials  *auth.CookieCredentials
+	Account      string
+	SourceFolder string
+	MakeAlbums   struct {
+		Enabled bool
+		Use     string
+	}
+	DeleteAfterUpload bool
+}
+type Config struct {
 	Accounts map[string]struct {
 		Username string
 		Password string
 	}
-	Jobs []*upload.FolderUploadJob
+	Jobs []*FolderUploadJob
 }
 
-func Load() []*upload.FolderUploadJob {
-	jobConfig := loadConfigFile()
-	for _, job := range jobConfig.Jobs {
-		authFilePath := fmt.Sprintf("%s/%s/auth.json", CONFIGFOLDER, slug.Make(job.Account))
-		authFilePathAbsolute, err := cp.AbsolutePath(authFilePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(fmt.Sprintf("loading auth file at %s", authFilePath))
-		job.Credentials = Authenticate(authFilePathAbsolute)
-	}
-	return jobConfig.Jobs
+func Load() *Config {
+	Cfg = loadConfigFile()
+	return Cfg
 }
 
-func loadConfigFile() *JobsConfig {
+// func processConfig(jobsConfig *Config) {
+// 	for _, job := range jobsConfig.Jobs {
+// 		authFilePathRaw := fmt.Sprintf("%s/%s/auth.json", CONFIGFOLDER, slug.Make(job.Account))
+// 		authFilePathAbsolute, err := cp.AbsolutePath(authFilePathRaw)
+// 		_ = authFilePathAbsolute
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		fmt.Println(fmt.Sprintf("loading auth file at %s", authFilePathRaw))
+// 		// job.Credentials = Authenticate(authFilePathAbsolute)
+// 	}
+// }
+
+func loadConfigFile() *Config {
 	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +90,7 @@ func loadConfigFile() *JobsConfig {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var config = &JobsConfig{}
+	var config = &Config{}
 	jsonConfig := hjson.ToJSON(configBytes)
 	if err := json.Unmarshal(jsonConfig, config); err != nil {
 		log.Fatal(stacktrace.Propagate(err, "unmarshal jsonConfig failed"))

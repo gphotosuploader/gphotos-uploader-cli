@@ -3,13 +3,16 @@ package config
 import "github.com/simonedegiacomi/gphotosuploader/auth"
 
 func Authenticate(authFilePath string) *auth.CookieCredentials {
-	authOpts := auth.AuthenticationOptions{
-		AuthFilePath: authFilePath,
-		Silent:       true,
-	}
+	// TODO: fix and uncomment
 
-	credentials := auth.Authenticate(authOpts)
-	return &credentials
+	// authOpts := auth.AuthenticationOptions{
+	// 	AuthFilePath: authFilePath,
+	// 	Silent:       true,
+	// }
+
+	// credentials := auth.Authenticate(authOpts)
+	// return &credentials
+	return &auth.CookieCredentials{}
 }
 
 // func loadCredentialsOrAuthenticate() *auth.CookieCredentials {

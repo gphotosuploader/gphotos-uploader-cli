@@ -1,4 +1,4 @@
-start:
+dev:
 	go run main.go
 
 .PHONY: vendor
