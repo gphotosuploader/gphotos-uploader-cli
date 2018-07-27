@@ -2,6 +2,7 @@ package main
 
 import (
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/upload"
 )
 
@@ -15,15 +16,19 @@ func main() {
 
 	// start file upload worker
 	doneUploading := upload.StartFileUploadWorker()
+	doneDeleting := fileshandling.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
 		folderUploadJob := upload.FolderUploadJob{job}
 		folderUploadJob.Run()
 	}
-	// we're done adding file upload jobs
+	// after we've run all the folder upload jobs we're done adding file upload jobs
 	upload.CloseFileUploadsChan()
-
-	// wait for all the uploads to be complete before exiting
+	// wait for all the uploads to be completed
 	<-doneUploading
+	// after the last upload is done we're done queueing files for deletion
+	fileshandling.CloseDeletionsChan()
+	// wait for deletions to be completed before exiting
+	<-doneDeleting
 }

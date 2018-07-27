@@ -70,24 +70,22 @@ func (client *PhotosClient) GetUploadToken(r io.Reader, filename string) (token 
 }
 
 // Upload actually uploads the media and activates it on google photos
-func (client *PhotosClient) Upload(filePath string) error {
+func (client *PhotosClient) UploadFile(filePath string) (*photoslibrary.MediaItem, error) {
 	filename := path.Base(filePath)
 	log.Printf("Uploading %s", filename)
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed opening file")
+		return nil, stacktrace.Propagate(err, "failed opening file")
 	}
 	defer file.Close()
 
 	uploadToken, err := client.GetUploadToken(file, filename)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed getting uploadToken for %s", filename)
+		return nil, stacktrace.Propagate(err, "failed getting uploadToken for %s", filename)
 	}
-	log.Printf("Uploaded %s as token %s", filename, uploadToken)
 
-	log.Printf("Adding media %s", filename)
-	batch, err := client.MediaItems.BatchCreate(&photoslibrary.BatchCreateMediaItemsRequest{
+	batchResponse, err := client.MediaItems.BatchCreate(&photoslibrary.BatchCreateMediaItemsRequest{
 		NewMediaItems: []*photoslibrary.NewMediaItem{
 			&photoslibrary.NewMediaItem{
 				Description:     filename,
@@ -96,12 +94,17 @@ func (client *PhotosClient) Upload(filePath string) error {
 		},
 	}).Do()
 	if err != nil {
-		return stacktrace.Propagate(err, "failed adding media %s", filename)
+		return nil, stacktrace.Propagate(err, "failed adding media %s", filename)
 	}
 
-	for _, result := range batch.NewMediaItemResults {
-		log.Printf("Added media %s as %s", result.MediaItem.Description, result.MediaItem.Id)
+	if batchResponse == nil || len(batchResponse.NewMediaItemResults) != 1 {
+		return nil, stacktrace.NewError("len(batchResults) should be 1")
+	}
+	result := batchResponse.NewMediaItemResults[0]
+	if result.Status.Message != "OK" {
+		return nil, stacktrace.NewError("status message should be OK, found: %s", result.Status.Message)
 	}
 
-	return nil
+	log.Printf("%s uploaded successfully as %s", filename, result.MediaItem.Id)
+	return result.MediaItem, nil
 }

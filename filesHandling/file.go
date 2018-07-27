@@ -1,4 +1,4 @@
-package filesHandling
+package fileshandling
 
 import "os"
 

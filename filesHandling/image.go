@@ -1,4 +1,4 @@
-package filesHandling
+package fileshandling
 
 import (
 	"fmt"
@@ -6,14 +6,46 @@ import (
 	// register decoders for jpeg and png
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
+
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/Nr90/imgsim"
 	"github.com/steakknife/hamming"
+	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
+
+var (
+	imageExtensions = []string{".jpg", ".jpeg", ".png"}
+	deletionsChan   = make(chan DeletionJob)
+)
+
+type DeletionJob struct {
+	uploadedMediaItem *photoslibrary.MediaItem
+	localFilePath     string
+}
+
+func QueueDeletionJob(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) {
+	deletionsChan <- DeletionJob{uploadedMediaItem, localImgPath}
+}
+
+func CloseDeletionsChan() { close(deletionsChan) }
+
+func StartDeletionsWorker() (doneDeleting chan struct{}) {
+	doneDeleting = make(chan struct{})
+	go func() {
+		for deletionJob := range deletionsChan {
+			err := CheckUploadedAndDeleteLocal(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
+			if err != nil {
+				fmt.Printf("%s. Won't delete", err)
+			}
+		}
+		fmt.Println("all deletions done")
+		doneDeleting <- struct{}{}
+	}()
+	return doneDeleting
+}
 
 func imageFromPath(filePath string) (imageLib.Image, error) {
 	reader, err := os.Open(filePath)
@@ -45,16 +77,8 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 		return nil, err
 	}
 
-	// imgDotImage, ok := img.(imageLib.Image)
-	// if !ok {
-	// 	return nil, errors.New("can't cast img to image.Image")
-	// }
 	return img, nil
 }
-
-var (
-	imageExtensions = []string{".jpg", ".jpeg", ".png"}
-)
 
 func hasImageExtension(path string) bool {
 	for _, ext := range imageExtensions {
@@ -80,30 +104,31 @@ func isSameImage(upImg, localImg imageLib.Image) bool {
 	return false
 }
 
-func CheckUploadedAndDeleteLocal(upImgUrl, localImgPath string) {
+// CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
+func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) error {
 	if !hasImageExtension(localImgPath) {
-		fmt.Printf("%s doesn't have an image extension. Won't delete", localImgPath)
-		return
+		return fmt.Errorf("%s doesn't have an image extension", localImgPath)
 	}
 
 	// compare uploaded image and local one
-	upImg, err := imageFromURL(upImgUrl)
+	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed getting image from URL")
 	}
 	localImg, err := imageFromPath(localImgPath)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed loading local image from path")
 	}
 
 	if !isSameImage(upImg, localImg) {
 		fmt.Println("not the same image. Won't delete")
 	} else {
 		fmt.Println("should delete")
-		if err = os.Remove(localImgPath); err != nil {
-			fmt.Println("delete failed")
-		}
+		// if err = os.Remove(localImgPath); err != nil {
+		// 	fmt.Println("delete failed")
+		// }
 	}
+	return nil
 }
 
 // const imageExtensions = ["jpg", "png"].map(v => `.${v}`);

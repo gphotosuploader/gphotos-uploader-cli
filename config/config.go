@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/filesHandling"
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
 
 	cp "github.com/nmrshll/go-cp"
 	"github.com/palantir/stacktrace"
@@ -77,7 +77,7 @@ func loadConfigFile() *Config {
 		log.Fatal(err)
 	}
 
-	if filesHandling.IsFile(configPathAbsolute) {
+	if fileshandling.IsFile(configPathAbsolute) {
 		fmt.Println("[INFO] Config file found. Loading...")
 	} else {
 		err := cp.CopyFile("config.hjson.example", configPathAbsolute)

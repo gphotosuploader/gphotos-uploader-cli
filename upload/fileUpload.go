@@ -6,6 +6,7 @@ import (
 
 	"github.com/palantir/stacktrace"
 
+	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/gphotosapiclient"
 )
 
@@ -22,7 +23,6 @@ type FileUpload struct {
 }
 
 func QueueFileUpload(fileUpload *FileUpload) {
-
 	fileUploadsChan <- fileUpload
 }
 func CloseFileUploadsChan() { close(fileUploadsChan) }
@@ -44,6 +44,7 @@ func StartFileUploadWorker() (doneUploading chan struct{}) {
 			// 	}
 			// }
 		}
+		fmt.Println("all uploads done")
 		doneUploading <- struct{}{}
 	}()
 
@@ -51,17 +52,23 @@ func StartFileUploadWorker() (doneUploading chan struct{}) {
 }
 
 func (fileUpload *FileUpload) upload() error {
-	err := fileUpload.gphotosClient.Upload(fileUpload.filePath)
+	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed uploading image")
 	}
 
-	fmt.Println("image uploaded successfully")
-
 	// check phash of uploaded image
 	// TODO: uncomment and fix
-	// if fu.DeleteAfterUpload {
-	// 	go filesHandling.CheckUploadedAndDeleteLocal(upload.URLString(), fu.filePath)
-	// }
+
+	if fileUpload.DeleteAfterUpload {
+		// get uploaded media URL into mediaItem
+		uploadedMediaItem, err := fileUpload.gphotosClient.MediaItems.Get(uploadedMediaItem.Id).Do()
+		if err != nil {
+			return stacktrace.Propagate(err, "failed getting uploaded mediaItem")
+		}
+
+		// go fileshandling.CheckUploadedAndDeleteLocal(uploadedMediaItem, fileUpload.filePath)
+		fileshandling.QueueDeletionJob(uploadedMediaItem, fileUpload.filePath)
+	}
 	return nil
 }
