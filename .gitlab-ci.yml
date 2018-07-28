@@ -1,0 +1,2 @@
+build:
+  script: go build . -o gphotos-uploader-cli

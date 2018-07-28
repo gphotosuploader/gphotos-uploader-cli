@@ -1,7 +1,6 @@
 package upload
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/palantir/stacktrace"
@@ -12,7 +11,6 @@ import (
 
 var (
 	fileUploadsChan = make(chan *FileUpload)
-	// maxPhotosToUpload    = -1
 )
 
 type FileUpload struct {
@@ -29,25 +27,15 @@ func CloseFileUploadsChan() { close(fileUploadsChan) }
 
 func StartFileUploadWorker() (doneUploading chan struct{}) {
 	doneUploading = make(chan struct{})
-
 	go func() {
-		// counter := 0
 		for fileUpload := range fileUploadsChan {
 			err := fileUpload.upload()
 			if err != nil {
 				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
 			}
-			// if maxPhotosToUpload > 0 {
-			// 	counter++
-			// 	if counter >= maxPhotosToUpload {
-			// 		log.Fatal("done")
-			// 	}
-			// }
 		}
-		fmt.Println("all uploads done")
 		doneUploading <- struct{}{}
 	}()
-
 	return doneUploading
 }
 
@@ -57,9 +45,7 @@ func (fileUpload *FileUpload) upload() error {
 		return stacktrace.Propagate(err, "failed uploading image")
 	}
 
-	// check phash of uploaded image
-	// TODO: uncomment and fix
-
+	// queue uploaded image for visual check of result + deletion
 	if fileUpload.DeleteAfterUpload {
 		// get uploaded media URL into mediaItem
 		uploadedMediaItem, err := fileUpload.gphotosClient.MediaItems.Get(uploadedMediaItem.Id).Do()

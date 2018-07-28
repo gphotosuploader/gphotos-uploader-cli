@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
 	"gitlab.com/nmrshll/gphotos-uploader-go-api/upload"
@@ -27,8 +29,10 @@ func main() {
 	upload.CloseFileUploadsChan()
 	// wait for all the uploads to be completed
 	<-doneUploading
+	fmt.Println("all uploads done")
 	// after the last upload is done we're done queueing files for deletion
 	fileshandling.CloseDeletionsChan()
 	// wait for deletions to be completed before exiting
 	<-doneDeleting
+	fmt.Println("all deletions done")
 }

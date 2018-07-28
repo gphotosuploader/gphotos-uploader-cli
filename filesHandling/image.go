@@ -41,7 +41,7 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 				fmt.Printf("%s. Won't delete", err)
 			}
 		}
-		fmt.Println("all deletions done")
+
 		doneDeleting <- struct{}{}
 	}()
 	return doneDeleting
