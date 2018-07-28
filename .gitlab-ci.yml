@@ -1,2 +1,4 @@
+image: golang-1.10.3
+
 build:
   script: go build . -o gphotos-uploader-cli
