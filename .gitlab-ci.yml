@@ -1,4 +1,7 @@
-image: golang:1.10.3
+before_script:
+  - docker info
 
-build:
-  script: go build . -o gphotos-uploader-cli
+build_image:
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image `go test
