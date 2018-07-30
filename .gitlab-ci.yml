@@ -1,7 +1,12 @@
-before_script:
-  - docker info
+image: golang
 
-build_image:
-  script:
-    - docker build -t my-docker-image .
-    - docker run my-docker-image `go test
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
+build:
+  script: go build -o gphotos-uploader-cli .
