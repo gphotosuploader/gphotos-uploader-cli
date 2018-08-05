@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/upload"
+	"github.com/nmrshll/gphotos-uploader-cli/config"
+	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/upload"
 )
 
-const (
-	imagePath = "/home/me/photos_autres/USSIS/2014_11_WE_U6/DSC_0501.JPG"
-)
+// const (
+// 	imagePath = "/home/me/photos_autres/USSIS/2014_11_WE_U6/DSC_0501.JPG"
+// )
 
 func main() {
 	// load all config parameters

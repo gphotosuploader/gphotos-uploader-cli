@@ -11,7 +11,7 @@ parts:
   gphotos-uploader-cli:
     source: .
     plugin: go
-    go-importpath: .
+    go-importpath: github.com/nmrshll/gphotos-uploader-cli
 
 apps:
   gphotos-uploader:

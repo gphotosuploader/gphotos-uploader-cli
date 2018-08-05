@@ -6,9 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
-
 	cp "github.com/nmrshll/go-cp"
+	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/palantir/stacktrace"
 
 	"github.com/client9/xson/hjson"

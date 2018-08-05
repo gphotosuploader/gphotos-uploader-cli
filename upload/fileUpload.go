@@ -3,10 +3,9 @@ package upload
 import (
 	"log"
 
+	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/gphotosapiclient"
 	"github.com/palantir/stacktrace"
-
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/gphotosapiclient"
 )
 
 var (

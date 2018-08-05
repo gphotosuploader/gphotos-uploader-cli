@@ -4,8 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/nmrshll/gphotos-uploader-cli/config"
 	oauth2ns "github.com/nmrshll/oauth2-noserver"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
