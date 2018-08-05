@@ -1,4 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
+[![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli)
 
 # Google photos uploader CLI
 Command line tool to upload large amounts of media to your google photos account(s)
@@ -8,7 +9,7 @@ Install using `go install github.com/nmrshll/gphotos-uploader-cli`
 Configure by modifying the file `~/.config/gphotos-uploader-cli/config.hjson`
 Run it with `gphotos-uploader`
 
-# Why this tool ?
+## Why this tool ?
 Google released apps for google photos for PC, Mac, Android and iOS, but Linux was ignored.
 This tool intends to be a cross platform google photos app for uploading media.
 Right now it's a Linux and Mac uploader CLI, I hope to add a graphical interface to it in the future.

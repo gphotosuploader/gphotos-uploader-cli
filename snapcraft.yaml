@@ -2,7 +2,7 @@ name: gphotos-uploader-cli
 version: git
 summary: A command line tool to upload to google photos
 description: |
-  Gphotos-uploader-cli lets you upload folders of media to google photos.
+  gphotos-uploader-cli lets you mass upload folders of media to google photos.
 
 grade: devel
 confinement: devmode
@@ -14,5 +14,5 @@ parts:
     go-importpath: github.com/nmrshll/gphotos-uploader-cli
 
 apps:
-  gphotos-uploader-cli:
-    command: gphotos-uploader
+  gphotos-uploader:
+    command: gphotos-uploader-cli
