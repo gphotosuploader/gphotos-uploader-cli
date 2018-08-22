@@ -11,11 +11,11 @@ import (
 
 	"github.com/nmrshll/go-cp"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/config"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/datastore"
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/config"
+	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 
-	"gitlab.com/nmrshll/gphotos-uploader-go-api/gphotosapiclient"
+	"github.com/nmrshll/gphotos-uploader-cli/gphotosapiclient"
 )
 
 const (

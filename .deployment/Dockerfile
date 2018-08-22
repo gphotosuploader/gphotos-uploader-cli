@@ -1,6 +1,6 @@
 FROM golang:1.10.3
 RUN apk --no-cache add gcc g++ make ca-certificates
-WORKDIR /go/src/gitlab.com/nmrshll/gphotos-uploader-go-api
+WORKDIR /go/src/github.com/nmrshll/gphotos-uploader-cli
 
 COPY Gopkg.lock Gopkg.toml ./
 COPY vendor vendor

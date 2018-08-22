@@ -1,19 +1,17 @@
 package config
 
-import "github.com/simonedegiacomi/gphotosuploader/auth"
+// func Authenticate(authFilePath string) *auth.CookieCredentials {
+// 	// TODO: fix and uncomment
 
-func Authenticate(authFilePath string) *auth.CookieCredentials {
-	// TODO: fix and uncomment
+// 	// authOpts := auth.AuthenticationOptions{
+// 	// 	AuthFilePath: authFilePath,
+// 	// 	Silent:       true,
+// 	// }
 
-	// authOpts := auth.AuthenticationOptions{
-	// 	AuthFilePath: authFilePath,
-	// 	Silent:       true,
-	// }
-
-	// credentials := auth.Authenticate(authOpts)
-	// return &credentials
-	return &auth.CookieCredentials{}
-}
+// 	// credentials := auth.Authenticate(authOpts)
+// 	// return &credentials
+// 	return &auth.CookieCredentials{}
+// }
 
 // func loadCredentialsOrAuthenticate() *auth.CookieCredentials {
 // 	// Load cookie for credentials from a json file

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/davecgh/go-spew/spew"
 	cp "github.com/nmrshll/go-cp"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/palantir/stacktrace"
@@ -45,15 +46,17 @@ type FolderUploadJob struct {
 	DeleteAfterUpload bool
 }
 type Config struct {
-	Accounts map[string]struct {
-		Username string
-		Password string
-	}
-	Jobs []*FolderUploadJob
+	// Accounts map[string]struct {
+	// 	Username string
+	// 	Password string
+	// }
+	APIAppCredentials APIAppCredentials
+	Jobs              []*FolderUploadJob
 }
 
 func Load() *Config {
 	Cfg = loadConfigFile()
+	spew.Dump(Cfg)
 	return Cfg
 }
 
@@ -79,7 +82,7 @@ func loadConfigFile() *Config {
 	if fileshandling.IsFile(configPathAbsolute) {
 		fmt.Println("[INFO] Config file found. Loading...")
 	} else {
-		err := cp.CopyFile("config.hjson.example", configPathAbsolute)
+		err := cp.CopyFile("./config/config.example.hjson", configPathAbsolute)
 		if err != nil {
 			log.Fatal(err)
 		}
