@@ -3,8 +3,8 @@ package upload
 import (
 	"log"
 
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
-	"github.com/nmrshll/gphotos-uploader-cli/gphotosapiclient"
 	"github.com/palantir/stacktrace"
 )
 
@@ -16,7 +16,7 @@ type FileUpload struct {
 	*FolderUploadJob
 	filePath      string
 	albumName     string
-	gphotosClient gphotosapiclient.PhotosClient
+	gphotosClient gphotos.Client
 }
 
 func QueueFileUpload(fileUpload *FileUpload) {

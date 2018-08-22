@@ -1,5 +1,10 @@
 package config
 
+import (
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
+	"golang.org/x/oauth2"
+)
+
 // func Authenticate(authFilePath string) *auth.CookieCredentials {
 // 	// TODO: fix and uncomment
 
@@ -12,6 +17,10 @@ package config
 // 	// return &credentials
 // 	return &auth.CookieCredentials{}
 // }
+
+func OAuthConfig() *oauth2.Config {
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(API_APP_CREDENTIALS))
+}
 
 // func loadCredentialsOrAuthenticate() *auth.CookieCredentials {
 // 	// Load cookie for credentials from a json file

@@ -10,12 +10,10 @@ import (
 	"github.com/palantir/stacktrace"
 
 	"github.com/nmrshll/go-cp"
-
+	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
-
-	"github.com/nmrshll/gphotos-uploader-cli/gphotosapiclient"
 )
 
 const (
@@ -43,14 +41,18 @@ func (folderUploadJob *FolderUploadJob) Run() {
 	}
 }
 
-func Authenticate(folderUploadJob *FolderUploadJob) (*gphotosapiclient.PhotosClient, error) {
+func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	var httpClient *http.Client
 
 	// try to load token from keyring
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
 	if err == nil {
 		// if found create client from token
-		httpClient = gphotosapiclient.NewClientFromToken(token)
+		// httpClient = gphotosapiclient.NewClientFromToken(token)
+		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(), token))
+		if err == nil && gphotosClient != nil {
+			return gphotosClient, nil
+		}
 	} else {
 		// else whatever the reason authenticate again to grab a new token
 		authorizedClient, err := gphotosapiclient.NewOAuthClient()
