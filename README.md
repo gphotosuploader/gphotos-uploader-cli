@@ -29,11 +29,11 @@ gphotos-uploader
 ```    
 
 ## Requirements
-- Go 1.5+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli` (running the)
+- Go 1.5+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli`
 - Mac OS or Linux
 
 # Contributing
-Have improvement ideas or want to help ? Please start in the [issues](https://github.com/nmrshll/gphotos-uploader-cli/issues)  
+Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues)  
 
 ### Current plans
 - [ ] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
