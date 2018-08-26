@@ -3,11 +3,13 @@
 
 # Google photos uploader CLI
 Command line tool to mass upload media folders to your google photos account(s).    
-There is no official google photos desktop app for linux, this aims to fill this need.    
+
+While the official tool is only supports Mac OS and Windows, this brings an uploader to Linux too.
+
 #### Features:
 - specify folders to upload in config file
 - optionally delete after upload
-- uploading to multiple google accounts
+- upload to multiple google accounts
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Quick start
@@ -28,13 +30,12 @@ gphotos-uploader
 
 ## Requirements
 - Go 1.5+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli` (running the)
-- The linux keyring or macOS keychain (as of 2018-07)
-- a unix-like filesystem (as of 2018-07)
+- Mac OS or Linux
 
 # Contributing
-Please submit an issue to discuss improvements before submitting a pull request.    
+Have improvement ideas or want to help ? Please start in the [issues](https://github.com/nmrshll/gphotos-uploader-cli/issues)  
 
-### Current issues
+### Current plans
 - [ ] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
 - [ ] add tests
 - [ ] add CLI manual
