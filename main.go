@@ -22,7 +22,7 @@ func main() {
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.FolderUploadJob{job}
+		folderUploadJob := upload.FolderUploadJob{&job}
 		folderUploadJob.Run()
 	}
 	// after we've run all the folder upload jobs we're done adding file upload jobs

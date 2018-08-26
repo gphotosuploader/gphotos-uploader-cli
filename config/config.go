@@ -8,8 +8,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	cp "github.com/nmrshll/go-cp"
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/palantir/stacktrace"
+	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
 )
@@ -25,8 +27,8 @@ type APIAppCredentials struct {
 
 var (
 	// consts
-	CONFIGPATH          = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
-	API_APP_CREDENTIALS = APIAppCredentials{
+	CONFIGPATH                  = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
+	DEFAULT_API_APP_CREDENTIALS = APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 	}
@@ -35,8 +37,25 @@ var (
 	Cfg *Config
 )
 
+type Config struct {
+	APIAppCredentials *APIAppCredentials
+	Jobs              []FolderUploadJob
+}
+
+func (c *Config) Process() {
+	if c.APIAppCredentials == nil {
+		c.APIAppCredentials = &DEFAULT_API_APP_CREDENTIALS
+	}
+}
+
+func OAuthConfig() *oauth2.Config {
+	if Cfg.APIAppCredentials == nil {
+		log.Fatal(stacktrace.NewError("APIAppCredentials can't be nil"))
+	}
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
+}
+
 type FolderUploadJob struct {
-	// Credentials  *auth.CookieCredentials
 	Account      string
 	SourceFolder string
 	MakeAlbums   struct {
@@ -45,33 +64,13 @@ type FolderUploadJob struct {
 	}
 	DeleteAfterUpload bool
 }
-type Config struct {
-	// Accounts map[string]struct {
-	// 	Username string
-	// 	Password string
-	// }
-	APIAppCredentials APIAppCredentials
-	Jobs              []*FolderUploadJob
-}
 
 func Load() *Config {
 	Cfg = loadConfigFile()
+	Cfg.Process()
 	spew.Dump(Cfg)
 	return Cfg
 }
-
-// func processConfig(jobsConfig *Config) {
-// 	for _, job := range jobsConfig.Jobs {
-// 		authFilePathRaw := fmt.Sprintf("%s/%s/auth.json", CONFIGFOLDER, slug.Make(job.Account))
-// 		authFilePathAbsolute, err := cp.AbsolutePath(authFilePathRaw)
-// 		_ = authFilePathAbsolute
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		fmt.Println(fmt.Sprintf("loading auth file at %s", authFilePathRaw))
-// 		// job.Credentials = Authenticate(authFilePathAbsolute)
-// 	}
-// }
 
 func loadConfigFile() *Config {
 	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)

@@ -65,16 +65,6 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 		return nil, stacktrace.Propagate(err, "failed storing token")
 	}
 
-	// httpClient = authorizedClient.Client
-
-	// if httpClient == nil {
-	// 	return nil, stacktrace.NewError("httpClient shouldn't be still nil")
-	// }
-
-	// photosClient, err := gphotosapiclient.New(httpClient)
-	// if err != nil {
-	// 	return nil, stacktrace.Propagate(err, "failed creating new photos client from httpClient")
-	// }
 	return gphotosClient, nil
 }
 
@@ -104,75 +94,3 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 	}
 	return nil
 }
-
-// const reduceGetFirst = (a, v) => (!a && v ? v : a);
-
-// const uploadFile = async(gphotos, filePath, albumName, context) => {
-//     const uploadedImage = await gphotos.upload(filePath).catch(logError);
-//     console.log(filePath, albumName, context);
-//     if (context.makeAlbums && albumName) {
-//         const album = await gphotos.searchOrCreateAlbum(albumName);
-//         await album.addPhoto(uploadedImage);
-//     }
-//     if (context.deleteAfterUpload)
-//         checkAndDeleteLocal(uploadedImage.rawUrl, filePath).catch(
-//             wrapLogError("checkAndDeleteLocal")
-//         );
-// };
-
-// const existsPath = path =>
-//     fs.access(path, function(err) {
-//         if (err && err.code === "ENOENT") {
-//             console.log("this runs");
-//             return false;
-//         }
-//         return true;
-//     });
-
-// function isDirSync(aPath) {
-//     try {
-//         return fs.statSync(aPath).isDirectory();
-//     } catch (e) {
-//         if (e.code === "ENOENT") {
-//             return false;
-//         } else {
-//             throw e;
-//         }
-//     }
-// }
-
-// const uploadFolder = (gphotos, folderPath, context) => {
-//     if (isDirSync(folderPath)) {
-//         const walker = walk.walk(folderPath);
-
-//         walker.on("file", (root, fileStats, next) => {
-//             fs.readFile(fileStats.name, () => {
-//                 const filePath = `${root}/${fileStats.name}`;
-//                 const firstSubFolder = root
-//                     .replace(folderPath, "")
-//                     .split("/")
-//                     .reduce(reduceGetFirst);
-//                 if (!context.exclude.endsWith.some(v => filePath.endsWith(v))) {
-//                     uploadFile(gphotos, filePath, (albumName = firstSubFolder), context)
-//                         .then(uploadedImage => {
-//                             next();
-//                         })
-//                         .catch(wrapLogError("uploadFile"));
-//                 } else {
-//                     console.log(`skipping file ${filePath}: excluded file extension`);
-//                 }
-//             });
-//         });
-
-//         walker.on("errors", function(root, nodeStatsArray, next) {
-//             nodeStatsArray.map(stat => wrapLogError("walker")(stat.error));
-//             next();
-//         });
-
-//         walker.on("end", function() {
-//             console.log("all done");
-//         });
-//     } else {
-//         console.log("path doesn't exist", folderPath);
-//     }
-// };
