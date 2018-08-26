@@ -26,11 +26,11 @@ Run it with `gphotos-uploader`
 Please submit an issue to discuss improvements before submitting a pull request.    
 
 ### Current issues
-- [] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
-- [] add tests
-- [] add CLI manual
-- [] add electron app for front-end
-- [] increase upload parallelism for speed
+- [ ] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
+- [ ] add tests
+- [ ] add CLI manual
+- [ ] add electron app for front-end
+- [ ] increase upload parallelism for speed
 
 ### Related
 - [google photos client library](github.com/nmrshll/google-photos-api-client-go)
