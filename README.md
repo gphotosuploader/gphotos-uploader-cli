@@ -11,11 +11,20 @@ There is no official google photos desktop app for linux, this aims to fill this
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Quick start
-Install using     
-`go get github.com/nmrshll/gphotos-uploader-cli`    
-`go install github.com/nmrshll/gphotos-uploader-cli`    
-Configure which folders to upload by modifying the file `~/.config/gphotos-uploader-cli/config.hjson` ([documentation](./docs/configuration.md))    
-Run it with `gphotos-uploader`    
+##### Install using     
+```
+go get github.com/nmrshll/gphotos-uploader-cli
+go install github.com/nmrshll/gphotos-uploader-cli
+```    
+##### Configure which folders to upload by modifying the file 
+```
+~/.config/gphotos-uploader-cli/config.hjson
+```
+([documentation](./docs/configuration.md))    
+##### Run it with 
+```
+gphotos-uploader
+```    
 
 ## Requirements
 - Go 1.5+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli` (running the)
