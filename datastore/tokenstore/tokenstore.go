@@ -19,7 +19,7 @@ var (
 )
 
 // StoreToken lets you store a token in the OS keyring
-func StoreToken(googleUserEmail string, token oauth2.Token) error {
+func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 	tokenJSONBytes, err := json.Marshal(token)
 	if err != nil {
 		return err

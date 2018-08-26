@@ -3,7 +3,6 @@ package upload
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -42,44 +41,44 @@ func (folderUploadJob *FolderUploadJob) Run() {
 }
 
 func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
-	var httpClient *http.Client
-
 	// try to load token from keyring
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
-	if err == nil {
+	if err == nil && token != nil { // if error ignore and skip
 		// if found create client from token
-		// httpClient = gphotosapiclient.NewClientFromToken(token)
 		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(), token))
-		if err == nil && gphotosClient != nil {
+		if err == nil && gphotosClient != nil { // if error ignore and skip
 			return gphotosClient, nil
 		}
-	} else {
-		// else whatever the reason authenticate again to grab a new token
-		authorizedClient, err := gphotosapiclient.NewOAuthClient()
-		if err != nil {
-			return nil, stacktrace.Propagate(err, "failed authenticating new client")
-		}
-
-		// and store the token into the keyring
-		err = tokenstore.StoreToken(folderUploadJob.Account, *authorizedClient.Token)
-		if err != nil {
-			return nil, stacktrace.Propagate(err, "failed storing token")
-		}
-
-		httpClient = authorizedClient.Client
-	}
-	if httpClient == nil {
-		return nil, stacktrace.NewError("httpClient shouldn't be still nil")
 	}
 
-	photosClient, err := gphotosapiclient.New(httpClient)
+	// else authenticate again to grab a new token
+	gphotosClient, err := gphotos.NewClient(
+		gphotos.AuthenticateUser(config.OAuthConfig()),
+	)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed creating new photos client from httpClient")
+		return nil, stacktrace.Propagate(err, "failed authenticating new client")
 	}
-	return photosClient, nil
+
+	// and store the token into the keyring
+	err = tokenstore.StoreToken(folderUploadJob.Account, gphotosClient.Token())
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed storing token")
+	}
+
+	// httpClient = authorizedClient.Client
+
+	// if httpClient == nil {
+	// 	return nil, stacktrace.NewError("httpClient shouldn't be still nil")
+	// }
+
+	// photosClient, err := gphotosapiclient.New(httpClient)
+	// if err != nil {
+	// 	return nil, stacktrace.Propagate(err, "failed creating new photos client from httpClient")
+	// }
+	return gphotosClient, nil
 }
 
-func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotosapiclient.PhotosClient, folderPath string) error {
+func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string) error {
 	if !fileshandling.IsDir(folderPath) {
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
@@ -89,7 +88,7 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotosapiclient.PhotosCli
 			return nil
 		}
 		if fileshandling.IsFile(path) {
-			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: *gphotosClient}
+			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: gphotosClient.Client}
 			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(path))
 				fileUpload.albumName = lastDirName
