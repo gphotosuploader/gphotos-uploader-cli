@@ -44,7 +44,7 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 
 ### Related
 - [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
-- [oauth2-noserver](https://github.com/nmrshll/oauth2ns)
+- [oauth2-noserver](https://github.com/nmrshll/oauth2-noserver)
 
 
 #### License: [MIT](./.docs/LICENSE)
