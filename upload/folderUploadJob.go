@@ -42,10 +42,6 @@ func (folderUploadJob *FolderUploadJob) Run() {
 	}
 }
 
-// type AuthenticateFuncConfig struct {
-// 	userLoginHint string
-// }
-
 func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	// try to load token from keyring
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
@@ -56,14 +52,6 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 			return gphotosClient, nil
 		}
 	}
-
-	// var funcOptions AuthenticateFuncConfig
-	// var gphotosAuthenticateUserFuncOptions []gphotos.AuthenticateUserOption
-	// if funcOptions.userLoginHint != "" {
-	// 	gphotosAuthenticateUserFuncOptions = append(gphotosAuthenticateUserFuncOptions,
-	// 		gphotos.WithUserLoginHint(funcOptions.userLoginHint),
-	// 	)
-	// }
 
 	// else authenticate again to grab a new token
 	log.Println(color.CyanString(fmt.Sprintf("Need to log login into account %s", folderUploadJob.Account)))
