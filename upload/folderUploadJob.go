@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/fatih/color"
 	"github.com/palantir/stacktrace"
 
 	"github.com/nmrshll/go-cp"
@@ -40,6 +42,10 @@ func (folderUploadJob *FolderUploadJob) Run() {
 	}
 }
 
+// type AuthenticateFuncConfig struct {
+// 	userLoginHint string
+// }
+
 func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	// try to load token from keyring
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
@@ -51,9 +57,22 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 		}
 	}
 
+	// var funcOptions AuthenticateFuncConfig
+	// var gphotosAuthenticateUserFuncOptions []gphotos.AuthenticateUserOption
+	// if funcOptions.userLoginHint != "" {
+	// 	gphotosAuthenticateUserFuncOptions = append(gphotosAuthenticateUserFuncOptions,
+	// 		gphotos.WithUserLoginHint(funcOptions.userLoginHint),
+	// 	)
+	// }
+
 	// else authenticate again to grab a new token
+	log.Println(color.CyanString(fmt.Sprintf("Need to log login into account %s", folderUploadJob.Account)))
+	time.Sleep(1200 * time.Millisecond)
 	gphotosClient, err := gphotos.NewClient(
-		gphotos.AuthenticateUser(config.OAuthConfig()),
+		gphotos.AuthenticateUser(
+			config.OAuthConfig(),
+			gphotos.WithUserLoginHint(folderUploadJob.Account),
+		),
 	)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed authenticating new client")
