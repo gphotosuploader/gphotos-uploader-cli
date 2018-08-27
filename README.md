@@ -43,8 +43,8 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 - [ ] increase upload parallelism for speed
 
 ### Related
-- [google photos client library](github.com/nmrshll/google-photos-api-client-go)
-- [oauth2-noserver](github.com/nmrshll/oauth2ns)
+- [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
+- [oauth2-noserver](https://github.com/nmrshll/oauth2ns)
 
 
 #### License: [MIT](./.docs/LICENSE)
