@@ -8,10 +8,6 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
 )
 
-// const (
-// 	imagePath = "/home/me/photos_autres/USSIS/2014_11_WE_U6/DSC_0501.JPG"
-// )
-
 func main() {
 	// load all config parameters
 	cfg := config.Load()

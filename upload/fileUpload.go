@@ -38,8 +38,17 @@ func StartFileUploadWorker() (doneUploading chan struct{}) {
 	return doneUploading
 }
 
-func (fileUpload *FileUpload) upload() error {
-	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath)
+func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.AlbumName
+	var albumIDVariadic []string
+	if fileUpload.albumName != "" {
+		album, err := fileUpload.gphotosClient.GetOrCreateAlbumByName(fileUpload.albumName)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed GetOrCreate-ing album by name")
+		}
+		albumIDVariadic = append(albumIDVariadic, album.Id)
+	}
+
+	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, albumIDVariadic...)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed uploading image")
 	}
@@ -52,7 +61,6 @@ func (fileUpload *FileUpload) upload() error {
 			return stacktrace.Propagate(err, "failed getting uploaded mediaItem")
 		}
 
-		// go fileshandling.CheckUploadedAndDeleteLocal(uploadedMediaItem, fileUpload.filePath)
 		fileshandling.QueueDeletionJob(uploadedMediaItem, fileUpload.filePath)
 	}
 	return nil
