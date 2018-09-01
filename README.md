@@ -1,5 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
-[![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli)
+<!--- [![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli) --->
+
 
 # Google photos uploader CLI
 Command line tool to mass upload media folders to your google photos account(s).    
@@ -15,8 +16,7 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 # Quick start
 ##### Install using     
 ```
-go get github.com/nmrshll/gphotos-uploader-cli
-go install github.com/nmrshll/gphotos-uploader-cli
+go get -u github.com/nmrshll/gphotos-uploader-cli
 ```    
 ##### Configure which folders to upload by modifying the file 
 ```
