@@ -85,6 +85,11 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 			return nil
 		}
 		if fileshandling.IsFile(path) {
+			// check type is image
+			if isImage, err := fileshandling.IsImage(path); err != nil || !isImage {
+				fmt.Printf("not an image: %s: skipping file...\n", path)
+				return nil
+			}
 			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: gphotosClient.Client}
 			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(path))

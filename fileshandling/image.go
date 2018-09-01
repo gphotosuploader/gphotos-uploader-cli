@@ -123,7 +123,7 @@ func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, loc
 	if !isSameImage(upImg, localImg) {
 		fmt.Println("not the same image. Won't delete")
 	} else {
-		fmt.Println("should delete")
+		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", localImgPath)
 		if err = os.Remove(localImgPath); err != nil {
 			fmt.Println("delete failed")
 		}

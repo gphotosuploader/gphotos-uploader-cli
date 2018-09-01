@@ -1,6 +1,13 @@
 package fileshandling
 
-import "os"
+import (
+	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/palantir/stacktrace"
+	filetype "gopkg.in/h2non/filetype.v1"
+)
 
 func IsFile(path string) bool {
 	fi, err := os.Stat(path)
@@ -18,20 +25,19 @@ func IsDir(path string) bool {
 	return fi.Mode().IsDir()
 }
 
-// func deleteFile(filePath string)  error {
-// 	err := os.Remove(filePath)
-// 	if err != nil {
-// 		return
-// 	}
-// 	return false, nil
-// }
+func IsImage(path string) (bool, error) {
+	buf, err := ioutil.ReadFile(path)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
+	}
 
-// func deleteFile() {
-// 	// delete file
-// 	var err = os.Remove(path)
-// 	if isError(err) {
-// 		return
-// 	}
+	kind, err := filetype.Match(buf)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
+	}
 
-// 	fmt.Println("==> done deleting file")
-// }
+	if strings.Contains(kind.MIME.Value, "image") {
+		return true, nil
+	}
+	return false, nil
+}
