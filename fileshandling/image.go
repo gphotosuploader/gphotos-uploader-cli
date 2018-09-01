@@ -124,58 +124,9 @@ func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, loc
 		fmt.Println("not the same image. Won't delete")
 	} else {
 		fmt.Println("should delete")
-		// if err = os.Remove(localImgPath); err != nil {
-		// 	fmt.Println("delete failed")
-		// }
+		if err = os.Remove(localImgPath); err != nil {
+			fmt.Println("delete failed")
+		}
 	}
 	return nil
 }
-
-// const imageExtensions = ["jpg", "png"].map(v => `.${v}`);
-
-// const getImage = uri => Jimp.read(uri).then(image => image);
-
-// const isSameImage = (upImg, localImg) => {
-//   var distance = Jimp.distance(upImg, localImg); // perceived distance
-//   var diff = Jimp.diff(upImg, localImg); // pixel difference
-//   if (distance < 0.5 || diff.percent < 0.15) {
-//     return true;
-//   }
-//   console.log(
-//     `upImg: ${upImg.hash()}, localImg: ${localImg.hash()}, phash distance: ${distance}`
-//   );
-//   return false;
-// };
-
-// const deleteFile = filePath => {
-//   fs.unlink(filePath, () => {
-//     console.log(`DELETED ${filePath}`);
-//   });
-// };
-
-// checkAndDeleteLocal = async (upImgUrl, localImgPath) => {
-//   if (
-//     imageExtensions.some(v =>
-//       localImgPath.toLowerCase().endsWith(v.toLowerCase())
-//     )
-//   ) {
-//     const upImgPromise = getImage(upImgUrl).then(r => r).catch(logError);
-//     const localImgPromise = getImage(localImgPath).then(r => r).catch(logError);
-//     Promise.all([upImgPromise, localImgPromise])
-//       .then(([upImg, localImg]) => {
-//         if (isSameImage(upImg, localImg)) {
-//           deleteFile(localImgPath);
-//         } else {
-//           console.log(
-//             `[ERROR] ${localImgPath}: couldn't find similar image uploaded. Won't delete.`,
-//             `uploaded image at ${upImgUrl}`
-//           );
-//         }
-//       })
-//       .catch(logError);
-//   } else {
-//     console.log(
-//       `${localImgPath} doesn't have an image extension. Won't delete`
-//     );
-//   }
-// };
