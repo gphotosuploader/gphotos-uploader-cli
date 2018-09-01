@@ -5,7 +5,7 @@
 # Google photos uploader CLI
 Command line tool to mass upload media folders to your google photos account(s).    
 
-While the official tool is only supports Mac OS and Windows, this brings an uploader to Linux too.
+While the official tool is only supports Mac OS and Windows, this brings an uploader to Linux too.    
 
 #### Features:
 - specify folders to upload in config file
@@ -17,8 +17,9 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 ##### Install using     
 ```
 go get -u github.com/nmrshll/gphotos-uploader-cli
+gphotos-uploader-cli
 ```    
-##### Configure which folders to upload by modifying the file 
+##### Configure which folders to upload by modifying the file at
 ```
 ~/.config/gphotos-uploader-cli/config.hjson
 ```
