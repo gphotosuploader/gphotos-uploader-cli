@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/fatih/color"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
@@ -17,7 +19,7 @@ import (
 )
 
 const (
-	CONFIGFOLDER = "~/.config/gphotos-uploader-go-api"
+	CONFIGFOLDER = "~/.config/gphotos-uploader-cli"
 )
 
 type APIAppCredentials struct {
@@ -68,7 +70,6 @@ type FolderUploadJob struct {
 func Load() *Config {
 	Cfg = loadConfigFile()
 	Cfg.Process()
-	spew.Dump(Cfg)
 	return Cfg
 }
 
@@ -78,15 +79,27 @@ func loadConfigFile() *Config {
 		log.Fatal(err)
 	}
 
-	if fileshandling.IsFile(configPathAbsolute) {
-		fmt.Println("[INFO] Config file found. Loading...")
-	} else {
+	// if no config file copy the default example and exit
+	if !fileshandling.IsFile(configPathAbsolute) {
+		fmt.Println(color.CyanString(`
+No config file found at ~/.config/gphotos-uploader-cli/config.hjson
+Will now copy an example config file.
+Edit it by running:
+
+	nano ~/.config/gphotos-uploader-cli/config.hjson
+
+`,
+		))
+		spew.Dump(configPathAbsolute)
 		err := cp.CopyFile("./config/config.example.hjson", configPathAbsolute)
 		if err != nil {
 			log.Fatal(err)
 		}
+		os.Exit(0)
 	}
 
+	// else load and continue
+	fmt.Println("[INFO] Config file found. Loading...")
 	configBytes, err := ioutil.ReadFile(configPathAbsolute)
 	if err != nil {
 		log.Fatal(err)
