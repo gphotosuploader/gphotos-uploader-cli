@@ -11,3 +11,6 @@ vendor:
 	rm -rf ./vendor
 	govendor init
 	govendor add +external
+
+clean:
+	rm ~/.config/gphotos-uploader-cli/config.hjson

@@ -91,10 +91,15 @@ Edit it by running:
 `,
 		))
 		spew.Dump(configPathAbsolute)
-		err := cp.CopyFile("./config/config.example.hjson", configPathAbsolute)
+		f, err := os.Create(configPathAbsolute)
 		if err != nil {
 			log.Fatal(err)
 		}
+		_, err = f.WriteString(ExampleConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		os.Exit(0)
 	}
 
@@ -111,3 +116,22 @@ Edit it by running:
 	}
 	return config
 }
+
+const ExampleConfig = `{
+  APIAppCredentials: {
+    ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+    ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+  }
+  jobs: [
+    {
+      account: youremail@gmail.com
+      sourceFolder: ~/folder/to/upload
+      makeAlbums: {
+        enabled: true
+        use: folderNames
+      }
+      deleteAfterUpload: true
+    }
+  ]
+}
+`
