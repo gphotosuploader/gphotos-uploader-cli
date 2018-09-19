@@ -1,0 +1,36 @@
+# .travis.yml
+language: go
+
+addons:
+  apt:
+    packages:
+    # needed for the nfpm pipe:
+    - rpm
+    # needed for the snap pipe:
+    - snapcraft
+
+env:
+# needed for the snap pipe:
+- PATH=/snap/bin:$PATH
+
+install:
+# needed for the snap pipe:
+- sudo snap install snapcraft --classic
+
+# needed for the docker pipe
+services:
+- docker
+
+after_success:
+# docker login is required if you want to push docker images.
+# DOCKER_PASSWORD should be a secret in your .travis.yml configuration.
+- test -n "$TRAVIS_TAG" && docker login -u=myuser -p="$DOCKER_PASSWORD"
+
+# calls goreleaser
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: curl -sL https://git.io/goreleaser | bash
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
