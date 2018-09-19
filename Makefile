@@ -14,3 +14,6 @@ vendor:
 
 clean:
 	rm ~/.config/gphotos-uploader-cli/config.hjson
+
+embed:
+	embedmd -w .docs/configuration.md

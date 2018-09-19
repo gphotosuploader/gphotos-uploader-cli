@@ -23,8 +23,7 @@ go get -u github.com/nmrshll/gphotos-uploader-cli
 ~/.config/gphotos-uploader-cli/config.hjson
 ```
 (if absent, run `gphotos-uploader-cli` to create an example configuration file)
-
-([documentation](./docs/configuration.md))    
+([documentation](./.docs/configuration.md))([troubleshooting](./.docs/installation-troubleshooting.md))
 ##### Run it with 
 ```
 gphotos-uploader-cli
