@@ -30,7 +30,7 @@ gphotos-uploader
 ```    
 
 ## Requirements
-- Go 1.5+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli`
+- Go 1.9+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli`
 - Mac OS or Linux
 
 # Contributing
