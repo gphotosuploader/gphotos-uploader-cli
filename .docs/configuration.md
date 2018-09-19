@@ -1,6 +1,7 @@
 ## Configuration
 
-Example configuration file:
+Example configuration file:    
+
 [embedmd]:# (../config/config.example.hjson)
 ```hjson
 {
@@ -22,14 +23,17 @@ Example configuration file:
 }
 ```
 
-# `APIAppCredentials`:
+### `APIAppCredentials`:
 The credentials that are provided are just example ones. 
 Replace them with credentials you create at https://console.cloud.google.com/apis/api/photoslibrary.googleapis.com
 
-# `jobs`:
+### `jobs`:
 List of folders to upload and upload options for each folder.
 
-## `account`:
+#### `account`:
 Needs to be unique.
 If it contains a google email address, it will be suggested at login.
 
+#### `sourceFolder`:
+The folder to upload from.
+Must be an absolute path. Can expand the home folder tilde shorthand.
