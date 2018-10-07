@@ -82,7 +82,7 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 
 func hasImageExtension(path string) bool {
 	for _, ext := range imageExtensions {
-		if strings.HasSuffix(path, ext) {
+		if strings.HasSuffix(strings.ToLower(path), ext) {
 			return true
 		}
 	}
