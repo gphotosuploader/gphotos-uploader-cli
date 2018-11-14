@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	imageExtensions = []string{".jpg", ".jpeg", ".png"}
+	imageExtensions = []string{".jpg", ".jpeg", ".png", ".mov", ".mp4"}
 	deletionsChan   = make(chan DeletionJob)
 )
 
