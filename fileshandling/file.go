@@ -2,27 +2,19 @@ package fileshandling
 
 import (
 	"io/ioutil"
-	"os"
 	"strings"
 
+	"github.com/nmrshll/gphotos-uploader-cli/util"
 	"github.com/palantir/stacktrace"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
 func IsFile(path string) bool {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return fi.Mode().IsRegular()
+	return util.IsFile(path)
 }
 
 func IsDir(path string) bool {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return fi.Mode().IsDir()
+	return util.IsDir(path)
 }
 
 func IsImage(path string) (bool, error) {

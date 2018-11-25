@@ -11,7 +11,7 @@ import (
 	"github.com/fatih/color"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/util"
 	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
@@ -85,7 +85,7 @@ func loadConfigFile() *Config {
 	}
 
 	// if no config file copy the default example and exit
-	if !fileshandling.IsFile(configPathAbsolute) {
+	if !util.IsFile(configPathAbsolute) {
 		fmt.Println(color.CyanString(`
 No config file found at ~/.config/gphotos-uploader-cli/config.hjson
 Will now copy an example config file.
