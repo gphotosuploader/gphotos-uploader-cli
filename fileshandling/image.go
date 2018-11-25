@@ -71,7 +71,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 			// check mtime first
 			if err == nil && cacheMtime != 0 {
 				fileMtime, err := util.GetMTime(filePath)
-				if err == nil && fileMtime.sec() == cacheMtime {
+				if err == nil && fileMtime.Unix() == cacheMtime {
 					isUploaded = true
 				}
 			}
@@ -103,7 +103,7 @@ func MarkUploaded(filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed getting local image mtime")
 	}
-	val := string(mtime.sec()) + "|" + getImageHash(localImg)
+	val := string(mtime.Unix()) + "|" + getImageHash(localImg)
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		err = db.Put([]byte(filePath), []byte(val), nil)
