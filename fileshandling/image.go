@@ -15,6 +15,7 @@ import (
 
 	"github.com/Nr90/imgsim"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
+	"github.com/nmrshll/gphotos-uploader-cli/util"
 	"github.com/steakknife/hamming"
 	"github.com/syndtr/goleveldb/leveldb"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
@@ -61,7 +62,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 			parts := strings.Split(string(val[:]), "|")
 			cacheMtime := int64(0)
 			cacheHash := ""
-			if len(s) > 1 {
+			if len(parts) > 1 {
 				cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
 				cacheHash = parts[1]
 			} else {
