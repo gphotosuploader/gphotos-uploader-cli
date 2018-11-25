@@ -88,7 +88,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 					if isUploaded {
 						log.Printf("%s hash match %s", filePath, cacheHash)
 						// update db mtime
-						MarkUploaded(filePath)
+						err = MarkUploaded(filePath)
 					}
 				}
 			}
