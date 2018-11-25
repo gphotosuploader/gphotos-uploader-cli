@@ -18,6 +18,10 @@ func IsDir(path string) bool {
 }
 
 func IsImage(path string) (bool, error) {
+	if !HasImageExtension(path) {
+		return false, nil
+	}
+
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)

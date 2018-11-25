@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	imageExtensions = []string{".jpg", ".jpeg", ".png"}
+	imageExtensions = []string{".jpg", ".jpeg", ".png", ".webp"}
 	deletionsChan   = make(chan DeletionJob)
 )
 
@@ -82,6 +82,15 @@ func MarkUploaded(filePath string) error {
 	return err
 }
 
+func HasImageExtension(path string) bool {
+	for _, ext := range imageExtensions {
+		if strings.HasSuffix(strings.ToLower(path), ext) {
+			return true
+		}
+	}
+	return false
+}
+
 func imageFromPath(filePath string) (imageLib.Image, error) {
 	reader, err := os.Open(filePath)
 	if err != nil {
@@ -115,15 +124,6 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
-func hasImageExtension(path string) bool {
-	for _, ext := range imageExtensions {
-		if strings.HasSuffix(strings.ToLower(path), ext) {
-			return true
-		}
-	}
-	return false
-}
-
 func getImageHash(img imageLib.Image) string {
 	return imgsim.DifferenceHash(img).String()
 }
@@ -149,7 +149,7 @@ func isSameHash(upDHash, localDHash string) bool {
 
 // CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
 func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) error {
-	if !hasImageExtension(localImgPath) {
+	if !HasImageExtension(localImgPath) {
 		return fmt.Errorf("%s doesn't have an image extension", localImgPath)
 	}
 
