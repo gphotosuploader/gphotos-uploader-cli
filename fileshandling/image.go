@@ -3,6 +3,8 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
+	"strconv"
+
 	// register decoders for jpeg and png
 	_ "image/jpeg"
 	_ "image/png"
@@ -54,17 +56,39 @@ func IsUploadedPrev(filePath string) (bool, error) {
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		val, err := db.Get([]byte(filePath), nil)
+		defer db.Close()
 		if err == nil {
-			localImg, err := imageFromPath(filePath)
-			if err != nil {
-				err = fmt.Errorf("failed loading local image from path")
+			parts := strings.Split(string(val[:]), "|")
+			cacheMtime := int64(0)
+			cacheHash := ""
+			if len(s) > 1 {
+				cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
+				cacheHash = parts[1]
 			} else {
-				localHash := getImageHash(localImg)
-				cacheHash := string(val[:])
-				isUploaded = isSameHash(cacheHash, localHash)
+				cacheHash = parts[0]
+			}
+			// check mtime first
+			if err == nil && cacheMtime != 0 {
+				fileMtime, err := util.GetMTime(filePath)
+				if err == nil && fileMtime.sec() == cacheMtime {
+					isUploaded = true
+				}
+			}
+			// mtime is different, check hash
+			if !isUploaded {
+				localImg, err := imageFromPath(filePath)
+				if err != nil {
+					err = fmt.Errorf("failed loading local image from path")
+				} else {
+					localHash := getImageHash(localImg)
+					isUploaded = isSameHash(cacheHash, localHash)
+					if isUploaded {
+						// update db mtime
+						MarkUploaded(filePath)
+					}
+				}
 			}
 		}
-		defer db.Close()
 	}
 	return isUploaded, err
 }
@@ -74,9 +98,14 @@ func MarkUploaded(filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed loading local image from path")
 	}
+	mtime, err := util.GetMTime(filePath)
+	if err != nil {
+		return fmt.Errorf("failed getting local image mtime")
+	}
+	val := string(mtime.sec()) + "|" + getImageHash(localImg)
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
-		err = db.Put([]byte(filePath), []byte(getImageHash(localImg)), nil)
+		err = db.Put([]byte(filePath), []byte(val), nil)
 		defer db.Close()
 	}
 	return err
