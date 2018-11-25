@@ -57,9 +57,11 @@ func IsUploadedPrev(filePath string) (bool, error) {
 	isUploaded := false
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
+		// look for previous upload in cache
 		val, err := db.Get([]byte(filePath), nil)
 		db.Close()
 		if err == nil {
+			// value found, try to split mtime and hash
 			parts := strings.Split(string(val[:]), "|")
 			cacheMtime := int64(0)
 			cacheHash := ""
@@ -74,7 +76,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 				fileMtime, err := util.GetMTime(filePath)
 				if err == nil && fileMtime.Unix() == cacheMtime {
 					isUploaded = true
-					log.Printf("%s mtime matched %i", filePath, cacheMtime)
+					//log.Printf("%s mtime matched %i", filePath, cacheMtime)
 				}
 			}
 			// mtime is different, check hash
@@ -86,7 +88,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 					localHash := getImageHash(localImg)
 					isUploaded = isSameHash(cacheHash, localHash)
 					if isUploaded {
-						log.Printf("%s hash match %s", filePath, cacheHash)
+						//log.Printf("%s hash match %s", filePath, cacheHash)
 						// update db mtime
 						err = MarkUploaded(filePath)
 					}
