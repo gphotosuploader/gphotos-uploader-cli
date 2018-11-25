@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/Nr90/imgsim"
+	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/steakknife/hamming"
 	"github.com/syndtr/goleveldb/leveldb"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
@@ -20,7 +21,6 @@ import (
 var (
 	imageExtensions = []string{".jpg", ".jpeg", ".png"}
 	deletionsChan   = make(chan DeletionJob)
-	UPLOADDB        = fmt.Sprintf("%s/config.hjson", config.CONFIGFOLDER)
 )
 
 type DeletionJob struct {
@@ -51,7 +51,7 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 
 func IsUploadedPrev(filePath string) (bool, error) {
 	isUploaded := false
-	db, err := leveldb.OpenFile(UPLOADDB, nil)
+	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		val, err := db.Get([]byte(filePath), nil)
 		if err == nil {
@@ -74,7 +74,7 @@ func MarkUploaded(filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed loading local image from path")
 	}
-	db, err := leveldb.OpenFile(UPLOADDB, nil)
+	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		err = db.Put([]byte(filePath), []byte(getImageHash(localImg)), nil)
 		defer db.Close()

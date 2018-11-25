@@ -30,6 +30,7 @@ type APIAppCredentials struct {
 var (
 	// consts
 	CONFIGPATH                  = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
+	UPLOADDBPATH                = fmt.Sprintf("%s/uploads.db", CONFIGFOLDER)
 	DEFAULT_API_APP_CREDENTIALS = APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
@@ -55,6 +56,10 @@ func OAuthConfig() *oauth2.Config {
 		log.Fatal(stacktrace.NewError("APIAppCredentials can't be nil"))
 	}
 	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
+}
+
+func GetUploadDBPath() string {
+	return UPLOADDBPATH
 }
 
 type FolderUploadJob struct {
