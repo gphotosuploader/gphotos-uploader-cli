@@ -59,7 +59,11 @@ func OAuthConfig() *oauth2.Config {
 }
 
 func GetUploadDBPath() string {
-	return UPLOADDBPATH
+	dbPathAbsolute, err := cp.AbsolutePath(UPLOADDBPATH)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dbPathAbsolute
 }
 
 type FolderUploadJob struct {
