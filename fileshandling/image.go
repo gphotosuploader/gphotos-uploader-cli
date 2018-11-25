@@ -47,6 +47,10 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	return doneDeleting
 }
 
+func IsUploadedPrev(filePath string) (bool, error) {
+	return false, nil
+}
+
 func imageFromPath(filePath string) (imageLib.Image, error) {
 	reader, err := os.Open(filePath)
 	if err != nil {
@@ -89,10 +93,18 @@ func hasImageExtension(path string) bool {
 	return false
 }
 
-func isSameImage(upImg, localImg imageLib.Image) bool {
-	upDHash := imgsim.DifferenceHash(upImg).String()
-	localDHash := imgsim.DifferenceHash(localImg).String()
+func getImageHash(img imageLib.Image) string {
+	return imgsim.DifferenceHash(img).String()
+}
 
+func isSameImage(upImg, localImg imageLib.Image) bool {
+	upDHash := getImageHash(upImg)
+	localDHash := getImageHash(localImg)
+
+	return isSameHash(upDHash, localDHash)
+}
+
+func isSameHash(upDHash, localDHash string) bool {
 	if len(upDHash) != len(localDHash) {
 		return false
 	}
