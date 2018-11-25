@@ -13,12 +13,14 @@ import (
 
 	"github.com/Nr90/imgsim"
 	"github.com/steakknife/hamming"
+	"github.com/syndtr/goleveldb/leveldb"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 var (
 	imageExtensions = []string{".jpg", ".jpeg", ".png"}
 	deletionsChan   = make(chan DeletionJob)
+	UPLOADDB        = fmt.Sprintf("%s/config.hjson", config.CONFIGFOLDER)
 )
 
 type DeletionJob struct {
@@ -48,7 +50,36 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 }
 
 func IsUploadedPrev(filePath string) (bool, error) {
-	return false, nil
+	isUploaded := false
+	db, err := leveldb.OpenFile(UPLOADDB, nil)
+	if err == nil {
+		val, err := db.Get([]byte(filePath), nil)
+		if err == nil {
+			localImg, err := imageFromPath(filePath)
+			if err != nil {
+				err = fmt.Errorf("failed loading local image from path")
+			} else {
+				localHash := getImageHash(localImg)
+				cacheHash := string(val[:])
+				isUploaded = isSameHash(cacheHash, localHash)
+			}
+		}
+		defer db.Close()
+	}
+	return isUploaded, err
+}
+
+func MarkUploaded(filePath string) error {
+	localImg, err := imageFromPath(filePath)
+	if err != nil {
+		return fmt.Errorf("failed loading local image from path")
+	}
+	db, err := leveldb.OpenFile(UPLOADDB, nil)
+	if err == nil {
+		err = db.Put([]byte(filePath), []byte(getImageHash(localImg)), nil)
+		defer db.Close()
+	}
+	return err
 }
 
 func imageFromPath(filePath string) (imageLib.Image, error) {
