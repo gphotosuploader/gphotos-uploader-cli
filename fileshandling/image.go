@@ -58,7 +58,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		val, err := db.Get([]byte(filePath), nil)
-		defer db.Close()
+		db.Close()
 		if err == nil {
 			parts := strings.Split(string(val[:]), "|")
 			cacheMtime := int64(0)
@@ -106,12 +106,12 @@ func MarkUploaded(filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed getting local image mtime")
 	}
-	val := string(mtime.Unix()) + "|" + getImageHash(localImg)
+	val := strconv.FormatInt(mtime.Unix(), 10) + "|" + getImageHash(localImg)
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
 		log.Printf("Marking file as uploaded: %s with values %s", filePath, val)
 		err = db.Put([]byte(filePath), []byte(val), nil)
-		defer db.Close()
+		db.Close()
 	}
 	return err
 }
