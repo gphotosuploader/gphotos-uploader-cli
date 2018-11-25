@@ -3,6 +3,7 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
+	"log"
 	"strconv"
 
 	// register decoders for jpeg and png
@@ -73,6 +74,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 				fileMtime, err := util.GetMTime(filePath)
 				if err == nil && fileMtime.Unix() == cacheMtime {
 					isUploaded = true
+					log.Printf("%s mtime matched %i", filePath, cacheMtime)
 				}
 			}
 			// mtime is different, check hash
@@ -84,6 +86,7 @@ func IsUploadedPrev(filePath string) (bool, error) {
 					localHash := getImageHash(localImg)
 					isUploaded = isSameHash(cacheHash, localHash)
 					if isUploaded {
+						log.Printf("%s hash match %s", filePath, cacheHash)
 						// update db mtime
 						MarkUploaded(filePath)
 					}
@@ -106,6 +109,7 @@ func MarkUploaded(filePath string) error {
 	val := string(mtime.Unix()) + "|" + getImageHash(localImg)
 	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
 	if err == nil {
+		log.Printf("Marking file as uploaded: %s with values %s", filePath, val)
 		err = db.Put([]byte(filePath), []byte(val), nil)
 		defer db.Close()
 	}
