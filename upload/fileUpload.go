@@ -51,6 +51,12 @@ func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.Alb
 	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, albumIDVariadic...)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed uploading image")
+	} else {
+		// check upload db for previous uploads
+		err := fileshandling.MarkUploaded(fileUpload.filePath)
+		if err != nil {
+			log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
+		}
 	}
 
 	// queue uploaded image for visual check of result + deletion
