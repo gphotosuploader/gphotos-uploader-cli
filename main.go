@@ -2,24 +2,32 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func main() {
 	// load all config parameters
 	cfg := config.Load()
 
+	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
+	if err != nil {
+		log.Fatalf("Error opening db: %s", err)
+	}
+	defer db.Close()
+
 	// start file upload worker
-	doneUploading := upload.StartFileUploadWorker()
+	doneUploading := upload.StartFileUploadWorker(db)
 	doneDeleting := fileshandling.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
 		folderUploadJob := upload.FolderUploadJob{&job}
-		folderUploadJob.Run()
+		folderUploadJob.Run(db)
 	}
 	// after we've run all the folder upload jobs we're done adding file upload jobs
 	upload.CloseFileUploadsChan()

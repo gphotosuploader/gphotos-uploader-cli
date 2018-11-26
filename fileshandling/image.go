@@ -53,53 +53,51 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	return doneDeleting
 }
 
-func IsUploadedPrev(filePath string) (bool, error) {
+func IsUploadedPrev(filePath string, db *leveldb.DB) (bool, error) {
 	isUploaded := false
-	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
+
+	// look for previous upload in cache
+	val, err := db.Get([]byte(filePath), nil)
 	if err == nil {
-		// look for previous upload in cache
-		val, err := db.Get([]byte(filePath), nil)
-		db.Close()
-		if err == nil {
-			// value found, try to split mtime and hash
-			parts := strings.Split(string(val[:]), "|")
-			cacheMtime := int64(0)
-			cacheHash := ""
-			if len(parts) > 1 {
-				cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
-				cacheHash = parts[1]
+		// value found, try to split mtime and hash
+		parts := strings.Split(string(val[:]), "|")
+		cacheMtime := int64(0)
+		cacheHash := ""
+		if len(parts) > 1 {
+			cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
+			cacheHash = parts[1]
+		} else {
+			cacheHash = parts[0]
+		}
+		// check mtime first
+		if err == nil && cacheMtime != 0 {
+			fileMtime, err := util.GetMTime(filePath)
+			if err == nil && fileMtime.Unix() == cacheMtime {
+				isUploaded = true
+				//log.Printf("%s mtime matched %i", filePath, cacheMtime)
+			}
+		}
+		// mtime is different, check hash
+		if !isUploaded {
+			localImg, err := imageFromPath(filePath)
+			if err != nil {
+				err = fmt.Errorf("failed loading local image from path")
 			} else {
-				cacheHash = parts[0]
-			}
-			// check mtime first
-			if err == nil && cacheMtime != 0 {
-				fileMtime, err := util.GetMTime(filePath)
-				if err == nil && fileMtime.Unix() == cacheMtime {
-					isUploaded = true
-					//log.Printf("%s mtime matched %i", filePath, cacheMtime)
-				}
-			}
-			// mtime is different, check hash
-			if !isUploaded {
-				localImg, err := imageFromPath(filePath)
-				if err != nil {
-					err = fmt.Errorf("failed loading local image from path")
-				} else {
-					localHash := getImageHash(localImg)
-					isUploaded = isSameHash(cacheHash, localHash)
-					if isUploaded {
-						//log.Printf("%s hash match %s", filePath, cacheHash)
-						// update db mtime
-						err = MarkUploaded(filePath)
-					}
+				localHash := getImageHash(localImg)
+				isUploaded = isSameHash(cacheHash, localHash)
+				if isUploaded {
+					//log.Printf("%s hash match %s", filePath, cacheHash)
+					// update db mtime
+					err = MarkUploaded(filePath, db)
 				}
 			}
 		}
 	}
+
 	return isUploaded, err
 }
 
-func MarkUploaded(filePath string) error {
+func MarkUploaded(filePath string, db *leveldb.DB) error {
 	localImg, err := imageFromPath(filePath)
 	if err != nil {
 		return fmt.Errorf("failed loading local image from path")
@@ -109,12 +107,10 @@ func MarkUploaded(filePath string) error {
 		return fmt.Errorf("failed getting local image mtime")
 	}
 	val := strconv.FormatInt(mtime.Unix(), 10) + "|" + getImageHash(localImg)
-	db, err := leveldb.OpenFile(config.GetUploadDBPath(), nil)
-	if err == nil {
-		log.Printf("Marking file as uploaded: %s with values %s", filePath, val)
-		err = db.Put([]byte(filePath), []byte(val), nil)
-		db.Close()
-	}
+
+	log.Printf("Marking file as uploaded: %s with values %s", filePath, val)
+	err = db.Put([]byte(filePath), []byte(val), nil)
+
 	return err
 }
 

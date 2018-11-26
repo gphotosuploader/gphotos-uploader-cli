@@ -25,19 +25,22 @@ type FolderUploadJob struct {
 	*config.FolderUploadJob
 }
 
-func (folderUploadJob *FolderUploadJob) Run() {
+func (folderUploadJob *FolderUploadJob) Run(db *leveldb.DB) {
 	sourceFolderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
+		db.Close()
 		log.Fatal(err)
 	}
 
 	client, err := Authenticate(folderUploadJob)
 	if err != nil {
+		db.Close()
 		log.Fatal(err)
 	}
 
-	err = folderUploadJob.uploadFolder(client, sourceFolderAbsolutePath)
+	err = folderUploadJob.uploadFolder(client, sourceFolderAbsolutePath, db)
 	if err != nil {
+		db.Close()
 		log.Fatal(err)
 	}
 }
@@ -75,7 +78,7 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	return gphotosClient, nil
 }
 
-func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string) error {
+func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string, db *leveldb.DB) error {
 	if !fileshandling.IsDir(folderPath) {
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
@@ -91,7 +94,7 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 				return nil
 			}
 			// check upload db for previous uploads
-			if isUploaded, err := fileshandling.IsUploadedPrev(path); err != nil || isUploaded {
+			if isUploaded, err := fileshandling.IsUploadedPrev(path, db); err != nil || isUploaded {
 				fmt.Printf("previously uploaded: %s: skipping file...\n", path)
 				return nil
 			}

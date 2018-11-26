@@ -6,6 +6,7 @@ import (
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/palantir/stacktrace"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
@@ -24,21 +25,22 @@ func QueueFileUpload(fileUpload *FileUpload) {
 }
 func CloseFileUploadsChan() { close(fileUploadsChan) }
 
-func StartFileUploadWorker() (doneUploading chan struct{}) {
+func StartFileUploadWorker(db *leveldb.DB) (doneUploading chan struct{}) {
 	doneUploading = make(chan struct{})
-	go func() {
+	go func(db *leveldb.DB) {
 		for fileUpload := range fileUploadsChan {
-			err := fileUpload.upload()
+			err := fileUpload.upload(db)
 			if err != nil {
+				db.Close()
 				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
 			}
 		}
 		doneUploading <- struct{}{}
-	}()
+	}(db)
 	return doneUploading
 }
 
-func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.AlbumName
+func (fileUpload *FileUpload) upload(db *leveldb.DB) error { // TODO: upload to fileUpload.AlbumName
 	var albumIDVariadic []string
 	if fileUpload.albumName != "" {
 		album, err := fileUpload.gphotosClient.GetOrCreateAlbumByName(fileUpload.albumName)
@@ -53,7 +55,7 @@ func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.Alb
 		return stacktrace.Propagate(err, "failed uploading image")
 	} else {
 		// check upload db for previous uploads
-		err := fileshandling.MarkUploaded(fileUpload.filePath)
+		err := fileshandling.MarkUploaded(fileUpload.filePath, db)
 		if err != nil {
 			log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
 		}
