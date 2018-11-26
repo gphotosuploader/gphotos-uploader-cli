@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/palantir/stacktrace"
+	"github.com/syndtr/goleveldb/leveldb"
 
 	"github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
