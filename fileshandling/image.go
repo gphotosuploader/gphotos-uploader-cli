@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/Nr90/imgsim"
-	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/util"
 	"github.com/steakknife/hamming"
 	"github.com/syndtr/goleveldb/leveldb"
