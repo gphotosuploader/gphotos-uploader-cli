@@ -91,6 +91,8 @@ func IsUploadedPrev(filePath string, db *leveldb.DB) (bool, error) {
 				}
 			}
 		}
+	} else if strings.Contains(err.Error(), "not found") {
+		err = nil
 	}
 
 	return isUploaded, err

@@ -94,11 +94,16 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 				fmt.Printf("not an image: %s: skipping file...\n", path)
 				return nil
 			}
+
 			// check upload db for previous uploads
-			if isUploaded, err := fileshandling.IsUploadedPrev(path, db); err != nil || isUploaded {
+			isUploaded, err := fileshandling.IsUploadedPrev(path, db)
+			if err != nil {
+				log.Println(err)
+			} else if isUploaded {
 				fmt.Printf("previously uploaded: %s: skipping file...\n", path)
 				return nil
 			}
+
 			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: gphotosClient.Client}
 			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(path))
