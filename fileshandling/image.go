@@ -116,7 +116,7 @@ func MarkUploaded(filePath string, db *leveldb.DB) error {
 }
 
 func removeFromDB(filePath string, db *leveldb.DB) error {
-	log.Printf("Removing file from upload DB: %s", filePath, val)
+	log.Printf("Removing file from upload DB: %s", filePath)
 	err := db.Delete([]byte(filePath), nil)
 
 	return err
