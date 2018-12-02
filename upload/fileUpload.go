@@ -2,6 +2,7 @@ package upload
 
 import (
 	"log"
+	"os"
 
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
@@ -58,6 +59,16 @@ func (fileUpload *FileUpload) upload(db *leveldb.DB) error { // TODO: upload to 
 		err := fileshandling.MarkUploaded(fileUpload.filePath, db)
 		if err != nil {
 			log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
+
+			// log potentially bad images to a file
+			f, err := os.OpenFile("bad_images.log",
+				os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Println(err)
+			}
+			defer f.Close()
+			badImages := log.New(f, "", log.LstdFlags)
+			badImages.Println(fileUpload.filePath)
 		}
 	}
 

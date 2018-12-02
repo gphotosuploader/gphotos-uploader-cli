@@ -22,7 +22,7 @@ func main() {
 
 	// start file upload worker
 	doneUploading := upload.StartFileUploadWorker(db)
-	doneDeleting := fileshandling.StartDeletionsWorker()
+	doneDeleting := fileshandling.StartDeletionsWorker(db)
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {

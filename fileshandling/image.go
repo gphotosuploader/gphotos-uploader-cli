@@ -37,11 +37,11 @@ func QueueDeletionJob(uploadedMediaItem *photoslibrary.MediaItem, localImgPath s
 
 func CloseDeletionsChan() { close(deletionsChan) }
 
-func StartDeletionsWorker() (doneDeleting chan struct{}) {
+func StartDeletionsWorker(db *leveldb.DB) (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {
 		for deletionJob := range deletionsChan {
-			err := CheckUploadedAndDeleteLocal(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
+			err := CheckUploadedAndDeleteLocal(deletionJob.uploadedMediaItem, deletionJob.localFilePath, db)
 			if err != nil {
 				fmt.Printf("%s. Won't delete", err)
 			}
@@ -109,8 +109,15 @@ func MarkUploaded(filePath string, db *leveldb.DB) error {
 	}
 	val := strconv.FormatInt(mtime.Unix(), 10) + "|" + getImageHash(localImg)
 
-	log.Printf("Marking file as uploaded: %s with values %s", filePath, val)
+	log.Printf("Marking file as uploaded: %s", filePath, val)
 	err = db.Put([]byte(filePath), []byte(val), nil)
+
+	return err
+}
+
+func removeFromDB(filePath string, db *leveldb.DB) error {
+	log.Printf("Removing file from upload DB: %s", filePath, val)
+	err := db.Delete([]byte(filePath), nil)
 
 	return err
 }
@@ -181,7 +188,7 @@ func isSameHash(upDHash, localDHash string) bool {
 }
 
 // CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
-func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) error {
+func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string, db *leveldb.DB) error {
 	if !HasImageExtension(localImgPath) {
 		return fmt.Errorf("%s doesn't have an image extension", localImgPath)
 	}
@@ -197,11 +204,15 @@ func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, loc
 	}
 
 	if !isSameImage(upImg, localImg) {
-		fmt.Println("not the same image. Won't delete")
+		log.Println("not the same image. Won't delete")
 	} else {
-		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", localImgPath)
+		log.Printf("uploaded file %s was checked for integrity. Will now delete.", localImgPath)
 		if err = os.Remove(localImgPath); err != nil {
-			fmt.Println("delete failed")
+			log.Println("delete failed")
+		} else {
+			if err = removeFromDB(localImgPath, db); err != nil {
+				log.Printf("Failed to remove from DB: %s", err)
+			}
 		}
 	}
 	return nil
