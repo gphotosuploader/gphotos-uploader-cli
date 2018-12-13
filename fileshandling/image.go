@@ -13,6 +13,7 @@ import (
 	"os"
 
 	"github.com/Nr90/imgsim"
+	"github.com/palantir/stacktrace"
 	"github.com/steakknife/hamming"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
@@ -101,11 +102,11 @@ func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localI
 	// compare uploaded image and local one
 	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
 	if err != nil {
-		return false, fmt.Errorf("failed getting image from URL")
+		return false, stacktrace.Propagate(err, "failed getting image from URL")
 	}
 	localImg, err := imageFromPath(localImgPath)
 	if err != nil {
-		return false, fmt.Errorf("failed loading local image from path")
+		return false, stacktrace.Propagate(err, "failed loading local image from path")
 	}
 
 	if isSameImage(upImg, localImg) {
