@@ -5,6 +5,7 @@ import (
 	imageLib "image"
 
 	// register decoders for jpeg and png
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 
