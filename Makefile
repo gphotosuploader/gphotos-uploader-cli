@@ -1,5 +1,5 @@
 dev:
-	go run main.go
+	go run cmd/gphotos-uploader-cli/main.go
 
 docker-build:
 	docker login registry.gitlab.com
