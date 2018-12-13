@@ -91,7 +91,7 @@ func loadConfigFile() *Config {
 	// if no config file copy the default example and exit
 	if !fileshandling.IsFile(configPathAbsolute) {
 		fmt.Println(noConfigFoundMessage)
-		if err := initConfigFile(); err != nil {
+		if err := InitConfigFile(); err != nil {
 			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
 		}
 		os.Exit(0)
@@ -111,7 +111,8 @@ func loadConfigFile() *Config {
 	return config
 }
 
-func initConfigFile() error {
+// InitConfigFile creates an example config file if it doesn't already exist
+func InitConfigFile() error {
 	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
 	if err != nil {
 		log.Fatal(err)

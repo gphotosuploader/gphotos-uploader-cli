@@ -43,7 +43,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "init",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Hello world :)")
+			config.InitConfigFile()
 		},
 	})
 	rootCmd.AddCommand(&cobra.Command{
