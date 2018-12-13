@@ -17,10 +17,12 @@ require (
 	github.com/nmrshll/rndm-go v0.0.0-20170430161430-8da3024e53de // indirect
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
 	github.com/skratchdot/open-golang v0.0.0-20160302144031-75fb7ed4208c // indirect
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3
 	github.com/zalando/go-keyring v0.0.0-20180221093347-6d81c293b3fb
 	golang.org/x/net v0.0.0-20181207154023-610586996380 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
-	google.golang.org/api v0.0.0-20181212003324-40e757e92c52
+	google.golang.org/api v0.0.0-20181213000619-1327b224df06
 	gopkg.in/h2non/filetype.v1 v1.0.5
 )

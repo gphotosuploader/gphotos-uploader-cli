@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
+	"github.com/spf13/cobra"
 )
 
-func main() {
+func startUploader(cmd *cobra.Command, args []string) {
 	// load all config parameters
 	cfg := config.Load()
 
@@ -31,4 +33,27 @@ func main() {
 	// wait for deletions to be completed before exiting
 	<-doneDeleting
 	fmt.Println("all deletions done")
+}
+
+func main() {
+	rootCmd := &cobra.Command{
+		Use: "gphotos-uploader-cli",
+		Run: startUploader,
+	}
+	rootCmd.AddCommand(&cobra.Command{
+		Use: "init",
+		Run: func(cmd *cobra.Command, args []string) {
+			config.InitConfigFile()
+		},
+	})
+	rootCmd.AddCommand(&cobra.Command{
+		Use: "version",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("gphotos-uploader-cli v0.1.1")
+		},
+	})
+
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
