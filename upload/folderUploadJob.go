@@ -80,23 +80,27 @@ func (folderUploadJob *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Clie
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
 
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(folderPath, func(filePath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
 
 		// process only files
-		if fileshandling.IsFile(path) {
+		if fileshandling.IsFile(filePath) {
 			// process only if filetype is image or video
-			if isMedia, err := fileshandling.IsMedia(path); err != nil || !isMedia {
-				fmt.Printf("not an image or video: %s: skipping file...\n", path)
+			if !fileshandling.IsMedia(filePath) {
+				fmt.Printf("not an image or video: %s: skipping file...\n", filePath)
 				return nil
 			}
 
 			// set file upload options depending on folder upload options
-			var fileUpload = &FileUpload{FolderUploadJob: folderUploadJob, filePath: path, gphotosClient: gphotosClient.Client}
+			var fileUpload = &FileUpload{
+				FolderUploadJob: folderUploadJob,
+				filePath:        filePath,
+				gphotosClient:   gphotosClient.Client,
+			}
 			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
-				lastDirName := filepath.Base(filepath.Dir(path))
+				lastDirName := filepath.Base(filepath.Dir(filePath))
 				fileUpload.albumName = lastDirName
 			}
 
