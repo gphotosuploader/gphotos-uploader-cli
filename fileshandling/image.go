@@ -3,13 +3,13 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
+
 	// register decoders for jpeg and png
 	_ "image/jpeg"
 	_ "image/png"
 
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/Nr90/imgsim"
 	"github.com/steakknife/hamming"
@@ -17,8 +17,7 @@ import (
 )
 
 var (
-	imageExtensions = []string{".jpg", ".jpeg", ".png"}
-	deletionsChan   = make(chan DeletionJob)
+	deletionsChan = make(chan DeletionJob)
 )
 
 type DeletionJob struct {
@@ -80,15 +79,6 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
-func hasImageExtension(path string) bool {
-	for _, ext := range imageExtensions {
-		if strings.HasSuffix(strings.ToLower(path), ext) {
-			return true
-		}
-	}
-	return false
-}
-
 func isSameImage(upImg, localImg imageLib.Image) bool {
 	upDHash := imgsim.DifferenceHash(upImg).String()
 	localDHash := imgsim.DifferenceHash(localImg).String()
@@ -106,8 +96,9 @@ func isSameImage(upImg, localImg imageLib.Image) bool {
 
 // CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
 func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) error {
-	if !hasImageExtension(localImgPath) {
-		return fmt.Errorf("%s doesn't have an image extension", localImgPath)
+	//TODO: add sameness check for videos (use file hash) and delete if same
+	if isImage, err := IsImage(localImgPath); !isImage || err != nil {
+		return fmt.Errorf("%s is not an image. won't delete local file.", localImgPath)
 	}
 
 	// compare uploaded image and local one
