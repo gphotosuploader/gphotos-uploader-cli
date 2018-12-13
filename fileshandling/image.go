@@ -17,7 +17,6 @@ import (
 )
 
 var (
-	// imageExtensions = []string{".jpg", ".jpeg", ".png"}
 	deletionsChan = make(chan DeletionJob)
 )
 
@@ -79,15 +78,6 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 
 	return img, nil
 }
-
-// func hasImageExtension(path string) bool {
-// 	for _, ext := range imageExtensions {
-// 		if strings.HasSuffix(strings.ToLower(path), ext) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
 
 func isSameImage(upImg, localImg imageLib.Image) bool {
 	upDHash := imgsim.DifferenceHash(upImg).String()
