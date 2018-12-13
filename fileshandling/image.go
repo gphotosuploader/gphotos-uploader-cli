@@ -37,7 +37,6 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 		for deletionJob := range deletionsChan {
 			deletionJob.deleteIfCorrectlyUploaded()
 		}
-
 		doneDeleting <- struct{}{}
 	}()
 	return doneDeleting
@@ -90,34 +89,6 @@ func isSameImage(upImg, localImg imageLib.Image) bool {
 	}
 	return false
 }
-
-// // CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
-// func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) error {
-// 	//TODO: add sameness check for videos (use file hash) and delete if same
-// 	if !IsImage(localImgPath) {
-// 		return fmt.Errorf("%s is not an image. won't delete local file", localImgPath)
-// 	}
-
-// 	// compare uploaded image and local one
-// 	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
-// 	if err != nil {
-// 		return fmt.Errorf("failed getting image from URL")
-// 	}
-// 	localImg, err := imageFromPath(localImgPath)
-// 	if err != nil {
-// 		return fmt.Errorf("failed loading local image from path")
-// 	}
-
-// 	if !isSameImage(upImg, localImg) {
-// 		fmt.Println("not the same image. Won't delete")
-// 	} else {
-// 		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", localImgPath)
-// 		if err = os.Remove(localImgPath); err != nil {
-// 			fmt.Println("delete failed")
-// 		}
-// 	}
-// 	return nil
-// }
 
 // isImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
 func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) (bool, error) {
