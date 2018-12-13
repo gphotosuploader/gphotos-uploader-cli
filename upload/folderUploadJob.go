@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/palantir/stacktrace"
 
-	"github.com/nmrshll/go-cp"
+	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
@@ -75,7 +75,7 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	return gphotosClient, nil
 }
 
-func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string) error {
+func (folderUploadJob *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string) error {
 	if !fileshandling.IsDir(folderPath) {
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
@@ -84,17 +84,23 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 		if info.IsDir() {
 			return nil
 		}
+
+		// process only files
 		if fileshandling.IsFile(path) {
-			// check type is image
-			if isImage, err := fileshandling.IsImage(path); err != nil || !isImage {
-				fmt.Printf("not an image: %s: skipping file...\n", path)
+			// process only if filetype is image or video
+			if isMedia, err := fileshandling.IsMedia(path); err != nil || !isMedia {
+				fmt.Printf("not an image or video: %s: skipping file...\n", path)
 				return nil
 			}
-			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: gphotosClient.Client}
-			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
+
+			// set file upload options depending on folder upload options
+			var fileUpload = &FileUpload{FolderUploadJob: folderUploadJob, filePath: path, gphotosClient: gphotosClient.Client}
+			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(path))
 				fileUpload.albumName = lastDirName
 			}
+
+			// finally, add the file upload to the queue
 			QueueFileUpload(fileUpload)
 		}
 
