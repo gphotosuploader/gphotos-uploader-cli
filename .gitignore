@@ -4,3 +4,4 @@ config.hjson.perso
 config.hjson
 auth.json
 dist
+\.history/

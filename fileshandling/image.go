@@ -3,27 +3,24 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
-	"log"
-	"strconv"
 
 	// register decoders for jpeg and png
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/Nr90/imgsim"
-	"github.com/nmrshll/gphotos-uploader-cli/util"
+	"github.com/palantir/stacktrace"
 	"github.com/steakknife/hamming"
 	"github.com/syndtr/goleveldb/leveldb"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 var (
-	imageExtensions = []string{".jpg", ".jpeg", ".png", ".webp"}
-	deletionsChan   = make(chan DeletionJob)
+	deletionsChan = make(chan DeletionJob)
 )
 
 type DeletionJob struct {
@@ -41,12 +38,8 @@ func StartDeletionsWorker(db *leveldb.DB) (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {
 		for deletionJob := range deletionsChan {
-			err := CheckUploadedAndDeleteLocal(deletionJob.uploadedMediaItem, deletionJob.localFilePath, db)
-			if err != nil {
-				fmt.Printf("%s. Won't delete", err)
-			}
+			deletionJob.deleteIfCorrectlyUploaded()
 		}
-
 		doneDeleting <- struct{}{}
 	}()
 	return doneDeleting
@@ -164,10 +157,6 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
-func getImageHash(img imageLib.Image) string {
-	return imgsim.DifferenceHash(img).String()
-}
-
 func isSameImage(upImg, localImg imageLib.Image) bool {
 	upDHash := getImageHash(upImg)
 	localDHash := getImageHash(localImg)
@@ -187,33 +176,45 @@ func isSameHash(upDHash, localDHash string) bool {
 	return false
 }
 
-// CheckUploadedAndDeleteLocal checks that the image that was uploaded is visually similar to the local one, before deleting the local one
-func CheckUploadedAndDeleteLocal(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string, db *leveldb.DB) error {
-	if !HasImageExtension(localImgPath) {
-		return fmt.Errorf("%s doesn't have an image extension", localImgPath)
+// isImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
+func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) (bool, error) {
+	// TODO: add sameness check for videos (use file hash) and delete if same
+	if !IsImage(localImgPath) {
+		return false, fmt.Errorf("%s is not an image. won't delete local file", localImgPath)
 	}
 
 	// compare uploaded image and local one
 	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
 	if err != nil {
-		return fmt.Errorf("failed getting image from URL")
+		return false, stacktrace.Propagate(err, "failed getting image from URL")
 	}
 	localImg, err := imageFromPath(localImgPath)
 	if err != nil {
-		return fmt.Errorf("failed loading local image from path")
+		return false, stacktrace.Propagate(err, "failed loading local image from path")
 	}
 
-	if !isSameImage(upImg, localImg) {
-		log.Println("not the same image. Won't delete")
-	} else {
-		log.Printf("uploaded file %s was checked for integrity. Will now delete.", localImgPath)
-		if err = os.Remove(localImgPath); err != nil {
-			log.Println("delete failed")
-		} else {
-			if err = removeFromDB(localImgPath, db); err != nil {
-				log.Printf("Failed to remove from DB: %s", err)
-			}
-		}
+	if isSameImage(upImg, localImg) {
+		return true, nil
 	}
-	return nil
+
+	return false, nil
+}
+
+func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
+	isImageCorrectlyUploaded, err := isImageCorrectlyUploaded(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
+	if err != nil {
+		fmt.Printf("%s. Won't delete\n", err)
+		return
+	}
+
+	if isImageCorrectlyUploaded {
+		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
+		if err = os.Remove(deletionJob.localFilePath); err != nil {
+			fmt.Println("failed deleting file")
+		}
+		return
+	} else {
+		fmt.Println("not the same image. Won't delete")
+		return
+	}
 }

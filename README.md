@@ -18,11 +18,12 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 ```
 go get -u github.com/nmrshll/gphotos-uploader-cli
 ```    
-##### Configure which folders to upload by modifying the file at
+##### Create the config file with
 ```
-~/.config/gphotos-uploader-cli/config.hjson
+gphotos-uploader-cli init
 ```
-(if absent, run `gphotos-uploader-cli` to create an example configuration file)    
+then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify which folder you want to upload
+  
 ([documentation](./.docs/configuration.md))  ([troubleshooting](./.docs/installation-troubleshooting.md))
 ##### Run it with 
 ```

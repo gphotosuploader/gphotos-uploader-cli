@@ -11,7 +11,7 @@ import (
 	"github.com/palantir/stacktrace"
 	"github.com/syndtr/goleveldb/leveldb"
 
-	"github.com/nmrshll/go-cp"
+	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
@@ -84,14 +84,16 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 		return fmt.Errorf("%s is not a folder", folderPath)
 	}
 
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(folderPath, func(filePath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-		if fileshandling.IsFile(path) {
-			// check type is image
-			if isImage, err := fileshandling.IsImage(path); err != nil || !isImage {
-				fmt.Printf("not an image: %s: skipping file...\n", path)
+
+		// process only files
+		if fileshandling.IsFile(filePath) {
+			// process only if filetype is image or video
+			if !fileshandling.IsMedia(filePath) {
+				fmt.Printf("not an image or video: %s: skipping file...\n", filePath)
 				return nil
 			}
 
@@ -104,11 +106,19 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 				return nil
 			}
 
-			var fileUpload = &FileUpload{FolderUploadJob: j, filePath: path, gphotosClient: gphotosClient.Client}
-			if j.MakeAlbums.Enabled && j.MakeAlbums.Use == USEFOLDERNAMES {
-				lastDirName := filepath.Base(filepath.Dir(path))
+
+			// set file upload options depending on folder upload options
+			var fileUpload = &FileUpload{
+				FolderUploadJob: folderUploadJob,
+				filePath:        filePath,
+				gphotosClient:   gphotosClient.Client,
+			}
+			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
+				lastDirName := filepath.Base(filepath.Dir(filePath))
 				fileUpload.albumName = lastDirName
 			}
+
+			// finally, add the file upload to the queue
 			QueueFileUpload(fileUpload)
 		}
 
