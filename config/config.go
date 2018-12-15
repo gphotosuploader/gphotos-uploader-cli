@@ -11,7 +11,8 @@ import (
 	"github.com/fatih/color"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/util"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
+
 	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
@@ -58,7 +59,7 @@ func OAuthConfig() *oauth2.Config {
 	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
 }
 
-func GetUploadDBPath() string {
+func GetUploadsDBPath() string {
 	dbPathAbsolute, err := cp.AbsolutePath(UPLOADDBPATH)
 	if err != nil {
 		log.Fatal(err)
@@ -98,7 +99,7 @@ func loadConfigFile() *Config {
 	}
 
 	// if no config file copy the default example and exit
-	if !fileshandling.IsFile(configPathAbsolute) {
+	if !filesystem.IsFile(configPathAbsolute) {
 		fmt.Println(noConfigFoundMessage)
 		if err := InitConfigFile(); err != nil {
 			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))

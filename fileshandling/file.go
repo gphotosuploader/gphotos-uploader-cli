@@ -3,25 +3,14 @@ package fileshandling
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
-	"github.com/nmrshll/gphotos-uploader-cli/util"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"github.com/palantir/stacktrace"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
-// IsFile asserts there is a file at path
-func IsFile(path string) bool {
-	return util.IsFile(path)
-}
-
-// IsDir asserts there is a directory at path
-func IsDir(path string) bool {
-	return util.IsDir(path)
-}
-
 func fileBuffer(filePath string) (buf []byte, _ error) {
-	if !IsFile(filePath) {
+	if !filesystem.IsFile(filePath) {
 		return nil, fmt.Errorf("not a file")
 	}
 	buf, err := ioutil.ReadFile(filePath)
@@ -32,41 +21,9 @@ func fileBuffer(filePath string) (buf []byte, _ error) {
 	return buf, nil
 }
 
-// func getFileKind(filePath string) (filetype.Kind, error) {
-// 	buf, err := ioutil.ReadFile(filePath)
-// 	if err != nil {
-// 		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
-// 	}
-
-// 	kind, err := filetype.Match(buf)
-// 	if err != nil {
-// 		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
-// 	}
-
-// 	return nil, nil
-// }
-
-// func mimeTypeContainsString(path, stringToMatch string) (bool, error) {
-// 	buf, err := ioutil.ReadFile(path)
-// 	if err != nil {
-// 		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
-// 	}
-
-// 	kind, err := filetype.Match(buf)
-// 	if err != nil {
-// 		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
-// 	}
-
-// 	if strings.Contains(kind.MIME.Value, stringToMatch) {
-// 		return true, nil
-// 	}
-// 	return false, nil
-// }
-
 // IsImage asserts file at filePath is an image
 func IsImage(filePath string) bool {
-	// return mimeTypeContainsString(filePath, "image")
-	buf, err := fileBuffer(filePath)
+	buf, err := filesystem.BufferFromFile(filePath)
 	if err != nil {
 		return false
 	}
@@ -76,8 +33,7 @@ func IsImage(filePath string) bool {
 
 // IsVideo asserts file at filePath is an image
 func IsVideo(filePath string) bool {
-	// return mimeTypeContainsString(filePath, "video")
-	buf, err := fileBuffer(filePath)
+	buf, err := filesystem.BufferFromFile(filePath)
 	if err != nil {
 		return false
 	}
@@ -87,16 +43,5 @@ func IsVideo(filePath string) bool {
 
 // IsMedia asserts file at filePath is an image or video
 func IsMedia(filePath string) bool {
-	// isImage, err := IsImage(filePath)
-	// if isImage && err == nil {
-	// 	return isImage, err
-	// }
-
-	// isVideo, err := IsVideo(filePath)
-	// if isVideo && err == nil {
-	// 	return isVideo, err
-	// }
-
-	// return false, nil
 	return IsImage(filePath) || IsVideo(filePath)
 }

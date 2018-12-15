@@ -2,12 +2,10 @@ package upload
 
 import (
 	"log"
-	"os"
 
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/palantir/stacktrace"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
@@ -26,22 +24,21 @@ func QueueFileUpload(fileUpload *FileUpload) {
 }
 func CloseFileUploadsChan() { close(fileUploadsChan) }
 
-func StartFileUploadWorker(db *leveldb.DB) (doneUploading chan struct{}) {
+func StartFileUploadWorker() (doneUploading chan struct{}) {
 	doneUploading = make(chan struct{})
-	go func(db *leveldb.DB) {
+	go func() {
 		for fileUpload := range fileUploadsChan {
-			err := fileUpload.upload(db)
+			err := fileUpload.upload()
 			if err != nil {
-				db.Close()
 				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
 			}
 		}
 		doneUploading <- struct{}{}
-	}(db)
+	}()
 	return doneUploading
 }
 
-func (fileUpload *FileUpload) upload(db *leveldb.DB) error { // TODO: upload to fileUpload.AlbumName
+func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.AlbumName
 	var albumIDVariadic []string
 	if fileUpload.albumName != "" {
 		album, err := fileUpload.gphotosClient.GetOrCreateAlbumByName(fileUpload.albumName)
@@ -54,22 +51,22 @@ func (fileUpload *FileUpload) upload(db *leveldb.DB) error { // TODO: upload to 
 	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, albumIDVariadic...)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed uploading image")
-	} else {
-		// check upload db for previous uploads
-		err := fileshandling.MarkUploaded(fileUpload.filePath, db)
-		if err != nil {
-			log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
+	}
+	// check upload db for previous uploads
+	err = fileUpload.completedUploads.CacheAsAlreadyUploaded(fileUpload.filePath)
+	if err != nil {
+		log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
 
-			// log potentially bad images to a file
-			f, err := os.OpenFile("bad_images.log",
-				os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Println(err)
-			}
-			defer f.Close()
-			badImages := log.New(f, "", log.LstdFlags)
-			badImages.Println(fileUpload.filePath)
-		}
+		// TODO: centralized logger
+		// // log potentially bad images to a file
+		// f, err := os.OpenFile("bad_images.log",
+		// 	os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
+		// defer f.Close()
+		// badImages := log.New(f, "", log.LstdFlags)
+		// badImages.Println(fileUpload.filePath)
 	}
 
 	// queue uploaded image for visual check of result + deletion

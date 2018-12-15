@@ -9,13 +9,14 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/palantir/stacktrace"
-	"github.com/syndtr/goleveldb/leveldb"
 
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
+	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 )
 
 const (
@@ -24,29 +25,38 @@ const (
 
 type FolderUploadJob struct {
 	*config.FolderUploadJob
+	gphotosClient    *gphotos.Client
+	completedUploads *completeduploads.CompletedUploadsService
 }
 
-func (folderUploadJob *FolderUploadJob) Run(db *leveldb.DB) {
-	sourceFolderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
-	if err != nil {
-		db.Close()
-		log.Fatal(err)
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService) *FolderUploadJob {
+	folderUploadJob := &FolderUploadJob{
+		FolderUploadJob:  configFolderUploadJob,
+		completedUploads: completedUploads,
 	}
 
-	client, err := Authenticate(folderUploadJob)
+	gphotosClient, err := authenticate(folderUploadJob)
 	if err != nil {
-		db.Close()
 		log.Fatal(err)
 	}
+	folderUploadJob.gphotosClient = gphotosClient
 
-	err = folderUploadJob.uploadFolder(client, sourceFolderAbsolutePath, db)
-	if err != nil {
-		db.Close()
-		log.Fatal(err)
-	}
+	return folderUploadJob
 }
 
-func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
+// func (folderUploadJob *FolderUploadJob) Run() {
+// 	client, err := authenticate(folderUploadJob)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	err = folderUploadJob.uploadFolder()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
+
+func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	// try to load token from keyring
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
 	if err == nil && token != nil { // if error ignore and skip
@@ -79,18 +89,24 @@ func Authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	return gphotosClient, nil
 }
 
-func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath string, db *leveldb.DB) error {
-	if !fileshandling.IsDir(folderPath) {
-		return fmt.Errorf("%s is not a folder", folderPath)
+// Upload uploads folder
+func (folderUploadJob *FolderUploadJob) Upload() error {
+	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
+	if err != nil {
+		return err
 	}
 
-	err := filepath.Walk(folderPath, func(filePath string, info os.FileInfo, err error) error {
+	if !filesystem.IsDir(folderAbsolutePath) {
+		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
+	}
+
+	err = filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
 
 		// process only files
-		if fileshandling.IsFile(filePath) {
+		if filesystem.IsFile(filePath) {
 			// process only if filetype is image or video
 			if !fileshandling.IsMedia(filePath) {
 				fmt.Printf("not an image or video: %s: skipping file...\n", filePath)
@@ -98,20 +114,19 @@ func (j *FolderUploadJob) uploadFolder(gphotosClient *gphotos.Client, folderPath
 			}
 
 			// check upload db for previous uploads
-			isUploaded, err := fileshandling.IsUploadedPrev(path, db)
+			isAlreadyUploaded, err := folderUploadJob.completedUploads.IsAlreadyUploaded(filePath)
 			if err != nil {
 				log.Println(err)
-			} else if isUploaded {
-				fmt.Printf("previously uploaded: %s: skipping file...\n", path)
+			} else if isAlreadyUploaded {
+				fmt.Printf("previously uploaded: %s: skipping file...\n", filePath)
 				return nil
 			}
-
 
 			// set file upload options depending on folder upload options
 			var fileUpload = &FileUpload{
 				FolderUploadJob: folderUploadJob,
 				filePath:        filePath,
-				gphotosClient:   gphotosClient.Client,
+				gphotosClient:   folderUploadJob.gphotosClient.Client,
 			}
 			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
 				lastDirName := filepath.Base(filepath.Dir(filePath))
