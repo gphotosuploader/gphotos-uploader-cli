@@ -1,39 +1,47 @@
 package fileshandling
 
 import (
+	"fmt"
 	"io/ioutil"
-	"strings"
 
-	"github.com/nmrshll/gphotos-uploader-cli/util"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"github.com/palantir/stacktrace"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
-func IsFile(path string) bool {
-	return util.IsFile(path)
+func fileBuffer(filePath string) (buf []byte, _ error) {
+	if !filesystem.IsFile(filePath) {
+		return nil, fmt.Errorf("not a file")
+	}
+	buf, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
+	}
+
+	return buf, nil
 }
 
-func IsDir(path string) bool {
-	return util.IsDir(path)
+// IsImage asserts file at filePath is an image
+func IsImage(filePath string) bool {
+	buf, err := filesystem.BufferFromFile(filePath)
+	if err != nil {
+		return false
+	}
+
+	return filetype.IsImage(buf)
 }
 
-func IsImage(path string) (bool, error) {
-	if !HasImageExtension(path) {
-		return false, nil
-	}
-
-	buf, err := ioutil.ReadFile(path)
+// IsVideo asserts file at filePath is an image
+func IsVideo(filePath string) bool {
+	buf, err := filesystem.BufferFromFile(filePath)
 	if err != nil {
-		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
+		return false
 	}
 
-	kind, err := filetype.Match(buf)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", path)
-	}
+	return filetype.IsVideo(buf)
+}
 
-	if strings.Contains(kind.MIME.Value, "image") {
-		return true, nil
-	}
-	return false, nil
+// IsMedia asserts file at filePath is an image or video
+func IsMedia(filePath string) bool {
+	return IsImage(filePath) || IsVideo(filePath)
 }

@@ -6,12 +6,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/fatih/color"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/util"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
+
 	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
@@ -58,7 +59,7 @@ func OAuthConfig() *oauth2.Config {
 	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
 }
 
-func GetUploadDBPath() string {
+func GetUploadsDBPath() string {
 	dbPathAbsolute, err := cp.AbsolutePath(UPLOADDBPATH)
 	if err != nil {
 		log.Fatal(err)
@@ -82,6 +83,15 @@ func Load() *Config {
 	return Cfg
 }
 
+var noConfigFoundMessage = color.CyanString(`
+No config file found at ~/.config/gphotos-uploader-cli/config.hjson
+Will now copy an example config file.
+Edit it by running:
+
+	nano ~/.config/gphotos-uploader-cli/config.hjson
+
+`)
+
 func loadConfigFile() *Config {
 	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
 	if err != nil {
@@ -89,26 +99,11 @@ func loadConfigFile() *Config {
 	}
 
 	// if no config file copy the default example and exit
-	if !util.IsFile(configPathAbsolute) {
-		fmt.Println(color.CyanString(`
-No config file found at ~/.config/gphotos-uploader-cli/config.hjson
-Will now copy an example config file.
-Edit it by running:
-
-	nano ~/.config/gphotos-uploader-cli/config.hjson
-
-`,
-		))
-		spew.Dump(configPathAbsolute)
-		f, err := os.Create(configPathAbsolute)
-		if err != nil {
-			log.Fatal(err)
+	if !filesystem.IsFile(configPathAbsolute) {
+		fmt.Println(noConfigFoundMessage)
+		if err := InitConfigFile(); err != nil {
+			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
 		}
-		_, err = f.WriteString(ExampleConfig)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		os.Exit(0)
 	}
 
@@ -126,7 +121,35 @@ Edit it by running:
 	return config
 }
 
-const ExampleConfig = `{
+// InitConfigFile creates an example config file if it doesn't already exist
+func InitConfigFile() error {
+	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dirname := filepath.Dir(configPathAbsolute)
+	if _, err := os.Stat(dirname); os.IsNotExist(err) {
+		os.Mkdir(dirname, 0755)
+	}
+
+	f, err := os.Open(configPathAbsolute)
+	if err != nil {
+		f, err = os.Create(configPathAbsolute)
+		if err != nil {
+			return err
+		}
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(exampleConfig)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+const exampleConfig = `{
   APIAppCredentials: {
     ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
     ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
