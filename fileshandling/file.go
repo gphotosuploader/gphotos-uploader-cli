@@ -32,7 +32,7 @@ func IsImage(filePath string) bool {
 
 	kind, _ := filetype.Image(buf)
 
-	return kind != filetypes.Unknown && kind != filematchers.TypePsd && kind != filematchers.TypeCR2
+	return kind != filetypes.Unknown && kind != filematchers.TypePsd && kind != filematchers.TypeTiff && kind != filematchers.TypeCR2
 }
 
 // IsVideo asserts file at filePath is an image
