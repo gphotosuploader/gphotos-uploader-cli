@@ -3,6 +3,7 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
+	"log"
 
 	// register decoders for jpeg and png
 	_ "image/gif"
@@ -151,6 +152,10 @@ func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
 		if err = os.Remove(deletionJob.localFilePath); err != nil {
 			fmt.Println("failed deleting file")
 		}
+
+		//if err = RemoveAsAlreadyUploaded(deletionJob.localFilePath); err != nil {
+		//	log.Printf("Failed to remove from DB: %s", err)
+		//}
 		return
 	}
 
