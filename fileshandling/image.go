@@ -143,14 +143,14 @@ func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localI
 func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
 	isImageCorrectlyUploaded, err := isImageCorrectlyUploaded(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
 	if err != nil {
-		fmt.Printf("%s. Won't delete\n", err)
+		log.Printf("%s. Won't delete\n", err)
 		return
 	}
 
 	if isImageCorrectlyUploaded {
 		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
 		if err = os.Remove(deletionJob.localFilePath); err != nil {
-			fmt.Println("failed deleting file")
+			log.Println("failed deleting file")
 		}
 
 		//if err = RemoveAsAlreadyUploaded(deletionJob.localFilePath); err != nil {
