@@ -162,7 +162,7 @@ const exampleConfig = `{
         enabled: true
         use: folderNames
       }
-      deleteAfterUpload: true
+      deleteAfterUpload: false
     }
   ]
 }
