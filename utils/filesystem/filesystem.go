@@ -74,5 +74,5 @@ func BufferHeaderFromFile(filePath string) ([]byte, error) {
 		return nil, stacktrace.Propagate(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(HEADERSIZE, 10), filePath)
 	}
 
-	return buf, nil
+	return buf[:], nil
 }
