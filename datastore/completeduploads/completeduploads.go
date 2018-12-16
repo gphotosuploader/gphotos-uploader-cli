@@ -104,6 +104,7 @@ func (s *CompletedUploadsService) CacheAsAlreadyUploaded(filePath string) error 
 	if err != nil {
 		return err
 	}
+	log.Printf("Marked as uploaded: %s", filePath)
 
 	return nil
 }
