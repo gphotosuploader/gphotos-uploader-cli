@@ -75,6 +75,7 @@ type FolderUploadJob struct {
 		Use     string
 	}
 	DeleteAfterUpload bool
+	UploadVideos      bool
 }
 
 func Load() *Config {
@@ -163,6 +164,7 @@ const exampleConfig = `{
         use: folderNames
       }
       deleteAfterUpload: false
+      uploadVideos: true
     }
   ]
 }

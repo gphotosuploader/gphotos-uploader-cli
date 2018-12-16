@@ -108,8 +108,13 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		// process only files
 		if filesystem.IsFile(filePath) {
 			// process only if filetype is image or video
-			if !fileshandling.IsMedia(filePath) {
-				fmt.Printf("not an image or video: %s: skipping file...\n", filePath)
+			if folderUploadJob.UploadVideos {
+				if !fileshandling.IsMedia(filePath) {
+					fmt.Printf("not an image or video: %s: skipping file...\n", filePath)
+					return nil
+				}
+			} else if !fileshandling.IsImage(filePath) {
+				fmt.Printf("not an image: %s: skipping file...\n", filePath)
 				return nil
 			}
 

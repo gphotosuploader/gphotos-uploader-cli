@@ -17,7 +17,8 @@ Example configuration file:
         enabled: true
         use: folderNames
       }
-      deleteAfterUpload: true
+      deleteAfterUpload: false
+      uploadVideos: true
     }
   ]
 }
@@ -44,3 +45,6 @@ If makeAlbums.enabled set to true, use the last folder path component as album n
 ##### `deleteAfterUpload`:
 If set to true, media will be deleted from local disk after upload. 
 To avoid data corruption, the uploader will double check that a the picture exists in your library and is visually similar to the one on the local disk before deleting any file.
+
+##### `uploadVideos`:
+If set to true, media items identified as a video will be uploaded. If false, they will be skipped. 

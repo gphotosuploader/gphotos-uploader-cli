@@ -12,6 +12,7 @@
         use: folderNames
       }
       deleteAfterUpload: false
+      uploadVideos: true
     }
   ]
 }
