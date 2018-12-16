@@ -2,8 +2,10 @@ package filesystem
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/palantir/stacktrace"
@@ -44,7 +46,28 @@ func BufferFromFile(filePath string) (buf []byte, _ error) {
 	}
 	buf, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
+		return nil, stacktrace.Propagate(err, "Failed reading file: %s: Ignoring file...\n", filePath)
+	}
+
+	return buf, nil
+}
+
+// BufferHeaderFromFile opens the file to return a buffer of the first N bytes
+func BufferHeaderFromFile(filePath string, howMany int64) ([]byte, error) {
+	if !IsFile(filePath) {
+		return nil, fmt.Errorf("not a file")
+	}
+	r, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Close()
+
+	var buf [howMany]byte
+	_, err = io.ReadFull(r, buf[:])
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(howMany, 10), filePath)
 	}
 
 	return buf, nil

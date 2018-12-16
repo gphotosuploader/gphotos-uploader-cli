@@ -25,7 +25,7 @@ func fileBuffer(filePath string) (buf []byte, _ error) {
 
 // IsImage asserts file at filePath is an image
 func IsImage(filePath string) bool {
-	buf, err := filesystem.BufferFromFile(filePath)
+	buf, err := filesystem.BufferHeaderFromFile(filePath, 100)
 	if err != nil {
 		return false
 	}
@@ -37,7 +37,7 @@ func IsImage(filePath string) bool {
 
 // IsVideo asserts file at filePath is an image
 func IsVideo(filePath string) bool {
-	buf, err := filesystem.BufferFromFile(filePath)
+	buf, err := filesystem.BufferHeaderFromFile(filePath, 100)
 	if err != nil {
 		return false
 	}
