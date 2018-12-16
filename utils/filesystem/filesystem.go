@@ -11,6 +11,10 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+const (
+	HEADERSIZE = 100
+)
+
 // IsFile asserts there is a file at path
 func IsFile(path string) bool {
 	fi, err := os.Stat(path)
@@ -52,8 +56,8 @@ func BufferFromFile(filePath string) (buf []byte, _ error) {
 	return buf, nil
 }
 
-// BufferHeaderFromFile opens the file to return a buffer of the first N bytes
-func BufferHeaderFromFile(filePath string, howMany int64) ([]byte, error) {
+// BufferHeaderFromFile opens the file to return a buffer of the first HEADERSIZE bytes
+func BufferHeaderFromFile(filePath string) ([]byte, error) {
 	if !IsFile(filePath) {
 		return nil, fmt.Errorf("not a file")
 	}
@@ -64,10 +68,10 @@ func BufferHeaderFromFile(filePath string, howMany int64) ([]byte, error) {
 
 	defer r.Close()
 
-	var buf [howMany]byte
+	var buf [HEADERSIZE]byte
 	_, err = io.ReadFull(r, buf[:])
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(howMany, 10), filePath)
+		return nil, stacktrace.Propagate(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(HEADERSIZE, 10), filePath)
 	}
 
 	return buf, nil
