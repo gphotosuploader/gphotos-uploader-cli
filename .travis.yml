@@ -1,37 +1,38 @@
-# .travis.yml
 language: go
-
-addons:
-  apt:
-    packages:
-    # needed for the nfpm pipe:
-    - rpm
-    # needed for the snap pipe:
-    - snapcraft
-
-env:
-# needed for the snap pipe:
-- PATH=/snap/bin:$PATH
-
+matrix:
+  include:
+    - go: 1.x
+      env: LATEST=true
+    - go: 1.11.x
+    - go: tip
+  allow_failures:
+    - go: tip
+before_install:
+  - go get github.com/mitchellh/gox
 install:
-# needed for the snap pipe:
-- sudo snap install snapcraft --classic
+  -
+script:
+  -
+  - diff -u <(echo -n) <(gofmt -d .)
+  - go vet $(go list ./... | grep -v /vendor/)
+  - go test -v -race ./...
+  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli.."
+    -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
 
-# # needed for the docker pipe
-# services:
-# - docker
 
-# after_success:
-# # docker login is required if you want to push docker images.
-# # DOCKER_PASSWORD should be a secret in your .travis.yml configuration.
-# - test -n "$TRAVIS_TAG" && docker login -u=myuser -p="$DOCKER_PASSWORD"
-
-# calls goreleaser
 deploy:
-# github_token: $GITHUB_TOKEN
-- provider: script
+  provider: releases
   skip_cleanup: true
-  script: curl -sL https://git.io/goreleaser | bash
+  api_key:
+    # Your *encrypted* GitHub key, as the output of the Travis CI CLI tool.
+    secure: pHNKyq8PRw90KmkL64XQM+AdwaGJ5UdSvCkk1FB4oxJuTmRoftz1QRpx1heXK7QxoOOzD7leAMAz4lsrDAxQQe0X85tBWDR6YgYI1hxXq1LI6odiNCJwNZ4Etkdk/Y5wluCtGWGN9dLAbj4tHmm6SM8cfvrLef8M+PYm78WuAVnqK+ou8ccDzSjebdbFSMNcrqBarVIURRVb1MPaXC3hhPIiVynabmzI4+XtEuLJ5cTzc44++FyjXNSxR/986vz45F4906rmQcSK5T/a9yMGH7nab6ABVcRIabMF41V174prDBw99BfaeijpbiFv3P/ipvKLhXCVh+2Iu90DUqCczU3hJP2VaDLODyIVwaF6Rw4RGDdRixIXN4wj7YG3NDVKf8kgLSSXQACMa2QQDVfN4X57AhLnvu7lT/TXAEgvn0i+slicMbAuaW+AvRgiTgQ1s585V9fxp7IDI+LyUQzV4HKH1ydAgy77x8Bz7dBSSWDhiNsrkCPiZb0VqrIWg/ZlgJ7NEukTgjmQgUqn8hiMUZ1Iiujbt4xMKvu1V5ogdGcwZqdfpX966oQsFRT+z408QqDQPY6UELVj+MZTGm6D8T++izI1xu9sC/sGKvywiK8LPbBkroc/c6bxbJ23mJCeev/nVn3A5Un/vY/ejFcHlHnMFaag/arHAlhGipMPyGE=
+  file:
+    # The names of the binaries to output, based on the -output template passed to gox.
+    - gphotos-uploader-cli.windows.amd64.exe
+    - gphotos-uploader-cli.darwin.amd64
+    - gphotos-uploader-cli.linux.amd64
   on:
+    repo: pacoorozco/gphotos-uploader-cli
+    # Only build binaries for tagged commits
     tags: true
-    condition: $TRAVIS_OS_NAME = linux
+    condition: $LATEST = true
