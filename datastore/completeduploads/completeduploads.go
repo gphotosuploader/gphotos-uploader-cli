@@ -3,7 +3,9 @@ package completeduploads
 import (
 	"encoding/binary"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -21,16 +23,19 @@ func NewService(db *leveldb.DB) *CompletedUploadsService {
 }
 
 func fileHash(filePath string) (uint32, error) {
-	fileBuf, err := filesystem.BufferFromFile(filePath)
+	inputFile, err := os.Open(filePath)
 	if err != nil {
 		return 0, err
 	}
+	defer inputFile.Close()
 
 	hasher := xxHash32.New(0xCAFE) // hash.Hash32
 	defer hasher.Reset()
 
-	hasher.Write(fileBuf)
-	//fmt.Printf("%x\n", hasher.Sum32())
+	_, err = io.Copy(hasher, inputFile)
+	if err != nil {
+		return 0, err
+	}
 
 	return hasher.Sum32(), nil
 }
