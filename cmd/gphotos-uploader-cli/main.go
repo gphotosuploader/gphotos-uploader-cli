@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	BuildVersion string = "0.1.5"
+	BuildVersion string = "0.1.6"
 	BuildRev     string = ""
 )
 

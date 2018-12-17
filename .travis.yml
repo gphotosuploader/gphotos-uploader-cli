@@ -1,31 +1,27 @@
 language: go
 env:
   global:
-    - GO111MODULE=on
+  - GO111MODULE=on
 matrix:
   include:
-    - go: 1.x
-      env: LATEST=true
-    - go: 1.11.x
+  - go: 1.x
+    env: LATEST=true
+  - go: 1.11.x
 before_install:
-  - go get github.com/mitchellh/gox
+- go get github.com/mitchellh/gox
 install:
-  -
+- 
 script:
-  - diff -u <(echo -n) <(gofmt -d .)
-  - go vet $(go list ./... | grep -v /vendor/) || true
-  - go test -v -race ./...
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
-    -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
+- diff -u <(echo -n) <(gofmt -d .)
+- go vet $(go list ./... | grep -v /vendor/) || true
+- go test -v -race ./...
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
+  -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
 
 deploy:
   provider: releases
-  skip_cleanup: true
   api_key:
-    secure: mSEFT6w0r3DdBuz5QdVD7QoSxOGfD+J7pOmH8JfwB87+4KBaptIrItgTXyL0Bi7+47RfpjO30JFC7VuWkE1x7mtZgHsobMEuYv8FnqSZg7kyUfbSQicG1fjgOoGKRFxLa4JwOrCn3z9RKapPmiI918OUOpnIEk8wSv5SDDTT9S6TSdN/wxWLgx/Hniu5czV3ZIy6LgLbXj/2/QCfWqyJEQziGRTTdoqjIhm0TmL+wKlIg+V7eT3PapTq3mqstdUuUU6YaguiUUv9o/3xYzxyG+JKXIn7Btp4LQJgSF/PWtgRtLfLat9cxmbX/lBxMotTxAp7hE3yej7LH8/FYjbmJTVSjT3Gwo5bhaDu75/svQesfflLaQvpZk1PhPz8P+aWJkm5A1Ud5dU1OUfci7D/qi5qhgAEjaC7ATZKpgDlWfoZC49g0K4Q1vA9yTwL8M9VM0czcclRwT6rufFls0MdnzyouUxO1ZbGvy0p8g04AwUZUDg55Pz8AJd/34n48bgLHfAaZLKhL2VfQyEOCaaJ7RyND4/Fxh0XalXN/bt5Gx933G9NLoVyFQVCYhz4Yp1gWH7I1cf7Rqqkvu6cOJZANVl+aMa364p70fl4bYCG7/m5zr1rirUx/YpBILW3zQMxX55Md0NiL0qKwl7L7gzCLjZzS/eD+qx4PfWyJ630Exs=
+    secure: T/IJF5igOS/Fm6gi+V0VZcUjXxy3h2TxtEDg0a19DjnDRxXmZxDn+yEm8c9/3K3oorwMqEA766GHxyPcmVEpDPg5KgSJHNFXJCSF48fLoyaNpz3J4vti3LuUJdixgyhRnuZzgUovmEW0/O52tvaRNj5pkaYD74KFdZ+seGGoFlTPsrQpHzukmGu/tkpSkZnRuF+XxpjBLN7wHMGZyAKGh/e6vsL30N0rr+pvhgDrsnSNHg/qYG5rIVs5cwwWLoK9M4d5iHIEx4rwvbaxaKhveKUmJsN1+ueyr5TZfbVHD0ePHbO9DWcfCuRK65dnH0xue7j/FH029A8i/u4+/iAstaLzMGLUfZWTL1exVlQJFPARYSglReK1XoCBj++CnyX4zLOPq3oz4950VA3RPFWe7nAZpbtO5a5tEobLA9Kyc6o4XwzA0MFgFwYY7Sp2aoRmzfdy6k62aRxV3m6Vr8skMnsEa7j+0jB8MCYpwqsMsBFmH7ZYJVa4JX/ATFwoASBftlLIm2i4+eoyTV3y4Z8AEwA4xfuVM81rVj2F0WTHEbx03acw5SQFNhbJAjopAJjPNkRlXdjJclBpZW2gjKOwI0BgUdtSgfbSt+V7KCSF0hjUFLK5W0pODVetdN+FqsWGy5Nu5P0RCkR4mQ703j22SWmirVOYVeDNKKgfeueEyeg=
   file:
     - gphotos-uploader-cli.darwin.amd64
     - gphotos-uploader-cli.linux.amd64
-  on:
-    repo: pacoorozco/gphotos-uploader-cli
-    tags: true
