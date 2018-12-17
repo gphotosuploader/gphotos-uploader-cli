@@ -19,7 +19,7 @@ script:
   - diff -u <(echo -n) <(gofmt -d .)
   - go vet $(go list ./... | grep -v /vendor/) || true
   - go test -v -race ./...
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli_{{.OS}}"
+  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
     -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
 
 

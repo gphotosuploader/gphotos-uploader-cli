@@ -10,4 +10,4 @@ dist
 .idea/
 
 # Binaries
-gphotos-uploader-cli_*
+gphotos-uploader-cli.*
