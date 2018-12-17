@@ -1,31 +1,31 @@
 language: go
 env:
   global:
-  - GO111MODULE=on
+    - GO111MODULE=on
 matrix:
   include:
-  - go: 1.x
-    env: LATEST=true
-  - go: 1.11.x
+    - go: 1.x
+      env: LATEST=true
+    - go: 1.11.x
 before_install:
-- go get github.com/mitchellh/gox
+  - go get github.com/mitchellh/gox
 install:
-- 
+  -
 script:
-- diff -u <(echo -n) <(gofmt -d .)
-- go vet $(go list ./... | grep -v /vendor/) || true
-- go test -v -race ./...
-- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
-  -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
+  - diff -u <(echo -n) <(gofmt -d .)
+  - go vet $(go list ./... | grep -v /vendor/) || true
+  - go test -v -race ./...
+  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
+    -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
+
 deploy:
   provider: releases
   skip_cleanup: true
+  api_key:
+    secure: mSEFT6w0r3DdBuz5QdVD7QoSxOGfD+J7pOmH8JfwB87+4KBaptIrItgTXyL0Bi7+47RfpjO30JFC7VuWkE1x7mtZgHsobMEuYv8FnqSZg7kyUfbSQicG1fjgOoGKRFxLa4JwOrCn3z9RKapPmiI918OUOpnIEk8wSv5SDDTT9S6TSdN/wxWLgx/Hniu5czV3ZIy6LgLbXj/2/QCfWqyJEQziGRTTdoqjIhm0TmL+wKlIg+V7eT3PapTq3mqstdUuUU6YaguiUUv9o/3xYzxyG+JKXIn7Btp4LQJgSF/PWtgRtLfLat9cxmbX/lBxMotTxAp7hE3yej7LH8/FYjbmJTVSjT3Gwo5bhaDu75/svQesfflLaQvpZk1PhPz8P+aWJkm5A1Ud5dU1OUfci7D/qi5qhgAEjaC7ATZKpgDlWfoZC49g0K4Q1vA9yTwL8M9VM0czcclRwT6rufFls0MdnzyouUxO1ZbGvy0p8g04AwUZUDg55Pz8AJd/34n48bgLHfAaZLKhL2VfQyEOCaaJ7RyND4/Fxh0XalXN/bt5Gx933G9NLoVyFQVCYhz4Yp1gWH7I1cf7Rqqkvu6cOJZANVl+aMa364p70fl4bYCG7/m5zr1rirUx/YpBILW3zQMxX55Md0NiL0qKwl7L7gzCLjZzS/eD+qx4PfWyJ630Exs=
   file:
-  - gphotos-uploader-cli.darwin.amd64
-  - gphotos-uploader-cli.linux.amd64
+    - gphotos-uploader-cli.darwin.amd64
+    - gphotos-uploader-cli.linux.amd64
   on:
     repo: pacoorozco/gphotos-uploader-cli
     tags: true
-    condition: "$LATEST = true"
-  api-key:
-    secure: qm4ygH6Yx+kZvetPSVLH7yyQGoxTWEq4WMjF+Fdeb5+MWG73oRNdUmO7RywOmsyupru5uMy4YChmVfEW557uYZ2lD4NtpROEZvDQxjz6Kdo/ZDlSHDzO+Ub1mBkNDmPkOfTxX1DxGWeJ5t0FegwKXECiw7/RvUkPhjyAidXxCKysYBtFzbtCDgcbzv73ul6T8LEPN2IjP3KBtJ2ukGkxLSG0DFhXf/8Hu9JEOJfMkQIRHRGhIQxu0S6Eikk+E20iUENInnaRUda1Wp48KpTeZPZjmNSLkvQjr6yX6Wz4+okZwW61Ub/5L228AACCBqL3JjgESL3G+EU51vhbETquXaE2UMbchL3Cdiv29JjW9SomeaBLlH69zaJqYn1qrUmcmoLuKyO+yjJ/sMgOwVWBE9KwKHAjXDENsiMYkXD/KSxHu+7TzAARelFh3pyBQwuWL1uXRMkcyjMcIe9dMi+r5/wtOrKtmpZQ6ZaZQl3FIESBzLo9yqlLpUZ4H1h5TBTLlb79pzYYzlcSfx6rSMDAGMa/cKRkZ68GwWKqI+GUF3vt9U86PYJKbuaWtc+S52jIbtet3cqWjcQcZZ7DhnBp1w/wdCnxB7l9EEf8INTMmzO6FZwQdE/3GAQNVimSr1prACQYqpukTDV9EzN/nK+ZWTr7gc9GFwSi1JJenQXEfas=
