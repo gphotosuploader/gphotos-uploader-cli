@@ -19,7 +19,7 @@ script:
   - diff -u <(echo -n) <(gofmt -d .)
   - go vet $(go list ./... | grep -v /vendor/) || true
   - go test -v -race ./...
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
+  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
     -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
 
 
@@ -31,7 +31,6 @@ deploy:
     secure: pHNKyq8PRw90KmkL64XQM+AdwaGJ5UdSvCkk1FB4oxJuTmRoftz1QRpx1heXK7QxoOOzD7leAMAz4lsrDAxQQe0X85tBWDR6YgYI1hxXq1LI6odiNCJwNZ4Etkdk/Y5wluCtGWGN9dLAbj4tHmm6SM8cfvrLef8M+PYm78WuAVnqK+ou8ccDzSjebdbFSMNcrqBarVIURRVb1MPaXC3hhPIiVynabmzI4+XtEuLJ5cTzc44++FyjXNSxR/986vz45F4906rmQcSK5T/a9yMGH7nab6ABVcRIabMF41V174prDBw99BfaeijpbiFv3P/ipvKLhXCVh+2Iu90DUqCczU3hJP2VaDLODyIVwaF6Rw4RGDdRixIXN4wj7YG3NDVKf8kgLSSXQACMa2QQDVfN4X57AhLnvu7lT/TXAEgvn0i+slicMbAuaW+AvRgiTgQ1s585V9fxp7IDI+LyUQzV4HKH1ydAgy77x8Bz7dBSSWDhiNsrkCPiZb0VqrIWg/ZlgJ7NEukTgjmQgUqn8hiMUZ1Iiujbt4xMKvu1V5ogdGcwZqdfpX966oQsFRT+z408QqDQPY6UELVj+MZTGm6D8T++izI1xu9sC/sGKvywiK8LPbBkroc/c6bxbJ23mJCeev/nVn3A5Un/vY/ejFcHlHnMFaag/arHAlhGipMPyGE=
   file:
     # The names of the binaries to output, based on the -output template passed to gox.
-    - gphotos-uploader-cli.windows.amd64.exe
     - gphotos-uploader-cli.darwin.amd64
     - gphotos-uploader-cli.linux.amd64
   on:
