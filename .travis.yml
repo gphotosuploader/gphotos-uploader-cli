@@ -1,40 +1,31 @@
 language: go
-
-# Force-enable Go modules. This will be unnecessary when Go 1.12 lands.
 env:
   global:
-    - GO111MODULE=on
-
+  - GO111MODULE=on
 matrix:
   include:
-    - go: 1.x
-      env: LATEST=true
-    - go: 1.11.x
-
+  - go: 1.x
+    env: LATEST=true
+  - go: 1.11.x
 before_install:
-  - go get github.com/mitchellh/gox
+- go get github.com/mitchellh/gox
 install:
-  - #skip
+- 
 script:
-  - diff -u <(echo -n) <(gofmt -d .)
-  - go vet $(go list ./... | grep -v /vendor/) || true
-  - go test -v -race ./...
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
-    -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
-
-
+- diff -u <(echo -n) <(gofmt -d .)
+- go vet $(go list ./... | grep -v /vendor/) || true
+- go test -v -race ./...
+- if [ "${LATEST}" = "true" ]; then gox -os="linux darwin" -arch="amd64" -output="gphotos-uploader-cli.{{.OS}}.{{.Arch}}"
+  -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
 deploy:
   provider: releases
   skip_cleanup: true
-  api_key:
-    # Your *encrypted* GitHub key, as the output of the Travis CI CLI tool.
-    secure: pHNKyq8PRw90KmkL64XQM+AdwaGJ5UdSvCkk1FB4oxJuTmRoftz1QRpx1heXK7QxoOOzD7leAMAz4lsrDAxQQe0X85tBWDR6YgYI1hxXq1LI6odiNCJwNZ4Etkdk/Y5wluCtGWGN9dLAbj4tHmm6SM8cfvrLef8M+PYm78WuAVnqK+ou8ccDzSjebdbFSMNcrqBarVIURRVb1MPaXC3hhPIiVynabmzI4+XtEuLJ5cTzc44++FyjXNSxR/986vz45F4906rmQcSK5T/a9yMGH7nab6ABVcRIabMF41V174prDBw99BfaeijpbiFv3P/ipvKLhXCVh+2Iu90DUqCczU3hJP2VaDLODyIVwaF6Rw4RGDdRixIXN4wj7YG3NDVKf8kgLSSXQACMa2QQDVfN4X57AhLnvu7lT/TXAEgvn0i+slicMbAuaW+AvRgiTgQ1s585V9fxp7IDI+LyUQzV4HKH1ydAgy77x8Bz7dBSSWDhiNsrkCPiZb0VqrIWg/ZlgJ7NEukTgjmQgUqn8hiMUZ1Iiujbt4xMKvu1V5ogdGcwZqdfpX966oQsFRT+z408QqDQPY6UELVj+MZTGm6D8T++izI1xu9sC/sGKvywiK8LPbBkroc/c6bxbJ23mJCeev/nVn3A5Un/vY/ejFcHlHnMFaag/arHAlhGipMPyGE=
   file:
-    # The names of the binaries to output, based on the -output template passed to gox.
-    - gphotos-uploader-cli.darwin.amd64
-    - gphotos-uploader-cli.linux.amd64
+  - gphotos-uploader-cli.darwin.amd64
+  - gphotos-uploader-cli.linux.amd64
   on:
     repo: pacoorozco/gphotos-uploader-cli
-    # Only build binaries for tagged commits
     tags: true
-    condition: $LATEST = true
+    condition: "$LATEST = true"
+  api-key:
+    secure: baUdTyvTwPsleUPlU0TCBZv9TYKkIQypsjXUVentGcCCCu0QS7HeiecnRSLYumwsQfEEbCYEtgUMVzAtFK+ouiVOH6o0HFmKL5aNXJJJqz3aDI0lKrKTH4/4LMuaaYsL0ufP4t2kyJn7xW9XQWBRfybct5kV0Aro/AdKcBXfHtlz3VRhlQPF6s3bjx5KLz3Gc+QyBKNWpB0Qycchyrgt/hVplyYvTnZLrDpbW8PGnyXIos9/sHlPVWPSftq8cQY13XYqrh4FfZ373gHOOyM6vu+KALFQATYRbdMyOccHWqPg8WWsqwyegF2Ar/2+bqkueL6lUs0zBl9Y3hY13SgNKnAqL5snamW6zVrYv1XPKeTbAkrzMKwCA21q2tyh1yeQaJhfLYonxjpFMXfjOIJY5kXFq4GiDfotr/iO0W0Ps9EtTgsFTTv/CPYvgnRkzUoF0vSKSo8LdpRi7+VxstYLK7a4PS/Sa7JG66RFedIsnXDzX8/4r9RAMCF48SmxZK+NeMIl9lWft66f7arrjX/AXOpOFprWyVr/UWdDwx993pwcu5vw23MluD74EOSoKrMhzQxVt650PCh53R2ANTZMKVVjCib80OgGeKEdrAtAUcKYE1HdN67I9m6WF2p7oEEVdMZQdAgVDOakDt2ZY3CRpdX6QG0zihu+23YKrjQtjKo=
