@@ -10,6 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	BuildVersion string = "0.1.1"
+	BuildRev     string = ""
+)
+
 func startUploader(cmd *cobra.Command, args []string) {
 	// load all config parameters
 	cfg := config.Load()
@@ -49,7 +54,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("gphotos-uploader-cli v0.1.1")
+			fmt.Printf("gphotos-uploader-cli v%s (build: %s)\n", BuildVersion, BuildRev)
 		},
 	})
 

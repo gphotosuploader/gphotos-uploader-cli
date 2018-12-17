@@ -10,20 +10,17 @@ matrix:
     - go: 1.x
       env: LATEST=true
     - go: 1.11.x
-    - go: tip
-  allow_failures:
-    - go: tip
+
 before_install:
   - go get github.com/mitchellh/gox
 install:
-  -
+  - #skip
 script:
-  -
   - diff -u <(echo -n) <(gofmt -d .)
-  - go vet $(go list ./... | grep -v /vendor/)
+  - go vet $(go list ./... | grep -v /vendor/) || true
   - go test -v -race ./...
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli.."
-    -ldflags "-X main.Rev=`git rev-parse --short HEAD`" -verbose ./...; fi
+  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gphotos-uploader-cli_{{.OS}}"
+    -ldflags "-X main.BuildRev=`git rev-parse --short HEAD`" -verbose ./...; fi
 
 
 deploy:
