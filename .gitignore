@@ -5,3 +5,6 @@ config.hjson
 auth.json
 dist
 \.history/
+
+# IDE configuration
+.idea/
