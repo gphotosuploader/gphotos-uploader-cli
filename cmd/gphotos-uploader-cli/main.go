@@ -25,7 +25,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.FolderUploadJob{&job}
+		folderUploadJob := upload.FolderUploadJob{FolderUploadJob: &job}
 		folderUploadJob.Run()
 	}
 	// after we've run all the folder upload jobs we're done adding file upload jobs
@@ -48,7 +48,10 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "init",
 		Run: func(cmd *cobra.Command, args []string) {
-			config.InitConfigFile()
+			err := config.InitConfigFile()
+			if err != nil {
+				fmt.Printf("could not create the init config file: %v", err)
+			}
 		},
 	})
 	rootCmd.AddCommand(&cobra.Command{
