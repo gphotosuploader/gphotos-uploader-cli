@@ -14,6 +14,9 @@ LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := cmd/gphotos-uploader-cli/main.go
 
+# Get first path on multiple GOPATH environments
+GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
+
 PLATFORMS := linux darwin
 os = $(word 1, $@)
 
