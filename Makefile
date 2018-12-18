@@ -27,7 +27,7 @@ $(PLATFORMS):			## Create binary for an specific platform
 release: linux darwin	## Create binaries for all supported platforms
 
 .PHONY: test
-test:					## Run tests
+test: lint					## Run tests
 	@echo "--> Running tests..."
 	@go test -v -race $(PKGS)
 
@@ -37,16 +37,18 @@ clean:					## Clean all built artifacts
 	@rm -rf release
 
 BIN_DIR := $(GOPATH)/bin
-GOMETALINTER := $(BIN_DIR)/gometalinter
 
-$(GOMETALINTER):
-	@echo "--> Installing gometalinter..."
-	@go get -u github.com/alecthomas/gometalinter
-	@gometalinter --install &> /dev/null
+GOLANGCI := $(BIN_DIR)/golangci-lint
+GOLANGCI_VERSION := 1.12.3
+
+$(GOLANGCI):
+	@echo "--> Installing golangci v$(GOLANGCI_VERSION)..."
+	@curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(BIN_DIR) v$(GOLANGCI_VERSION)
 
 .PHONY: lint
-lint: $(GOMETALINTER)	## Run linter
-	@gometalinter ./... --vendor
+lint: $(GOLANGCI)	## Run linter
+	@echo "--> Running linter golangci v$(GOLANGCI_VERSION)..."
+	@$(GOLANGCI) run
 
 .PHONY: help
 help:					## Show this help.
