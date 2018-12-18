@@ -120,7 +120,10 @@ func InitConfigFile() error {
 
 	dirname := filepath.Dir(configPathAbsolute)
 	if _, err := os.Stat(dirname); os.IsNotExist(err) {
-		os.Mkdir(dirname, 0755)
+		err := os.MkdirAll(dirname, 0755)
+		if err != nil {
+			return err
+		}
 	}
 
 	f, err := os.Open(configPathAbsolute)
