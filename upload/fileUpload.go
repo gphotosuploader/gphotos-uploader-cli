@@ -52,6 +52,22 @@ func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.Alb
 	if err != nil {
 		return stacktrace.Propagate(err, "failed uploading image")
 	}
+	// check upload db for previous uploads
+	err = fileUpload.completedUploads.CacheAsAlreadyUploaded(fileUpload.filePath)
+	if err != nil {
+		log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
+
+		// TODO: centralized logger
+		// // log potentially bad images to a file
+		// f, err := os.OpenFile("bad_images.log",
+		// 	os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
+		// defer f.Close()
+		// badImages := log.New(f, "", log.LstdFlags)
+		// badImages.Println(fileUpload.filePath)
+	}
 
 	// queue uploaded image for visual check of result + deletion
 	if fileUpload.DeleteAfterUpload {

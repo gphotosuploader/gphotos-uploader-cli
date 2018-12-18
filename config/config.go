@@ -11,7 +11,8 @@ import (
 	"github.com/fatih/color"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
+
 	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
@@ -30,6 +31,7 @@ type APIAppCredentials struct {
 var (
 	// consts
 	CONFIGPATH                  = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
+	UPLOADDBPATH                = fmt.Sprintf("%s/uploads.db", CONFIGFOLDER)
 	DEFAULT_API_APP_CREDENTIALS = APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
@@ -57,6 +59,14 @@ func OAuthConfig() *oauth2.Config {
 	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
 }
 
+func GetUploadsDBPath() string {
+	dbPathAbsolute, err := cp.AbsolutePath(UPLOADDBPATH)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dbPathAbsolute
+}
+
 type FolderUploadJob struct {
 	Account      string
 	SourceFolder string
@@ -65,6 +75,7 @@ type FolderUploadJob struct {
 		Use     string
 	}
 	DeleteAfterUpload bool
+	UploadVideos      bool
 }
 
 func Load() *Config {
@@ -89,7 +100,7 @@ func loadConfigFile() *Config {
 	}
 
 	// if no config file copy the default example and exit
-	if !fileshandling.IsFile(configPathAbsolute) {
+	if !filesystem.IsFile(configPathAbsolute) {
 		fmt.Println(noConfigFoundMessage)
 		if err := InitConfigFile(); err != nil {
 			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
@@ -155,7 +166,8 @@ const exampleConfig = `{
         enabled: true
         use: folderNames
       }
-      deleteAfterUpload: true
+      deleteAfterUpload: false
+      uploadVideos: true
     }
   ]
 }
