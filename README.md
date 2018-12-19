@@ -14,16 +14,21 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Quick start
-##### Install using     
+##### Install using
+
 ```
-go get -u github.com/nmrshll/gphotos-uploader-cli
+go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli
 ```    
+
 ##### Create the config file with
+
 ```
 gphotos-uploader-cli init
 ```
+
 then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify which folder you want to upload
-  
+
+
 ([documentation](./.docs/configuration.md))  ([troubleshooting](./.docs/installation-troubleshooting.md))
 ##### Run it with 
 ```
