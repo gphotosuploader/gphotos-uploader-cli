@@ -7,5 +7,6 @@ go:
   - "1.11.x"
 
 script:
+  - make lint
   - make test
-  - make release -j2
+  - make release
