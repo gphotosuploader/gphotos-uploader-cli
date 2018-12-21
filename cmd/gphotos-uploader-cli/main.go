@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
@@ -18,11 +17,16 @@ var (
 	configFilePath = "~/.config/gphotos-uploader-cli/config.hjson"
 )
 
+// errorf prints an error to stderr and force the app to exist
+func errorf(format string, a ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stderr, format+"\n", a...)
+	os.Exit(2)
+}
+
 func startUploader(cmd *cobra.Command, args []string) {
-	cfg, err := config.Load(configFilePath)
+	cfg, err := config.LoadConfigFile(configFilePath)
 	if err != nil {
-		fmt.Printf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.\n", configFilePath)
-		os.Exit(1)
+		errorf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", configFilePath)
 	}
 
 	// start file upload worker
@@ -56,10 +60,9 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := config.InitConfigFile(configFilePath)
 			if err != nil {
-				fmt.Printf("could not create the init config file: %v\n", err)
-				os.Exit(2)
+				errorf("Failed to create the init config file: %v", err)
 			}
-			fmt.Printf("Configuration file has created.\nEdit it by running:\n    nano %s\n", configFilePath)
+			fmt.Printf("Configuration file has been created.\nEdit it by running:\n    nano %s\n", configFilePath)
 		},
 	})
 	rootCmd.AddCommand(&cobra.Command{
@@ -70,6 +73,6 @@ func main() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		errorf("Could not execute the command: %v", err)
 	}
 }

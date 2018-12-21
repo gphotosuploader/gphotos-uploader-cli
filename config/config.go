@@ -51,14 +51,16 @@ func OAuthConfig() *oauth2.Config {
 type FolderUploadJob struct {
 	Account      string
 	SourceFolder string
-	MakeAlbums   struct {
-		Enabled bool
-		Use     string
-	}
+	MakeAlbums   MakeAlbums
 	DeleteAfterUpload bool
 }
 
-//func Load() *Config {
+type MakeAlbums struct {
+	Enabled bool
+	Use     string
+}
+
+//func LoadConfigFile() *Config {
 //	Cfg = loadConfigFile()
 //	Cfg.Process()
 //	return Cfg
@@ -91,8 +93,8 @@ type FolderUploadJob struct {
 //	return LoadFromFile(configPathAbsolute)
 //}
 
-// Load reads HJSON file (absolute path) and decodes its configuration
-func Load(p string) (*Config, error) {
+// LoadConfigFile reads HJSON file (absolute path) and decodes its configuration
+func LoadConfigFile(p string) (*Config, error) {
 	path, err := cp.AbsolutePath(p)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Failed to get absolute path: %s", p)

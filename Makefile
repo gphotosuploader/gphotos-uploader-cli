@@ -24,7 +24,7 @@ os = $(word 1, $@)
 $(PLATFORMS): ## Create binary for an specific platform
 	@echo "--> Generating binary for $(os) v$(VERSION) (build: $(BUILD))..."
 	@mkdir -p release
-	@GOOS=$(os) GOARCH=amd64 go build ${LDFLAGS} -o release/$(BINARY)-v$(VERSION)-$(os)-amd64 $(SRC)
+	@GOOS=$(os) GOARCH=amd64 go build ${LDFLAGS} -o dist/$(BINARY)-v$(VERSION)-$(os)-amd64 $(SRC)
 
 .PHONY: release
 release: test linux darwin ## Build the app for multiple os/arch
@@ -42,7 +42,7 @@ build: ## Build the app
 clean: ## Clean all built artifacts
 	@echo "--> Cleaning all built artifacts..."
 	@rm -f $(BINARY)
-	@rm -rf release
+	@rm -rf dist
 
 BIN_DIR := $(GOPATH)/bin
 
