@@ -31,7 +31,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.FolderUploadJob{&job}
+		folderUploadJob := upload.FolderUploadJob{FolderUploadJob: &job}
 		folderUploadJob.Run()
 	}
 	// after we've run all the folder upload jobs we're done adding file upload jobs
@@ -65,7 +65,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("gphotos-uploader-cli v0.1.1")
+			fmt.Printf("gphotos-uploader-cli v%s (build: %s)\n", Version, Build)
 		},
 	})
 

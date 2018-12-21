@@ -84,12 +84,10 @@ func isSameImage(upImg, localImg imageLib.Image) bool {
 	if len(upDHash) != len(localDHash) {
 		return false
 	}
+
 	hammingDistance := hamming.Strings(upDHash, localDHash)
 
-	if hammingDistance < len(upDHash)/16 {
-		return true
-	}
-	return false
+	return hammingDistance < (len(upDHash) / 16)
 }
 
 // isImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one

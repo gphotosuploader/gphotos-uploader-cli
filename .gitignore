@@ -9,3 +9,6 @@ dist
 # IDE configuration
 .idea/
 
+# Binary releases
+release/
+gphotos-uploader-cli
