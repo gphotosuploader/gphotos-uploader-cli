@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
@@ -10,9 +11,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	Version string = "0.0.0"
+	Build   string = "0"
+
+	configFilePath = "~/.config/gphotos-uploader-cli/config.hjson"
+)
+
 func startUploader(cmd *cobra.Command, args []string) {
-	// load all config parameters
-	cfg := config.Load()
+	cfg, err := config.Load(configFilePath)
+	if err != nil {
+		fmt.Printf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.\n", configFilePath)
+		os.Exit(1)
+	}
 
 	// start file upload worker
 	doneUploading := upload.StartFileUploadWorker()
@@ -43,7 +54,12 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "init",
 		Run: func(cmd *cobra.Command, args []string) {
-			config.InitConfigFile()
+			err := config.InitConfigFile(configFilePath)
+			if err != nil {
+				fmt.Printf("could not create the init config file: %v\n", err)
+				os.Exit(2)
+			}
+			fmt.Printf("Configuration file has created.\nEdit it by running:\n    nano %s\n", configFilePath)
 		},
 	})
 	rootCmd.AddCommand(&cobra.Command{

@@ -1,25 +1,17 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
-	cp "github.com/nmrshll/go-cp"
-	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/go-cp"
+	"github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
-)
-
-const (
-	CONFIGFOLDER = "~/.config/gphotos-uploader-cli"
 )
 
 type APIAppCredentials struct {
@@ -29,7 +21,6 @@ type APIAppCredentials struct {
 
 var (
 	// consts
-	CONFIGPATH                  = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
 	DEFAULT_API_APP_CREDENTIALS = APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
@@ -67,82 +58,94 @@ type FolderUploadJob struct {
 	DeleteAfterUpload bool
 }
 
-func Load() *Config {
-	Cfg = loadConfigFile()
-	Cfg.Process()
-	return Cfg
-}
+//func Load() *Config {
+//	Cfg = loadConfigFile()
+//	Cfg.Process()
+//	return Cfg
+//}
 
-var noConfigFoundMessage = color.CyanString(`
-No config file found at ~/.config/gphotos-uploader-cli/config.hjson
-Will now copy an example config file.
-Edit it by running:
+//var noConfigFoundMessage = color.CyanString(`
+//No config file found at ~/.config/gphotos-uploader-cli/config.hjson
+//Will now copy an example config file.
+//Edit it by running:
+//
+//	nano ~/.config/gphotos-uploader-cli/config.hjson
+//
+//`)
 
-	nano ~/.config/gphotos-uploader-cli/config.hjson
+//func loadConfigFile() (*Config, error) {
+//	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	// if no config file copy the default example and exit
+//	if !fileshandling.IsFile(configPathAbsolute) {
+//		fmt.Println(noConfigFoundMessage)
+//		if err := InitConfigFile(); err != nil {
+//			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
+//		}
+//		os.Exit(0)
+//	}
+//
+//	return LoadFromFile(configPathAbsolute)
+//}
 
-`)
-
-func loadConfigFile() *Config {
-	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+// Load reads HJSON file (absolute path) and decodes its configuration
+func Load(p string) (*Config, error) {
+	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		log.Fatal(err)
+		return nil, stacktrace.Propagate(err, "Failed to get absolute path: %s", p)
 	}
 
-	// if no config file copy the default example and exit
-	if !fileshandling.IsFile(configPathAbsolute) {
-		fmt.Println(noConfigFoundMessage)
-		if err := InitConfigFile(); err != nil {
-			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
-		}
-		os.Exit(0)
-	}
-
-	// else load and continue
-	fmt.Println("[INFO] Config file found. Loading...")
-	configBytes, err := ioutil.ReadFile(configPathAbsolute)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, stacktrace.Propagate(err, "Failed to read configuration from file: %s", path)
 	}
+
 	var config = &Config{}
-	jsonConfig := hjson.ToJSON(configBytes)
-	if err := json.Unmarshal(jsonConfig, config); err != nil {
-		log.Fatal(stacktrace.Propagate(err, "unmarshal jsonConfig failed"))
+
+	if err := hjson.Unmarshal(data, config); err != nil {
+		return nil, stacktrace.Propagate(err, "Failed to decode configuration data")
 	}
-	return config
+
+	return config, nil
 }
 
 // InitConfigFile creates an example config file if it doesn't already exist
-func InitConfigFile() error {
-	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+func InitConfigFile(p string) error {
+	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		log.Fatal(err)
+		return stacktrace.Propagate(err, "Failed to get absolute path: %s", p)
 	}
 
-	dirname := filepath.Dir(configPathAbsolute)
+	dirname := filepath.Dir(path)
 	if _, err := os.Stat(dirname); os.IsNotExist(err) {
 		err := os.MkdirAll(dirname, 0755)
 		if err != nil {
-			return err
+			return stacktrace.Propagate(err, "Failed to create config parent directory: %s", dirname)
 		}
 	}
 
-	f, err := os.Open(configPathAbsolute)
+	fh, err := os.Open(path)
 	if err != nil {
-		f, err = os.Create(configPathAbsolute)
+		fh, err = os.Create(path)
 		if err != nil {
-			return err
+			return stacktrace.Propagate(err, "Failed to create config file: %s", path)
 		}
 	}
-	defer f.Close()
+	defer fh.Close()
 
-	_, err = f.WriteString(exampleConfig)
+	_, err = fh.WriteString(exampleConfig)
 	if err != nil {
-		return err
+		return stacktrace.Propagate(err, "Failed to write in config file: %s", path)
 	}
-	return nil
+
+	return fh.Sync()
 }
 
-const exampleConfig = `{
+const exampleConfig = `
+{
   APIAppCredentials: {
     ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
     ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
