@@ -27,23 +27,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 	}()
 
 	// prepare expected configuration
-	expected := &Config{
-		APIAppCredentials: &APIAppCredentials{
-			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-		},
-	}
-	expected.Jobs = make([]FolderUploadJob, 0)
-	job := FolderUploadJob{
-		Account:      "youremail@gmail.com",
-		SourceFolder: "~/folder/to/upload",
-		MakeAlbums: MakeAlbums{
-			Enabled: true,
-			Use:     "folderNames",
-		},
-		DeleteAfterUpload: true,
-	}
-	expected.Jobs = append(expected.Jobs, job)
+	expected := newExampleConfig()
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file

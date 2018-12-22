@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,26 +14,6 @@ import (
 
 	"github.com/client9/xson/hjson"
 )
-
-const exampleConfig = `
-{
-  APIAppCredentials: {
-    ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-    ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-  }
-  jobs: [
-    {
-      account: youremail@gmail.com
-      sourceFolder: ~/folder/to/upload
-      makeAlbums: {
-        enabled: true
-        use: folderNames
-      }
-      deleteAfterUpload: true
-    }
-  ]
-}
-`
 
 type APIAppCredentials struct {
 	ClientID     string
@@ -54,6 +35,57 @@ type MakeAlbums struct {
 type Config struct {
 	APIAppCredentials *APIAppCredentials
 	Jobs              []FolderUploadJob
+}
+
+// newExampleConfig returns an example Config object
+func newExampleConfig() *Config {
+	c := &Config{}
+	c.APIAppCredentials = &APIAppCredentials{
+		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+	}
+	c.Jobs = make([]FolderUploadJob, 0)
+	job := FolderUploadJob{
+		Account:      "youremail@gmail.com",
+		SourceFolder: "~/folder/to/upload",
+		MakeAlbums: MakeAlbums{
+			Enabled: true,
+			Use:     "folderNames",
+		},
+		DeleteAfterUpload: true,
+	}
+	c.Jobs = append(c.Jobs, job)
+	return c
+}
+
+// String returns a string representation of the Config object
+func (c Config) String() string {
+	configTemplate := `
+{
+  APIAppCredentials: {
+    ClientID:     "%s",
+    ClientSecret: "%s",
+  }
+  jobs: [
+    {
+      account: %s
+      sourceFolder: %s
+      makeAlbums: {
+        enabled: %t
+        use: %s
+      }
+      deleteAfterUpload: %t
+    }
+  ]
+}`
+	return fmt.Sprintf(configTemplate,
+		c.APIAppCredentials.ClientID,
+		c.APIAppCredentials.ClientSecret,
+		c.Jobs[0].Account,
+		c.Jobs[0].SourceFolder,
+		c.Jobs[0].MakeAlbums.Enabled,
+		c.Jobs[0].MakeAlbums.Use,
+		c.Jobs[0].DeleteAfterUpload)
 }
 
 var (
@@ -112,7 +144,7 @@ func InitConfigFile(p string) error {
 	}
 	defer fh.Close()
 
-	_, err = fh.WriteString(exampleConfig)
+	_, err = fh.WriteString(newExampleConfig().String())
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to write in config file: %s", path)
 	}
