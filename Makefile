@@ -13,6 +13,7 @@ LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := cmd/gphotos-uploader-cli/main.go
+COVERAGE_FILE := coverage.txt
 
 # Get first path on multiple GOPATH environments
 GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
@@ -30,9 +31,14 @@ $(PLATFORMS): ## Create binary for an specific platform
 release: test linux darwin ## Build the app for multiple os/arch
 
 .PHONY: test
-test: ## Launch tests
+test: ## Run all the tests
 	@echo "--> Running tests..."
-	@go test -v $(PKGS)
+	@echo 'mode: atomic' > $(COVERAGE_FILE) && go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -v -race -timeout=30s $(PKGS)
+
+.PHONY: cover
+cover: test ## Run all the tests and opens the coverage report
+	@echo "--> Openning coverage report..."
+	@go tool cover -html=$(COVERAGE_FILE)
 
 build: ## Build the app
 	@echo "--> Building binary artifact ($(BINARY))..."
@@ -41,7 +47,7 @@ build: ## Build the app
 .PHONY: clean
 clean: ## Clean all built artifacts
 	@echo "--> Cleaning all built artifacts..."
-	@rm -f $(BINARY)
+	@rm -f $(BINARY) $(COVERAGE_FILE)
 	@rm -rf dist
 
 BIN_DIR := $(GOPATH)/bin
