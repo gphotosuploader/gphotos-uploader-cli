@@ -2,11 +2,9 @@ package tokenstore
 
 import (
 	"encoding/json"
-
-	"github.com/palantir/stacktrace"
+	"fmt"
+	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
-
-	keyring "github.com/zalando/go-keyring"
 )
 
 const (
@@ -14,8 +12,11 @@ const (
 )
 
 var (
-	ErrNotFound     = stacktrace.Propagate(keyring.ErrNotFound, "failed retrieving token from keyring")
-	ErrInvalidToken = stacktrace.NewError("invalid token")
+	// ErrNotFound is the expected error if the token isn't found in the keyring
+	ErrNotFound = fmt.Errorf("failed retrieving token from keyring")
+
+	// ErrInvalidToken is the expected error if the token isn't a valid one
+	ErrInvalidToken = fmt.Errorf("invalid token")
 )
 
 // StoreToken lets you store a token in the OS keyring
@@ -27,7 +28,7 @@ func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 
 	err = keyring.Set(serviceName, googleUserEmail, string(tokenJSONBytes))
 	if err != nil {
-		return stacktrace.Propagate(err, "failed storing token into keyring")
+		return fmt.Errorf("failed storing token into keyring: %v", err)
 	}
 	return nil
 }
@@ -36,21 +37,27 @@ func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 func RetrieveToken(googleUserEmail string) (*oauth2.Token, error) {
 	tokenJSONString, err := keyring.Get(serviceName, googleUserEmail)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed retrieving token from keyring")
+		if err == keyring.ErrNotFound {
+			return nil, ErrNotFound
+		}
+		return nil, err
 	}
 
 	var token oauth2.Token
 	err = json.Unmarshal([]byte(tokenJSONString), &token)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed unmarshaling token")
+		return nil, fmt.Errorf("failed unmarshaling token: %v", err)
 	}
 
 	// validate token
-	{
-		if !token.Valid() {
-			return nil, ErrInvalidToken
-		}
+	if !token.Valid() {
+		return nil, ErrInvalidToken
 	}
 
 	return &token, nil
+}
+
+// MockInit sets the provider to a mocked memory store, using keyring mock
+func MockInit() {
+	keyring.MockInit()
 }
