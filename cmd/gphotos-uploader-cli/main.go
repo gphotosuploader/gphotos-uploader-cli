@@ -12,6 +12,11 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+var (
+	Version string = "0.0.0"
+	Build   string = "0"
+)
+
 func startUploader(cmd *cobra.Command, args []string) {
 	// load all config parameters
 	cfg := config.Load()
@@ -64,7 +69,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("gphotos-uploader-cli v0.1.1")
+			fmt.Printf("gphotos-uploader-cli v%s (build: %s)\n", Version, Build)
 		},
 	})
 
