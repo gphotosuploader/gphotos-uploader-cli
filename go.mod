@@ -7,6 +7,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
@@ -16,10 +17,12 @@ require (
 	github.com/nmrshll/oauth2-noserver v0.0.0-20180827223500-16b622b98a45 // indirect
 	github.com/nmrshll/rndm-go v0.0.0-20170430161430-8da3024e53de // indirect
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
+	github.com/pierrec/xxHash v0.1.1
 	github.com/skratchdot/open-golang v0.0.0-20160302144031-75fb7ed4208c // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3
+	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2
 	github.com/zalando/go-keyring v0.0.0-20180221093347-6d81c293b3fb
 	golang.org/x/net v0.0.0-20181207154023-610586996380 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890

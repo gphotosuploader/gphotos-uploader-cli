@@ -3,6 +3,7 @@ package fileshandling
 import (
 	"fmt"
 	imageLib "image"
+	"log"
 
 	// register decoders for jpeg and png
 	_ "image/gif"
@@ -15,6 +16,7 @@ import (
 	"github.com/Nr90/imgsim"
 	"github.com/palantir/stacktrace"
 	"github.com/steakknife/hamming"
+
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
@@ -37,7 +39,7 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {
 		for deletionJob := range deletionsChan {
-			deletionJob.deleteIfCorrectlyUploaded()
+			_ = deletionJob.deleteIfCorrectlyUploaded()
 		}
 		doneDeleting <- struct{}{}
 	}()
@@ -77,17 +79,38 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
-func isSameImage(upImg, localImg imageLib.Image) bool {
-	upDHash := imgsim.DifferenceHash(upImg).String()
-	localDHash := imgsim.DifferenceHash(localImg).String()
+// func isSameImage(upImg, localImg imageLib.Image) bool {
+// 	upDHash := getImageHash(upImg)
+// 	localDHash := getImageHash(localImg)
 
-	if len(upDHash) != len(localDHash) {
+// 	return isSameHash(upDHash, localDHash)
+// }
+
+// func isSameHash(upDHash, localDHash string) bool {
+// 	if len(upDHash) != len(localDHash) {
+// 		return false
+// 	}
+// 	hammingDistance := hamming.Strings(upDHash, localDHash)
+
+// 	if hammingDistance < len(upDHash)/16 {
+// 		return true
+// 	}
+// 	return false
+// }
+
+// isSimilarImage checks if two images (local and uploaded) are similar visually
+// the hash used here is not a proper hash: it doesn't guarantee two images with the same hash are the same images
+// it's called a perceptual hash, and can give equal or similar hashes for two different, but visually close images.
+func isSimilarImages(upImg, localImg imageLib.Image) bool {
+	upPerceptualHash := imgsim.DifferenceHash(upImg).String()
+	localPerceptualHash := imgsim.DifferenceHash(localImg).String()
+
+	if len(upPerceptualHash) != len(localPerceptualHash) {
 		return false
 	}
+	hammingDistance := hamming.Strings(upPerceptualHash, localPerceptualHash)
 
-	hammingDistance := hamming.Strings(upDHash, localDHash)
-
-	return hammingDistance < (len(upDHash) / 16)
+	return hammingDistance < len(upPerceptualHash)/16
 }
 
 // isImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
@@ -107,28 +130,32 @@ func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localI
 		return false, stacktrace.Propagate(err, "failed loading local image from path")
 	}
 
-	if isSameImage(upImg, localImg) {
+	if isSimilarImages(upImg, localImg) {
 		return true, nil
 	}
 
 	return false, nil
 }
 
-func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
+func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() error {
 	isImageCorrectlyUploaded, err := isImageCorrectlyUploaded(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
 	if err != nil {
-		fmt.Printf("%s. Won't delete\n", err)
-		return
+		log.Printf("%s. Won't delete\n", err)
+		return err
 	}
 
 	if isImageCorrectlyUploaded {
-		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
+		log.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
 		if err = os.Remove(deletionJob.localFilePath); err != nil {
-			fmt.Println("failed deleting file")
+			log.Println("failed deleting file")
 		}
-		return
-	} else {
-		fmt.Println("not the same image. Won't delete")
-		return
+
+		//if err = RemoveAsAlreadyUploaded(deletionJob.localFilePath); err != nil {
+		//	log.Printf("Failed to remove from DB: %s", err)
+		//}
+		return err
 	}
+
+	log.Println("not the same image. Won't delete")
+	return err
 }

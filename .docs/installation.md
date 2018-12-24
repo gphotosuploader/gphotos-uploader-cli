@@ -6,8 +6,8 @@
 
 ## As a go package
 
-`go get github.om/nmrshll/gphotos-uploader-cli`
-`go install github.com/nmrshll/gphotos-uploader-cli`
+`go get github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli`
+`go install github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli`
 
 ## From apt / apt-get (as a .deb package)
 
