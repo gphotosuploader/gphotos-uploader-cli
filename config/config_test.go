@@ -27,7 +27,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 	}()
 
 	// prepare expected configuration
-	expected := newExampleConfig()
+	expected := defaultConfig()
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
