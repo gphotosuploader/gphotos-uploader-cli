@@ -1,22 +1,28 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
+project_name: gphotos-uploader-cli
 builds:
-- env:
-  - CGO_ENABLED=0
-archive:
-  replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  - goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    main: ./cmd/gphotos-uploader-cli/main.go
+    ldflags: -s -w -X=main.Version={{.Version}} -X=main.Build={{.ShortCommit}}
+before:
+    hooks:
+      - go mod download
 checksum:
   name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
+snapcraft:
+  replacements:
+    amd64: 64-bit
+    386: 32-bit
+  publish: true
+  summary: A command line tool to upload to Google Photos service.
+  description: |
+    This is a CLI to mass upload folders of media to Google Photos.
+    Install it and run it!
+  grade: devel
+  confinement: devmode
+  apps:
+    gphotos-uploader-cli:
+      plugs: ["home", "network"]
