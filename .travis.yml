@@ -7,9 +7,7 @@ addons:
       - snapd
 
 env:
-- GO111MODULE=on
-# needed for the snap pipe:
-- PATH=/snap/bin:$PATH
+- GO111MODULE=on PATH=/snap/bin:$PATH
 
 go:
 - "1.11.x"
