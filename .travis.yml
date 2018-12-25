@@ -7,24 +7,24 @@ addons:
       - snapd
 
 env:
-  - GO111MODULE=on
-  # needed for the snap pipe:
-  - PATH=/snap/bin:$PATH
+- GO111MODULE=on
+# needed for the snap pipe:
+- PATH=/snap/bin:$PATH
 
 go:
-  - "1.11.x"
+- "1.11.x"
 
 script:
-  - make lint
-  - make test
-  - make release
+- make lint
+- make test
+- make release
 
 install:
-  # needed for the snap pipe:
-  - sudo snap install snapcraft --classic
+# needed for the snap pipe:
+- sudo snap install snapcraft --classic
 
 after_success:
-  - test -n "$TRAVIS_TAG" && snapcraft login --with snap.login
+- test -n "$TRAVIS_TAG" && snapcraft login --with snap.login
 
 deploy:
   - provider: script
