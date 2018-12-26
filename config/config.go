@@ -91,10 +91,6 @@ func (c Config) String() string {
 		c.Jobs[0].UploadVideos)
 }
 
-// var (
-// 	Cfg *Config
-// )
-
 // OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
 func OAuthConfig(uploaderConfig Config) *oauth2.Config {
 	if uploaderConfig.APIAppCredentials == nil {
