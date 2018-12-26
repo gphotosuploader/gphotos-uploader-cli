@@ -15,7 +15,7 @@ go:
 script:
 - make lint
 - make test
-- make release
+- make build
 
 install:
 # needed for the snap pipe:
