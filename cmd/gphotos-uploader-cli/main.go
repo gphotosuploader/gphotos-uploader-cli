@@ -48,7 +48,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, job := range uploaderConfig.Jobs {
-		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig)
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig.APIAppCredentials)
 
 		if err := folderUploadJob.Upload(); err != nil {
 			printError("Failed to upload folder %s: %v", job.SourceFolder, err)
