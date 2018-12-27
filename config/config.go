@@ -92,11 +92,11 @@ func (c Config) String() string {
 }
 
 // OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
-func OAuthConfig(uploaderConfig Config) *oauth2.Config {
-	if uploaderConfig.APIAppCredentials == nil {
+func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
+	if uploaderConfigAPICredentials == nil {
 		log.Fatalf("APIAppCredentials can't be nil")
 	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfig.APIAppCredentials))
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
 }
 
 // GetUploadsDBPath returns the absolute path of uploads DB file

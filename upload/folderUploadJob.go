@@ -25,26 +25,26 @@ const (
 
 type FolderUploadJob struct {
 	*config.FolderUploadJob
-	uploaderConfig   *config.Config
-	gphotosClient    *gphotos.Client
-	completedUploads *completeduploads.CompletedUploadsService
+	uploaderConfigAPICredentials *config.APIAppCredentials
+	gphotosClient                *gphotos.Client
+	completedUploads             *completeduploads.CompletedUploadsService
 }
 
-func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfig *config.Config) *FolderUploadJob {
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfigAPICredentials *config.APIAppCredentials) *FolderUploadJob {
 	// check args
 	{
 		if completedUploads == nil {
 			log.Fatalf("completedUploadsService can't be nil")
 		}
-		if uploaderConfig == nil {
-			log.Fatalf("uploaderConfig can't be nil")
+		if uploaderConfigAPICredentials == nil {
+			log.Fatalf("uploaderConfigAPICredentials can't be nil")
 		}
 	}
 
 	folderUploadJob := &FolderUploadJob{
-		FolderUploadJob:  configFolderUploadJob,
-		completedUploads: completedUploads,
-		uploaderConfig:   uploaderConfig,
+		FolderUploadJob:              configFolderUploadJob,
+		completedUploads:             completedUploads,
+		uploaderConfigAPICredentials: uploaderConfigAPICredentials,
 	}
 
 	gphotosClient, err := authenticate(folderUploadJob)
@@ -61,7 +61,7 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
 	if err == nil && token != nil { // if error ignore and skip
 		// if found create client from token
-		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(*folderUploadJob.uploaderConfig), token))
+		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(folderUploadJob.uploaderConfigAPICredentials), token))
 		if err == nil && gphotosClient != nil { // if error ignore and skip
 			return gphotosClient, nil
 		}
@@ -72,7 +72,7 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	time.Sleep(1200 * time.Millisecond)
 	gphotosClient, err := gphotos.NewClient(
 		gphotos.AuthenticateUser(
-			config.OAuthConfig(*folderUploadJob.uploaderConfig),
+			config.OAuthConfig(folderUploadJob.uploaderConfigAPICredentials),
 			gphotos.WithUserLoginHint(folderUploadJob.Account),
 		),
 	)
