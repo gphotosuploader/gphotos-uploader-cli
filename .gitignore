@@ -1,13 +1,7 @@
-.env
-vendor
-config.hjson.perso
-config.hjson
-auth.json
-dist
-\.history/
-
 # IDE configuration
-.idea/
+/.idea/
+.history
 
 # Binary releases
-release/
+/dist/
+/gphotos-uploader-cli

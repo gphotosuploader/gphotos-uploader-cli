@@ -1,7 +1,6 @@
 package completeduploads
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -40,11 +39,11 @@ func fileHash(filePath string) (uint32, error) {
 	return hasher.Sum32(), nil
 }
 
-func uint32ToBytes(u uint32) []byte {
-	a := make([]byte, 4)
-	binary.LittleEndian.PutUint32(a, u)
-	return a
-}
+//func uint32ToBytes(u uint32) []byte {
+//	a := make([]byte, 4)
+//	binary.LittleEndian.PutUint32(a, u)
+//	return a
+//}
 
 // IsAlreadyUploaded checks in cache if the file was already uploaded
 func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, error) {
@@ -52,6 +51,10 @@ func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, erro
 
 	// look for previous upload in cache
 	val, err := s.db.Get([]byte(filePath), nil)
+	if err == leveldb.ErrNotFound {
+		return false, nil
+	}
+
 	if err == nil {
 		// value found, try to split mtime and hash
 		parts := strings.Split(string(val[:]), "|")
@@ -59,14 +62,20 @@ func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, erro
 		cacheHash := ""
 		if len(parts) > 1 {
 			cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
+			if err != nil {
+				return false, err
+			}
 			cacheHash = parts[1]
 		} else {
 			cacheHash = parts[0]
 		}
 		// check mtime first
-		if err == nil && cacheMtime != 0 {
+		if cacheMtime != 0 {
 			fileMtime, err := filesystem.GetMTime(filePath)
-			if err == nil && fileMtime.Unix() == cacheMtime {
+			if err != nil {
+				return false, err
+			}
+			if fileMtime.Unix() == cacheMtime {
 				isUploaded = true
 				//log.Printf("%s mtime matched %i", filePath, cacheMtime)
 			}
@@ -78,15 +87,16 @@ func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, erro
 				return false, err
 			}
 
-			isUploaded = (cacheHash == fmt.Sprint(fileHash))
-			if isUploaded {
+			if cacheHash == fmt.Sprint(fileHash) {
+				isUploaded = true
 				//log.Printf("%s hash match %s", filePath, cacheHash)
 				// update db mtime
 				err = s.CacheAsAlreadyUploaded(filePath)
+				if err != nil {
+					return isUploaded, err
+				}
 			}
 		}
-	} else if strings.Contains(err.Error(), "not found") {
-		err = nil
 	}
 
 	return isUploaded, err

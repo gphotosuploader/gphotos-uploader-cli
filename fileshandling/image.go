@@ -39,7 +39,7 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {
 		for deletionJob := range deletionsChan {
-			deletionJob.deleteIfCorrectlyUploaded()
+			_ = deletionJob.deleteIfCorrectlyUploaded()
 		}
 		doneDeleting <- struct{}{}
 	}()
@@ -110,10 +110,7 @@ func isSimilarImages(upImg, localImg imageLib.Image) bool {
 	}
 	hammingDistance := hamming.Strings(upPerceptualHash, localPerceptualHash)
 
-	if hammingDistance < len(upPerceptualHash)/16 {
-		return true
-	}
-	return false
+	return hammingDistance < len(upPerceptualHash)/16
 }
 
 // isImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
@@ -140,15 +137,15 @@ func isImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localI
 	return false, nil
 }
 
-func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
+func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() error {
 	isImageCorrectlyUploaded, err := isImageCorrectlyUploaded(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
 	if err != nil {
 		log.Printf("%s. Won't delete\n", err)
-		return
+		return err
 	}
 
 	if isImageCorrectlyUploaded {
-		fmt.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
+		log.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
 		if err = os.Remove(deletionJob.localFilePath); err != nil {
 			log.Println("failed deleting file")
 		}
@@ -156,9 +153,9 @@ func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() {
 		//if err = RemoveAsAlreadyUploaded(deletionJob.localFilePath); err != nil {
 		//	log.Printf("Failed to remove from DB: %s", err)
 		//}
-		return
+		return err
 	}
 
-	fmt.Println("not the same image. Won't delete")
-	return
+	log.Println("not the same image. Won't delete")
+	return err
 }

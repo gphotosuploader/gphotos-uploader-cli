@@ -1,26 +1,17 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
-	cp "github.com/nmrshll/go-cp"
-	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
-
-	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
-)
-
-const (
-	CONFIGFOLDER = "~/.config/gphotos-uploader-cli"
+	cp "github.com/nmrshll/go-cp"
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
 type APIAppCredentials struct {
@@ -28,147 +19,146 @@ type APIAppCredentials struct {
 	ClientSecret string
 }
 
-var (
-	// consts
-	CONFIGPATH                  = fmt.Sprintf("%s/config.hjson", CONFIGFOLDER)
-	UPLOADDBPATH                = fmt.Sprintf("%s/uploads.db", CONFIGFOLDER)
-	DEFAULT_API_APP_CREDENTIALS = APIAppCredentials{
-		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-	}
+type FolderUploadJob struct {
+	Account           string
+	SourceFolder      string
+	MakeAlbums        MakeAlbums
+	DeleteAfterUpload bool
+	UploadVideos      bool
+}
 
-	// vars
-	Cfg *Config
-)
+type MakeAlbums struct {
+	Enabled bool
+	Use     string
+}
 
 type Config struct {
 	APIAppCredentials *APIAppCredentials
 	Jobs              []FolderUploadJob
 }
 
-func (c *Config) Process() {
-	if c.APIAppCredentials == nil {
-		c.APIAppCredentials = &DEFAULT_API_APP_CREDENTIALS
+// defaultConfig returns an example Config object
+func defaultConfig() *Config {
+	c := &Config{}
+	c.APIAppCredentials = &APIAppCredentials{
+		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 	}
+	c.Jobs = make([]FolderUploadJob, 0)
+	job := FolderUploadJob{
+		Account:      "youremail@gmail.com",
+		SourceFolder: "~/folder/to/upload",
+		MakeAlbums: MakeAlbums{
+			Enabled: true,
+			Use:     "folderNames",
+		},
+		DeleteAfterUpload: true,
+		UploadVideos:      false,
+	}
+	c.Jobs = append(c.Jobs, job)
+	return c
 }
 
-func OAuthConfig() *oauth2.Config {
-	if Cfg.APIAppCredentials == nil {
-		log.Fatal(stacktrace.NewError("APIAppCredentials can't be nil"))
-	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
+// String returns a string representation of the Config object
+func (c Config) String() string {
+	configTemplate := `
+{
+  APIAppCredentials: {
+    ClientID:     "%s",
+    ClientSecret: "%s",
+  }
+  jobs: [
+    {
+      account: %s
+      sourceFolder: %s
+      makeAlbums: {
+        enabled: %t
+        use: %s
+      }
+      deleteAfterUpload: %t
+      uploadVideos: %t
+    }
+  ]
+}`
+	return fmt.Sprintf(configTemplate,
+		c.APIAppCredentials.ClientID,
+		c.APIAppCredentials.ClientSecret,
+		c.Jobs[0].Account,
+		c.Jobs[0].SourceFolder,
+		c.Jobs[0].MakeAlbums.Enabled,
+		c.Jobs[0].MakeAlbums.Use,
+		c.Jobs[0].DeleteAfterUpload,
+		c.Jobs[0].UploadVideos)
 }
 
+// OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
+func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
+	if uploaderConfigAPICredentials == nil {
+		log.Fatalf("APIAppCredentials can't be nil")
+	}
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
+}
+
+// GetUploadsDBPath returns the absolute path of uploads DB file
 func GetUploadsDBPath() string {
-	dbPathAbsolute, err := cp.AbsolutePath(UPLOADDBPATH)
+	const UploadDBPath = "~/.config/gphotos-uploader-cli/uploads.db"
+
+	dbPathAbsolute, err := cp.AbsolutePath(UploadDBPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // TODO: should return an error instead a log.Fatal
 	}
 	return dbPathAbsolute
 }
 
-type FolderUploadJob struct {
-	Account      string
-	SourceFolder string
-	MakeAlbums   struct {
-		Enabled bool
-		Use     string
-	}
-	DeleteAfterUpload bool
-	UploadVideos      bool
-}
-
-func Load() *Config {
-	Cfg = loadConfigFile()
-	Cfg.Process()
-	return Cfg
-}
-
-var noConfigFoundMessage = color.CyanString(`
-No config file found at ~/.config/gphotos-uploader-cli/config.hjson
-Will now copy an example config file.
-Edit it by running:
-
-	nano ~/.config/gphotos-uploader-cli/config.hjson
-
-`)
-
-func loadConfigFile() *Config {
-	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+// LoadConfigFile reads HJSON file (absolute path) and decodes its configuration
+func LoadConfigFile(p string) (*Config, error) {
+	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to get absolute path: %s", p)
 	}
 
-	// if no config file copy the default example and exit
-	if !filesystem.IsFile(configPathAbsolute) {
-		fmt.Println(noConfigFoundMessage)
-		if err := InitConfigFile(); err != nil {
-			log.Fatal(stacktrace.Propagate(err, "failed initializing config file"))
-		}
-		os.Exit(0)
-	}
-
-	// else load and continue
-	fmt.Println("[INFO] Config file found. Loading...")
-	configBytes, err := ioutil.ReadFile(configPathAbsolute)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
 	}
+
 	var config = &Config{}
-	jsonConfig := hjson.ToJSON(configBytes)
-	if err := json.Unmarshal(jsonConfig, config); err != nil {
-		log.Fatal(stacktrace.Propagate(err, "unmarshal jsonConfig failed"))
+
+	if err := hjson.Unmarshal(data, config); err != nil {
+		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
 	}
-	return config
+
+	return config, nil
 }
 
 // InitConfigFile creates an example config file if it doesn't already exist
-func InitConfigFile() error {
-	configPathAbsolute, err := cp.AbsolutePath(CONFIGPATH)
+func InitConfigFile(p string) error {
+	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to get absolute path: %s", p)
 	}
 
-	dirname := filepath.Dir(configPathAbsolute)
+	dirname := filepath.Dir(path)
 	if _, err := os.Stat(dirname); os.IsNotExist(err) {
 		err := os.MkdirAll(dirname, 0755)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create config parent directory %s: %v", dirname, err)
 		}
 	}
 
-	f, err := os.Open(configPathAbsolute)
+	fh, err := os.Open(path)
 	if err != nil {
-		f, err = os.Create(configPathAbsolute)
+		fh, err = os.Create(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create config file %s: %v", path, err)
 		}
 	}
-	defer f.Close()
+	defer fh.Close()
 
-	_, err = f.WriteString(exampleConfig)
+	_, err = fh.WriteString(defaultConfig().String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write in config file %s: %v", path, err)
 	}
-	return nil
-}
 
-const exampleConfig = `{
-  APIAppCredentials: {
-    ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-    ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-  }
-  jobs: [
-    {
-      account: youremail@gmail.com
-      sourceFolder: ~/folder/to/upload
-      makeAlbums: {
-        enabled: true
-        use: folderNames
-      }
-      deleteAfterUpload: false
-      uploadVideos: true
-    }
-  ]
+	return fh.Sync()
 }
-`

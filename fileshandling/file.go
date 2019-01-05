@@ -1,27 +1,23 @@
 package fileshandling
 
 import (
-	"fmt"
-	"io/ioutil"
-
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
-	"github.com/palantir/stacktrace"
-	filetype "gopkg.in/h2non/filetype.v1"
+	"gopkg.in/h2non/filetype.v1"
 	filematchers "gopkg.in/h2non/filetype.v1/matchers"
 	filetypes "gopkg.in/h2non/filetype.v1/types"
 )
 
-func fileBuffer(filePath string) (buf []byte, _ error) {
-	if !filesystem.IsFile(filePath) {
-		return nil, fmt.Errorf("not a file")
-	}
-	buf, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
-	}
-
-	return buf, nil
-}
+//func fileBuffer(filePath string) (buf []byte, _ error) {
+//	if !filesystem.IsFile(filePath) {
+//		return nil, fmt.Errorf("not a file")
+//	}
+//	buf, err := ioutil.ReadFile(filePath)
+//	if err != nil {
+//		return nil, stacktrace.Propagate(err, "Failed finding file type: %s: Ignoring file...\n", filePath)
+//	}
+//
+//	return buf, nil
+//}
 
 // IsImage asserts file at filePath is an image
 func IsImage(filePath string) bool {
