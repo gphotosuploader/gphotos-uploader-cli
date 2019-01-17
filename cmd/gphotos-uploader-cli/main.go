@@ -30,7 +30,7 @@ func printError(format string, a ...interface{}) {
 }
 
 func startUploader(cmd *cobra.Command, args []string) {
-	cfg, err := config.LoadConfigFile(configFilePath)
+	uploaderConfig, err := config.LoadConfigFile(configFilePath)
 	if err != nil {
 		printErrorAndExit("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", configFilePath)
 	}
@@ -47,13 +47,9 @@ func startUploader(cmd *cobra.Command, args []string) {
 	doneDeleting := fileshandling.StartDeletionsWorker()
 
 	// launch all folder upload jobs
-	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db))
-		// upload.FolderUploadJob{
-		// 	&job,
-		// 	completeduploads: completeduploads.NewService(db),
-		// }
-		// folderUploadJob.Run()
+	for _, job := range uploaderConfig.Jobs {
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig.APIAppCredentials)
+
 		if err := folderUploadJob.Upload(); err != nil {
 			printError("Failed to upload folder %s: %v", job.SourceFolder, err)
 		}

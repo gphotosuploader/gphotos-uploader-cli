@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
+	cp "github.com/nmrshll/go-cp"
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
 type APIAppCredentials struct {
@@ -91,15 +91,12 @@ func (c Config) String() string {
 		c.Jobs[0].UploadVideos)
 }
 
-var (
-	Cfg *Config
-)
-
-func OAuthConfig() *oauth2.Config {
-	if Cfg.APIAppCredentials == nil {
-		log.Fatal(fmt.Errorf("APIAppCredentials can't be nil"))
+// OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
+func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
+	if uploaderConfigAPICredentials == nil {
+		log.Fatalf("APIAppCredentials can't be nil")
 	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
 }
 
 // GetUploadsDBPath returns the absolute path of uploads DB file
