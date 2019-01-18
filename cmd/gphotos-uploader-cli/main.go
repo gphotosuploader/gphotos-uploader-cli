@@ -5,9 +5,11 @@ import (
 	"os"
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
+	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
 	"github.com/spf13/cobra"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
@@ -17,27 +19,42 @@ var (
 	configFilePath = "~/.config/gphotos-uploader-cli/config.hjson"
 )
 
-// errorf prints an error to stderr and force the app to exist
-func errorf(format string, a ...interface{}) {
+// printErrorAndExit prints an error to stderr and force the app to exit
+func printErrorAndExit(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stderr, format+"\n", a...)
 	os.Exit(2)
 }
 
+func printError(format string, a ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stderr, format+"\n", a...)
+}
+
 func startUploader(cmd *cobra.Command, args []string) {
-	cfg, err := config.LoadConfigFile(configFilePath)
+	uploaderConfig, err := config.LoadConfigFile(configFilePath)
 	if err != nil {
-		errorf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", configFilePath)
+		printErrorAndExit("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", configFilePath)
 	}
+
+	// load completedUploads DB
+	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
+	if err != nil {
+		printErrorAndExit("Error opening db: %v", err)
+	}
+	defer db.Close()
 
 	// start file upload worker
 	doneUploading := upload.StartFileUploadWorker()
 	doneDeleting := fileshandling.StartDeletionsWorker()
 
 	// launch all folder upload jobs
-	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.FolderUploadJob{FolderUploadJob: &job}
-		folderUploadJob.Run()
+	for _, job := range uploaderConfig.Jobs {
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig.APIAppCredentials)
+
+		if err := folderUploadJob.Upload(); err != nil {
+			printError("Failed to upload folder %s: %v", job.SourceFolder, err)
+		}
 	}
+
 	// after we've run all the folder upload jobs we're done adding file upload jobs
 	upload.CloseFileUploadsChan()
 	// wait for all the uploads to be completed
@@ -60,7 +77,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := config.InitConfigFile(configFilePath)
 			if err != nil {
-				errorf("Failed to create the init config file: %v", err)
+				printErrorAndExit("Failed to create the init config file: %v", err)
 			}
 			fmt.Printf("Configuration file has been created.\nEdit it by running:\n    nano %s\n", configFilePath)
 		},
@@ -73,6 +90,6 @@ func main() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		errorf("Could not execute the command: %v", err)
+		printErrorAndExit("Could not execute the command: %v", err)
 	}
 }

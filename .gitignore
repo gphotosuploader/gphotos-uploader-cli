@@ -1,5 +1,6 @@
 # IDE configuration
 /.idea/
+.history
 
 # Binary releases
 /dist/

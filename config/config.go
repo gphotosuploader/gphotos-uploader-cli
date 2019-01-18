@@ -7,12 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/palantir/stacktrace"
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
+	cp "github.com/nmrshll/go-cp"
+	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
 type APIAppCredentials struct {
@@ -25,6 +24,7 @@ type FolderUploadJob struct {
 	SourceFolder      string
 	MakeAlbums        MakeAlbums
 	DeleteAfterUpload bool
+	UploadVideos      bool
 }
 
 type MakeAlbums struct {
@@ -37,8 +37,8 @@ type Config struct {
 	Jobs              []FolderUploadJob
 }
 
-// newExampleConfig returns an example Config object
-func newExampleConfig() *Config {
+// defaultConfig returns an example Config object
+func defaultConfig() *Config {
 	c := &Config{}
 	c.APIAppCredentials = &APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
@@ -53,6 +53,7 @@ func newExampleConfig() *Config {
 			Use:     "folderNames",
 		},
 		DeleteAfterUpload: true,
+		UploadVideos:      false,
 	}
 	c.Jobs = append(c.Jobs, job)
 	return c
@@ -75,6 +76,7 @@ func (c Config) String() string {
         use: %s
       }
       deleteAfterUpload: %t
+      uploadVideos: %t
     }
   ]
 }`
@@ -85,36 +87,45 @@ func (c Config) String() string {
 		c.Jobs[0].SourceFolder,
 		c.Jobs[0].MakeAlbums.Enabled,
 		c.Jobs[0].MakeAlbums.Use,
-		c.Jobs[0].DeleteAfterUpload)
+		c.Jobs[0].DeleteAfterUpload,
+		c.Jobs[0].UploadVideos)
 }
 
-var (
-	Cfg *Config
-)
-
-func OAuthConfig() *oauth2.Config {
-	if Cfg.APIAppCredentials == nil {
-		log.Fatal(stacktrace.NewError("APIAppCredentials can't be nil"))
+// OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
+func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
+	if uploaderConfigAPICredentials == nil {
+		log.Fatalf("APIAppCredentials can't be nil")
 	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*Cfg.APIAppCredentials))
+	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
+}
+
+// GetUploadsDBPath returns the absolute path of uploads DB file
+func GetUploadsDBPath() string {
+	const UploadDBPath = "~/.config/gphotos-uploader-cli/uploads.db"
+
+	dbPathAbsolute, err := cp.AbsolutePath(UploadDBPath)
+	if err != nil {
+		log.Fatal(err) // TODO: should return an error instead a log.Fatal
+	}
+	return dbPathAbsolute
 }
 
 // LoadConfigFile reads HJSON file (absolute path) and decodes its configuration
 func LoadConfigFile(p string) (*Config, error) {
 	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed to get absolute path: %s", p)
+		return nil, fmt.Errorf("failed to get absolute path: %s", p)
 	}
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed to read configuration from file: %s", path)
+		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
 	}
 
 	var config = &Config{}
 
 	if err := hjson.Unmarshal(data, config); err != nil {
-		return nil, stacktrace.Propagate(err, "Failed to decode configuration data")
+		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
 	}
 
 	return config, nil
@@ -124,14 +135,14 @@ func LoadConfigFile(p string) (*Config, error) {
 func InitConfigFile(p string) error {
 	path, err := cp.AbsolutePath(p)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get absolute path: %s", p)
+		return fmt.Errorf("failed to get absolute path: %s", p)
 	}
 
 	dirname := filepath.Dir(path)
 	if _, err := os.Stat(dirname); os.IsNotExist(err) {
 		err := os.MkdirAll(dirname, 0755)
 		if err != nil {
-			return stacktrace.Propagate(err, "Failed to create config parent directory: %s", dirname)
+			return fmt.Errorf("failed to create config parent directory %s: %v", dirname, err)
 		}
 	}
 
@@ -139,14 +150,14 @@ func InitConfigFile(p string) error {
 	if err != nil {
 		fh, err = os.Create(path)
 		if err != nil {
-			return stacktrace.Propagate(err, "Failed to create config file: %s", path)
+			return fmt.Errorf("failed to create config file %s: %v", path, err)
 		}
 	}
 	defer fh.Close()
 
-	_, err = fh.WriteString(newExampleConfig().String())
+	_, err = fh.WriteString(defaultConfig().String())
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to write in config file: %s", path)
+		return fmt.Errorf("failed to write in config file %s: %v", path, err)
 	}
 
 	return fh.Sync()
