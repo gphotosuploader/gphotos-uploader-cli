@@ -4,7 +4,6 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"gopkg.in/h2non/filetype.v1"
 	filematchers "gopkg.in/h2non/filetype.v1/matchers"
-	filetypes "gopkg.in/h2non/filetype.v1/types"
 )
 
 //func fileBuffer(filePath string) (buf []byte, _ error) {
@@ -28,7 +27,7 @@ func IsImage(filePath string) bool {
 
 	kind, _ := filetype.Image(buf)
 
-	return kind != filetypes.Unknown && kind != filematchers.TypePsd && kind != filematchers.TypeTiff && kind != filematchers.TypeCR2
+	return kind != filetype.Unknown && kind != filematchers.TypePsd && kind != filematchers.TypeTiff && kind != filematchers.TypeCR2
 }
 
 // IsVideo asserts file at filePath is an image
