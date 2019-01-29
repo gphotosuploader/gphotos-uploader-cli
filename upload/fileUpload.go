@@ -22,27 +22,34 @@ type FileUpload struct {
 	gphotosClient gphotos.Client
 }
 
-func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan struct{}) {
-	doneUploading = make(chan struct{})
+// read fileUploads chan for each FileUpload struct, and upload the file to gphotos
+// when the fileUploadsChan is done, signal to doneUploading
+func concurrentUpload(fileUploadsChan chan *FileUpload, doneUploading chan bool) {
+	semaphore := make(chan bool, uploadConcurrency)
+	for fileUpload := range fileUploadsChan {
+		semaphore <- true
+		go func(fileUpload *FileUpload) {
+			defer func() { <-semaphore }()
+			err := fileUpload.upload()
+			if err != nil {
+				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
+			}
+		}(fileUpload)
+	}
+	// drain the semaphore
+	for i := 0; i < cap(semaphore); i++ {
+		semaphore <- true
+	}
+	doneUploading <- true
+}
+
+// set up channels and start concurrentUpload
+// fileUploadsChan will receive FileUpload structs and upload them
+// will signal doneUploading when fileUploadsChan is done
+func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan bool) {
+	doneUploading = make(chan bool)
 	fileUploadsChan = make(chan *FileUpload)
-	go func() {
-		semaphore := make(chan bool, uploadConcurrency)
-		for fileUpload := range fileUploadsChan {
-			semaphore <- true
-			go func(fileUpload *FileUpload) {
-				defer func() { <-semaphore }()
-				err := fileUpload.upload()
-				if err != nil {
-					log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
-				}
-			}(fileUpload)
-		}
-		// drain the semaphore
-		for i := 0; i < cap(semaphore); i++ {
-			semaphore <- true
-		}
-		doneUploading <- struct{}{}
-	}()
+	go concurrentUpload(fileUploadsChan, doneUploading)
 	return fileUploadsChan, doneUploading
 }
 
