@@ -90,7 +90,7 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 }
 
 // Upload uploads folder
-func (folderUploadJob *FolderUploadJob) Upload() error {
+func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan *FileUpload) error {
 	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 			}
 
 			// finally, add the file upload to the queue
-			QueueFileUpload(fileUpload)
+			fileUploadsChan <- fileUpload
 		}
 
 		return nil

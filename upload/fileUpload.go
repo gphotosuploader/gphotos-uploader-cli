@@ -12,6 +12,9 @@ var (
 	fileUploadsChan = make(chan *FileUpload)
 )
 
+// number of concurrent uploads
+const uploadConcurrency = 5
+
 type FileUpload struct {
 	*FolderUploadJob
 	filePath      string
@@ -19,23 +22,28 @@ type FileUpload struct {
 	gphotosClient gphotos.Client
 }
 
-func QueueFileUpload(fileUpload *FileUpload) {
-	fileUploadsChan <- fileUpload
-}
-func CloseFileUploadsChan() { close(fileUploadsChan) }
-
-func StartFileUploadWorker() (doneUploading chan struct{}) {
+func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan struct{}) {
 	doneUploading = make(chan struct{})
+	fileUploadsChan = make(chan *FileUpload)
 	go func() {
+		semaphore := make(chan bool, uploadConcurrency)
 		for fileUpload := range fileUploadsChan {
-			err := fileUpload.upload()
-			if err != nil {
-				log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
-			}
+			semaphore <- true
+			go func(fileUpload *FileUpload) {
+				defer func() { <-semaphore }()
+				err := fileUpload.upload()
+				if err != nil {
+					log.Fatal(stacktrace.Propagate(err, "failed uploading image"))
+				}
+			}(fileUpload)
+		}
+		// drain the semaphore
+		for i := 0; i < cap(semaphore); i++ {
+			semaphore <- true
 		}
 		doneUploading <- struct{}{}
 	}()
-	return doneUploading
+	return fileUploadsChan, doneUploading
 }
 
 func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.AlbumName
