@@ -17,6 +17,7 @@ import (
 type APIAppCredentials struct {
 	ClientID     string
 	ClientSecret string
+	RedirectURL  string
 }
 
 type FolderUploadJob struct {
@@ -96,7 +97,13 @@ func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config
 	if uploaderConfigAPICredentials == nil {
 		log.Fatalf("APIAppCredentials can't be nil")
 	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
+	oauthConfig := gphotos.NewOAuthConfig(gphotos.APIAppCredentials{uploaderConfigAPICredentials.ClientID, uploaderConfigAPICredentials.ClientSecret})
+	if uploaderConfigAPICredentials.RedirectURL == "" {
+		oauthConfig.RedirectURL = "http://127.0.0.1:14565/oauth/callback"
+	} else {
+		oauthConfig.RedirectURL = uploaderConfigAPICredentials.RedirectURL
+	}
+	return oauthConfig
 }
 
 // GetUploadsDBPath returns the absolute path of uploads DB file

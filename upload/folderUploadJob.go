@@ -47,6 +47,14 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 		uploaderConfigAPICredentials: uploaderConfigAPICredentials,
 	}
 
+	if tokenstore.KeyRingSupported() {
+		log.Println("Saving credentials in keyring")
+		tokenstore.TokenStore = tokenstore.TokenStoreKeyring{}
+	} else {
+		log.Println("Saving credentials in Leveldb")
+		tokenstore.TokenStore = tokenstore.TokenLevelDB{DB: completedUploads.DB()}
+	}
+
 	gphotosClient, err := authenticate(folderUploadJob)
 	if err != nil {
 		log.Fatal(err)
@@ -58,7 +66,7 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 
 func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	// try to load token from keyring
-	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
+	token, err := tokenstore.TokenStore.RetrieveToken(folderUploadJob.Account)
 	if err == nil && token != nil { // if error ignore and skip
 		// if found create client from token
 		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(folderUploadJob.uploaderConfigAPICredentials), token))
@@ -81,7 +89,7 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	}
 
 	// and store the token into the keyring
-	err = tokenstore.StoreToken(folderUploadJob.Account, gphotosClient.Token())
+	err = tokenstore.TokenStore.StoreToken(folderUploadJob.Account, gphotosClient.Token())
 	if err != nil {
 		return nil, errors.Annotate(err, "failed storing token")
 	}

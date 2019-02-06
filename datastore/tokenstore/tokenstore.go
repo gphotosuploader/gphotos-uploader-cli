@@ -3,13 +3,38 @@ package tokenstore
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/zalando/go-keyring"
+	"log"
+	"runtime"
+
+	"github.com/godbus/dbus"
+	keyring "github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
 )
 
 const (
 	serviceName = "googlephotos-uploader-go-api"
 )
+
+type TokenStoreInterface interface {
+	StoreToken(googleUserEmail string, token *oauth2.Token) error
+	RetrieveToken(googleUserEmail string) (*oauth2.Token, error)
+}
+
+// the active TokenStore for this instance
+var TokenStore TokenStoreInterface
+
+func KeyRingSupported() bool {
+	if runtime.GOOS == "linux" {
+		// test dbus connection
+		_, err := dbus.SessionBus()
+		if err != nil {
+			log.Print("No Dbus support")
+			return false
+		}
+	}
+	log.Print("Keyring is supported")
+	return true
+}
 
 var (
 	// ErrNotFound is the expected error if the token isn't found in the keyring
@@ -19,8 +44,11 @@ var (
 	ErrInvalidToken = fmt.Errorf("invalid token")
 )
 
+// TokenStoreKeyring Default token store that uses the os-specific keyring (via zalondo/go-keyring)
+type TokenStoreKeyring struct{}
+
 // StoreToken lets you store a token in the OS keyring
-func StoreToken(googleUserEmail string, token *oauth2.Token) error {
+func (t TokenStoreKeyring) StoreToken(googleUserEmail string, token *oauth2.Token) error {
 	tokenJSONBytes, err := json.Marshal(token)
 	if err != nil {
 		return err
@@ -34,7 +62,7 @@ func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 }
 
 // RetrieveToken lets you get a token by google account email
-func RetrieveToken(googleUserEmail string) (*oauth2.Token, error) {
+func (t TokenStoreKeyring) RetrieveToken(googleUserEmail string) (*oauth2.Token, error) {
 	tokenJSONString, err := keyring.Get(serviceName, googleUserEmail)
 	if err != nil {
 		if err == keyring.ErrNotFound {

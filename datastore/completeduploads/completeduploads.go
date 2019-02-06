@@ -17,6 +17,10 @@ type CompletedUploadsService struct {
 	db *leveldb.DB
 }
 
+func (c *CompletedUploadsService) DB() *leveldb.DB {
+	return c.db
+}
+
 func NewService(db *leveldb.DB) *CompletedUploadsService {
 	return &CompletedUploadsService{db}
 }
