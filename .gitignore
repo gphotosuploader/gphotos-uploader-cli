@@ -5,3 +5,6 @@
 # Binary releases
 /dist/
 /gphotos-uploader-cli
+
+# Tests files
+/coverage.txt
