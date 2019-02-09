@@ -15,7 +15,7 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 )
 
@@ -109,11 +109,11 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		if filesystem.IsFile(filePath) {
 			// process only if filetype is image or video
 			if folderUploadJob.UploadVideos {
-				if !fileshandling.IsMedia(filePath) {
+				if !filetypes.IsMedia(filePath) {
 					fmt.Printf("not a supported image or video: %s: skipping file...\n", filePath)
 					return nil
 				}
-			} else if !fileshandling.IsImage(filePath) {
+			} else if !filetypes.IsImage(filePath) {
 				fmt.Printf("not a supported image: %s: skipping file...\n", filePath)
 				return nil
 			}

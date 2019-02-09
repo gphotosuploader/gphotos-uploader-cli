@@ -6,7 +6,7 @@ import (
 
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
 	"github.com/spf13/cobra"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -44,7 +44,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// start file upload worker
 	doneUploading := upload.StartFileUploadWorker()
-	doneDeleting := fileshandling.StartDeletionsWorker()
+	doneDeleting := filetypes.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range uploaderConfig.Jobs {
@@ -61,7 +61,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	<-doneUploading
 	fmt.Println("all uploads done")
 	// after the last upload is done we're done queueing files for deletion
-	fileshandling.CloseDeletionsChan()
+	filetypes.CloseDeletionsChan()
 	// wait for deletions to be completed before exiting
 	<-doneDeleting
 	fmt.Println("all deletions done")

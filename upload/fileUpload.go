@@ -4,7 +4,7 @@ import (
 	"log"
 
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/gphotos-uploader-cli/fileshandling"
+	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/palantir/stacktrace"
 )
 
@@ -77,7 +77,7 @@ func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.Alb
 			return stacktrace.Propagate(err, "failed getting uploaded mediaItem")
 		}
 
-		fileshandling.QueueDeletionJob(uploadedMediaItem, fileUpload.filePath)
+		filetypes.QueueDeletionJob(uploadedMediaItem, fileUpload.filePath)
 	}
 	return nil
 }

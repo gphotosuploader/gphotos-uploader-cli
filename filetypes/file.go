@@ -1,4 +1,4 @@
-package fileshandling
+package filetypes
 
 import (
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"

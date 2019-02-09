@@ -1,4 +1,4 @@
-package fileshandling
+package filetypes
 
 import (
 	"fmt"

@@ -7,7 +7,7 @@ COPY vendor vendor
 COPY main.go main.go
 COPY config config
 COPY datastore datastore
-COPY fileshandling fileshandling
+COPY filetypes filetypes
 COPY gphotosapiclient gphotosapiclient
 COPY upload upload
 
