@@ -52,26 +52,7 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
-// func isSameImage(upImg, localImg imageLib.Image) bool {
-// 	upDHash := getImageHash(upImg)
-// 	localDHash := getImageHash(localImg)
-
-// 	return isSameHash(upDHash, localDHash)
-// }
-
-// func isSameHash(upDHash, localDHash string) bool {
-// 	if len(upDHash) != len(localDHash) {
-// 		return false
-// 	}
-// 	hammingDistance := hamming.Strings(upDHash, localDHash)
-
-// 	if hammingDistance < len(upDHash)/16 {
-// 		return true
-// 	}
-// 	return false
-// }
-
-// isSimilarImage checks if two images (local and uploaded) are similar visually
+// isSimilarImages checks if two images (local and uploaded) are similar visually
 // the hash used here is not a proper hash: it doesn't guarantee two images with the same hash are the same images
 // it's called a perceptual hash, and can give equal or similar hashes for two different, but visually close images.
 func isSimilarImages(upImg, localImg imageLib.Image) bool {
