@@ -23,6 +23,8 @@ const (
 	USEFOLDERNAMES = "folderNames"
 )
 
+type gatherFunc func(filePath string) error
+
 type FolderUploadJob struct {
 	*config.FolderUploadJob
 	uploaderConfigAPICredentials *config.APIAppCredentials
@@ -89,8 +91,8 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	return gphotosClient, nil
 }
 
-// Upload uploads folder
-func (folderUploadJob *FolderUploadJob) Upload() error {
+// gatherFiles Walks the main directory of the job and calls the given callback for every valid non-uploaded file.
+func (folderUploadJob *FolderUploadJob) gatherFiles(callback gatherFunc) error {
 	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
 		return err
@@ -127,19 +129,7 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 				return nil
 			}
 
-			// set file upload options depending on folder upload options
-			var fileUpload = &FileUpload{
-				FolderUploadJob: folderUploadJob,
-				filePath:        filePath,
-				gphotosClient:   folderUploadJob.gphotosClient.Client,
-			}
-			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
-				lastDirName := filepath.Base(filepath.Dir(filePath))
-				fileUpload.albumName = lastDirName
-			}
-
-			// finally, add the file upload to the queue
-			QueueFileUpload(fileUpload)
+			return callback(filePath)
 		}
 
 		return nil
@@ -149,4 +139,31 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		fmt.Printf("walk error [%v]\n", err)
 	}
 	return nil
+}
+
+// Upload uploads folder
+func (folderUploadJob *FolderUploadJob) Upload() error {
+	return folderUploadJob.gatherFiles(func(filePath string) error {
+		// set file upload options depending on folder upload options
+		var fileUpload = &FileUpload{
+			FolderUploadJob: folderUploadJob,
+			filePath:        filePath,
+			gphotosClient:   folderUploadJob.gphotosClient.Client,
+		}
+		if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
+			lastDirName := filepath.Base(filepath.Dir(filePath))
+			fileUpload.albumName = lastDirName
+		}
+
+		// finally, add the file upload to the queue
+		QueueFileUpload(fileUpload)
+		return nil
+	})
+}
+
+// MarkAsUploaded Marks all files in the current job as uploaded aready uploaded
+func (folderUploadJob *FolderUploadJob) MarkAsUploaded() error {
+	return folderUploadJob.gatherFiles(func(filePath string) error {
+		return folderUploadJob.completedUploads.CacheAsAlreadyUploaded(filePath)
+	})
 }

@@ -28,7 +28,7 @@ func printError(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stderr, format+"\n", a...)
 }
 
-func startUploader(cmd *cobra.Command, args []string) {
+func initialize() (*config.Config, *leveldb.DB) {
 	uploaderConfig, err := config.LoadConfigFile(configFilePath)
 	if err != nil {
 		printErrorAndExit("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", configFilePath)
@@ -39,6 +39,12 @@ func startUploader(cmd *cobra.Command, args []string) {
 	if err != nil {
 		printErrorAndExit("Error opening db: %v", err)
 	}
+
+	return uploaderConfig, db
+}
+
+func startUploader(cmd *cobra.Command, args []string) {
+	uploaderConfig, db := initialize()
 	defer db.Close()
 
 	// start file upload worker
@@ -66,6 +72,18 @@ func startUploader(cmd *cobra.Command, args []string) {
 	fmt.Println("all deletions done")
 }
 
+func markAsUploaded(cmd *cobra.Command, args []string) {
+	uploaderConfig, db := initialize()
+	defer db.Close()
+
+	for _, job := range uploaderConfig.Jobs {
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig.APIAppCredentials)
+		if err := folderUploadJob.MarkAsUploaded(); err != nil {
+			printError("Failed to mark folder as uploaded %s: %v", job.SourceFolder, err)
+		}
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use: "gphotos-uploader-cli",
@@ -86,6 +104,19 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("gphotos-uploader-cli v%s (build: %s)\n", Version, Build)
 		},
+	})
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "mark-as-uploaded",
+		Run:   markAsUploaded,
+		Short: "Marks all current local files as uploaded. Useful to establish a initial, known state.",
+		Long: `
+			This command will mark all of the file in local directories as uploaded.
+			This will cause them not to be uploaded in future calls of gphotos-uploader-cli.
+			Only use this command if you are certain that all images in the folder are already in Google Photos and you want to
+			avoid duplicates.
+
+			!!! WARNING !!! All images in the local folder that are not in Google Photos already will never be uploaded!
+			`,
 	})
 
 	if err := rootCmd.Execute(); err != nil {
