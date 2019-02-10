@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/palantir/stacktrace"
+	"github.com/juju/errors"
 )
 
 // IsFile asserts there is a file at path
@@ -46,7 +46,7 @@ func BufferFromFile(filePath string) (buf []byte, _ error) {
 	}
 	buf, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed reading file: %s: Ignoring file...\n", filePath)
+		return nil, errors.Annotatef(err, "Failed reading file: %s: Ignoring file...\n", filePath)
 	}
 
 	return buf, nil
@@ -67,7 +67,7 @@ func BufferHeaderFromFile(filePath string, howMany int64) (buf []byte, _ error) 
 	buf = make([]byte, howMany)
 	_, err = io.ReadFull(r, buf[:])
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(howMany, 10), filePath)
+		return nil, errors.Annotatef(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(howMany, 10), filePath)
 	}
 
 	return buf, nil

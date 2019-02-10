@@ -1,9 +1,9 @@
 package filetypes
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/juju/errors"
 	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 

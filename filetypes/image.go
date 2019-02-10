@@ -13,10 +13,8 @@ import (
 	"os"
 
 	"github.com/Nr90/imgsim"
-	"github.com/palantir/stacktrace"
+	"github.com/juju/errors"
 	"github.com/steakknife/hamming"
-
-	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 func imageFromPath(filePath string) (imageLib.Image, error) {
@@ -52,6 +50,33 @@ func imageFromURL(URL string) (imageLib.Image, error) {
 	return img, nil
 }
 
+// ImageTypedMedia implements TypedMedia for image files
+type ImageTypedMedia struct{}
+
+// IsCorrectlyUploaded for image file
+func (im *ImageTypedMedia) IsCorrectlyUploaded(uploadedFileURL, localFilePath string) (bool, error) {
+	// TODO: add sameness check for videos (use file hash) and delete if same
+	if !IsImage(localFilePath) {
+		return false, fmt.Errorf("%s is not an image. won't delete local file", localFilePath)
+	}
+
+	// compare uploaded image and local one
+	upImg, err := imageFromURL(uploadedFileURL)
+	if err != nil {
+		return false, errors.Annotate(err, "failed getting image from URL")
+	}
+	localImg, err := imageFromPath(localFilePath)
+	if err != nil {
+		return false, errors.Annotate(err, "failed loading local image from path")
+	}
+
+	if isSimilarImages(upImg, localImg) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // isSimilarImages checks if two images (local and uploaded) are similar visually
 // the hash used here is not a proper hash: it doesn't guarantee two images with the same hash are the same images
 // it's called a perceptual hash, and can give equal or similar hashes for two different, but visually close images.
@@ -67,26 +92,25 @@ func isSimilarImages(upImg, localImg imageLib.Image) bool {
 	return hammingDistance < len(upPerceptualHash)/16
 }
 
-// IsImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
-func IsImageCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) (bool, error) {
-	// TODO: add sameness check for videos (use file hash) and delete if same
-	if !IsImage(localImgPath) {
-		return false, fmt.Errorf("%s is not an image. won't delete local file", localImgPath)
-	}
+// // IsImageCorrectlyUploaded checks that the image that was uploaded is visually similar to the local one, before deleting the local one
+// func IsImageCorrectlyUploaded(uploadedFileURL, localImgPath string) (bool, error) {
+// 	if !IsImage(localImgPath) {
+// 		return false, fmt.Errorf("%s is not an image. won't delete local file", localImgPath)
+// 	}
 
-	// compare uploaded image and local one
-	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "failed getting image from URL")
-	}
-	localImg, err := imageFromPath(localImgPath)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "failed loading local image from path")
-	}
+// 	// compare uploaded image and local one
+// 	upImg, err := imageFromURL(uploadedMediaItem.BaseUrl)
+// 	if err != nil {
+// 		return false, errors.Annotate(err, "failed getting image from URL")
+// 	}
+// 	localImg, err := imageFromPath(localImgPath)
+// 	if err != nil {
+// 		return false, errors.Annotate(err, "failed loading local image from path")
+// 	}
 
-	if isSimilarImages(upImg, localImg) {
-		return true, nil
-	}
+// 	if isSimilarImages(upImg, localImg) {
+// 		return true, nil
+// 	}
 
-	return false, nil
-}
+// 	return false, nil
+// }

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/palantir/stacktrace"
 
+	"github.com/juju/errors"
 	cp "github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
@@ -77,19 +77,19 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 		),
 	)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed authenticating new client")
+		return nil, errors.Annotate(err, "failed authenticating new client")
 	}
 
 	// and store the token into the keyring
 	err = tokenstore.StoreToken(folderUploadJob.Account, gphotosClient.Token())
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed storing token")
+		return nil, errors.Annotate(err, "failed storing token")
 	}
 
 	return gphotosClient, nil
 }
 
-// Upload uploads folder
+// Upload uploads a folder
 func (folderUploadJob *FolderUploadJob) Upload() error {
 	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
@@ -104,49 +104,56 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		if info.IsDir() {
 			return nil
 		}
-
 		// process only files
-		if filesystem.IsFile(filePath) {
-			// process only if filetype is image or video
-			if folderUploadJob.UploadVideos {
-				if !filetypes.IsMedia(filePath) {
-					fmt.Printf("not a supported image or video: %s: skipping file...\n", filePath)
-					return nil
-				}
-			} else if !filetypes.IsImage(filePath) {
-				fmt.Printf("not a supported image: %s: skipping file...\n", filePath)
-				return nil
-			}
-
-			// check upload db for previous uploads
-			isAlreadyUploaded, err := folderUploadJob.completedUploads.IsAlreadyUploaded(filePath)
-			if err != nil {
-				log.Println(err)
-			} else if isAlreadyUploaded {
-				fmt.Printf("previously uploaded: %s: skipping file...\n", filePath)
-				return nil
-			}
-
-			// set file upload options depending on folder upload options
-			var fileUpload = &FileUpload{
-				FolderUploadJob: folderUploadJob,
-				filePath:        filePath,
-				gphotosClient:   folderUploadJob.gphotosClient.Client,
-			}
-			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
-				lastDirName := filepath.Base(filepath.Dir(filePath))
-				fileUpload.albumName = lastDirName
-			}
-
-			// finally, add the file upload to the queue
-			QueueFileUpload(fileUpload)
+		if !filesystem.IsFile(filePath) {
+			return nil
 		}
+		// process only media
+		if !filetypes.IsMedia(filePath) {
+			fmt.Printf("not a media file: %s: skipping file...\n", filePath)
+			return nil
+		}
+
+		// if we don't upload videos check it's not a video
+		if !folderUploadJob.UploadVideos && filetypes.IsVideo(filePath) {
+			fmt.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", filePath)
+			return nil
+		}
+
+		// check upload db for previous uploads
+		isAlreadyUploaded, err := folderUploadJob.completedUploads.IsAlreadyUploaded(filePath)
+		if err != nil {
+			log.Println(err)
+		} else if isAlreadyUploaded {
+			fmt.Printf("already uploaded: %s: skipping file...\n", filePath)
+			return nil
+		}
+
+		typedMedia, err := filetypes.NewTypedMedia(filePath)
+		if err != nil {
+			return errors.Annotatef(err, "failed creating new TypedMedia from filePath")
+		}
+
+		// set file upload options depending on folder upload options
+		var fileUpload = &FileUpload{
+			FolderUploadJob: folderUploadJob,
+			filePath:        filePath,
+			typedMedia:      typedMedia,
+			gphotosClient:   folderUploadJob.gphotosClient.Client,
+		}
+		if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
+			lastDirName := filepath.Base(filepath.Dir(filePath))
+			fileUpload.albumName = lastDirName
+		}
+
+		// finally, add the file upload to the queue
+		QueueFileUpload(fileUpload)
 
 		return nil
 	})
-
 	if err != nil {
 		fmt.Printf("walk error [%v]\n", err)
 	}
+
 	return nil
 }

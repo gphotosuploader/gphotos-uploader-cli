@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/juju/errors"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
-	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 var (
@@ -13,12 +13,27 @@ var (
 )
 
 type DeletionJob struct {
-	uploadedMediaItem *photoslibrary.MediaItem
-	localFilePath     string
+	uploadedFileURL string
+	localFilePath   string
+	typedMedia      filetypes.TypedMedia
 }
 
-func QueueDeletionJob(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) {
-	deletionsChan <- DeletionJob{uploadedMediaItem, localImgPath}
+func QueueDeletionJob(deletionJob DeletionJob) error {
+	// check params
+	{
+		if deletionJob.uploadedFileURL == "" {
+			return errors.NewNotValid(nil, "missing uploadedFileURL for deletionJob")
+		}
+		if deletionJob.localFilePath == "" {
+			return errors.NewNotValid(nil, "missing localFilePath for deletionJob")
+		}
+		if deletionJob.typedMedia == nil {
+			return errors.NewNotValid(nil, "missing typedMedia for deletionJob")
+		}
+	}
+
+	deletionsChan <- deletionJob
+	return nil
 }
 
 func CloseDeletionsChan() { close(deletionsChan) }
@@ -27,21 +42,21 @@ func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {
 		for deletionJob := range deletionsChan {
-			_ = deletionJob.deleteImageIfCorrectlyUploaded()
+			_ = deletionJob.deleteIfCorrectlyUploaded()
 		}
 		doneDeleting <- struct{}{}
 	}()
 	return doneDeleting
 }
 
-func (deletionJob *DeletionJob) deleteImageIfCorrectlyUploaded() error {
-	isImageCorrectlyUploaded, err := filetypes.IsImageCorrectlyUploaded(deletionJob.uploadedMediaItem, deletionJob.localFilePath)
+func (deletionJob *DeletionJob) deleteIfCorrectlyUploaded() error {
+	isCorrectlyUploaded, err := deletionJob.typedMedia.IsCorrectlyUploaded(deletionJob.uploadedFileURL, deletionJob.localFilePath)
 	if err != nil {
 		log.Printf("%s. Won't delete\n", err)
 		return err
 	}
 
-	if isImageCorrectlyUploaded {
+	if isCorrectlyUploaded {
 		log.Printf("uploaded file %s was checked for integrity. Will now delete.\n", deletionJob.localFilePath)
 		if err = os.Remove(deletionJob.localFilePath); err != nil {
 			log.Println("failed deleting file")
