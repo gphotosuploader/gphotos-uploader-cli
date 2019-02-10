@@ -53,7 +53,7 @@ func defaultConfig() *Config {
 			Use:     "folderNames",
 		},
 		DeleteAfterUpload: true,
-		UploadVideos:      false,
+		UploadVideos:      true,
 	}
 	c.Jobs = append(c.Jobs, job)
 	return c
