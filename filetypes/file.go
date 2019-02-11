@@ -85,7 +85,15 @@ func NewTypedMedia(filePath string) (TypedMedia, error) {
 		return &ImageTypedMedia{}, nil
 	}
 
-	// TODO: same for gif and video
+	// if gif detected
+	if IsGif(filePath) && IsImage(filePath) && !IsVideo(filePath) {
+		return &GifTypedMedia{}, nil
+	}
 
-	return nil, errors.New("failed creating TypedMedia from file")
+	// if video detected
+	if IsVideo(filePath) && !IsImage(filePath) && !IsGif(filePath) {
+		return &VideoTypedMedia{}, nil
+	}
+
+	return nil, errors.Errorf("failed creating TypedMedia from file: %s", filePath)
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/juju/errors"
-	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 // isSameVideos checks if two gifs (local and uploaded) are exactly the same
@@ -21,14 +20,17 @@ func isSameVideos(upGifPath, localGifPath string) bool {
 	return upHash == localHash
 }
 
-// IsVideoCorrectlyUploaded checks that the gif that was uploaded is the same as the local one, before deleting the local one
-func IsVideoCorrectlyUploaded(uploadedMediaItem *photoslibrary.MediaItem, localImgPath string) (bool, error) {
-	if !IsGif(localImgPath) {
-		return false, fmt.Errorf("%s is not a gif. Not deleting local file", localImgPath)
+// VideoTypedMedia implements TypedMedia for video files
+type VideoTypedMedia struct{}
+
+// IsCorrectlyUploaded checks that the video that was uploaded is the same as the local one, before deleting the local one
+func (gm *VideoTypedMedia) IsCorrectlyUploaded(uploadedFileURL, localFilePath string) (bool, error) {
+	if !IsGif(localFilePath) {
+		return false, fmt.Errorf("%s is not a gif. Not deleting local file", localFilePath)
 	}
 
 	// compare uploaded image and local one
-	if isSameGifs(uploadedMediaItem.BaseUrl, localImgPath) {
+	if isSameGifs(uploadedFileURL, localFilePath) {
 		return true, nil
 	}
 

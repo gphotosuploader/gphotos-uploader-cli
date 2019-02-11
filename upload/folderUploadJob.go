@@ -131,7 +131,8 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 
 		typedMedia, err := filetypes.NewTypedMedia(filePath)
 		if err != nil {
-			return errors.Annotatef(err, "failed creating new TypedMedia from filePath")
+			fmt.Println(errors.Annotatef(err, "failed creating new TypedMedia from filePath"))
+			return nil
 		}
 
 		// set file upload options depending on folder upload options

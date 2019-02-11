@@ -3,6 +3,7 @@ module github.com/nmrshll/gphotos-uploader-cli
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
+	github.com/bloom42/rz-go v1.2.4
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
