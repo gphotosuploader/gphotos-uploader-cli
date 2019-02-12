@@ -100,7 +100,7 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
-	err = filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, err error) error {
+	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -152,8 +152,8 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 
 		return nil
 	})
-	if err != nil {
-		fmt.Printf("walk error [%v]\n", err)
+	if errW != nil {
+		fmt.Printf("walk error [%v]\n", errW)
 	}
 
 	return nil

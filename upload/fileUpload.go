@@ -79,7 +79,7 @@ func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.Alb
 			return errors.Annotate(err, "failed getting uploaded mediaItem")
 		}
 
-		QueueDeletionJob(DeletionJob{
+		return QueueDeletionJob(DeletionJob{
 			uploadedMediaItem.BaseUrl,
 			fileUpload.filePath,
 			fileUpload.typedMedia,

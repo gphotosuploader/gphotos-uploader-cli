@@ -30,7 +30,7 @@ func (gm *VideoTypedMedia) IsCorrectlyUploaded(uploadedFileURL, localFilePath st
 	}
 
 	// compare uploaded image and local one
-	if isSameGifs(uploadedFileURL, localFilePath) {
+	if isSameVideos(uploadedFileURL, localFilePath) {
 		return true, nil
 	}
 
