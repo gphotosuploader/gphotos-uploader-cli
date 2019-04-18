@@ -40,7 +40,7 @@ gphotos-uploader-cli
 ## Requirements
 
 - Go 1.11+ for installation using `go install github.com/nmrshll/gphotos-uploader-cli`
- - GO111MODULE=on environment variable
+   - GO111MODULE=on environment variable
 - Mac OS or Linux
 
 # Contributing
