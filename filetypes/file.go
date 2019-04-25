@@ -4,11 +4,11 @@ import (
 	"io"
 	"os"
 
+	"github.com/h2non/filetype"
+	filematchers "github.com/h2non/filetype/matchers"
 	"github.com/juju/errors"
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"github.com/pierrec/xxHash/xxHash32"
-	"gopkg.in/h2non/filetype.v1"
-	filematchers "gopkg.in/h2non/filetype.v1/matchers"
 )
 
 // IsImage asserts file at filePath is an image

@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
+	github.com/h2non/filetype v1.0.8
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
 	github.com/mattn/go-colorable v0.0.9 // indirect
@@ -29,5 +30,4 @@ require (
 	golang.org/x/net v0.0.0-20181207154023-610586996380 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
 	google.golang.org/api v0.0.0-20181213000619-1327b224df06
-	gopkg.in/h2non/filetype.v1 v1.0.5
 )
