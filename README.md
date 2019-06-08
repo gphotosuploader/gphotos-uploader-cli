@@ -19,9 +19,18 @@ There are two ways to install this command line:
 - [Downloading a compiled binary](#downloading-a-compiled-binary) 
 - [Using common Go application distribution](#using-common-go-application-distribution)
 
+| Release archive (recommended) | Using `go get` |  
+| ----------------------------- | -------------- |  
+| [![Download](https://img.shields.io/badge/dynamic/json.svg?
+  label=download
+  &url=https://api.github.com/repos/nmrshll/gphotos-uploader-cli/releases/latest
+  &query=$.assets[0].name
+  &style=for-the-badge)(https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+
+
 ## Installation
 ### Downloading a compiled binary
-Just go to the [Releases page](/releases) and download the latest available binary for your OS. 
+Just go to the [latest releases page](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) and download the proper package for your OS. 
 The downloaded file contains the proper binary for you. Start enjoying the Google Photos uploader CLI, [configuring it](#configuring-this-application).
 
 ### Using common Go application distribution
