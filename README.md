@@ -1,6 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
-![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg)
-![GitHub](https://img.shields.io/github/license/nmrshll/gphotos-uploader-cli.svg)
+[![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
+[![GitHub](https://img.shields.io/github/license/nmrshll/gphotos-uploader-cli.svg)](LICENSE)
 <!--- [![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli) --->
 
 # Google Photos uploader CLI
