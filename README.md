@@ -18,8 +18,9 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 There are two ways to install this command line: 
 
 | Release archive (recommended) | Compile in your system |  
-| ----------------------------- | ---------------------- |  
-| [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+| :---------------------------: | ---------------------- |  
+| [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | ```bash
+go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli``` |  
 
 ## Configuring this application
 First initialize the config file using this command:
@@ -41,7 +42,7 @@ gphotos-uploader-cli
 ```    
 
 # Contributing
-Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues).``  
+Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
 
 ## Current plans
 - [ ] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
