@@ -1,4 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
+![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg)
+![GitHub](https://img.shields.io/github/license/nmrshll/gphotos-uploader-cli.svg)
 <!--- [![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli) --->
 
 # Google Photos uploader CLI
@@ -17,9 +19,11 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 # Quick start
 There are two ways to install this command line: 
 
-| Release archive (recommended) | Compile in your system |  
+| Release archive (recommended) | Compile in your system (*) |  
 | :---------------------------: | ---------------------- |  
-| [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+| [![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+
+(*) Go 1.11+ is required to compile this application
 
 ## Configuring this application
 First initialize the config file using this command:
@@ -29,15 +33,15 @@ $ gphotos-uploader-cli init
 
 then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify your configuration.
 
-You can review the [documentation](./.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
+You can review the [documentation](.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
 
-If you have problems, please take a look to [troubleshooting](./.docs/installation-troubleshooting.md) guide.
+If you have problems, please take a look to [troubleshooting](.docs/installation-troubleshooting.md) guide.
 
 ## Run it with 
 
 Once it's configured you can call the command in this way:
-```bash 
-gphotos-uploader-cli
+``` 
+$ gphotos-uploader-cli
 ```    
 
 # Contributing
@@ -56,4 +60,4 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 
 # License
  
- Use of this source code is governed by an MIT-style license that can be found in the LICENSE [MIT](./.docs/LICENSE) file.
+ Use of this source code is governed by an MIT-style license that can be found in the LICENSE [MIT](LICENSE) file.
