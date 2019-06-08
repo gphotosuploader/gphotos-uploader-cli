@@ -21,11 +21,7 @@ There are two ways to install this command line:
 
 | Release archive (recommended) | Using `go get` |  
 | ----------------------------- | -------------- |  
-| [![Download](https://img.shields.io/badge/dynamic/json.svg?
-  label=download
-  &url=https://api.github.com/repos/nmrshll/gphotos-uploader-cli/releases/latest
-  &query=$.assets[0].name
-  &style=for-the-badge)(https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+| [![Download](https://img.shields.io/badge/dynamic/json.svg?label=download&url=https://api.github.com/repos/nmrshll/gphotos-uploader-cli/releases/latest&query=$.assets[0].name&style=for-the-badge)(https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
 
 
 ## Installation
