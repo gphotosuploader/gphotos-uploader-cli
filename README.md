@@ -19,34 +19,12 @@ There are two ways to install this command line:
 
 | Release archive (recommended) | Compile in your system |  
 | :---------------------------: | ---------------------- |  
-| [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
-
-<table>
-<tr>
-<th>
-Release archive (recommended)
-</th>
-<th>
-Compile in your system
-</th>
-</tr>
-
-<tr>
-<td>
-[![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
-</td>
-<td>
-```bash
-go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli
-```
-</td>
-</tr>
-</table>
+| [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
 
 ## Configuring this application
 First initialize the config file using this command:
 ```
-gphotos-uploader-cli init
+$ gphotos-uploader-cli init
 ```
 
 then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify your configuration.
@@ -58,7 +36,7 @@ If you have problems, please take a look to [troubleshooting](./.docs/installati
 ## Run it with 
 
 Once it's configured you can call the command in this way:
-```
+```bash 
 gphotos-uploader-cli
 ```    
 
