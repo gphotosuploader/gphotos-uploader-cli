@@ -16,13 +16,13 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 
 # Quick start
 There are two ways to install this command line: 
-- [Downloading a compiled binary](#Downloading a compiled binary) 
-- [Using common Go application distribution](#Using common Go application distribution)
+- [Downloading a compiled binary](# Downloading a compiled binary) 
+- [Using common Go application distribution](# Using common Go application distribution)
 
 ## Installation
 ### Downloading a compiled binary
 Just go to the [Releases page](/releases) and download the latest available binary for your OS. 
-The downloaded file contains the proper binary for you. Start enjoying the Google Photos uploader CLI, [configuring it](#Configuring this application).
+The downloaded file contains the proper binary for you. Start enjoying the Google Photos uploader CLI, [configuring it](# Configuring this application).
 
 ### Using common Go application distribution
 In order to compile this application you need to ensure:
@@ -34,7 +34,7 @@ Then you can download dependencies, compile the application and install if behin
 $ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli
 ```    
 
-You can now [configure the application](#Configuring this application).
+You can now [configure the application](# Configuring this application).
 
 ## Configuring this application
 First initialize the config file using this command:
