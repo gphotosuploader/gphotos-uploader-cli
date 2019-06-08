@@ -21,6 +21,28 @@ There are two ways to install this command line:
 | :---------------------------: | ---------------------- |  
 | [![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
 
+<table>
+<tr>
+<th>
+Release archive (recommended)
+</th>
+<th>
+Compile in your system
+</th>
+</tr>
+
+<tr>
+<td>
+[![GitHub All Releases](https://img.shields.io/github/downloads/nmrshll/gphotos-uploader-cli/total.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
+</td>
+<td>
+```bash
+go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli
+```
+</td>
+</tr>
+</table>
+
 ## Configuring this application
 First initialize the config file using this command:
 ```
