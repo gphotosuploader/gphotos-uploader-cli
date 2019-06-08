@@ -16,30 +16,10 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 
 # Quick start
 There are two ways to install this command line: 
-- [Downloading a compiled binary](#downloading-a-compiled-binary) 
-- [Using common Go application distribution](#using-common-go-application-distribution)
 
 | Release archive (recommended) | Using `go get` |  
 | ----------------------------- | -------------- |  
-| [![Download](https://img.shields.io/badge/dynamic/json.svg?label=download&url=https://api.github.com/repos/nmrshll/gphotos-uploader-cli/releases/latest&query=$.assets[0].name&style=for-the-badge)(https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
-
-
-## Installation
-### Downloading a compiled binary
-Just go to the [latest releases page](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) and download the proper package for your OS. 
-The downloaded file contains the proper binary for you. Start enjoying the Google Photos uploader CLI, [configuring it](#configuring-this-application).
-
-### Using common Go application distribution
-In order to compile this application you need to ensure:
-- Go 1.11+ is present 
-- `GO111MODULE=on` environment variable is set before `go get`
-
-Then you can download dependencies, compile the application and install if behind `GOPATH`:
-```
-$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli
-```    
-
-You can now [configure the application](#configuring-this-application).
+| [![Download](https://img.shields.io/badge/dynamic/json.svg?label=download&url=https://api.github.com/repos/nmrshll/gphotos-uploader-cli/releases/latest&query=$.assets[0].name&style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
 
 ## Configuring this application
 First initialize the config file using this command:
@@ -74,4 +54,6 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 - [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
 - [oauth2-noserver](https://github.com/nmrshll/oauth2-noserver)
 
-# License: [MIT](./.docs/LICENSE)
+# License
+ 
+ Use of this source code is governed by an MIT-style license that can be found in the LICENSE [MIT](./.docs/LICENSE) file.
