@@ -10,13 +10,15 @@ import (
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // Job represents a job to upload all photos from the specified folder
 type Job struct {
-	client          *gphotos.Client
-	trackingService *completeduploads.Service
+	client            *gphotos.Client
+	trackingService   *completeduploads.Service
+	uploadURLsService *uploadurls.Service
 
 	sourceFolder string
 	options      *JobOptions
@@ -43,10 +45,11 @@ func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, 
 }
 
 // NewFolderUploadJob creates a job based on the submitted data
-func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *JobOptions) *Job {
+func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, uploadURLsService *uploadurls.Service, fp string, opt *JobOptions) *Job {
 	return &Job{
-		trackingService: trackingService,
-		client:          client,
+		trackingService:   trackingService,
+		uploadURLsService: uploadURLsService,
+		client:            client,
 
 		sourceFolder: fp,
 		options:      opt,
@@ -92,7 +95,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 			return nil
 		}
 
-		// check upload db for previous uploads
+		// check completed uploads db for previous uploads
 		isAlreadyUploaded, err := job.trackingService.IsAlreadyUploaded(fp)
 		if err != nil {
 			log.Println(err)
