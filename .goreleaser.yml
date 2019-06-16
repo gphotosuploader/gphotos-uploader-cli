@@ -12,18 +12,3 @@ before:
       - go mod download
 checksum:
   name_template: 'checksums.txt'
-snapcrafts:
-  - 
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-    publish: true
-    summary: A command line tool to upload to Google Photos service.
-    description: |
-      This is a CLI to mass upload folders of media to Google Photos.
-      Install it and run it!
-    grade: devel
-    confinement: devmode
-    apps:
-      gphotos-uploader-cli-pacoorozco:
-        plugs: ["home", "network"]
