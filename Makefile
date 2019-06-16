@@ -2,7 +2,7 @@ BINARY := gphotos-uploader-cli
 .DEFAULT_GOAL := help
 
 # This VERSION could be set calling `make VERSION=0.2.0`
-VERSION ?= Dev
+VERSION ?= $(shell git describe --tags --abbrev=0)
 
 # This BUILD is automatically calculated and used inside the command
 BUILD := $(shell git rev-parse --short HEAD)

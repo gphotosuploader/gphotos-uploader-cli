@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	Version string = "0.0.0"
+	Version string = "v0.0.0"
 	Build   string = "0"
 
 	configFilePath = "~/.config/gphotos-uploader-cli/config.hjson"
@@ -84,7 +84,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use: "version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("gphotos-uploader-cli v%s (build: %s)\n", Version, Build)
+			fmt.Printf("gphotos-uploader-cli %s (build: %s)\n", Version, Build)
 		},
 	})
 
