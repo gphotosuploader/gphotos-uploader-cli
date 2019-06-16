@@ -2,7 +2,7 @@ BINARY := gphotos-uploader-cli
 .DEFAULT_GOAL := help
 
 # This VERSION could be set calling `make VERSION=0.2.0`
-VERSION ?= 0.1.2
+VERSION ?= Dev
 
 # This BUILD is automatically calculated and used inside the command
 BUILD := $(shell git rev-parse --short HEAD)
@@ -17,18 +17,6 @@ COVERAGE_FILE := coverage.txt
 
 # Get first path on multiple GOPATH environments
 GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
-
-PLATFORMS := linux darwin
-os = $(word 1, $@)
-
-.PHONY: $(PLATFORMS)
-$(PLATFORMS): ## Create binary for an specific platform
-	@echo "--> Generating binary for $(os) v$(VERSION) (build: $(BUILD))..."
-	@mkdir -p release
-	@GOOS=$(os) GOARCH=amd64 go build ${LDFLAGS} -o dist/$(BINARY)-v$(VERSION)-$(os)-amd64 $(SRC)
-
-.PHONY: release
-release: test linux darwin ## Build the app for multiple os/arch
 
 .PHONY: test
 test: ## Run all the tests
