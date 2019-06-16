@@ -1,6 +1,0 @@
-buildservice:
-  build:
-    # image: codeship_example
-    dockerfile: Dockerfile
-  environment:
-    EXAMPLE_ENV_VAR: example-var
