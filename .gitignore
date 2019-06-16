@@ -8,3 +8,6 @@
 
 # Tests files
 /coverage.txt
+
+# Other files
+/snap.login
