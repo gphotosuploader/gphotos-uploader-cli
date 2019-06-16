@@ -25,5 +25,5 @@ snapcrafts:
     grade: devel
     confinement: devmode
     apps:
-      gphotos-uploader-cli:
+      gphotos-uploader-cli-pacoorozco:
         plugs: ["home", "network"]
