@@ -8,7 +8,8 @@ VERSION ?= $(shell git describe --tags --abbrev=0)
 BUILD := $(shell git rev-parse --short HEAD)
 
 # Use linker flags to provide version/build settings to the target
-LDFLAGS=-ldflags "-X=cmd/version.Version=$(VERSION) -X=main.Build=$(BUILD)"
+VERSION_IMPORT_PATH := github.com/nmrshll/gphotos-uploader-cli/cmd
+LDFLAGS=-ldflags "-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)"
 
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
