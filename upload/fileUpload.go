@@ -6,50 +6,57 @@ import (
 	"github.com/juju/errors"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
+	photoslibrary "google.golang.org/api/photoslibrary/v1"
 )
 
 var (
 	fileUploadsChan = make(chan *FileUpload)
 )
 
+// number of concurrent uploads
+const uploadConcurrency = 5
+
 type FileUpload struct {
 	*FolderUploadJob
 	filePath      string
 	typedMedia    filetypes.TypedMedia
-	albumName     string
+	album         *photoslibrary.Album
 	gphotosClient gphotos.Client
 }
 
-func QueueFileUpload(fileUpload *FileUpload) {
-	fileUploadsChan <- fileUpload
-}
-func CloseFileUploadsChan() { close(fileUploadsChan) }
-
-func StartFileUploadWorker() (doneUploading chan struct{}) {
-	doneUploading = make(chan struct{})
-	go func() {
-		for fileUpload := range fileUploadsChan {
+// read fileUploads chan for each FileUpload struct, and upload the file to gphotos
+// when the fileUploadsChan is done, signal to doneUploading
+func concurrentUpload(fileUploadsChan <-chan *FileUpload, doneUploading chan<- bool) {
+	semaphore := make(chan bool, uploadConcurrency)
+	for fileUpload := range fileUploadsChan {
+		semaphore <- true
+		go func(fileUpload *FileUpload) {
+			defer func() { <-semaphore }()
 			err := fileUpload.upload()
 			if err != nil {
 				log.Fatal(errors.Annotate(err, "failed uploading image"))
 			}
-		}
-		doneUploading <- struct{}{}
-	}()
-	return doneUploading
+		}(fileUpload)
+	}
+	// drain the semaphore
+	for i := 0; i < cap(semaphore); i++ {
+		semaphore <- true
+	}
+	doneUploading <- true
 }
 
-func (fileUpload *FileUpload) upload() error { // TODO: upload to fileUpload.AlbumName
-	var albumIDVariadic []string
-	if fileUpload.albumName != "" {
-		album, err := fileUpload.gphotosClient.GetOrCreateAlbumByName(fileUpload.albumName)
-		if err != nil {
-			return errors.Annotate(err, "failed GetOrCreate-ing album by name")
-		}
-		albumIDVariadic = append(albumIDVariadic, album.Id)
-	}
+// set up channels and start concurrentUpload
+// fileUploadsChan will receive FileUpload structs and upload them
+// will signal doneUploading when fileUploadsChan is done
+func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan bool) {
+	doneUploading = make(chan bool)
+	fileUploadsChan = make(chan *FileUpload)
+	go concurrentUpload(fileUploadsChan, doneUploading)
+	return fileUploadsChan, doneUploading
+}
 
-	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, albumIDVariadic...)
+func (fileUpload *FileUpload) upload() error {
+	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, fileUpload.album.Id)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
