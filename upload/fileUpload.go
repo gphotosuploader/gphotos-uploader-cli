@@ -6,11 +6,7 @@ import (
 	"github.com/juju/errors"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
-	photoslibrary "google.golang.org/api/photoslibrary/v1"
-)
-
-var (
-	fileUploadsChan = make(chan *FileUpload)
+	"google.golang.org/api/photoslibrary/v1"
 )
 
 // number of concurrent uploads

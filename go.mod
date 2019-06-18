@@ -8,6 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
+	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/h2non/filetype v1.0.8
 	github.com/hashicorp/go-multierror v1.0.0 // indirect
@@ -31,14 +32,16 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3
+	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2
 	github.com/zalando/go-keyring v0.0.0-20180221093347-6d81c293b3fb
-	golang.org/x/net v0.0.0-20181207154023-610586996380 // indirect
+	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
 	golang.org/x/sys v0.0.0-20190522044717-8097e1b27ff5 // indirect
 	google.golang.org/api v0.0.0-20181213000619-1327b224df06 // indirect
 	google.golang.org/appengine v1.6.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
+	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

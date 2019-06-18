@@ -2,17 +2,18 @@ BINARY := gphotos-uploader-cli
 .DEFAULT_GOAL := help
 
 # This VERSION could be set calling `make VERSION=0.2.0`
-VERSION ?= Dev
+VERSION ?= $(shell git describe --tags --abbrev=0)
 
 # This BUILD is automatically calculated and used inside the command
 BUILD := $(shell git rev-parse --short HEAD)
 
 # Use linker flags to provide version/build settings to the target
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
+VERSION_IMPORT_PATH := github.com/nmrshll/gphotos-uploader-cli/cmd
+LDFLAGS=-ldflags "-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)"
 
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
-SRC := cmd/gphotos-uploader-cli/main.go
+SRC := main.go
 COVERAGE_FILE := coverage.txt
 
 # Get first path on multiple GOPATH environments
@@ -29,7 +30,7 @@ cover: test ## Run all the tests and opens the coverage report
 	@go tool cover -html=$(COVERAGE_FILE)
 
 build: ## Build the app
-	@echo "--> Building binary artifact ($(BINARY))..."
+	@echo "--> Building binary artifact ($(BINARY) $(VERSION) (build: $(BUILD)))..."
 	@go build ${LDFLAGS} -o $(BINARY) $(SRC)
 
 .PHONY: clean
@@ -58,4 +59,4 @@ help: ## Show this help
 
 .PHONY: version
 version: ## Show current version
-	@echo "v$(VERSION)"
+	@echo "$(VERSION) (build: $(BUILD))"
