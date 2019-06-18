@@ -23,3 +23,5 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 )
+
+replace github.com/nmrshll/oauth2-noserver => github.com/pdecat/oauth2-noserver v0.0.0-20190612234004-b0730ae5fd3d
