@@ -45,6 +45,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgFile)
 	}
+
 	// load completedUploads DB
 	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
 	if err != nil {
@@ -53,26 +54,26 @@ func startUploader(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	// start file upload worker
-	doneUploading := upload.StartFileUploadWorker()
+	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
 	doneDeleting := upload.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
 		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), cfg.APIAppCredentials)
 
-		if err := folderUploadJob.Upload(); err != nil {
+		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)
 		}
 	}
 
 	// after we've run all the folder upload jobs we're done adding file upload jobs
-	upload.CloseFileUploadsChan()
+	close(fileUploadsChan)
 	// wait for all the uploads to be completed
 	<-doneUploading
-	fmt.Println("all uploads done")
+	log.Println("all uploads done")
 	// after the last upload is done we're done queueing files for deletion
 	upload.CloseDeletionsChan()
 	// wait for deletions to be completed before exiting
 	<-doneDeleting
-	fmt.Println("all deletions done")
+	log.Println("all deletions done")
 }
