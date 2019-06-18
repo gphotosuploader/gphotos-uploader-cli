@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	photoslibrary "google.golang.org/api/photoslibrary/v1"
 
 	"github.com/juju/errors"
 	cp "github.com/nmrshll/go-cp"
@@ -89,8 +90,8 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	return gphotosClient, nil
 }
 
-// Upload uploads a folder
-func (folderUploadJob *FolderUploadJob) Upload() error {
+// Upload uploads folder
+func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUpload) error {
 	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
 	if err != nil {
 		return err
@@ -100,8 +101,23 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
+	// dirs are walked depth-first.   These vars hold the active album
+	// default empty album for makeAlbums.enabled = false
+	currentPhotoAlbum := &photoslibrary.Album{}
 	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
 		if info.IsDir() {
+			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
+				log.Printf("Entering Directory: %s", filePath)
+				currentPhotoAlbum, err = folderUploadJob.gphotosClient.GetOrCreateAlbumByName(filepath.Base(filePath))
+				if err != nil {
+					currentPhotoAlbum = &photoslibrary.Album{}
+					log.Printf("error creating album: %s. File will be uploaded without album", filePath)
+					return nil
+				}
+				log.Printf("using album: %s / Id: %s", currentPhotoAlbum.Title, currentPhotoAlbum.Id)
+			} else {
+				log.Printf("album not created: %s. set jobs.makeAlbums.enabled = true to create albums", filePath)
+			}
 			return nil
 		}
 		// process only files
@@ -110,13 +126,13 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		}
 		// process only media
 		if !filetypes.IsMedia(filePath) {
-			fmt.Printf("not a media file: %s: skipping file...\n", filePath)
+			log.Printf("not a media file: %s: skipping file...\n", filePath)
 			return nil
 		}
 
 		// if we don't upload videos check it's not a video
 		if !folderUploadJob.UploadVideos && filetypes.IsVideo(filePath) {
-			fmt.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", filePath)
+			log.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", filePath)
 			return nil
 		}
 
@@ -125,13 +141,13 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 		if err != nil {
 			log.Println(err)
 		} else if isAlreadyUploaded {
-			fmt.Printf("already uploaded: %s: skipping file...\n", filePath)
+			log.Printf("already uploaded: %s: skipping file...\n", filePath)
 			return nil
 		}
 
 		typedMedia, err := filetypes.NewTypedMedia(filePath)
 		if err != nil {
-			fmt.Println(errors.Annotatef(err, "failed creating new TypedMedia from filePath"))
+			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from filePath"))
 			return nil
 		}
 
@@ -141,19 +157,16 @@ func (folderUploadJob *FolderUploadJob) Upload() error {
 			filePath:        filePath,
 			typedMedia:      typedMedia,
 			gphotosClient:   folderUploadJob.gphotosClient.Client,
-		}
-		if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
-			lastDirName := filepath.Base(filepath.Dir(filePath))
-			fileUpload.albumName = lastDirName
+			album:           currentPhotoAlbum,
 		}
 
 		// finally, add the file upload to the queue
-		QueueFileUpload(fileUpload)
+		fileUploadsChan <- fileUpload
 
 		return nil
 	})
 	if errW != nil {
-		fmt.Printf("walk error [%v]\n", errW)
+		log.Printf("walk error [%v]\n", errW)
 	}
 
 	return nil

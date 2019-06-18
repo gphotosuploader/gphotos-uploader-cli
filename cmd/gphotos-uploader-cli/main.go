@@ -42,20 +42,20 @@ func startUploader(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	// start file upload worker
-	doneUploading := upload.StartFileUploadWorker()
+	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
 	doneDeleting := upload.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range uploaderConfig.Jobs {
 		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), uploaderConfig.APIAppCredentials)
 
-		if err := folderUploadJob.Upload(); err != nil {
+		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
 			printError("Failed to upload folder %s: %v", job.SourceFolder, err)
 		}
 	}
 
 	// after we've run all the folder upload jobs we're done adding file upload jobs
-	upload.CloseFileUploadsChan()
+	close(fileUploadsChan)
 	// wait for all the uploads to be completed
 	<-doneUploading
 	fmt.Println("all uploads done")
