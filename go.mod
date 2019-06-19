@@ -39,7 +39,7 @@ require (
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
 	golang.org/x/sys v0.0.0-20190522044717-8097e1b27ff5 // indirect
-	google.golang.org/api v0.0.0-20181213000619-1327b224df06 // indirect
+	google.golang.org/api v0.0.0-20181213000619-1327b224df06
 	google.golang.org/appengine v1.6.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect

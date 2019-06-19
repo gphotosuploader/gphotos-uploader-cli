@@ -20,10 +20,7 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 )
 
-const (
-	USEFOLDERNAMES = "folderNames"
-)
-
+// FolderUploadJob represents a job to upload all photos in a folder
 type FolderUploadJob struct {
 	*config.FolderUploadJob
 	uploaderConfigAPICredentials *config.APIAppCredentials
@@ -31,6 +28,7 @@ type FolderUploadJob struct {
 	completedUploads             *completeduploads.CompletedUploadsService
 }
 
+// NewFolderUploadJob creates a FolderUploadJob based on the submitted data
 func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfigAPICredentials *config.APIAppCredentials) *FolderUploadJob {
 	// check args
 	{
@@ -106,7 +104,7 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 	currentPhotoAlbum := &photoslibrary.Album{}
 	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
 		if info.IsDir() {
-			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == USEFOLDERNAMES {
+			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == "folderNames" {
 				log.Printf("Entering Directory: %s", filePath)
 				currentPhotoAlbum, err = folderUploadJob.gphotosClient.GetOrCreateAlbumByName(filepath.Base(filePath))
 				if err != nil {

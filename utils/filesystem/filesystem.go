@@ -29,7 +29,7 @@ func IsDir(path string) bool {
 	return fi.Mode().IsDir()
 }
 
-// GetLastModifiedTime returns the Last Modified time from the file
+// GetMTime returns the Last Modified time from the file
 func GetMTime(path string) (mtime time.Time, err error) {
 	fi, err := os.Stat(path)
 	if err != nil {
