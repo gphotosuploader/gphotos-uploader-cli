@@ -14,11 +14,13 @@ import (
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
+// APIAppCredentials represents Google Photos API credentials for OAuth
 type APIAppCredentials struct {
 	ClientID     string
 	ClientSecret string
 }
 
+// FolderUploadJob represents configuration for a folder to be uploaded
 type FolderUploadJob struct {
 	Account           string
 	SourceFolder      string
@@ -27,11 +29,13 @@ type FolderUploadJob struct {
 	UploadVideos      bool
 }
 
+// MakeAlbums represents configuration about how to create Albums in Google Photos
 type MakeAlbums struct {
 	Enabled bool
 	Use     string
 }
 
+// Config represents this application configuration
 type Config struct {
 	APIAppCredentials *APIAppCredentials
 	Jobs              []FolderUploadJob

@@ -12,12 +12,15 @@ var (
 	deletionsChan = make(chan DeletionJob)
 )
 
+// DeletionJob represents an object to be deleted from local repository
 type DeletionJob struct {
 	uploadedFileURL string
 	localFilePath   string
 	typedMedia      filetypes.TypedMedia
 }
 
+// QueueDeletionJob adds an object to be deleted to an asynchronous queue.
+// It checks that all the parameters are set or return error otherwise.
 func QueueDeletionJob(deletionJob DeletionJob) error {
 	// check params
 	{
@@ -36,8 +39,13 @@ func QueueDeletionJob(deletionJob DeletionJob) error {
 	return nil
 }
 
+// CloseDeletionChan close the channel used for removing objects
 func CloseDeletionsChan() { close(deletionsChan) }
 
+
+// StartDeletionsWorker set up channels and start concurrent deletions
+// deletionsChan will receive DeletionJob structs and delete the object
+// from local repository, it will signal doneDeleting when removal is done
 func StartDeletionsWorker() (doneDeleting chan struct{}) {
 	doneDeleting = make(chan struct{})
 	go func() {

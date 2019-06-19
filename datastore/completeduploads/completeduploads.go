@@ -13,10 +13,12 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// CompletedUploadsService represents the DB where uploaded objects are logged
 type CompletedUploadsService struct {
 	db *leveldb.DB
 }
 
+// NewService created a CompletedUploadsService to log uploaded objects
 func NewService(db *leveldb.DB) *CompletedUploadsService {
 	return &CompletedUploadsService{db}
 }
@@ -38,12 +40,6 @@ func fileHash(filePath string) (uint32, error) {
 
 	return hasher.Sum32(), nil
 }
-
-//func uint32ToBytes(u uint32) []byte {
-//	a := make([]byte, 4)
-//	binary.LittleEndian.PutUint32(a, u)
-//	return a
-//}
 
 // IsAlreadyUploaded checks in cache if the file was already uploaded
 func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, error) {

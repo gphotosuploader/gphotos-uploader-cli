@@ -6,7 +6,9 @@ import (
 )
 
 var (
+	// Version is this application version and it's set on build time
 	Version = "v0.0.0"
+	// Build is this specific build version and it's set on build time
 	Build   = "0"
 )
 

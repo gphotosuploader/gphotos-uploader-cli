@@ -12,6 +12,7 @@ import (
 // number of concurrent uploads
 const uploadConcurrency = 5
 
+// FileUpload represents an object to be uploaded to Google Photos
 type FileUpload struct {
 	*FolderUploadJob
 	filePath      string
@@ -20,7 +21,7 @@ type FileUpload struct {
 	gphotosClient gphotos.Client
 }
 
-// read fileUploads chan for each FileUpload struct, and upload the file to gphotos
+// concurrentUpload read fileUploads chan for each FileUpload struct, and upload the file to gphotos
 // when the fileUploadsChan is done, signal to doneUploading
 func concurrentUpload(fileUploadsChan <-chan *FileUpload, doneUploading chan<- bool) {
 	semaphore := make(chan bool, uploadConcurrency)
@@ -41,7 +42,7 @@ func concurrentUpload(fileUploadsChan <-chan *FileUpload, doneUploading chan<- b
 	doneUploading <- true
 }
 
-// set up channels and start concurrentUpload
+// StartFileUploadWorker set up channels and start concurrentUpload
 // fileUploadsChan will receive FileUpload structs and upload them
 // will signal doneUploading when fileUploadsChan is done
 func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan bool) {
