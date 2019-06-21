@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-func init() {
-	// Mock the keyring to duse memory
-	MockInit()
-}
-
 // getDefaultToken return a token to complete tests
 func getDefaultToken() *oauth2.Token {
 	return &oauth2.Token{

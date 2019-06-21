@@ -3,8 +3,9 @@ package tokenstore
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/zalando/go-keyring"
+	"github.com/99designs/keyring"
 	"golang.org/x/oauth2"
+	"log"
 )
 
 const (
@@ -19,6 +20,19 @@ var (
 	ErrInvalidToken = fmt.Errorf("invalid token")
 )
 
+var kr keyring.Keyring
+
+func init() {
+	// Use the best keyring implementation for your operating system
+	k, err := keyring.Open(keyring.Config{
+		ServiceName: serviceName,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	kr = k
+}
+
 // StoreToken lets you store a token in the OS keyring
 func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 	tokenJSONBytes, err := json.Marshal(token)
@@ -26,7 +40,8 @@ func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 		return err
 	}
 
-	err = keyring.Set(serviceName, googleUserEmail, string(tokenJSONBytes))
+	//err = keyring.Set(serviceName, googleUserEmail, string(tokenJSONBytes))
+	err = kr.Set(keyring.Item{Key: googleUserEmail, Data: tokenJSONBytes})
 	if err != nil {
 		return fmt.Errorf("failed storing token into keyring: %v", err)
 	}
@@ -35,13 +50,18 @@ func StoreToken(googleUserEmail string, token *oauth2.Token) error {
 
 // RetrieveToken lets you get a token by google account email
 func RetrieveToken(googleUserEmail string) (*oauth2.Token, error) {
-	tokenJSONString, err := keyring.Get(serviceName, googleUserEmail)
-	if err != nil {
+	//tokenJSONString, err := keyring.Get(serviceName, googleUserEmail)
+	/*if err != nil {
 		if err == keyring.ErrNotFound {
 			return nil, ErrNotFound
 		}
 		return nil, err
+	}*/
+	item, err := kr.Get(googleUserEmail)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	tokenJSONString := string(item.Data)
 
 	var token oauth2.Token
 	err = json.Unmarshal([]byte(tokenJSONString), &token)
@@ -58,6 +78,6 @@ func RetrieveToken(googleUserEmail string) (*oauth2.Token, error) {
 }
 
 // MockInit sets the provider to a mocked memory store, using keyring mock
-func MockInit() {
-	keyring.MockInit()
-}
+//func MockInit() {
+//	keyring.MockInit()
+//}
