@@ -30,21 +30,3 @@ func TestCompletedUploadedFileItem_GetTrackedHash(t *testing.T) {
 		t.Errorf("got %s, want %s", got, expected)
 	}
 }
-
-func TestCompletedUploadedFileItem_GetTrackedMTime(t *testing.T) {
-	filePath := "testdata/image.png"
-	expected := int64(1561281995)
-
-	item, err := NewCompletedUploadedFileItem(filePath)
-	if err != nil {
-		t.Errorf("error not expected at this stage: %v", err)
-	}
-
-	got, err := item.GetTrackedMTime()
-	if err != nil {
-		t.Errorf("error not expected at this stage: %v", err)
-	}
-	if got != expected {
-		t.Errorf("got %d, want %d", got, expected)
-	}
-}
