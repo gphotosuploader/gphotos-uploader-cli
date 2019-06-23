@@ -2,128 +2,85 @@ package completeduploads
 
 import (
 	"fmt"
-	"io"
-	"log"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
-	"github.com/pierrec/xxHash/xxHash32"
-	"github.com/syndtr/goleveldb/leveldb"
+	"log"
 )
 
-// CompletedUploadsService represents the DB where uploaded objects are logged
-type CompletedUploadsService struct {
-	db *leveldb.DB
+// Service represents the repository where uploaded objects are tracked
+type Service struct {
+	repo Repository
 }
 
-// NewService created a CompletedUploadsService to log uploaded objects
-func NewService(db *leveldb.DB) *CompletedUploadsService {
-	return &CompletedUploadsService{db}
+// NewService created a Service to track uploaded objects
+func NewService(r Repository) *Service {
+	return &Service{repo: r}
 }
 
-func fileHash(filePath string) (uint32, error) {
-	inputFile, err := os.Open(filePath)
+// IsAlreadyUploaded checks if the file was already uploaded
+func (s *Service) IsAlreadyUploaded(filePath string) (bool, error) {
+	// find a previous upload in the repository
+	item, err := s.repo.Get(filePath)
 	if err != nil {
-		return 0, err
-	}
-	defer inputFile.Close()
-
-	hasher := xxHash32.New(0xCAFE) // hash.Hash32
-	defer hasher.Reset()
-
-	_, err = io.Copy(hasher, inputFile)
-	if err != nil {
-		return 0, err
-	}
-
-	return hasher.Sum32(), nil
-}
-
-// IsAlreadyUploaded checks in cache if the file was already uploaded
-func (s *CompletedUploadsService) IsAlreadyUploaded(filePath string) (bool, error) {
-	isUploaded := false
-
-	// look for previous upload in cache
-	val, err := s.db.Get([]byte(filePath), nil)
-	if err == leveldb.ErrNotFound {
+		// this file was not uploaded before
 		return false, nil
 	}
 
-	if err == nil {
-		// value found, try to split mtime and hash
-		parts := strings.Split(string(val[:]), "|")
-		cacheMtime := int64(0)
-		cacheHash := ""
-		if len(parts) > 1 {
-			cacheMtime, err = strconv.ParseInt(parts[0], 10, 64)
-			if err != nil {
-				return false, err
-			}
-			cacheHash = parts[1]
-		} else {
-			cacheHash = parts[0]
-		}
-		// check mtime first
-		if cacheMtime != 0 {
-			fileMtime, err := filesystem.GetMTime(filePath)
-			if err != nil {
-				return false, err
-			}
-			if fileMtime.Unix() == cacheMtime {
-				isUploaded = true
-				//log.Printf("%s mtime matched %i", filePath, cacheMtime)
-			}
-		}
-		// mtime is different, check hash
-		if !isUploaded {
-			fileHash, err := fileHash(filePath)
-			if err != nil {
-				return false, err
-			}
+	// value found on the cache
 
-			if cacheHash == fmt.Sprint(fileHash) {
-				isUploaded = true
-				//log.Printf("%s hash match %s", filePath, cacheHash)
-				// update db mtime
-				err = s.CacheAsAlreadyUploaded(filePath)
-				if err != nil {
-					return isUploaded, err
-				}
-			}
+	// get the last modified time from the cache
+	cacheMtime, err := item.GetTrackedMTime()
+	if err != nil {
+		return false, err
+	}
+
+	// check stored last modified time with the current one to see if the
+	// file has been modified
+	if cacheMtime != 0 {
+		fileMtime, err := filesystem.GetMTime(filePath)
+		if err != nil {
+			return false, err
+		}
+		if fileMtime.Unix() == cacheMtime {
+			return true, nil
 		}
 	}
 
-	return isUploaded, err
+	// file was not uploaded before or modified time has changed after being
+	// uploaded
+	fileHash, err := Hash(filePath)
+	if err != nil {
+		return false, err
+	}
+
+	// checks if the file is the same (equal hash)
+	if item.GetTrackedHash() == fmt.Sprint(fileHash) {
+		// update last modified time on the cache
+		err = s.CacheAsAlreadyUploaded(filePath)
+		if err != nil {
+			return true, err
+		}
+
+	}
+
+	return false, nil
 }
 
-// CacheAsAlreadyUploaded marks a file in cache as already uploaded to prevent re-uploads
-func (s *CompletedUploadsService) CacheAsAlreadyUploaded(filePath string) error {
-	fileHash, err := fileHash(filePath)
+// CacheAsAlreadyUploaded marks a file as already uploaded to prevent re-uploads
+func (s *Service) CacheAsAlreadyUploaded(filePath string) error {
+	item, err := NewCompletedUploadedFileItem(filePath)
 	if err != nil {
 		return err
 	}
-
-	mtime, err := filesystem.GetMTime(filePath)
-	if err != nil {
-		return fmt.Errorf("failed getting local image mtime")
-	}
-
-	val := strconv.FormatInt(mtime.Unix(), 10) + "|" + fmt.Sprint(fileHash)
-	err = s.db.Put([]byte(filePath), []byte(val), nil)
+	err = s.repo.Put(item)
 	if err != nil {
 		return err
 	}
 	log.Printf("Marked as uploaded: %s", filePath)
-
 	return nil
 }
 
-// RemoveAsAlreadyUploaded removes a file previously marked as uploaded from the db
-func (s *CompletedUploadsService) RemoveAsAlreadyUploaded(filePath string) error {
-	log.Printf("Removing file from upload DB: %s", filePath)
-	err := s.db.Delete([]byte(filePath), nil)
-
-	return err
+// RemoveAsAlreadyUploaded removes a file previously marked as uploaded
+func (s *Service) RemoveAsAlreadyUploaded(filePath string) error {
+	log.Printf("Removing file from upload repository: %s", filePath)
+	return s.repo.Delete(filePath)
 }
