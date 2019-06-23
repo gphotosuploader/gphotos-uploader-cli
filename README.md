@@ -52,7 +52,7 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 - [ ] add tests
 - [ ] add CLI manual
 - [ ] add electron app for front-end
-- [ ] increase upload parallelism for speed
+- [x] increase upload parallelism for speed
 
 # Related
 - [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
