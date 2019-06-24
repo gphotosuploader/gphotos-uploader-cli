@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	photoslibrary "google.golang.org/api/photoslibrary/v1"
+	"google.golang.org/api/photoslibrary/v1"
 
 	"github.com/juju/errors"
-	cp "github.com/nmrshll/go-cp"
+	"github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
@@ -29,7 +29,7 @@ type FolderUploadJob struct {
 }
 
 // NewFolderUploadJob creates a FolderUploadJob based on the submitted data
-func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfigAPICredentials *config.APIAppCredentials) *FolderUploadJob {
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *FolderUploadJob {
 	// check args
 	{
 		if completedUploads == nil {
@@ -46,7 +46,7 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 		uploaderConfigAPICredentials: uploaderConfigAPICredentials,
 	}
 
-	gphotosClient, err := authenticate(folderUploadJob)
+	gphotosClient, err := authenticate(tokenManagerService, folderUploadJob)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,9 +55,10 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 	return folderUploadJob
 }
 
-func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
+func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	// try to load token from keyring
-	token, err := tokenstore.RetrieveToken(folderUploadJob.Account)
+
+	token, err := tkm.RetrieveToken(folderUploadJob.Account)
 	if err == nil && token != nil { // if error ignore and skip
 		// if found create client from token
 		gphotosClient, err := gphotos.NewClient(gphotos.FromToken(config.OAuthConfig(folderUploadJob.uploaderConfigAPICredentials), token))
@@ -80,7 +81,7 @@ func authenticate(folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
 	}
 
 	// and store the token into the keyring
-	err = tokenstore.StoreToken(folderUploadJob.Account, gphotosClient.Token())
+	err = tkm.StoreToken(folderUploadJob.Account, gphotosClient.Token())
 	if err != nil {
 		return nil, errors.Annotate(err, "failed storing token")
 	}
