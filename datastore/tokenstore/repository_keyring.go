@@ -31,9 +31,8 @@ type KeyringRepository struct {
 //	PassBackend          BackendType = "pass"
 func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc) (*KeyringRepository, error) {
 	keyringConfig := defaultConfig()
-	if backend != "" {
+	if backend != "" && backend != "auto" {
 		keyringConfig.AllowedBackends = append(keyringConfig.AllowedBackends, keyring.BackendType(backend))
-
 	}
 	if promptFunc != nil {
 		keyringConfig.FilePasswordFunc = *promptFunc
@@ -121,4 +120,3 @@ func terminalPrompt(prompt string) (string, error) {
 	fmt.Println()
 	return string(b), nil
 }
-
