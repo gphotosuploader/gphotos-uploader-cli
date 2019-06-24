@@ -37,8 +37,8 @@ type MakeAlbums struct {
 
 // Config represents this application configuration
 type Config struct {
-	ConfigFile string
-	Verbose    bool
+	ConfigFile         string
+	Verbose            bool
 	SecretsBackendType string
 	APIAppCredentials  *APIAppCredentials
 	Jobs               []FolderUploadJob

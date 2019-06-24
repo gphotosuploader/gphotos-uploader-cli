@@ -55,7 +55,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	defer db.Close()
 
 	// token manager service to be used as secrets backend
-	kr, err := tokenstore.NewKeyringRepository()
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil)
 	if err != nil {
 		log.Fatalf("Unable to use the token repository: %v", err)
 	}

@@ -2,8 +2,11 @@ package tokenstore
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/99designs/keyring"
+	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/oauth2"
+	"os"
 )
 
 // KeyringRepository represents a repository provided by different secrets
@@ -15,14 +18,52 @@ type KeyringRepository struct {
 }
 
 // NewKeyringRepository creates a new repository
-func NewKeyringRepository() (*KeyringRepository, error) {
-	kr, err := keyring.Open(keyring.Config{
-		ServiceName: serviceName,
-	})
+// backend could be used to select which backed will be used. If it's empty
+// the library will select the most suitable depending OS.
+//
+// All currently supported secure storage backends:
+//
+//	SecretServiceBackend BackendType = "secret-service"
+//	KeychainBackend      BackendType = "keychain"
+//	KWalletBackend       BackendType = "kwallet"
+//	WinCredBackend       BackendType = "wincred"
+//	FileBackend          BackendType = "file"
+//	PassBackend          BackendType = "pass"
+func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc) (*KeyringRepository, error) {
+	keyringConfig := defaultConfig()
+	if backend != "" {
+		keyringConfig.AllowedBackends = append(keyringConfig.AllowedBackends, keyring.BackendType(backend))
+
+	}
+	if promptFunc != nil {
+		keyringConfig.FilePasswordFunc = *promptFunc
+	}
+	kr, err := keyring.Open(keyringConfig)
 	if err != nil {
 		return nil, err
 	}
 	return &KeyringRepository{kr}, nil
+}
+
+func defaultConfig() keyring.Config {
+	return keyring.Config{
+		AllowedBackends:                nil,
+		ServiceName:                    serviceName,
+		KeychainName:                   serviceName,
+		KeychainTrustApplication:       false,
+		KeychainSynchronizable:         false,
+		KeychainAccessibleWhenUnlocked: false,
+		KeychainPasswordFunc:           nil,
+		FilePasswordFunc:               terminalPrompt,
+		FileDir:                        "~/.gphotos-uploader-cli",
+		KWalletAppID:                   "",
+		KWalletFolder:                  "",
+		LibSecretCollectionName:        "",
+		PassDir:                        "",
+		PassCmd:                        "",
+		PassPrefix:                     "",
+		WinCredPrefix:                  "",
+	}
 }
 
 // StoreToken lets you store a token in the OS keyring
@@ -70,3 +111,14 @@ func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 
 	return tk, nil
 }
+
+func terminalPrompt(prompt string) (string, error) {
+	fmt.Printf("%s: ", prompt)
+	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	if err != nil {
+		return "", err
+	}
+	fmt.Println()
+	return string(b), nil
+}
+

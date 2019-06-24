@@ -1,6 +1,7 @@
 package tokenstore
 
 import (
+	"github.com/99designs/keyring"
 	"golang.org/x/oauth2"
 	"testing"
 	"time"
@@ -18,8 +19,14 @@ func getDefaultToken() *oauth2.Token {
 
 const userEmail string = "user@domain.com"
 
+const secretsBackend string = "file"
+
+var fixedStringPrompt keyring.PromptFunc = func(_ string) (string, error) {
+	return "no more secrets", nil
+}
+
 func TestKeyringRepository_StoreToken(t *testing.T) {
-	repo, err := NewKeyringRepository()
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
@@ -33,7 +40,7 @@ func TestKeyringRepository_StoreToken(t *testing.T) {
 
 // TestRetrieveToken tests getting a token from the keyring.
 func TestRetrieveToken(t *testing.T) {
-	repo, err := NewKeyringRepository()
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
@@ -57,7 +64,7 @@ func TestRetrieveToken(t *testing.T) {
 
 // TestRetrieveExpiredToken tests getting an invalid (expired) token from the keyring.
 func TestRetrieveExpiredToken(t *testing.T) {
-	repo, err := NewKeyringRepository()
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
@@ -78,7 +85,7 @@ func TestRetrieveExpiredToken(t *testing.T) {
 
 // TestRetrieveInvalidToken tests getting an invalid (empty AccessToken) token from the keyring.
 func TestRetrieveInvalidToken(t *testing.T) {
-	repo, err := NewKeyringRepository()
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
@@ -99,12 +106,12 @@ func TestRetrieveInvalidToken(t *testing.T) {
 
 // TestRetrieveNonExistingToken tests getting a token not in the keyring.
 func TestRetrieveNonExistingToken(t *testing.T) {
-	repo, err := NewKeyringRepository()
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
 	s := NewService(repo)
-	
+
 	_, err = s.RetrieveToken(userEmail + "fake")
 	if err != ErrNotFound {
 		t.Errorf("Expected error ErrNotFound, got %s", err)
