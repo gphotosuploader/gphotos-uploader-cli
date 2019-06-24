@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Added
+- Support for [different secret backends](https://github.com/99designs/keyring). (#15, #41, #50, #51 and #52)
+
+### Changed
+- The `tokenstore` library has been modified to allow [new secrets backends](https://github.com/99designs/keyring)
+
 ## 0.2.1 - 2019-06-18
 ### Fixed
 - Fix [Go Report Card](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli) issues
