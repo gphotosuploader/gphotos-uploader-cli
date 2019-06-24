@@ -21,7 +21,7 @@ There are two ways to install this command line:
 
 | Release archive (recommended) | Compile in your system (*) |  
 | :---------------------------: | ---------------------- |  
-| [![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+| [![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli` |  
 
 (*) Go 1.11+ is required to compile this application
 
