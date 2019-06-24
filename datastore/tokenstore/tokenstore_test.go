@@ -25,7 +25,7 @@ var fixedStringPrompt keyring.PromptFunc = func(_ string) (string, error) {
 	return "no more secrets", nil
 }
 
-func TestKeyringRepository_StoreToken(t *testing.T) {
+func TestStoreToken(t *testing.T) {
 	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
