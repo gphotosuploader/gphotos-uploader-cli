@@ -1,5 +1,7 @@
 module github.com/nmrshll/gphotos-uploader-cli
 
+replace /google.golang.org/api/photoslibrary => ./vendor/google.golang.org/api/photoslibrary
+
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
@@ -46,4 +48,3 @@ require (
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
 
-replace google.golang.org/api/photoslibrary => ./vendor/google.golang.org/api/photoslibrary
