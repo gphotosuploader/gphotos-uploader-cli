@@ -1,6 +1,6 @@
 module github.com/nmrshll/gphotos-uploader-cli
 
-replace /google.golang.org/api/photoslibrary => ./vendor/google.golang.org/api/photoslibrary
+replace /google.golang.org/api/photoslibrary => ./aux/google.golang.org/api/photoslibrary
 
 require (
 	cloud.google.com/go v0.34.0 // indirect
