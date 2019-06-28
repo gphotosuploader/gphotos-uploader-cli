@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Add `google.golang.org/api/photoslibrary` as vendor library, due to [Google's announcement](https://code-review.googlesource.com/c/google-api-go-client/+/39951) (#53)
 ### Fixed
 - Fix installation instructions (#72)
+### Removed
+- `go get` installation method has been removed.
 
 ## 0.2.1 - 2019-06-18
 ### Fixed
