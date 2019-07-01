@@ -1,15 +1,11 @@
 package tokenstore
 
 import (
+	"github.com/99designs/keyring"
 	"golang.org/x/oauth2"
 	"testing"
 	"time"
 )
-
-func init() {
-	// Mock the keyring to duse memory
-	MockInit()
-}
 
 // getDefaultToken return a token to complete tests
 func getDefaultToken() *oauth2.Token {
@@ -23,9 +19,20 @@ func getDefaultToken() *oauth2.Token {
 
 const userEmail string = "user@domain.com"
 
-// TestStoreToken tests setting a token in the keyring.
+const secretsBackend string = "file"
+
+var fixedStringPrompt keyring.PromptFunc = func(_ string) (string, error) {
+	return "no more secrets", nil
+}
+
 func TestStoreToken(t *testing.T) {
-	err := StoreToken(userEmail, getDefaultToken())
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	if err != nil {
+		t.Errorf("error not expected at this stage: %v", err)
+	}
+	s := NewService(repo)
+
+	err = s.StoreToken(userEmail, getDefaultToken())
 	if err != nil {
 		t.Errorf("Should not fail, got: %s", err)
 	}
@@ -33,13 +40,19 @@ func TestStoreToken(t *testing.T) {
 
 // TestRetrieveToken tests getting a token from the keyring.
 func TestRetrieveToken(t *testing.T) {
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	if err != nil {
+		t.Errorf("error not expected at this stage: %v", err)
+	}
+	s := NewService(repo)
+
 	expectedToken := getDefaultToken()
-	err := StoreToken(userEmail, expectedToken)
+	err = s.StoreToken(userEmail, expectedToken)
 	if err != nil {
 		t.Errorf("Should not fail, got: %s", err)
 	}
 
-	tk, err := RetrieveToken(userEmail)
+	tk, err := s.RetrieveToken(userEmail)
 	if err != nil {
 		t.Errorf("Should not fail, got %s", err)
 	}
@@ -51,14 +64,20 @@ func TestRetrieveToken(t *testing.T) {
 
 // TestRetrieveExpiredToken tests getting an invalid (expired) token from the keyring.
 func TestRetrieveExpiredToken(t *testing.T) {
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	if err != nil {
+		t.Errorf("error not expected at this stage: %v", err)
+	}
+	s := NewService(repo)
+
 	expectedToken := getDefaultToken()
 	expectedToken.Expiry = time.Now().Add(-time.Minute)
-	err := StoreToken(userEmail, expectedToken)
+	err = s.StoreToken(userEmail, expectedToken)
 	if err != nil {
 		t.Errorf("Should not fail, got: %s", err)
 	}
 
-	_, err = RetrieveToken(userEmail)
+	_, err = s.RetrieveToken(userEmail)
 	if err != ErrInvalidToken {
 		t.Errorf("Expected error ErrInvalidToken, got %s", err)
 	}
@@ -66,14 +85,20 @@ func TestRetrieveExpiredToken(t *testing.T) {
 
 // TestRetrieveInvalidToken tests getting an invalid (empty AccessToken) token from the keyring.
 func TestRetrieveInvalidToken(t *testing.T) {
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	if err != nil {
+		t.Errorf("error not expected at this stage: %v", err)
+	}
+	s := NewService(repo)
+
 	expectedToken := getDefaultToken()
 	expectedToken.AccessToken = ""
-	err := StoreToken(userEmail, expectedToken)
+	err = s.StoreToken(userEmail, expectedToken)
 	if err != nil {
 		t.Errorf("Should not fail, got: %s", err)
 	}
 
-	_, err = RetrieveToken(userEmail)
+	_, err = s.RetrieveToken(userEmail)
 	if err != ErrInvalidToken {
 		t.Errorf("Expected error ErrInvalidToken, got %s", err)
 	}
@@ -81,7 +106,13 @@ func TestRetrieveInvalidToken(t *testing.T) {
 
 // TestRetrieveNonExistingToken tests getting a token not in the keyring.
 func TestRetrieveNonExistingToken(t *testing.T) {
-	_, err := RetrieveToken(userEmail + "fake")
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	if err != nil {
+		t.Errorf("error not expected at this stage: %v", err)
+	}
+	s := NewService(repo)
+
+	_, err = s.RetrieveToken(userEmail + "fake")
 	if err != ErrNotFound {
 		t.Errorf("Expected error ErrNotFound, got %s", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
 	"github.com/nmrshll/gphotos-uploader-cli/upload"
 	"github.com/spf13/cobra"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -56,13 +57,20 @@ func startUploader(cmd *cobra.Command, args []string) {
 	defer db.Close()
 	completedUploadsRepository := completeduploads.NewLevelDBRepository(db)
 
+	// token manager service to be used as secrets backend
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil)
+	if err != nil {
+		log.Fatalf("Unable to use the token repository: %v", err)
+	}
+	tkm := tokenstore.NewService(kr)
+
 	// start file upload worker
 	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
 	doneDeleting := upload.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials)
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials, &tkm)
 
 		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)

@@ -10,7 +10,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
-	cp "github.com/nmrshll/go-cp"
+	"github.com/nmrshll/go-cp"
 	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
@@ -37,13 +37,17 @@ type MakeAlbums struct {
 
 // Config represents this application configuration
 type Config struct {
-	APIAppCredentials *APIAppCredentials
-	Jobs              []FolderUploadJob
+	ConfigFile         string
+	Verbose            bool
+	SecretsBackendType string
+	APIAppCredentials  *APIAppCredentials
+	Jobs               []FolderUploadJob
 }
 
 // defaultConfig returns an example Config object
 func defaultConfig() *Config {
 	c := &Config{}
+	c.SecretsBackendType = "auto"
 	c.APIAppCredentials = &APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
@@ -67,6 +71,7 @@ func defaultConfig() *Config {
 func (c Config) String() string {
 	configTemplate := `
 {
+  SecretsBackendType: %s,
   APIAppCredentials: {
     ClientID:     "%s",
     ClientSecret: "%s",
@@ -85,6 +90,7 @@ func (c Config) String() string {
   ]
 }`
 	return fmt.Sprintf(configTemplate,
+		c.SecretsBackendType,
 		c.APIAppCredentials.ClientID,
 		c.APIAppCredentials.ClientSecret,
 		c.Jobs[0].Account,
