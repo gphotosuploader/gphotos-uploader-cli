@@ -1,14 +1,15 @@
 project_name: gphotos-uploader-cli
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod download
 builds:
   - goos:
       - darwin
       - linux
     goarch:
       - amd64
-    main: ./cmd/gphotos-uploader-cli/main.go
-    ldflags: -s -w -X=main.Version={{.Version}} -X=main.Build={{.ShortCommit}}
-before:
-    hooks:
-      - go mod download
+    ldflags: -s -w {{ .Env.RELEASE_VERSION_TAG }}
 checksum:
   name_template: 'checksums.txt'

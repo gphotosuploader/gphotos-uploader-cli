@@ -22,7 +22,7 @@ GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
 .PHONY: test
 test: ## Run all the tests
 	@echo "--> Running tests..."
-	@echo 'mode: atomic' > $(COVERAGE_FILE) && go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -v -race -timeout=30s $(PKGS)
+	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -v -race -failfast -timeout=30s $(PKGS)
 
 .PHONY: cover
 cover: test ## Run all the tests and opens the coverage report
@@ -52,6 +52,14 @@ $(GOLANGCI):
 lint: $(GOLANGCI) ## Run linter
 	@echo "--> Running linter golangci v$(GOLANGCI_VERSION)..."
 	@$(GOLANGCI) run
+
+.PHONY: ci
+ci: build test lint ## Run all the tests and code checks
+
+.PHONY: release
+release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
+	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
+	@curl -sL https://git.io/goreleaser | RELEASE_VERSION_TAG="-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)" sh -s release
 
 .PHONY: help
 help: ## Show this help
