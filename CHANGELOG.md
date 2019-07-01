@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## Unreleased
 ### Added
 - Support for [different secret backends](https://github.com/99designs/keyring). (#15, #41, #50, #51 and #52)
-
+- Added test to completeuploads package
 ### Changed
+- Document code in a more complete way
+- Add `google.golang.org/api/photoslibrary` as vendor library, due to [Google's announcement](https://code-review.googlesource.com/c/google-api-go-client/+/39951) (#53)
 - The `tokenstore` library has been modified to allow [new secrets backends](https://github.com/99designs/keyring)
+### Fixed
+- Fix installation instructions (#72)
+### Removed
+- `go get` installation method has been removed.
 
 ## 0.2.1 - 2019-06-18
 ### Fixed

@@ -1,5 +1,7 @@
 module github.com/nmrshll/gphotos-uploader-cli
 
+replace /google.golang.org/api/photoslibrary => ./aux/google.golang.org/api/photoslibrary
+
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/99designs/keyring v0.0.0-20190620041230-372329baeea2
@@ -30,7 +32,6 @@ require (
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2
-	github.com/zalando/go-keyring v0.0.0-20180221093347-6d81c293b3fb
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890

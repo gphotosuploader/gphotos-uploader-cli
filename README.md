@@ -12,18 +12,32 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 # Features:
 
 - specify folders to upload in config file
-- optionally delete after upload
+- optionally delete obejcts after upload
 - upload to multiple google accounts
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Quick start
-There are two ways to install this command line: 
+There are two ways to install this command line:
 
-| Release archive (recommended) | Compile in your system (*) |  
-| :---------------------------: | ---------------------- |  
-| [![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) | `$ go get -u github.com/nmrshll/gphotos-uploader-cli/cmd/gphotos-uploader-cli` |  
+### Downloading a binary (recommended)
 
-(*) Go 1.11+ is required to compile this application
+You can download [latest released package](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) for your preferred OS.
+
+[![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
+
+### Compiling in your system
+
+You can compile the source code in your system. **Go 1.11+** is required to compile this application:
+
+Clone this repository and use `make build` to compile it
+
+```
+$ git clone https://github.com/nmrshll/gphotos-uploader-cli
+$ cd gphotos-uploader-cli
+$ make build
+```
+
+**NOTE**: It's not possible to install this application using `go get` due to the [use of a third party library as vendor](https://github.com/golang/go/issues/30354).
 
 ## Configuring this application
 First initialize the config file using this command:
@@ -52,7 +66,7 @@ Have improvement ideas or want to help ? Please start by opening an [issue](http
 - [ ] add tests
 - [ ] add CLI manual
 - [ ] add electron app for front-end
-- [ ] increase upload parallelism for speed
+- [x] increase upload parallelism for speed
 
 # Related
 - [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)

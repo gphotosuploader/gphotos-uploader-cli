@@ -25,11 +25,11 @@ type FolderUploadJob struct {
 	*config.FolderUploadJob
 	uploaderConfigAPICredentials *config.APIAppCredentials
 	gphotosClient                *gphotos.Client
-	completedUploads             *completeduploads.CompletedUploadsService
+	completedUploads             *completeduploads.Service
 }
 
 // NewFolderUploadJob creates a FolderUploadJob based on the submitted data
-func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.CompletedUploadsService, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *FolderUploadJob {
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.Service, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *FolderUploadJob {
 	// check args
 	{
 		if completedUploads == nil {
