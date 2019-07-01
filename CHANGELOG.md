@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added
+- Added test to completeuploads package
 ### Changed
+- Document code in a more complete way
 - Add `google.golang.org/api/photoslibrary` as vendor library, due to [Google's announcement](https://code-review.googlesource.com/c/google-api-go-client/+/39951) (#53)
 ### Fixed
 - Fix installation instructions (#72)

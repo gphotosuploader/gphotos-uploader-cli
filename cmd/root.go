@@ -21,7 +21,9 @@ var rootCmd = &cobra.Command{
 	Short: "This is an unofficial Google Photos uploader",
 	Long: `This application will allow you to upload your pictures to Google Photos.
 
-You can upload folders of pictures to several Google Photos accounts and organize them in albums.`,
+You can upload folders of pictures to several Google Photos accounts and organize them in albums.
+
+See https://github.com/nmrshll/gphotos-uploader-cli for more information.`,
 	Run: startUploader,
 }
 
@@ -52,6 +54,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 		log.Fatalf("Error opening db: %v", err)
 	}
 	defer db.Close()
+	completedUploadsRepository := completeduploads.NewLevelDBRepository(db)
 
 	// start file upload worker
 	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
@@ -59,7 +62,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(db), cfg.APIAppCredentials)
+		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials)
 
 		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)
