@@ -1,30 +1,17 @@
 language: go
-addons:
-  apt:
-    packages:
-    - snapd
 env:
   matrix:
-  - GO111MODULE=on PATH=/snap/bin:$PATH
+  - GO111MODULE=on
   global:
     secure: W976WL46a0mlqgOBcF6UCigkSJYD7RTGmo+rCrxhnmXbC0AWcR9Ve0aQWYsqnnhltK3WD274bdY9/FF2LyREGaUbF8+RL/qyNu6pOMJy9yFS8DwIfl6h/4P4KVeZs5M15YKvW1UpbXRZZougKT1Y4aOwuZfEED8ux761JqvNwiHHXQbmlV5sOMUBObSIbNsYMWm25veaXcio+Oe9SqNVzTHZBsZ826ytJ/I0tyBzhyRZKqWIRxp7nhx8FZySD7t3pgGo6NUc/DXWkF37Xbs5mJTmrGjIgt1B+fjxqC3tlSYFCS9K2fVeZ7N/hI+tvPDZeWJ0tdNu/u9Wek9S5nuMaMwn/qjPzeqk7atappbeGzMUu0weEpBJnvTCW0j/1hrUNJgrz+9BpmdWOaibMb60tDuqTHizyt+7m9vz8afYKK4di6mxmiKPRwTsLovxNv5yFD/Y3gF9vq9vAFH0MSdIIIrIxpOjUtlrOGgoUY65hSdKiRgPUeDWR23vyS7nomy4CVqM+50cj+gZO8XVYVt9ct5OhDnWTMadSEzU61Q00tc2toV7NIcffvAGLgIwY77Xzds5ggigfHMAq2D8OxXGxKLES3GeWOuzdP1bC7Ujc2WxV+a1hP4ptz9L5xewXvdth6Doj+7MB2T/wR3kHw+R1HiJ33i6ogUMXHyFxb5gq7E=
 go:
 - 1.11.x
 script:
-- make lint
-- make test
-- make build
-install:
-- sudo snap install snapcraft --classic
-after_success:
-- test -n "$TRAVIS_TAG" && snapcraft login --with snap.login
+- make ci
 deploy:
 - provider: script
   skip_cleanup: true
-  script: curl -sL https://git.io/goreleaser | bash
+  script: make release
   on:
     tags: true
     condition: "$TRAVIS_OS_NAME = linux"
-before_install:
-- openssl aes-256-cbc -K $encrypted_d2a80c0858e5_key -iv $encrypted_d2a80c0858e5_iv
-  -in snap.login.enc -out snap.login -d
