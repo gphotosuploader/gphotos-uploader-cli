@@ -24,6 +24,7 @@ type APIAppCredentials struct {
 type FolderUploadJob struct {
 	Account           string
 	SourceFolder      string
+	SkipFolders       []string
 	MakeAlbums        MakeAlbums
 	DeleteAfterUpload bool
 	UploadVideos      bool
@@ -56,6 +57,7 @@ func defaultConfig() *Config {
 	job := FolderUploadJob{
 		Account:      "youremail@gmail.com",
 		SourceFolder: "~/folder/to/upload",
+		SkipFolders:  []string{"the_folder_name_you_want_to_skip"},
 		MakeAlbums: MakeAlbums{
 			Enabled: true,
 			Use:     "folderNames",
@@ -80,6 +82,9 @@ func (c Config) String() string {
     {
       account: %s
       sourceFolder: %s
+      skipFolders: [
+        %s
+      ]
       makeAlbums: {
         enabled: %t
         use: %s
@@ -95,6 +100,7 @@ func (c Config) String() string {
 		c.APIAppCredentials.ClientSecret,
 		c.Jobs[0].Account,
 		c.Jobs[0].SourceFolder,
+		c.Jobs[0].SkipFolders[0],
 		c.Jobs[0].MakeAlbums.Enabled,
 		c.Jobs[0].MakeAlbums.Use,
 		c.Jobs[0].DeleteAfterUpload,

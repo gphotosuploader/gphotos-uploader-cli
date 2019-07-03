@@ -105,6 +105,12 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 	currentPhotoAlbum := &photoslibrary.Album{}
 	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
 		if info.IsDir() {
+			for _, v := range folderUploadJob.SkipFolders {
+				if v == filepath.Base(filePath) {
+					log.Printf("Folder is in the skip list: %s: skipping folder", filePath)
+					return nil
+				}
+			}
 			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == "folderNames" {
 				log.Printf("Entering Directory: %s", filePath)
 				currentPhotoAlbum, err = folderUploadJob.gphotosClient.GetOrCreateAlbumByName(filepath.Base(filePath))
