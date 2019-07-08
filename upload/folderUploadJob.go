@@ -2,17 +2,16 @@ package upload
 
 import (
 	"fmt"
+	"github.com/nmrshll/go-cp"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
-	"google.golang.org/api/photoslibrary/v1"
-
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/noserver-gphotos"
+	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 	"github.com/juju/errors"
-	"github.com/nmrshll/go-cp"
-	gphotos "github.com/nmrshll/google-photos-api-client-go/noserver-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"

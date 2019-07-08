@@ -1,43 +1,25 @@
 module github.com/nmrshll/gphotos-uploader-cli
 
-replace /google.golang.org/api/photoslibrary => ./aux/google.golang.org/api/photoslibrary
+go 1.12
 
 require (
-	cloud.google.com/go v0.34.0 // indirect
-	github.com/99designs/keyring v0.0.0-20190620041230-372329baeea2
+	github.com/99designs/keyring v0.0.0-20190704105226-2c916c935b9f
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/fatih/color v1.7.0
-	github.com/golang/protobuf v1.3.1 // indirect
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
+	github.com/gphotosuploader/google-photos-api-client-go v0.0.0-20190708134236-3fa98bce1290
+	github.com/gphotosuploader/googlemirror v0.0.0-20190708130251-f249ce03cd95
 	github.com/h2non/filetype v1.0.8
-	github.com/hashicorp/go-multierror v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
-	github.com/juju/loggo v0.0.0-20190212223446-d976af380377 // indirect
-	github.com/juju/testing v0.0.0-20190429233213-dfc56b8c09fc // indirect
-	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mattn/go-isatty v0.0.4 // indirect
+	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
+	github.com/juju/testing v0.0.0-20190613124551-e81189438503 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/nmrshll/go-cp v0.0.0-20180115193924-61436d3b7cfa
-	github.com/nmrshll/google-photos-api-client-go v0.0.0-20180906090521-a94d2fbcfb40
-	github.com/nmrshll/oauth2-noserver v0.0.0-20180827223500-16b622b98a45 // indirect
-	github.com/nmrshll/rndm-go v0.0.0-20170430161430-8da3024e53de // indirect
-	github.com/onsi/ginkgo v1.8.0 // indirect
-	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177 // indirect
-	github.com/pierrec/xxHash v0.1.1
-	github.com/skratchdot/open-golang v0.0.0-20160302144031-75fb7ed4208c // indirect
-	github.com/spf13/cobra v0.0.3
-	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/pierrec/xxHash v0.1.5
+	github.com/spf13/cobra v0.0.5
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3
-	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2
-	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
-	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
-	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
-	golang.org/x/sys v0.0.0-20190522044717-8097e1b27ff5 // indirect
-	google.golang.org/api v0.0.0-20181213000619-1327b224df06
-	google.golang.org/appengine v1.6.0 // indirect
+	github.com/syndtr/goleveldb v1.0.0
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

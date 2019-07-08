@@ -1,12 +1,12 @@
 package upload
 
 import (
+	photoslibrary "github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 	"log"
 
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
-	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
-	"google.golang.org/api/photoslibrary/v1"
 )
 
 // number of concurrent uploads
