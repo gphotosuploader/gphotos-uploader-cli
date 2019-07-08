@@ -10,8 +10,8 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/nmrshll/go-cp"
-	gphotos "github.com/nmrshll/google-photos-api-client-go/lib-gphotos"
 )
 
 // APIAppCredentials represents Google Photos API credentials for OAuth
