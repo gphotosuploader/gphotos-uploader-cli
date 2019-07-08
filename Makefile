@@ -22,7 +22,7 @@ GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
 .PHONY: test
 test: ## Run all the tests
 	@echo "--> Running tests..."
-	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -v -race -failfast -timeout=30s $(PKGS)
+	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -race -failfast -timeout=30s $(PKGS)
 
 .PHONY: cover
 cover: test ## Run all the tests and opens the coverage report
