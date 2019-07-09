@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Added
+- Add `go get` installation method to [README](README.md)
+
+### Fixed
+- Update [configuration documentation](.docs/configuration.md) to add `SecretsBackendType` (#83)
+- Typo on [README](README.md)
+
 ## 0.3.1
 ### Changed
 - Move some dependencies to the new [gphotosuploader](https://github.com/gphotosuploader) organization

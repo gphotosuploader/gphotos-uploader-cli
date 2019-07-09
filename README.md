@@ -12,7 +12,7 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 # Features:
 
 - specify folders to upload in config file
-- optionally delete obejcts after upload
+- optionally delete objects after upload
 - upload to multiple google accounts
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
@@ -37,7 +37,11 @@ $ cd gphotos-uploader-cli
 $ make build
 ```
 
-**NOTE**: It's not possible to install this application using `go get` due to the [use of a third party library as vendor](https://github.com/golang/go/issues/30354).
+Or you can use `go get` if you prefer it:
+
+```
+$ go get github.com/nmrshll/gphotos-uploader-cli
+```
 
 ## Configuring this application
 First initialize the config file using this command:
@@ -49,7 +53,7 @@ then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify your 
 
 You can review the [documentation](.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
 
-If you have problems, please take a look to [troubleshooting](.docs/installation-troubleshooting.md) guide.
+If you have problems, please open an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
 
 ## Run it with 
 
@@ -60,13 +64,6 @@ $ gphotos-uploader-cli
 
 # Contributing
 Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
-
-## Current plans
-- [ ] add CI pipeline for testing / building / releasing deb/snap/homebrew/... packages (to drop the dependency on go for installing)
-- [ ] add tests
-- [ ] add CLI manual
-- [ ] add electron app for front-end
-- [x] increase upload parallelism for speed
 
 # Related
 - [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
