@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.3.2
 ### Added
 - Add `go get` installation method to [README](README.md)
+
+### Changed
+- Update `github.com/gphotosuploader/google-photos-api-client-go` to v1.0.1
+- Update `github.com/gphotosuploader/googlemirror` to v0.3.2
 
 ### Fixed
 - Update [configuration documentation](.docs/configuration.md) to add `SecretsBackendType` (#83)

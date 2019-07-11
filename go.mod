@@ -7,8 +7,8 @@ require (
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/fatih/color v1.7.0
-	github.com/gphotosuploader/google-photos-api-client-go v0.0.0-20190708134236-3fa98bce1290
-	github.com/gphotosuploader/googlemirror v0.0.0-20190708130251-f249ce03cd95
+	github.com/gphotosuploader/google-photos-api-client-go v1.0.1
+	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/h2non/filetype v1.0.8
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
