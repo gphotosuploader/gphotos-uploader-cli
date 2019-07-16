@@ -132,6 +132,13 @@ func TestMatch(t *testing.T) {
 			})
 		}
 	}
+
+	t.Run("TestMatchWithEmptyString", func(t *testing.T) {
+		_, err := filter.Match("*.go", "")
+		if err != filter.ErrBadString {
+			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
+		}
+	})
 }
 
 var childMatchTests = []struct {
@@ -222,6 +229,13 @@ func TestChildMatch(t *testing.T) {
 			})
 		}
 	}
+
+	t.Run("TestChildMatchWithEmptyString", func(t *testing.T) {
+		_, err := filter.ChildMatch("*.go", "")
+		if err != filter.ErrBadString {
+			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
+		}
+	})
 }
 
 func ExampleMatch() {
@@ -269,6 +283,13 @@ func TestList(t *testing.T) {
 				i, test.patterns, test.path, test.match, match)
 		}
 	}
+
+	t.Run("TestListWithEmptyString", func(t *testing.T) {
+		_, _, err := filter.List([]string{"*.go"}, "")
+		if err != filter.ErrBadString {
+			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
+		}
+	})
 }
 
 func ExampleList() {
