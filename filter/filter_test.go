@@ -141,103 +141,6 @@ func TestMatch(t *testing.T) {
 	})
 }
 
-var childMatchTests = []struct {
-	pattern string
-	path    string
-	match   bool
-}{
-	{"", "", true},
-	{"", "/foo", true},
-	{"", "/x/y/z/foo", true},
-	{"foo/bar", "/foo", true},
-	{"baz/bar", "/foo", true},
-	{"foo", "/foo/bar", true},
-	{"bar", "/foo", true},
-	{"baz", "/foo/bar", true},
-	{"*", "/foo", true},
-	{"*", "/foo/bar", true},
-	{"/foo/bar", "/foo", true},
-	{"/foo/bar/baz", "/foo", true},
-	{"/foo/bar/baz", "/foo/bar", true},
-	{"/foo/bar/baz", "/foo/baz", false},
-	{"/foo/**/baz", "/foo/bar/baz", true},
-	{"/foo/**/baz", "/foo/bar/baz/blah", true},
-	{"/foo/**/qux", "/foo/bar/baz/qux", true},
-	{"/foo/**/qux", "/foo/bar/baz", true},
-	{"/foo/**/qux", "/foo/bar/baz/boo", true},
-	{"/foo/**", "/foo/bar/baz", true},
-	{"/foo/**", "/foo/bar", true},
-	{"foo/**/bar/**/x", "/home/user/foo", true},
-	{"foo/**/bar/**/x", "/home/user/foo/bar", true},
-	{"foo/**/bar/**/x", "/home/user/foo/blaaa/blaz/bar/shared/work/x", true},
-	{"/foo/*/qux", "/foo/bar", true},
-	{"/foo/*/qux", "/foo/bar/boo", false},
-	{"/foo/*/qux", "/foo/bar/boo/xx", false},
-	{"/baz/bar", "/foo", false},
-	{"/foo", "/foo/bar", true},
-	{"/*", "/foo", true},
-	{"/*", "/foo/bar", true},
-	{"/foo", "/foo/bar", true},
-	{"/**", "/foo", true},
-	{"/*/**", "/foo", true},
-	{"/*/**", "/foo/bar", true},
-	{"/*/bar", "/foo", true},
-	{"/bar/*", "/foo", false},
-	{"/foo/*/baz", "/foo/bar", true},
-	{"/foo/*/baz", "/foo/baz", true},
-	{"/foo/*/baz", "/bar/baz", false},
-	{"/**/*", "/foo", true},
-	{"/**/bar", "/foo/bar", true},
-}
-
-func testChildPattern(t *testing.T, pattern, path string, shouldMatch bool) {
-	match, err := filter.ChildMatch(pattern, path)
-	if err != nil {
-		t.Errorf("test child pattern %q failed: expected no error for path %q, but error returned: %v",
-			pattern, path, err)
-	}
-
-	if match != shouldMatch {
-		t.Errorf("test: filter.ChildMatch(%q, %q): expected %v, got %v",
-			pattern, path, shouldMatch, match)
-	}
-}
-
-func TestChildMatch(t *testing.T) {
-	for _, test := range childMatchTests {
-		t.Run("", func(t *testing.T) {
-			testChildPattern(t, test.pattern, test.path, test.match)
-		})
-
-		// Test with native path separator
-		if filepath.Separator != '/' {
-			pattern := strings.Replace(test.pattern, "/", string(filepath.Separator), -1)
-			// Test with pattern as native
-			t.Run("pattern-native", func(t *testing.T) {
-				testChildPattern(t, pattern, test.path, test.match)
-			})
-
-			path := strings.Replace(test.path, "/", string(filepath.Separator), -1)
-			t.Run("path-native", func(t *testing.T) {
-				// Test with path as native
-				testChildPattern(t, test.pattern, path, test.match)
-			})
-
-			t.Run("both-native", func(t *testing.T) {
-				// Test with both pattern and path as native
-				testChildPattern(t, pattern, path, test.match)
-			})
-		}
-	}
-
-	t.Run("TestChildMatchWithEmptyString", func(t *testing.T) {
-		_, err := filter.ChildMatch("*.go", "")
-		if err != filter.ErrBadString {
-			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
-		}
-	})
-}
-
 func ExampleMatch() {
 	match, _ := filter.Match("*.go", "/home/user/file.go")
 	fmt.Printf("match: %v\n", match)
@@ -271,7 +174,7 @@ var filterListTests = []struct {
 
 func TestList(t *testing.T) {
 	for i, test := range filterListTests {
-		match, _, err := filter.List(test.patterns, test.path)
+		match, err := filter.List(test.patterns, test.path)
 		if err != nil {
 			t.Errorf("test %d failed: expected no error for patterns %q, but error returned: %v",
 				i, test.patterns, err)
@@ -285,7 +188,7 @@ func TestList(t *testing.T) {
 	}
 
 	t.Run("TestListWithEmptyString", func(t *testing.T) {
-		_, _, err := filter.List([]string{"*.go"}, "")
+		_, err := filter.List([]string{"*.go"}, "")
 		if err != filter.ErrBadString {
 			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
 		}
@@ -293,7 +196,7 @@ func TestList(t *testing.T) {
 }
 
 func ExampleList() {
-	match, _, _ := filter.List([]string{"*.c", "*.go"}, "/home/user/file.go")
+	match, _ := filter.List([]string{"*.c", "*.go"}, "/home/user/file.go")
 	fmt.Printf("match: %v\n", match)
 	// Output:
 	// match: true
