@@ -122,11 +122,15 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 		if !filesystem.IsFile(filePath) {
 			return nil
 		}
+
+		/*
+		issue #44 - remove pre-screening
 		// process only media
 		if !filetypes.IsMedia(filePath) {
 			log.Printf("not a media file: %s: skipping file...\n", filePath)
 			return nil
 		}
+		*/
 
 		// if we don't upload videos check it's not a video
 		if !folderUploadJob.UploadVideos && filetypes.IsVideo(filePath) {
