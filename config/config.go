@@ -27,6 +27,8 @@ type FolderUploadJob struct {
 	MakeAlbums        MakeAlbums
 	DeleteAfterUpload bool
 	UploadVideos      bool
+	IncludePatterns   []string
+	ExcludePatterns   []string
 }
 
 // MakeAlbums represents configuration about how to create Albums in Google Photos

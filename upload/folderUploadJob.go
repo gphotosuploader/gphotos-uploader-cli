@@ -3,6 +3,7 @@ package upload
 import (
 	"fmt"
 	"github.com/nmrshll/go-cp"
+	"github.com/nmrshll/gphotos-uploader-cli/filter"
 	"log"
 	"os"
 	"path/filepath"
@@ -89,8 +90,8 @@ func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*g
 }
 
 // Upload uploads folder
-func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUpload) error {
-	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
+func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
+	folderAbsolutePath, err := cp.AbsolutePath(job.SourceFolder)
 	if err != nil {
 		return err
 	}
@@ -102,68 +103,99 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
 	currentPhotoAlbum := &photoslibrary.Album{}
-	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
-		if info.IsDir() {
-			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == "folderNames" {
-				log.Printf("Entering Directory: %s", filePath)
-				currentPhotoAlbum, err = folderUploadJob.gphotosClient.GetOrCreateAlbumByName(filepath.Base(filePath))
+	errW := filepath.Walk(folderAbsolutePath, func(fp string, fi os.FileInfo, errP error) error {
+		// log.Printf("Upload.Walk: %v, fi: %v, err: %v\n", fp, fi, err)
+		// TODO: integrate error reporting
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error for %v: %v\n", fp, err)
+			return nil
+		}
+		if fi == nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error for %v: FileInfo is nil\n", fp)
+			return nil
+		}
+
+		selectExcludeFilter := func(item string) bool {
+			matched, err := filter.List(job.ExcludePatterns, item)
+			if err != nil {
+				log.Printf("error for exclude pattern: %v", err)
+			}
+
+			return !matched
+		}
+
+		selectIncludeFilter := func(item string) bool {
+			matched, err := filter.List(job.IncludePatterns, item)
+			if err != nil {
+				log.Printf("error for include pattern: %v", err)
+			}
+
+			return matched
+		}
+
+		if !selectFunc(selectIncludeFilter, selectExcludeFilter, fp, fi) {
+			log.Printf("Upload.Walk: path %v excluded", fp)
+			if fi.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+
+		if fi.IsDir() {
+			if job.MakeAlbums.Enabled && job.MakeAlbums.Use == "folderNames" {
+				log.Printf("Entering Directory: %s", fp)
+				currentPhotoAlbum, err = job.gphotosClient.GetOrCreateAlbumByName(filepath.Base(fp))
 				if err != nil {
 					currentPhotoAlbum = &photoslibrary.Album{}
-					log.Printf("error creating album: %s. File will be uploaded without album", filePath)
+					log.Printf("error creating album: %s. File will be uploaded without album", fp)
 					return nil
 				}
 				log.Printf("using album: %s / Id: %s", currentPhotoAlbum.Title, currentPhotoAlbum.Id)
 			} else {
-				log.Printf("album not created: %s. set jobs.makeAlbums.enabled = true to create albums", filePath)
+				log.Printf("album not created: %s. set jobs.makeAlbums.enabled = true to create albums", fp)
 			}
 			return nil
 		}
 		// process only files
-		if !filesystem.IsFile(filePath) {
+		if !filesystem.IsFile(fp) {
 			return nil
 		}
-
-		/*
-		issue #44 - remove pre-screening
-		// process only media
-		if !filetypes.IsMedia(filePath) {
-			log.Printf("not a media file: %s: skipping file...\n", filePath)
-			return nil
-		}
-		*/
 
 		// if we don't upload videos check it's not a video
-		if !folderUploadJob.UploadVideos && filetypes.IsVideo(filePath) {
-			log.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", filePath)
+		if !job.UploadVideos && filetypes.IsVideo(fp) {
+			log.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", fp)
 			return nil
 		}
 
 		// check upload db for previous uploads
-		isAlreadyUploaded, err := folderUploadJob.completedUploads.IsAlreadyUploaded(filePath)
+		isAlreadyUploaded, err := job.completedUploads.IsAlreadyUploaded(fp)
 		if err != nil {
 			log.Println(err)
 		} else if isAlreadyUploaded {
-			log.Printf("already uploaded: %s: skipping file...\n", filePath)
+			log.Printf("already uploaded: %s: skipping file...\n", fp)
 			return nil
 		}
 
-		typedMedia, err := filetypes.NewTypedMedia(filePath)
+
+
+		typedMedia, err := filetypes.NewTypedMedia(fp)
 		if err != nil {
-			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from filePath"))
+			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from fp"))
 			return nil
 		}
 
 		// set file upload options depending on folder upload options
 		var fileUpload = &FileUpload{
-			FolderUploadJob: folderUploadJob,
-			filePath:        filePath,
+			FolderUploadJob: job,
+			filePath:        fp,
 			typedMedia:      typedMedia,
-			gphotosClient:   folderUploadJob.gphotosClient.Client,
+			gphotosClient:   job.gphotosClient.Client,
 			album:           currentPhotoAlbum,
 		}
 
 		// finally, add the file upload to the queue
-		fileUploadsChan <- fileUpload
+		uploadChan <- fileUpload
 
 		return nil
 	})
@@ -173,3 +205,10 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 
 	return nil
 }
+
+// selectFunc returns true for all items that should be included (files and
+// dirs). If false is returned, files are ignored and dirs are not even walked.
+func selectFunc(includeFunc, excludeFunc func(string) bool, item string, fi os.FileInfo) bool {
+	return includeFunc(item) && !excludeFunc(item)
+}
+
