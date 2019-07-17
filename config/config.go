@@ -88,6 +88,8 @@ func (c Config) String() string {
       }
       deleteAfterUpload: %t
       uploadVideos: %t
+      includePatterns: []
+	  excludePatterns: []
     }
   ]
 }`
