@@ -122,6 +122,11 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 			return nil
 		}
 
+		// only files are allowed
+		if !filesystem.IsFile(fp) {
+			return nil
+		}
+
 		// check upload db for previous uploads
 		isAlreadyUploaded, err := job.trackingRepository.IsAlreadyUploaded(fp)
 		if err != nil {

@@ -3,7 +3,6 @@ package upload
 import (
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/nmrshll/gphotos-uploader-cli/filter"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"log"
 )
 
@@ -52,11 +51,6 @@ func NewFilter(includePatterns []string, excludePatterns []string, allowVideos b
 //   - item is in the include pattern
 //   - item is not in the exclude pattern
 func (f *Filter) IsAllowed(fp string) bool {
-	// only files are allowed
-	if !filesystem.IsFile(fp) {
-		return false
-	}
-
 	// check if videos are allowed
 	if !f.allowVideos && filetypes.IsVideo(fp) {
 		log.Printf("config doesn't allow video uploads - skipping: file=%s", fp)
