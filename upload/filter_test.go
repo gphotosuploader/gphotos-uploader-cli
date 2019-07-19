@@ -66,6 +66,28 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 
 }
 
+func TestFilter_AllowPNGFilesWithFolder(t *testing.T) {
+	var testCases = []struct {
+		file string
+		out  bool
+	}{
+		{"testdata/SampleJPGImage.jpg", false},
+		{"testdata/SamplePNGImage.png", true},
+		{"testdata/folder/SampleJPGImage.jpg", false},
+		{"testdata/folder/SamplePNGImage.png", true},
+
+	}
+
+	f := upload.NewFilter([]string{"*.png"}, []string{""}, false)
+	for _, tc := range testCases {
+		got := f.IsAllowed(tc.file)
+		if tc.out != got {
+			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+		}
+	}
+
+}
+
 func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 	var testCases = []struct {
 		file string
@@ -188,4 +210,26 @@ func TestFilter_DisallowVideos(t *testing.T) {
 			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
+}
+
+func TestFilter_DisallowFolder(t *testing.T) {
+	var testCases = []struct {
+		file string
+		out  bool
+	}{
+		{"testdata/SampleJPGImage.jpg", false},
+		{"testdata/SamplePNGImage.png", true},
+		{"testdata/folder/SampleJPGImage.jpg", false},
+		{"testdata/folder/SamplePNGImage.png", false},
+
+	}
+
+	f := upload.NewFilter([]string{"*.png"}, []string{"folder"}, false)
+	for _, tc := range testCases {
+		got := f.IsAllowed(tc.file)
+		if tc.out != got {
+			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+		}
+	}
+
 }
