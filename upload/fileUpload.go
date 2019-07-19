@@ -1,35 +1,38 @@
 package upload
 
 import (
-	photoslibrary "github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
-	"log"
-
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
+	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
+	"log"
 )
 
 // number of concurrent uploads
 const uploadConcurrency = 5
 
-// FileUpload represents an object to be uploaded to Google Photos
-type FileUpload struct {
-	*FolderUploadJob
-	filePath      string
-	typedMedia    filetypes.TypedMedia
-	album         *photoslibrary.Album
-	gphotosClient gphotos.Client
+// Item represents an object to be uploaded to Google Photos
+type Item struct {
+	path            string
+	typedMedia      filetypes.TypedMedia
+	album           string
+	gphotosClient   gphotos.Client
+	deleteOnSuccess bool
 }
 
-// concurrentUpload read fileUploads chan for each FileUpload struct, and upload the file to gphotos
+// concurrentUpload read fileUploads chan for each Item struct, and upload the file to gphotos
 // when the fileUploadsChan is done, signal to doneUploading
-func concurrentUpload(fileUploadsChan <-chan *FileUpload, doneUploading chan<- bool) {
+// TODO: We should refactor this to improve concurrency
+//  eg: https://gobyexample.com/worker-pools
+//  eg: https://gobyexample.com/waitgroups
+//  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
+func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, completedUploads *completeduploads.Service) {
 	semaphore := make(chan bool, uploadConcurrency)
 	for fileUpload := range fileUploadsChan {
 		semaphore <- true
-		go func(fileUpload *FileUpload) {
+		go func(fileUpload *Item) {
 			defer func() { <-semaphore }()
-			err := fileUpload.upload()
+			err := fileUpload.upload(completedUploads)
 			if err != nil {
 				log.Fatal(errors.Annotate(err, "failed uploading image"))
 			}
@@ -43,50 +46,58 @@ func concurrentUpload(fileUploadsChan <-chan *FileUpload, doneUploading chan<- b
 }
 
 // StartFileUploadWorker set up channels and start concurrentUpload
-// fileUploadsChan will receive FileUpload structs and upload them
+// fileUploadsChan will receive Item structs and upload them
 // will signal doneUploading when fileUploadsChan is done
-func StartFileUploadWorker() (fileUploadsChan chan *FileUpload, doneUploading chan bool) {
+func StartFileUploadWorker(completedUploads *completeduploads.Service) (fileUploadsChan chan *Item, doneUploading chan bool) {
 	doneUploading = make(chan bool)
-	fileUploadsChan = make(chan *FileUpload)
-	go concurrentUpload(fileUploadsChan, doneUploading)
+	fileUploadsChan = make(chan *Item)
+	go concurrentUpload(fileUploadsChan, doneUploading, completedUploads)
 	return fileUploadsChan, doneUploading
 }
 
-func (fileUpload *FileUpload) upload() error {
-	uploadedMediaItem, err := fileUpload.gphotosClient.UploadFile(fileUpload.filePath, fileUpload.album.Id)
+// getGooglePhotosAlbumId return the Id of an album with the specified name.
+// If the album doesn't exist, return an empty string.
+func getGooglePhotosAlbumId(name string, c gphotos.Client) string {
+	if name == "" {
+		return ""
+	}
+
+	album, err := c.GetOrCreateAlbumByName(name)
+	if err != nil {
+		log.Printf("error creating album: name=%s, error=%v", name, err)
+		return ""
+	}
+	return album.Id
+}
+
+func (f *Item) upload(completedUploads *completeduploads.Service) error {
+	albumId := getGooglePhotosAlbumId(f.album, f.gphotosClient)
+	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
+
+	// upload the file content to Google Photos
+	media, err := f.gphotosClient.UploadFile(f.path, albumId)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
 
-	// check upload db for previous uploads
-	err = fileUpload.completedUploads.CacheAsAlreadyUploaded(fileUpload.filePath)
+	// mark file as uploaded in the DB
+	err = completedUploads.CacheAsAlreadyUploaded(f.path)
 	if err != nil {
-		log.Printf("Error marking file as uploaded: %s", fileUpload.filePath)
-
-		// TODO: centralized logger
-		// // log potentially bad images to a file
-		// f, err := os.OpenFile("bad_images.log",
-		// 	os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		// if err != nil {
-		// 	log.Println(err)
-		// }
-		// defer f.Close()
-		// badImages := log.New(f, "", log.LstdFlags)
-		// badImages.Println(fileUpload.filePath)
+		log.Printf("error marking file as uploaded: file=%s, error=%v", f.path, err)
 	}
 
 	// queue uploaded image for visual check of result + deletion
-	if fileUpload.DeleteAfterUpload {
+	if f.deleteOnSuccess {
 		// get uploaded media URL into mediaItem
-		uploadedMediaItem, err := fileUpload.gphotosClient.MediaItems.Get(uploadedMediaItem.Id).Do()
+		uploadedMediaItem, err := f.gphotosClient.MediaItems.Get(media.Id).Do()
 		if err != nil {
 			return errors.Annotate(err, "failed getting uploaded mediaItem")
 		}
 
 		return QueueDeletionJob(DeletionJob{
 			uploadedMediaItem.BaseUrl,
-			fileUpload.filePath,
-			fileUpload.typedMedia,
+			f.path,
+			f.typedMedia,
 		})
 	}
 	return nil

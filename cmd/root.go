@@ -65,14 +65,14 @@ func startUploader(cmd *cobra.Command, args []string) {
 	tkm := tokenstore.NewService(kr)
 
 	// start file upload worker
-	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
+	fileUploadsChan, doneUploading := upload.StartFileUploadWorker(completeduploads.NewService(completedUploadsRepository))
 	doneDeleting := upload.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
 		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials, &tkm)
 
-		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
+		if err := folderUploadJob.ScanFolder(fileUploadsChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)
 		}
 	}
@@ -88,3 +88,5 @@ func startUploader(cmd *cobra.Command, args []string) {
 	<-doneDeleting
 	log.Println("all deletions done")
 }
+
+

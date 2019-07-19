@@ -3,7 +3,6 @@ package upload
 import (
 	"fmt"
 	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/gphotos-uploader-cli/filter"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/noserver-gphotos"
-	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 	"github.com/juju/errors"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
@@ -20,16 +18,17 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 )
 
-// FolderUploadJob represents a job to upload all photos in a folder
-type FolderUploadJob struct {
+// Job represents a job to upload all photos in a folder
+type Job struct {
 	*config.FolderUploadJob
 	uploaderConfigAPICredentials *config.APIAppCredentials
 	gphotosClient                *gphotos.Client
-	completedUploads             *completeduploads.Service
+	trackingRepository           *completeduploads.Service
 }
 
-// NewFolderUploadJob creates a FolderUploadJob based on the submitted data
-func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.Service, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *FolderUploadJob {
+// TODO: accept a *gphotos.Client instead of creating it inside. We can remove a lot of parameters on call and in Job
+// NewFolderUploadJob creates a Job based on the submitted data
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.Service, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *Job {
 	// check args
 	{
 		if completedUploads == nil {
@@ -40,9 +39,9 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 		}
 	}
 
-	folderUploadJob := &FolderUploadJob{
+	folderUploadJob := &Job{
 		FolderUploadJob:              configFolderUploadJob,
-		completedUploads:             completedUploads,
+		trackingRepository:           completedUploads,
 		uploaderConfigAPICredentials: uploaderConfigAPICredentials,
 	}
 
@@ -54,8 +53,8 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 
 	return folderUploadJob
 }
-
-func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
+// TODO: Move this to a new package Photos or GPhotos where all the Google Photos code is there
+func authenticate(tkm *tokenstore.Service, folderUploadJob *Job) (*gphotos.Client, error) {
 	// try to load token from keyring
 
 	token, err := tkm.RetrieveToken(folderUploadJob.Account)
@@ -89,8 +88,8 @@ func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*g
 	return gphotosClient, nil
 }
 
-// Upload uploads folder
-func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
+// ScanFolder uploads folder
+func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 	folderAbsolutePath, err := cp.AbsolutePath(job.SourceFolder)
 	if err != nil {
 		return err
@@ -100,12 +99,12 @@ func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
+	filter := NewFilter(job.IncludePatterns, job.ExcludePatterns, job.UploadVideos)
+
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
-	currentPhotoAlbum := &photoslibrary.Album{}
 	errW := filepath.Walk(folderAbsolutePath, func(fp string, fi os.FileInfo, errP error) error {
-		// log.Printf("Upload.Walk: %v, fi: %v, err: %v\n", fp, fi, err)
-		// TODO: integrate error reporting
+		// log.Printf("ScanFolder.Walk: %v, fi: %v, err: %v\n", fp, fi, err)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "error for %v: %v\n", fp, err)
 			return nil
@@ -115,61 +114,16 @@ func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
 			return nil
 		}
 
-		selectExcludeFilter := func(item string) bool {
-			matched, err := filter.List(job.ExcludePatterns, item)
-			if err != nil {
-				log.Printf("error for exclude pattern: %v", err)
-			}
-
-			return !matched
-		}
-
-		selectIncludeFilter := func(item string) bool {
-			matched, err := filter.List(job.IncludePatterns, item)
-			if err != nil {
-				log.Printf("error for include pattern: %v", err)
-			}
-
-			return matched
-		}
-
-		if !selectFunc(selectIncludeFilter, selectExcludeFilter, fp, fi) {
-			log.Printf("Upload.Walk: path %v excluded", fp)
+		// check if the item should be uploaded (it's a file and it's not exclude
+		if !filter.IsAllowed(fp) {
 			if fi.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-
-		if fi.IsDir() {
-			if job.MakeAlbums.Enabled && job.MakeAlbums.Use == "folderNames" {
-				log.Printf("Entering Directory: %s", fp)
-				currentPhotoAlbum, err = job.gphotosClient.GetOrCreateAlbumByName(filepath.Base(fp))
-				if err != nil {
-					currentPhotoAlbum = &photoslibrary.Album{}
-					log.Printf("error creating album: %s. File will be uploaded without album", fp)
-					return nil
-				}
-				log.Printf("using album: %s / Id: %s", currentPhotoAlbum.Title, currentPhotoAlbum.Id)
-			} else {
-				log.Printf("album not created: %s. set jobs.makeAlbums.enabled = true to create albums", fp)
-			}
-			return nil
-		}
-		// process only files
-		if !filesystem.IsFile(fp) {
-			return nil
-		}
-
-		// if we don't upload videos check it's not a video
-		if !job.UploadVideos && filetypes.IsVideo(fp) {
-			log.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", fp)
-			return nil
-		}
-
 		// check upload db for previous uploads
-		isAlreadyUploaded, err := job.completedUploads.IsAlreadyUploaded(fp)
+		isAlreadyUploaded, err := job.trackingRepository.IsAlreadyUploaded(fp)
 		if err != nil {
 			log.Println(err)
 		} else if isAlreadyUploaded {
@@ -177,25 +131,26 @@ func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
 			return nil
 		}
 
-
-
 		typedMedia, err := filetypes.NewTypedMedia(fp)
 		if err != nil {
 			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from fp"))
 			return nil
 		}
 
+		// calculate Album Name from the folder name
+		album := filepath.Base(filepath.Dir(fp))
+
 		// set file upload options depending on folder upload options
-		var fileUpload = &FileUpload{
-			FolderUploadJob: job,
-			filePath:        fp,
+		var uploadItem = &Item{
+			path:            fp,
 			typedMedia:      typedMedia,
 			gphotosClient:   job.gphotosClient.Client,
-			album:           currentPhotoAlbum,
+			album:           album,
+			deleteOnSuccess: job.DeleteAfterUpload,
 		}
 
 		// finally, add the file upload to the queue
-		uploadChan <- fileUpload
+		uploadChan <- uploadItem
 
 		return nil
 	})
@@ -205,10 +160,3 @@ func (job *FolderUploadJob) Upload(uploadChan chan<- *FileUpload) error {
 
 	return nil
 }
-
-// selectFunc returns true for all items that should be included (files and
-// dirs). If false is returned, files are ignored and dirs are not even walked.
-func selectFunc(includeFunc, excludeFunc func(string) bool, item string, fi os.FileInfo) bool {
-	return includeFunc(item) && !excludeFunc(item)
-}
-
