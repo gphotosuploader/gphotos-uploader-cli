@@ -53,6 +53,7 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 
 	return folderUploadJob
 }
+
 // TODO: Move this to a new package Photos or GPhotos where all the Google Photos code is there
 func authenticate(tkm *tokenstore.Service, folderUploadJob *Job) (*gphotos.Client, error) {
 	// try to load token from keyring

@@ -19,6 +19,8 @@ Example configuration file (usually at `~/.config/gphotos-uploader-cli/config.hj
       }
       deleteAfterUpload: false
       uploadVideos: true
+      includePatterns: [ "*.jpg", "*.png" ]
+      excludePatterns: [ "*ScreenShot*" ]
     }
   ]
 }
@@ -79,4 +81,23 @@ If set to true, media will be deleted from local disk after upload.
 To avoid data corruption, the uploader will double check that a the picture exists in your library and is visually similar to the one on the local disk before deleting any file.
 
 ### `uploadVideos`
-If set to true, media items identified as a video will be uploaded. If false, they will be skipped. 
+If set to true, media items identified as a video will be uploaded. If false, they will be skipped.
+
+## Including and Excluding files
+You can include and exclude files by specifying the `includePatterns` and `excludePatterns` options. You can add one or more patterns separated by commas `,`. These patterns are always applied to `sourceFolder` scope.
+
+For example, to upload all _JPG and PNG files_ that are not named _*ScreenShots*_ you can configure it like this:
+```
+      includePatterns: [ "*.jpg", "*.png" ]
+      excludePatterns: [ "*ScreenShot*" ]
+```
+
+Patterns use [filepath.Glob](https://golang.org/pkg/path/filepath/#Glob) internally, see [filepath.Match](https://golang.org/pkg/path/filepath/#Match) for syntax. 
+
+Regular wildcards cannot be used to match over the directory separator `/`. For example: `b*ash` matches `/dir/bash` but does not match `/dir/ash`.
+
+For this, the special wildcard `**` can be used to match arbitrary sub-directories: The pattern `foo/**/bar` matches:
+
+* `/dir1/foo/dir2/bar/file`
+* `/foo/bar/file`
+* `/tmp/foo/bar`

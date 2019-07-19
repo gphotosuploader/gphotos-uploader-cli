@@ -47,8 +47,8 @@ type Config struct {
 }
 
 // defaultConfig returns an example Config object
-func defaultConfig() *Config {
-	c := &Config{}
+func defaultConfig() Config {
+	var c Config
 	c.SecretsBackendType = "auto"
 	c.APIAppCredentials = &APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
@@ -136,13 +136,14 @@ func LoadConfigFile(p string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
 	}
 
-	var config = &Config{}
+	config := defaultConfig()
+	config.ConfigFile = path
 
-	if err := hjson.Unmarshal(data, config); err != nil {
+	if err := hjson.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
 	}
 
-	return config, nil
+	return &config, nil
 }
 
 // InitConfigFile creates an example config file if it doesn't already exist

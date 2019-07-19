@@ -17,6 +17,10 @@ type Filter struct {
 func NewFilter(includePatterns []string, excludePatterns []string, allowVideos bool) *Filter {
 	var f Filter
 
+	if len(includePatterns) < 1 {
+		includePatterns = []string{"*"}
+	}
+
 	// empty includePatterns means "*"
 	for i, p := range includePatterns {
 		if p == "" {
