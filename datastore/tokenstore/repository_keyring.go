@@ -54,7 +54,7 @@ func defaultConfig() keyring.Config {
 		KeychainAccessibleWhenUnlocked: false,
 		KeychainPasswordFunc:           nil,
 		FilePasswordFunc:               terminalPrompt,
-		FileDir:                        "~/.gphotos-uploader-cli",
+		FileDir:                        "~/.config/gphotos-uploader-cli",
 		KWalletAppID:                   "",
 		KWalletFolder:                  "",
 		LibSecretCollectionName:        "",
