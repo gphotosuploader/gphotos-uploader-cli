@@ -52,7 +52,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	// load completedUploads DB
 	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
 	if err != nil {
-		log.Fatalf("Error opening db: %v", err)
+		log.Fatalf("Error opening db: path=%s, err=%v", config.GetUploadsDBPath(), err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
