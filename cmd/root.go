@@ -54,7 +54,11 @@ func startUploader(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("Error opening db: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	completedUploadsRepository := completeduploads.NewLevelDBRepository(db)
 
 	// token manager service to be used as secrets backend
