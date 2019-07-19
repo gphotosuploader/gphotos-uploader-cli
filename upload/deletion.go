@@ -19,6 +19,8 @@ type DeletionJob struct {
 	typedMedia      filetypes.TypedMedia
 }
 
+// TODO: create a new type DeletionQueue. The rest are methods of it
+
 // QueueDeletionJob adds an object to be deleted to an asynchronous queue.
 // It checks that all the parameters are set or return error otherwise.
 func QueueDeletionJob(deletionJob DeletionJob) error {
