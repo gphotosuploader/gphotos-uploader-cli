@@ -167,7 +167,11 @@ func InitConfigFile(p string) error {
 			return fmt.Errorf("failed to create config file %s: %v", path, err)
 		}
 	}
-	defer fh.Close()
+	defer func() {
+		if err := fh.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	_, err = fh.WriteString(defaultConfig().String())
 	if err != nil {
