@@ -94,7 +94,7 @@ For example, to upload all _JPG and PNG files_ that are not named _*ScreenShots*
 
 Patterns use [filepath.Glob](https://golang.org/pkg/path/filepath/#Glob) internally, see [filepath.Match](https://golang.org/pkg/path/filepath/#Match) for syntax. 
 
-Regular wildcards cannot be used to match over the directory separator `/`. For example: `b*ash` matches `/dir/bash` but does not match `/dir/ash`.
+Regular wildcards cannot be used to match over the directory separator `/`. For example: `b*ash` matches `/dir/bash` but does not match `/dibr/ash`.
 
 For this, the special wildcard `**` can be used to match arbitrary sub-directories: The pattern `foo/**/bar` matches:
 
