@@ -7,6 +7,6 @@ type Service struct {
 }
 
 // NewService create a Service to store / retrieve tokens.
-func NewService(r TokenManager) Service {
-	return Service{r}
+func NewService(r TokenManager) *Service {
+	return &Service{r}
 }
