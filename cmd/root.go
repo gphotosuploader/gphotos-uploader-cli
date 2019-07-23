@@ -52,9 +52,13 @@ func startUploader(cmd *cobra.Command, args []string) {
 	// load completedUploads DB
 	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
 	if err != nil {
-		log.Fatalf("Error opening db: %v", err)
+		log.Fatalf("Error opening db: path=%s, err=%v", config.GetUploadsDBPath(), err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	completedUploadsRepository := completeduploads.NewLevelDBRepository(db)
 
 	// token manager service to be used as secrets backend
@@ -65,14 +69,14 @@ func startUploader(cmd *cobra.Command, args []string) {
 	tkm := tokenstore.NewService(kr)
 
 	// start file upload worker
-	fileUploadsChan, doneUploading := upload.StartFileUploadWorker()
+	fileUploadsChan, doneUploading := upload.StartFileUploadWorker(completeduploads.NewService(completedUploadsRepository))
 	doneDeleting := upload.StartDeletionsWorker()
 
 	// launch all folder upload jobs
 	for _, job := range cfg.Jobs {
 		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials, &tkm)
 
-		if err := folderUploadJob.Upload(fileUploadsChan); err != nil {
+		if err := folderUploadJob.ScanFolder(fileUploadsChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)
 		}
 	}
@@ -88,3 +92,5 @@ func startUploader(cmd *cobra.Command, args []string) {
 	<-doneDeleting
 	log.Println("all deletions done")
 }
+
+

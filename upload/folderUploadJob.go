@@ -10,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/noserver-gphotos"
-	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 	"github.com/juju/errors"
 	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
@@ -19,16 +18,17 @@ import (
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 )
 
-// FolderUploadJob represents a job to upload all photos in a folder
-type FolderUploadJob struct {
+// Job represents a job to upload all photos in a folder
+type Job struct {
 	*config.FolderUploadJob
 	uploaderConfigAPICredentials *config.APIAppCredentials
 	gphotosClient                *gphotos.Client
-	completedUploads             *completeduploads.Service
+	trackingRepository           *completeduploads.Service
 }
 
-// NewFolderUploadJob creates a FolderUploadJob based on the submitted data
-func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.Service, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *FolderUploadJob {
+// TODO: accept a *gphotos.Client instead of creating it inside. We can remove a lot of parameters on call and in Job
+// NewFolderUploadJob creates a Job based on the submitted data
+func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completedUploads *completeduploads.Service, uploaderConfigAPICredentials *config.APIAppCredentials, tokenManagerService *tokenstore.Service) *Job {
 	// check args
 	{
 		if completedUploads == nil {
@@ -39,9 +39,9 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 		}
 	}
 
-	folderUploadJob := &FolderUploadJob{
+	folderUploadJob := &Job{
 		FolderUploadJob:              configFolderUploadJob,
-		completedUploads:             completedUploads,
+		trackingRepository:           completedUploads,
 		uploaderConfigAPICredentials: uploaderConfigAPICredentials,
 	}
 
@@ -54,7 +54,8 @@ func NewFolderUploadJob(configFolderUploadJob *config.FolderUploadJob, completed
 	return folderUploadJob
 }
 
-func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*gphotos.Client, error) {
+// TODO: Move this to a new package Photos or GPhotos where all the Google Photos code is there
+func authenticate(tkm *tokenstore.Service, folderUploadJob *Job) (*gphotos.Client, error) {
 	// try to load token from keyring
 
 	token, err := tkm.RetrieveToken(folderUploadJob.Account)
@@ -88,9 +89,9 @@ func authenticate(tkm *tokenstore.Service, folderUploadJob *FolderUploadJob) (*g
 	return gphotosClient, nil
 }
 
-// Upload uploads folder
-func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUpload) error {
-	folderAbsolutePath, err := cp.AbsolutePath(folderUploadJob.SourceFolder)
+// ScanFolder uploads folder
+func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
+	folderAbsolutePath, err := cp.AbsolutePath(job.SourceFolder)
 	if err != nil {
 		return err
 	}
@@ -99,67 +100,63 @@ func (folderUploadJob *FolderUploadJob) Upload(fileUploadsChan chan<- *FileUploa
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
+	filter := NewFilter(job.IncludePatterns, job.ExcludePatterns, job.UploadVideos)
+
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
-	currentPhotoAlbum := &photoslibrary.Album{}
-	errW := filepath.Walk(folderAbsolutePath, func(filePath string, info os.FileInfo, errP error) error {
-		if info.IsDir() {
-			if folderUploadJob.MakeAlbums.Enabled && folderUploadJob.MakeAlbums.Use == "folderNames" {
-				log.Printf("Entering Directory: %s", filePath)
-				currentPhotoAlbum, err = folderUploadJob.gphotosClient.GetOrCreateAlbumByName(filepath.Base(filePath))
-				if err != nil {
-					currentPhotoAlbum = &photoslibrary.Album{}
-					log.Printf("error creating album: %s. File will be uploaded without album", filePath)
-					return nil
-				}
-				log.Printf("using album: %s / Id: %s", currentPhotoAlbum.Title, currentPhotoAlbum.Id)
-			} else {
-				log.Printf("album not created: %s. set jobs.makeAlbums.enabled = true to create albums", filePath)
-			}
+	errW := filepath.Walk(folderAbsolutePath, func(fp string, fi os.FileInfo, errP error) error {
+		// log.Printf("ScanFolder.Walk: %v, fi: %v, err: %v\n", fp, fi, err)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error for %v: %v\n", fp, err)
 			return nil
 		}
-		// process only files
-		if !filesystem.IsFile(filePath) {
-			return nil
-		}
-		// process only media
-		if !filetypes.IsMedia(filePath) {
-			log.Printf("not a media file: %s: skipping file...\n", filePath)
+		if fi == nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error for %v: FileInfo is nil\n", fp)
 			return nil
 		}
 
-		// if we don't upload videos check it's not a video
-		if !folderUploadJob.UploadVideos && filetypes.IsVideo(filePath) {
-			log.Printf("recognized as video file: %s: skipping file... (set uploadVideos to true in config to upload videos)\n", filePath)
+		// check if the item should be uploaded (it's a file and it's not exclude
+		if !filter.IsAllowed(fp) {
+			if fi.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// only files are allowed
+		if !filesystem.IsFile(fp) {
 			return nil
 		}
 
 		// check upload db for previous uploads
-		isAlreadyUploaded, err := folderUploadJob.completedUploads.IsAlreadyUploaded(filePath)
+		isAlreadyUploaded, err := job.trackingRepository.IsAlreadyUploaded(fp)
 		if err != nil {
 			log.Println(err)
 		} else if isAlreadyUploaded {
-			log.Printf("already uploaded: %s: skipping file...\n", filePath)
+			log.Printf("already uploaded: %s: skipping file...\n", fp)
 			return nil
 		}
 
-		typedMedia, err := filetypes.NewTypedMedia(filePath)
+		typedMedia, err := filetypes.NewTypedMedia(fp)
 		if err != nil {
-			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from filePath"))
+			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from fp"))
 			return nil
 		}
+
+		// calculate Album Name from the folder name
+		album := filepath.Base(filepath.Dir(fp))
 
 		// set file upload options depending on folder upload options
-		var fileUpload = &FileUpload{
-			FolderUploadJob: folderUploadJob,
-			filePath:        filePath,
+		var uploadItem = &Item{
+			path:            fp,
 			typedMedia:      typedMedia,
-			gphotosClient:   folderUploadJob.gphotosClient.Client,
-			album:           currentPhotoAlbum,
+			gphotosClient:   job.gphotosClient.Client,
+			album:           album,
+			deleteOnSuccess: job.DeleteAfterUpload,
 		}
 
 		// finally, add the file upload to the queue
-		fileUploadsChan <- fileUpload
+		uploadChan <- uploadItem
 
 		return nil
 	})

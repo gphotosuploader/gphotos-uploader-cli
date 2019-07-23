@@ -27,6 +27,8 @@ type FolderUploadJob struct {
 	MakeAlbums        MakeAlbums
 	DeleteAfterUpload bool
 	UploadVideos      bool
+	IncludePatterns   []string
+	ExcludePatterns   []string
 }
 
 // MakeAlbums represents configuration about how to create Albums in Google Photos
@@ -45,8 +47,8 @@ type Config struct {
 }
 
 // defaultConfig returns an example Config object
-func defaultConfig() *Config {
-	c := &Config{}
+func defaultConfig() Config {
+	var c Config
 	c.SecretsBackendType = "auto"
 	c.APIAppCredentials = &APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
@@ -86,6 +88,8 @@ func (c Config) String() string {
       }
       deleteAfterUpload: %t
       uploadVideos: %t
+      includePatterns: []
+	  excludePatterns: []
     }
   ]
 }`
@@ -132,13 +136,14 @@ func LoadConfigFile(p string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
 	}
 
-	var config = &Config{}
+	config := defaultConfig()
+	config.ConfigFile = path
 
-	if err := hjson.Unmarshal(data, config); err != nil {
+	if err := hjson.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
 	}
 
-	return config, nil
+	return &config, nil
 }
 
 // InitConfigFile creates an example config file if it doesn't already exist
@@ -163,7 +168,11 @@ func InitConfigFile(p string) error {
 			return fmt.Errorf("failed to create config file %s: %v", path, err)
 		}
 	}
-	defer fh.Close()
+	defer func() {
+		if err := fh.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	_, err = fh.WriteString(defaultConfig().String())
 	if err != nil {

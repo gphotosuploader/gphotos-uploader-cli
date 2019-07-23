@@ -1,7 +1,8 @@
-package config
+package config_test
 
 import (
 	"fmt"
+	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +14,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 	path := filepath.Join(os.TempDir(), fmt.Sprintf("file.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := InitConfigFile(path)
+		err := config.InitConfigFile(path)
 		if err != nil {
 			t.Errorf("could not create init config file: %v", err)
 		}
@@ -27,11 +28,11 @@ func TestInitAndLoadConfig(t *testing.T) {
 	}()
 
 	// prepare expected configuration
-	expected := defaultConfig()
+	expected := createTestConfiguration()
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
-		got, err := LoadConfigFile(path)
+		got, err := config.LoadConfigFile(path)
 		if err != nil {
 			t.Errorf("could not load config file, got an error: %v", err)
 		}
@@ -41,8 +42,30 @@ func TestInitAndLoadConfig(t *testing.T) {
 			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", *expected.APIAppCredentials, *got.APIAppCredentials)
 		}
 
-		if got.Jobs[0] != expected.Jobs[0] {
-			t.Errorf("Jobs are not equal: expected %v, got %v", expected.Jobs[0], got.Jobs[0])
+		if len(got.Jobs) != len(expected.Jobs) {
+			t.Errorf("Jobs are not equal: expected %d jobs, got %d jobs", len(expected.Jobs), len(got.Jobs))
 		}
 	})
+}
+
+func createTestConfiguration() *config.Config {
+	c := &config.Config{}
+	c.SecretsBackendType = "auto"
+	c.APIAppCredentials = &config.APIAppCredentials{
+		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+	}
+	c.Jobs = make([]config.FolderUploadJob, 0)
+	job := config.FolderUploadJob{
+		Account:      "youremail@gmail.com",
+		SourceFolder: "~/folder/to/upload",
+		MakeAlbums: config.MakeAlbums{
+			Enabled: true,
+			Use:     "folderNames",
+		},
+		DeleteAfterUpload: true,
+		UploadVideos:      true,
+	}
+	c.Jobs = append(c.Jobs, job)
+	return c
 }
