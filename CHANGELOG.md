@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - Add two configuration options to include (`includePatterns`) and exclude (`excludePatterns`) files to be uploaded. See [configuration documentation](.docs/configuration.md) for details.
 
+### Changed
+- Reduce memory footprint simplifying objects overhead
+
 ### Fixed
 - Fix folder typo on secrets backend storage
 

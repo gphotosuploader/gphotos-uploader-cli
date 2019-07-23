@@ -82,7 +82,8 @@ func startUploader(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 
-		job := upload.NewFolderUploadJob(&gPhotos.Client, fileTracker, &item)
+		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
+		job := upload.NewFolderUploadJob(&gPhotos.Client, fileTracker, item.SourceFolder, opt)
 
 		if err := job.ScanFolder(uploadChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
@@ -100,5 +101,3 @@ func startUploader(cmd *cobra.Command, args []string) {
 	<-doneDeleting
 	log.Println("all deletions done")
 }
-
-

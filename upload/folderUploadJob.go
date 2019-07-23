@@ -5,7 +5,6 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
 	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
@@ -19,32 +18,44 @@ type Job struct {
 	client          *gphotos.Client
 	trackingService *completeduploads.Service
 
-	SourceFolder      string
-	MakeAlbums        config.MakeAlbums
-	DeleteAfterUpload bool
-	UploadVideos      bool
-	IncludePatterns   []string
-	ExcludePatterns   []string
+	sourceFolder string
+	*JobOptions
+}
+
+// JobOptions represents all the options that a Job can have
+type JobOptions struct {
+	createAlbum       bool
+	deleteAfterUpload bool
+	uploadVideos      bool
+	includePatterns   []string
+	excludePatterns   []string
+}
+
+// NewJobOptions create a JobOptions based on the submitted / validated data
+func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
+	return &JobOptions{
+		createAlbum:       createAlbum,
+		deleteAfterUpload: deleteAfterUpload,
+		uploadVideos:      uploadVideos,
+		includePatterns:   includePatterns,
+		excludePatterns:   excludePatterns,
+	}
 }
 
 // NewFolderUploadJob creates a Job based on the submitted data
-func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, cfg *config.FolderUploadJob) *Job {
+func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *JobOptions) *Job {
 	return &Job{
 		trackingService: trackingService,
 		client:          client,
 
-		SourceFolder:      cfg.SourceFolder,
-		MakeAlbums:        cfg.MakeAlbums,
-		DeleteAfterUpload: cfg.DeleteAfterUpload,
-		UploadVideos:      cfg.UploadVideos,
-		IncludePatterns:   cfg.IncludePatterns,
-		ExcludePatterns:   cfg.ExcludePatterns,
+		sourceFolder: fp,
+		JobOptions:   opt,
 	}
 }
 
 // ScanFolder uploads folder
 func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
-	folderAbsolutePath, err := cp.AbsolutePath(job.SourceFolder)
+	folderAbsolutePath, err := cp.AbsolutePath(job.sourceFolder)
 	if err != nil {
 		return err
 	}
@@ -53,7 +64,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
-	filter := NewFilter(job.IncludePatterns, job.ExcludePatterns, job.UploadVideos)
+	filter := NewFilter(job.includePatterns, job.excludePatterns, job.uploadVideos)
 
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
@@ -97,7 +108,10 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		}
 
 		// calculate Album Name from the folder name
-		album := filepath.Base(filepath.Dir(fp))
+		var album string
+		if job.createAlbum {
+			album = filepath.Base(filepath.Dir(fp))
+		}
 
 		// set file upload options depending on folder upload options
 		var uploadItem = &Item{
@@ -105,7 +119,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 			path:            fp,
 			typedMedia:      typedMedia,
 			album:           album,
-			deleteOnSuccess: job.DeleteAfterUpload,
+			deleteOnSuccess: job.deleteAfterUpload,
 		}
 
 		// finally, add the file upload to the queue
