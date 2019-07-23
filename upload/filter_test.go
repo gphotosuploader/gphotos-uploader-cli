@@ -54,31 +54,11 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 		{"testdata/SampleVideo.mp4", false},
 		{"testdata/ScreenShotJPG.jpg", false},
 		{"testdata/ScreenShotPNG.png", true},
+		{"testdata/folder/SampleJPGImage.jpg", false},
+		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
 	f := upload.NewFilter([]string{"*.png"}, []string{""}, true)
-	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
-	}
-
-}
-
-func TestFilter_AllowPNGFilesWithFolder(t *testing.T) {
-	var testCases = []struct {
-		file string
-		out  bool
-	}{
-		{"testdata/SampleJPGImage.jpg", false},
-		{"testdata/SamplePNGImage.png", true},
-		{"testdata/folder/SampleJPGImage.jpg", false},
-		{"testdata/folder/SamplePNGImage.png", true},
-
-	}
-
-	f := upload.NewFilter([]string{"*.png"}, []string{""}, false)
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -101,6 +81,8 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 		{"testdata/SampleVideo.mp4", false},
 		{"testdata/ScreenShotJPG.jpg", true},
 		{"testdata/ScreenShotPNG.png", true},
+		{"testdata/folder/SampleJPGImage.jpg", true},
+		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
 	f := upload.NewFilter([]string{"*.png", "*.jpg"}, []string{""}, true)
@@ -113,7 +95,7 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 
 }
 
-func TestFilter_AllowSampleImageFiles(t *testing.T) {
+func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
 	var testCases = []struct {
 		file string
 		out  bool
@@ -163,7 +145,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 
 }
 
-func TestFilter_DisallowScreenShots(t *testing.T) {
+func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 	var testCases = []struct {
 		file string
 		out  bool
@@ -188,7 +170,7 @@ func TestFilter_DisallowScreenShots(t *testing.T) {
 
 }
 
-func TestFilter_DisallowVideos(t *testing.T) {
+func TestFilter_DisallowVideosByParameter(t *testing.T) {
 	var testCases = []struct {
 		file string
 		out  bool
@@ -212,7 +194,7 @@ func TestFilter_DisallowVideos(t *testing.T) {
 	}
 }
 
-func TestFilter_DisallowFolder(t *testing.T) {
+func TestFilter_DisallowAFolder(t *testing.T) {
 	var testCases = []struct {
 		file string
 		out  bool
@@ -224,7 +206,7 @@ func TestFilter_DisallowFolder(t *testing.T) {
 
 	}
 
-	f := upload.NewFilter([]string{"*.png"}, []string{"folder"}, false)
+	f := upload.NewFilter([]string{"*.png"}, []string{"folder"}, true)
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
