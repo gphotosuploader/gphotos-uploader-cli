@@ -13,17 +13,17 @@ import (
 	"path/filepath"
 )
 
-// Job represents a job to upload all photos in a folder
-type Job struct {
+// job represents a job to upload all photos from the specified folder
+type job struct {
 	client          *gphotos.Client
 	trackingService *completeduploads.Service
 
 	sourceFolder string
-	*JobOptions
+	*jobOptions
 }
 
-// JobOptions represents all the options that a Job can have
-type JobOptions struct {
+// jobOptions represents all the options that a job can have
+type jobOptions struct {
 	createAlbum       bool
 	deleteAfterUpload bool
 	uploadVideos      bool
@@ -31,9 +31,9 @@ type JobOptions struct {
 	excludePatterns   []string
 }
 
-// NewJobOptions create a JobOptions based on the submitted / validated data
-func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
-	return &JobOptions{
+// NewJobOptions create a jobOptions based on the submitted / validated data
+func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *jobOptions {
+	return &jobOptions{
 		createAlbum:       createAlbum,
 		deleteAfterUpload: deleteAfterUpload,
 		uploadVideos:      uploadVideos,
@@ -42,19 +42,19 @@ func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, 
 	}
 }
 
-// NewFolderUploadJob creates a Job based on the submitted data
-func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *JobOptions) *Job {
-	return &Job{
+// NewFolderUploadJob creates a job based on the submitted data
+func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *jobOptions) *job {
+	return &job{
 		trackingService: trackingService,
 		client:          client,
 
 		sourceFolder: fp,
-		JobOptions:   opt,
+		jobOptions:   opt,
 	}
 }
 
 // ScanFolder uploads folder
-func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
+func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 	folderAbsolutePath, err := cp.AbsolutePath(job.sourceFolder)
 	if err != nil {
 		return err
