@@ -59,7 +59,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	}()
-	completedUploadsRepository := completeduploads.NewLevelDBRepository(db)
+	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(db))
 
 	// token manager service to be used as secrets backend
 	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil)
@@ -69,20 +69,29 @@ func startUploader(cmd *cobra.Command, args []string) {
 	tkm := tokenstore.NewService(kr)
 
 	// start file upload worker
-	fileUploadsChan, doneUploading := upload.StartFileUploadWorker(completeduploads.NewService(completedUploadsRepository))
+	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker)
 	doneDeleting := upload.StartDeletionsWorker()
 
-	// launch all folder upload jobs
-	for _, job := range cfg.Jobs {
-		folderUploadJob := upload.NewFolderUploadJob(&job, completeduploads.NewService(completedUploadsRepository), cfg.APIAppCredentials, &tkm)
+	// get OAuth2 Configuration with our App credentials
+	oauthConfig := config.OAuthConfig(cfg.APIAppCredentials)
 
-		if err := folderUploadJob.ScanFolder(fileUploadsChan); err != nil {
-			log.Fatalf("Failed to upload folder %s: %v", job.SourceFolder, err)
+	// launch all folder upload jobs
+	for _, item := range cfg.Jobs {
+		gPhotos, err := upload.Authenticate(tkm, oauthConfig, item.Account)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
+		job := upload.NewFolderUploadJob(&gPhotos.Client, fileTracker, item.SourceFolder, opt)
+
+		if err := job.ScanFolder(uploadChan); err != nil {
+			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
 		}
 	}
 
 	// after we've run all the folder upload jobs we're done adding file upload jobs
-	close(fileUploadsChan)
+	close(uploadChan)
 	// wait for all the uploads to be completed
 	<-doneUploading
 	log.Println("all uploads done")
@@ -92,5 +101,3 @@ func startUploader(cmd *cobra.Command, args []string) {
 	<-doneDeleting
 	log.Println("all deletions done")
 }
-
-

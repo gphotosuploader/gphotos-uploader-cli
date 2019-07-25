@@ -13,10 +13,11 @@ const uploadConcurrency = 5
 
 // Item represents an object to be uploaded to Google Photos
 type Item struct {
+	client          *gphotos.Client
+
 	path            string
 	typedMedia      filetypes.TypedMedia
 	album           string
-	gphotosClient   gphotos.Client
 	deleteOnSuccess bool
 }
 
@@ -48,16 +49,16 @@ func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, c
 // StartFileUploadWorker set up channels and start concurrentUpload
 // fileUploadsChan will receive Item structs and upload them
 // will signal doneUploading when fileUploadsChan is done
-func StartFileUploadWorker(completedUploads *completeduploads.Service) (fileUploadsChan chan *Item, doneUploading chan bool) {
+func StartFileUploadWorker(trackingService *completeduploads.Service) (fileUploadsChan chan *Item, doneUploading chan bool) {
 	doneUploading = make(chan bool)
 	fileUploadsChan = make(chan *Item)
-	go concurrentUpload(fileUploadsChan, doneUploading, completedUploads)
+	go concurrentUpload(fileUploadsChan, doneUploading, trackingService)
 	return fileUploadsChan, doneUploading
 }
 
 // getGooglePhotosAlbumId return the Id of an album with the specified name.
 // If the album doesn't exist, return an empty string.
-func getGooglePhotosAlbumId(name string, c gphotos.Client) string {
+func getGooglePhotosAlbumId(name string, c *gphotos.Client) string {
 	if name == "" {
 		return ""
 	}
@@ -71,11 +72,11 @@ func getGooglePhotosAlbumId(name string, c gphotos.Client) string {
 }
 
 func (f *Item) upload(completedUploads *completeduploads.Service) error {
-	albumId := getGooglePhotosAlbumId(f.album, f.gphotosClient)
+	albumId := getGooglePhotosAlbumId(f.album, f.client)
 	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
 
 	// upload the file content to Google Photos
-	media, err := f.gphotosClient.UploadFile(f.path, albumId)
+	media, err := f.client.UploadFile(f.path, albumId)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
@@ -89,7 +90,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	// queue uploaded image for visual check of result + deletion
 	if f.deleteOnSuccess {
 		// get uploaded media URL into mediaItem
-		uploadedMediaItem, err := f.gphotosClient.MediaItems.Get(media.Id).Do()
+		uploadedMediaItem, err := f.client.MediaItems.Get(media.Id).Do()
 		if err != nil {
 			return errors.Annotate(err, "failed getting uploaded mediaItem")
 		}
