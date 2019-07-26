@@ -3,15 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-### Unreleased
+### 0.4.0
 ### Added
 - Add two configuration options to include (`includePatterns`) and exclude (`excludePatterns`) files to be uploaded. See [configuration documentation](.docs/configuration.md) for details.
 
 ### Changed
 - Reduce memory footprint simplifying objects overhead
+- Configuration parameter `uploadVideos` is now using `includePatterns` and `excludePatterns` instead of detecting video format. **ATTENTION:** This option **will be deprecated** in the future in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation](.docs/configuration.md) for details.
 
 ### Fixed
-- Fix folder typo on secrets backend storage
+- Fix folder path typo on secrets backend storage
 
 ### Removed
 - **ATTENTION:** `deleteAfterUpload` option has been temporarily removed. So no local file is removed by `gphotos-uplaoder-cli`.  See [issue #25](https://github.com/nmrshll/gphotos-uploader-cli/issues/25) for more details.

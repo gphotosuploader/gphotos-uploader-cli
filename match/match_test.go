@@ -1,10 +1,10 @@
-package filter_test
+package match_test
 
 import (
 	"bufio"
 	"compress/bzip2"
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/filter"
+	"github.com/nmrshll/gphotos-uploader-cli/match"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,7 +94,7 @@ var matchTests = []struct {
 }
 
 func testPattern(t *testing.T, pattern, path string, shouldMatch bool) {
-	match, err := filter.Match(pattern, path)
+	match, err := match.Match(pattern, path)
 	if err != nil {
 		t.Errorf("test pattern %q failed: expected no error for path %q, but error returned: %v",
 			pattern, path, err)
@@ -134,28 +134,28 @@ func TestMatch(t *testing.T) {
 	}
 
 	t.Run("TestMatchWithEmptyString", func(t *testing.T) {
-		_, err := filter.Match("*.go", "")
-		if err != filter.ErrBadString {
-			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
+		_, err := match.Match("*.go", "")
+		if err != match.ErrBadString {
+			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", match.ErrBadString, err)
 		}
 	})
 }
 
 func ExampleMatch() {
-	match, _ := filter.Match("*.go", "/home/user/file.go")
+	match, _ := match.Match("*.go", "/home/user/file.go")
 	fmt.Printf("match: %v\n", match)
 	// Output:
 	// match: true
 }
 
 func ExampleMatch_wildcards() {
-	match, _ := filter.Match("/home/[uU]ser/?.go", "/home/user/F.go")
+	match, _ := match.Match("/home/[uU]ser/?.go", "/home/user/F.go")
 	fmt.Printf("match: %v\n", match)
 	// Output:
 	// match: true
 }
 
-var filterListTests = []struct {
+var filterMatchOneTests = []struct {
 	patterns []string
 	path     string
 	match    bool
@@ -172,9 +172,9 @@ var filterListTests = []struct {
 	{[]string{"", "*.c"}, "/foo/bar/test.go", false},
 }
 
-func TestList(t *testing.T) {
-	for i, test := range filterListTests {
-		match, err := filter.List(test.patterns, test.path)
+func TestMatchOne(t *testing.T) {
+	for i, test := range filterMatchOneTests {
+		match, err := match.MatchOne(test.patterns, test.path)
 		if err != nil {
 			t.Errorf("test %d failed: expected no error for patterns %q, but error returned: %v",
 				i, test.patterns, err)
@@ -182,21 +182,21 @@ func TestList(t *testing.T) {
 		}
 
 		if match != test.match {
-			t.Errorf("test %d: filter.MatchList(%q, %q): expected %v, got %v",
+			t.Errorf("test %d: filter.MatchOne(%q, %q): expected %v, got %v",
 				i, test.patterns, test.path, test.match, match)
 		}
 	}
 
-	t.Run("TestListWithEmptyString", func(t *testing.T) {
-		_, err := filter.List([]string{"*.go"}, "")
-		if err != filter.ErrBadString {
-			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", filter.ErrBadString, err)
+	t.Run("TestMatchOneWithEmptyString", func(t *testing.T) {
+		_, err := match.MatchOne([]string{"*.go"}, "")
+		if err != match.ErrBadString {
+			t.Errorf("test empty string failed: expected %s error, but different error returned: %v", match.ErrBadString, err)
 		}
 	})
 }
 
-func ExampleList() {
-	match, _ := filter.List([]string{"*.c", "*.go"}, "/home/user/file.go")
+func ExampleMatchOne() {
+	match, _ := match.MatchOne([]string{"*.c", "*.go"}, "/home/user/file.go")
 	fmt.Printf("match: %v\n", match)
 	// Output:
 	// match: true
@@ -237,7 +237,7 @@ func TestFilterPatternsFile(t *testing.T) {
 	for _, test := range testPatterns {
 		var c uint
 		for _, line := range lines {
-			match, err := filter.Match(test.pattern, line)
+			match, err := match.Match(test.pattern, line)
 			if err != nil {
 				t.Error(err)
 				continue
