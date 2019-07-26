@@ -44,9 +44,15 @@ BIN_DIR := $(GOPATH)/bin
 GOLANGCI := $(BIN_DIR)/golangci-lint
 GOLANGCI_VERSION := 1.12.3
 
+GORELEASER := $(BIN_DIR)/goreleaser
+
 $(GOLANGCI):
 	@echo "--> Installing golangci v$(GOLANGCI_VERSION)..."
 	@curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(BIN_DIR) v$(GOLANGCI_VERSION)
+
+$(GORELEASER):
+	@echo "--> Installing goreleaser..."
+	@curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh -s -- -b $(BIN_DIR)
 
 .PHONY: lint
 lint: $(GOLANGCI) ## Run linter
@@ -59,7 +65,7 @@ ci: build test lint ## Run all the tests and code checks
 .PHONY: release
 release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
 	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
-	@curl -sL https://git.io/goreleaser | RELEASE_VERSION_TAG="-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)" sh -s release
+	@RELEASE_VERSION_TAG="-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)" $(GORELEASER) release
 
 .PHONY: help
 help: ## Show this help
