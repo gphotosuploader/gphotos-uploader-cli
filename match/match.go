@@ -2,7 +2,7 @@
 // in contrast to filepath.Glob a pattern may specify directories.
 //
 // For a list of valid patterns please see the documentation on filepath.Glob.
-package filter
+package match
 
 import (
 	"github.com/juju/errors"
@@ -107,9 +107,9 @@ func match(patterns, strs []string) (matched bool, err error) {
 	return false, nil
 }
 
-// List returns true if str matches one of the patterns. Empty patterns are
+// MatchOne returns true if str matches one of the patterns. Empty patterns are
 // ignored.
-func List(patterns []string, str string) (matched bool, err error) {
+func MatchOne(patterns []string, str string) (matched bool, err error) {
 	for _, pat := range patterns {
 		if pat == "" {
 			continue
