@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/nmrshll/gphotos-uploader-cli.svg?branch=master)](https://travis-ci.org/nmrshll/gphotos-uploader-cli)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
 [![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
 [![GitHub](https://img.shields.io/github/license/nmrshll/gphotos-uploader-cli.svg)](LICENSE)
@@ -12,24 +13,32 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 # Features:
 
 - specify folders to upload in config file
-- ~~optionally delete objects after uploaḍ~~
 - upload to multiple google accounts
+- include/exclude files & folders using patterns (see [documentation](.docs/configuration.md))
+- ~~optionally delete objects after uploaḍ~~
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
-# Quick start
-There are two ways to install this command line:
+# Getting started
 
-### Downloading a binary (recommended)
+## Install
+You can install the pre-compiled binary (in several different ways) or compile from source.
 
-You can download [latest released package](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) for your preferred OS.
+Here are the steps for each of them:
 
-[![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg?style=for-the-badge)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
+### Install the pre-compiled binary
 
-### Compiling in your system
+**homebrew tap** (only on macOS for now):
+```
+$ brew install gphotosuploader/tap/gphotos-uploader-cli
+```
+
+**manually**
+
+Download the pre-compiled binaries from the [releases page](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) and copy to the desired location.
+
+### Compiling from source
 
 You can compile the source code in your system. **Go 1.11+** is required to compile this application:
-
-Clone this repository and use `make build` to compile it
 
 ```
 $ git clone https://github.com/nmrshll/gphotos-uploader-cli
@@ -43,7 +52,7 @@ Or you can use `go get` if you prefer it:
 $ go get github.com/nmrshll/gphotos-uploader-cli
 ```
 
-## Configuring this application
+## Configure
 First initialize the config file using this command:
 ```
 $ gphotos-uploader-cli init
@@ -55,9 +64,9 @@ You can review the [documentation](.docs/configuration.md) to specify the folder
 
 If you have problems, please open an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
 
-## Run it with 
+## Run
 
-Once it's configured you can call the command in this way:
+Once it's configured you can start uploading files in this way:
 ``` 
 $ gphotos-uploader-cli
 ```    
