@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 - Fix folder typo on secrets backend storage
 
+### Removed
+- **ATTENTION:** `deleteAfterUpload` option has been temporarily removed. So no local file is removed by `gphotos-uplaoder-cli`.  See [issue #25](https://github.com/nmrshll/gphotos-uploader-cli/issues/25) for more details.
+
 ## 0.3.2
 ### Added
 - Add `go get` installation method to [README](README.md)

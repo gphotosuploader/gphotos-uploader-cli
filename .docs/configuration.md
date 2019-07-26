@@ -77,8 +77,10 @@ Must be an absolute path. Can expand the home folder tilde shorthand.
 If makeAlbums.enabled set to true, use the last folder path component as album name.
 
 ### `deleteAfterUpload`
-If set to true, media will be deleted from local disk after upload. 
-To avoid data corruption, the uploader will double check that a the picture exists in your library and is visually similar to the one on the local disk before deleting any file.
+**ATTENTION:** For v0.4.0+ this option has been disabled due to several problems detecting similarities between uploaded and local files. **So no file will be removed from local storage by this CLI** See [issue #45](https://github.com/nmrshll/gphotos-uploader-cli/issues/25) for more details.
+  
+~~If set to true, media will be deleted from local disk after upload. 
+To avoid data corruption, the uploader will double check that a the picture exists in your library and is visually similar to the one on the local disk before deleting any file.~~
 
 ### `uploadVideos`
 If set to true, media items identified as a video will be uploaded. If false, they will be skipped.

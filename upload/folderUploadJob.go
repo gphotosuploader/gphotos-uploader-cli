@@ -3,10 +3,8 @@ package upload
 import (
 	"fmt"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
-	"github.com/juju/errors"
 	"github.com/nmrshll/go-cp"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"log"
 	"os"
@@ -101,25 +99,24 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 			return nil
 		}
 
-		typedMedia, err := filetypes.NewTypedMedia(fp)
-		if err != nil {
-			log.Println(errors.Annotatef(err, "failed creating new TypedMedia from fp"))
-			return nil
-		}
-
 		// calculate Album Name from the folder name
 		var album string
 		if job.createAlbum {
 			album = filepath.Base(filepath.Dir(fp))
 		}
 
+		// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+		// v0.4.0: Disable all files removal until we fix the issue properly
+		if job.deleteAfterUpload {
+			log.Printf("[WARNING] Removal of local files has been disabled. (See issue #25 https://github.com/nmrshll/gphotos-uploader-cli/issues/25")
+		}
+
 		// set file upload options depending on folder upload options
 		var uploadItem = &Item{
 			client:          job.client,
 			path:            fp,
-			typedMedia:      typedMedia,
 			album:           album,
-			deleteOnSuccess: job.deleteAfterUpload,
+			deleteOnSuccess: false, // TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
 		}
 
 		// finally, add the file upload to the queue

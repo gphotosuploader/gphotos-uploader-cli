@@ -4,19 +4,17 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
 	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
 	"log"
 )
 
-// number of concurrent uploads
-const uploadConcurrency = 5
+// number of concurrent workers uploading items
+const WORKERS = 5
 
 // Item represents an object to be uploaded to Google Photos
 type Item struct {
-	client          *gphotos.Client
+	client *gphotos.Client
 
 	path            string
-	typedMedia      filetypes.TypedMedia
 	album           string
 	deleteOnSuccess bool
 }
@@ -28,7 +26,7 @@ type Item struct {
 //  eg: https://gobyexample.com/waitgroups
 //  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
 func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, completedUploads *completeduploads.Service) {
-	semaphore := make(chan bool, uploadConcurrency)
+	semaphore := make(chan bool, WORKERS)
 	for fileUpload := range fileUploadsChan {
 		semaphore <- true
 		go func(fileUpload *Item) {
@@ -76,7 +74,9 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
 
 	// upload the file content to Google Photos
-	media, err := f.client.UploadFile(f.path, albumId)
+	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+	// media, err := f.client.UploadFile(f.path, albumId)
+	_, err := f.client.UploadFile(f.path, albumId)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
@@ -88,18 +88,23 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	}
 
 	// queue uploaded image for visual check of result + deletion
-	if f.deleteOnSuccess {
-		// get uploaded media URL into mediaItem
-		uploadedMediaItem, err := f.client.MediaItems.Get(media.Id).Do()
-		if err != nil {
-			return errors.Annotate(err, "failed getting uploaded mediaItem")
-		}
 
-		return QueueDeletionJob(DeletionJob{
-			uploadedMediaItem.BaseUrl,
-			f.path,
-			f.typedMedia,
-		})
-	}
+	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+	// v0.4.0: Disable all files removal until we fix the issue properly
+	/*
+		if f.deleteOnSuccess {
+			// get uploaded media URL into mediaItem
+			uploadedMediaItem, err := f.client.MediaItems.Get(media.Id).Do()
+			if err != nil {
+				return errors.Annotate(err, "failed getting uploaded mediaItem")
+			}
+
+			return QueueDeletionJob(DeletionJob{
+				mediaURL: uploadedMediaItem.BaseUrl,
+				mimeType: uploadedMediaItem.MimeType,
+				filePath: f.path,
+			})
+		}
+	*/
 	return nil
 }
