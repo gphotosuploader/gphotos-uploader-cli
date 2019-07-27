@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.4.2
+### Fixed
+- Fix CI release pipeline to fix application version (#94). Last version was still broken on CI.
+
 ## 0.4.1
 ### Added
 - Add Homebrew tap to allow users to install `gphotos-uploader-cli` using Homebrew. See [install](README.md) section.
