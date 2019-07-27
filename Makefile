@@ -9,7 +9,8 @@ BUILD := $(shell git rev-parse --short HEAD)
 
 # Use linker flags to provide version/build settings to the target
 VERSION_IMPORT_PATH := github.com/nmrshll/gphotos-uploader-cli/cmd
-LDFLAGS=-ldflags "-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)"
+RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION) -X=${VERSION_IMPORT_PATH}.build=$(BUILD)
+LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
@@ -65,7 +66,7 @@ ci: build test lint ## Run all the tests and code checks
 .PHONY: release
 release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
 	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
-	@RELEASE_VERSION_TAG="-X=${VERSION_IMPORT_PATH}.Version=$(VERSION) -X=${VERSION_IMPORT_PATH}.Build=$(BUILD)" $(GORELEASER) release
+	@RELEASE_VERSION_TAG="$(RELEASE_VERSION_FLAGS)" $(GORELEASER) release
 
 .PHONY: help
 help: ## Show this help
