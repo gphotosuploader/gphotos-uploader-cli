@@ -2,6 +2,7 @@ package tokenstore
 
 import (
 	"errors"
+
 	"golang.org/x/oauth2"
 )
 
@@ -17,11 +18,10 @@ var (
 )
 
 const (
-	serviceName = "googlephotos-uploader-go-api"
+	serviceName = "gPhotosUploader"
 )
 
 type TokenManager interface {
 	StoreToken(email string, token *oauth2.Token) error
 	RetrieveToken(email string) (*oauth2.Token, error)
 }
-
