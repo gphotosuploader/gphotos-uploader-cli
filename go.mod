@@ -6,10 +6,10 @@ require (
 	github.com/99designs/keyring v0.0.0-20190704105226-2c916c935b9f
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
-	github.com/fatih/color v1.7.0
 	github.com/gphotosuploader/google-photos-api-client-go v1.0.1
-	github.com/gphotosuploader/googlemirror v0.3.2 // indirect
+	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/h2non/filetype v1.0.8
+	github.com/int128/oauth2cli v1.4.1
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/juju/testing v0.0.0-20190613124551-e81189438503 // indirect

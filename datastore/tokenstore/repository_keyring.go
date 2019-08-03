@@ -3,10 +3,11 @@ package tokenstore
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/99designs/keyring"
 	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/oauth2"
-	"os"
 )
 
 // KeyringRepository represents a repository provided by different secrets
@@ -80,15 +81,15 @@ func (r *KeyringRepository) StoreToken(email string, token *oauth2.Token) error 
 }
 
 // RetrieveToken lets you get a token from the OS keyring.
-// If the Token is not valid returns a ErrInvalidToken.
 func (r *KeyringRepository) RetrieveToken(email string) (*oauth2.Token, error) {
 	tk, err := r.getToken(email)
 	if err != nil {
 		return nil, err
 	}
 
-	// validate token
-	if !tk.Valid() {
+	// validate token.
+	// It should be non nil and it should have an AccessToken
+	if &tk == nil || tk.AccessToken == "" {
 		return nil, ErrInvalidToken
 	}
 
