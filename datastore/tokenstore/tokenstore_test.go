@@ -1,10 +1,11 @@
 package tokenstore
 
 import (
-	"github.com/99designs/keyring"
-	"golang.org/x/oauth2"
 	"testing"
 	"time"
+
+	"github.com/99designs/keyring"
+	"golang.org/x/oauth2"
 )
 
 // getDefaultToken return a token to complete tests

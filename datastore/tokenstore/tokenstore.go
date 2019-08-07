@@ -1,6 +1,5 @@
 package tokenstore
 
-
 // Service represents the repository where tokens are stored / retrieved.
 type Service struct {
 	TokenManager

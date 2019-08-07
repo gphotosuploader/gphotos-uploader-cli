@@ -2,13 +2,15 @@ package completeduploads
 
 import (
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
-	"github.com/pierrec/xxHash/xxHash32"
 	"io"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pierrec/xxHash/xxHash32"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 var (

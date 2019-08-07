@@ -2,12 +2,14 @@ package upload
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/fatih/color"
 	gphotosns "github.com/gphotosuploader/google-photos-api-client-go/noserver-gphotos"
 	"github.com/juju/errors"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
 	"golang.org/x/oauth2"
-	"time"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
 )
 
 // Authenticate returns a Google Photos client form the supplied Google account.

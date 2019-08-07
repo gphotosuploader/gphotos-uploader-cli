@@ -1,8 +1,9 @@
 package upload_test
 
 import (
-	"github.com/nmrshll/gphotos-uploader-cli/upload"
 	"testing"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
 func TestFilter_AllowAllFiles(t *testing.T) {

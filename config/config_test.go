@@ -2,11 +2,12 @@ package config_test
 
 import (
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/config"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 )
 
 func TestInitAndLoadConfig(t *testing.T) {

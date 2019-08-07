@@ -14,15 +14,14 @@ builds:
 checksum:
   name_template: 'checksums.txt'
 brews:
-  -
-    github:
+  - github:
       owner: gphotosuploader
       name: homebrew-tap
     folder: Formula
     commit_author:
       name: pacoorozco
       email: paco@pacoorozco.info
-    homepage: https://github.com/nmrshll/gphotos-uploader-cli
+    homepage: https://github.com/gphotosuploader/gphotos-uploader-cli
     description: "Mass upload media folders to your Google Photos account(s)"
     test: system "#{bin}/gphotos-uploader-cli --help"
     install: bin.install "gphotos-uploader-cli"

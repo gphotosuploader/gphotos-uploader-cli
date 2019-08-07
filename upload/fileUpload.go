@@ -1,10 +1,12 @@
 package upload
 
 import (
+	"log"
+
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"log"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 )
 
 // number of concurrent workers uploading items
@@ -74,7 +76,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
 
 	// upload the file content to Google Photos
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
 	// media, err := f.client.UploadFile(f.path, albumId)
 	_, err := f.client.UploadFile(f.path, albumId)
 	if err != nil {
@@ -89,7 +91,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 
 	// queue uploaded image for visual check of result + deletion
 
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
 	// v0.4.0: Disable all files removal until we fix the issue properly
 	/*
 		if f.deleteOnSuccess {

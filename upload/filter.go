@@ -1,8 +1,9 @@
 package upload
 
 import (
-	"github.com/nmrshll/gphotos-uploader-cli/match"
 	"log"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/match"
 )
 
 // Filter is a filter for file uploading

@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/config"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
-	"github.com/nmrshll/gphotos-uploader-cli/upload"
-	"github.com/spf13/cobra"
-	"github.com/syndtr/goleveldb/leveldb"
 	"log"
 	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/syndtr/goleveldb/leveldb"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
 const defaultCfgFile = "~/.config/gphotos-uploader-cli/config.hjson"
@@ -24,7 +26,7 @@ var rootCmd = &cobra.Command{
 
 You can upload folders of pictures to several Google Photos accounts and organize them in albums.
 
-See https://github.com/nmrshll/gphotos-uploader-cli for more information.`,
+See https://github.com/gphotosuploader/gphotos-uploader-cli for more information.`,
 	Run: startUploader,
 }
 

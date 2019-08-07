@@ -1,4 +1,4 @@
-module github.com/nmrshll/gphotos-uploader-cli
+module github.com/gphotosuploader/gphotos-uploader-cli
 
 go 1.12
 
