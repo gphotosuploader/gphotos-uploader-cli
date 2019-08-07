@@ -2,13 +2,15 @@ package upload
 
 import (
 	"fmt"
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"log"
 	"os"
 	"path/filepath"
+
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	"github.com/nmrshll/go-cp"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // job represents a job to upload all photos from the specified folder
@@ -105,10 +107,10 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 			album = filepath.Base(filepath.Dir(fp))
 		}
 
-		// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+		// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
 		// v0.4.0: Disable all files removal until we fix the issue properly
 		if job.deleteAfterUpload {
-			log.Printf("[WARNING] Removal of local files has been disabled. (See issue #25 https://github.com/nmrshll/gphotos-uploader-cli/issues/25")
+			log.Printf("[WARNING] Removal of local files has been disabled. (See issue #25 https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25")
 		}
 
 		// set file upload options depending on folder upload options
@@ -116,7 +118,7 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 			client:          job.client,
 			path:            fp,
 			album:           album,
-			deleteOnSuccess: false, // TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+			deleteOnSuccess: false, // TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
 		}
 
 		// finally, add the file upload to the queue

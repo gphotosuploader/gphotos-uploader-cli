@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/config"
-	"github.com/spf13/cobra"
 	"log"
+
+	"github.com/spf13/cobra"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 )
 
 // versionCmd get the application version

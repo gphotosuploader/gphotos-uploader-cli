@@ -5,7 +5,8 @@ import (
 	"os"
 
 	"github.com/juju/errors"
-	"github.com/nmrshll/gphotos-uploader-cli/filetypes"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/filetypes"
 )
 
 var (
@@ -43,7 +44,6 @@ func QueueDeletionJob(deletionJob DeletionJob) error {
 
 // CloseDeletionChan close the channel used for removing objects
 func CloseDeletionsChan() { close(deletionsChan) }
-
 
 // StartDeletionsWorker set up channels and start concurrent deletions
 // deletionsChan will receive DeletionJob structs and delete the object

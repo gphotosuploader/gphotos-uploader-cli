@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"compress/bzip2"
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/match"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/match"
 )
 
 var matchTests = []struct {

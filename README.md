@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/nmrshll/gphotos-uploader-cli.svg?branch=master)](https://travis-ci.org/nmrshll/gphotos-uploader-cli)
-[![Go Report Card](https://goreportcard.com/badge/github.com/nmrshll/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli)
-[![GitHub release](https://img.shields.io/github/release/nmrshll/gphotos-uploader-cli.svg)](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest)
-[![GitHub](https://img.shields.io/github/license/nmrshll/gphotos-uploader-cli.svg)](LICENSE)
-<!--- [![Snap Status](https://build.snapcraft.io/badge/nmrshll/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/nmrshll/gphotos-uploader-cli) --->
+[![Build Status](https://travis-ci.org/gphotosuploader/gphotos-uploader-cli.svg?branch=master)](https://travis-ci.org/gphotosuploader/gphotos-uploader-cli)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gphotosuploader/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/gphotosuploader/gphotos-uploader-cli)
+[![GitHub release](https://img.shields.io/github/release/gphotosuploader/gphotos-uploader-cli.svg)](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest)
+[![GitHub](https://img.shields.io/github/license/gphotosuploader/gphotos-uploader-cli.svg)](LICENSE)
+<!--- [![Snap Status](https://build.snapcraft.io/badge/gphotosuploader/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/gphotosuploader/gphotos-uploader-cli) --->
 
 # Google Photos uploader CLI
 
@@ -34,14 +34,14 @@ $ brew install gphotosuploader/tap/gphotos-uploader-cli
 
 **manually**
 
-Download the pre-compiled binaries from the [releases page](https://github.com/nmrshll/gphotos-uploader-cli/releases/latest) and copy to the desired location.
+Download the pre-compiled binaries from the [releases page](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest) and copy to the desired location.
 
 ### Compiling from source
 
 You can compile the source code in your system. **Go 1.11+** is required to compile this application:
 
 ```
-$ git clone https://github.com/nmrshll/gphotos-uploader-cli
+$ git clone https://github.com/gphotosuploader/gphotos-uploader-cli
 $ cd gphotos-uploader-cli
 $ make build
 ```
@@ -49,7 +49,7 @@ $ make build
 Or you can use `go get` if you prefer it:
 
 ```
-$ go get github.com/nmrshll/gphotos-uploader-cli
+$ go get github.com/gphotosuploader/gphotos-uploader-cli
 ```
 
 ## Configure
@@ -62,7 +62,7 @@ then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify your 
 
 You can review the [documentation](.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
 
-If you have problems, please open an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
+If you have problems, please open an [issue](https://github.com/gphotosuploader/gphotos-uploader-cli/issues). 
 
 ## Run
 
@@ -72,11 +72,8 @@ $ gphotos-uploader-cli
 ```    
 
 # Contributing
-Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/nmrshll/gphotos-uploader-cli/issues). 
+Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/gphotosuploader/gphotos-uploader-cli/issues). 
 
-# Related
-- [google photos client library](https://github.com/nmrshll/google-photos-api-client-go)
-- [oauth2-noserver](https://github.com/nmrshll/oauth2-noserver)
 
 # License
  

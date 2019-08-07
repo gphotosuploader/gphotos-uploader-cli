@@ -3,10 +3,11 @@ package tokenstore
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/99designs/keyring"
 	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/oauth2"
-	"os"
 )
 
 // KeyringRepository represents a repository provided by different secrets

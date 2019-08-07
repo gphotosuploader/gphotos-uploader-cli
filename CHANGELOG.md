@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- This repository has transferred to [GPhotos Uploaders organization](https://github.com/gphotosuploader), so all imports has been updated to the new URL.
+
 ## 0.5.0
 ### Changed
 - Fix issue #97 "New gnome keyring store created on each launch". To solve this issue a new `serviceName` has been changed. **NOTE**: Once you use this version, a new Gnome keyring will be created, so credentials should be supplied again. (#97) 
@@ -30,7 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Fix folder path typo on secrets backend storage
 
 ### Removed
-- **ATTENTION:** `deleteAfterUpload` option has been temporarily removed. So no local file is removed by `gphotos-uplaoder-cli`.  See [issue #25](https://github.com/nmrshll/gphotos-uploader-cli/issues/25) for more details.
+- **ATTENTION:** `deleteAfterUpload` option has been temporarily removed. So no local file is removed by `gphotos-uplaoder-cli`.  See [issue #25](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25) for more details.
 
 ## 0.3.2
 ### Added
@@ -66,7 +70,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.2.1 - 2019-06-18
 ### Fixed
-- Fix [Go Report Card](https://goreportcard.com/report/github.com/nmrshll/gphotos-uploader-cli) issues
+- Fix [Go Report Card](https://goreportcard.com/report/github.com/gphotosuploader/gphotos-uploader-cli) issues
 
 ## 0.2.0 - 2019-06-18
 ### Added
@@ -90,5 +94,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.1.11 - 2018-09-20
 ### Added
-- [goreleaser](https://goreleaser.com/) will be on charge of publishing [binaries](https://github.com/nmrshll/gphotos-uploader-cli/releases) after new release is done
+- [goreleaser](https://goreleaser.com/) will be on charge of publishing [binaries](https://github.com/gphotosuploader/gphotos-uploader-cli/releases) after new release is done
 

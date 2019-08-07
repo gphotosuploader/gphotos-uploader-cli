@@ -1,17 +1,17 @@
 language: go
 env:
   matrix:
-  - GO111MODULE=on
+    - GO111MODULE=on
   global:
     secure: p6KK6Ga+1fSLNoEttS+GtUSP4d4rPFomz91jFWkSKq193XhEVZlmIeP1rM+v/2dmdsnye6vL3MEvzA8+nB+DCj/DueFIkyRVoHnlfgy6MTDAXaXB90dkDQNcZCCD5DryIjlUkJ6e6ypQwPHsDdgZ6a6B7LQrkKFp1PgqjpEMIvR34RSU5ndbGKr5gOGUGowuQcdSmYjojb97ER4bCagfUX/R+yngBMH1x67MiVYuUXHy70O0uII5Qthbcgyzvpn/xJGCcjSrcKV7GIAK/GnHAAR7cf+Gf9aqGHKWS5jBxhNVgUEGz6MhDsfbsKdhMbSctI2y2SM8YwJJXyV0ZqS463KBTcUzJhcUvJ8/Uo2nRSZTkB5fUmNQNO0YOxKG5nOId5UwQc6kyvpjwNcR8hWUDRzzt9g0jtQ6Ijb6Q0G/k5LUY9Op28w9rr0+E063zRmbvL7KZ3fdBaRJn9/11iUj5xzO2wT+OU32cVm3OtLZm6T0naRhe6BRRhfRKQDBpLPLXcByK2Z9BcT+T6p4oZvKbf4KLn8kFsacu2iYGOEkD24BHmy7W+w+67H5LD3rBkGllSCYlnB03rSTp1E/HHyp8X+BRkJMJoQU8gyM7+3f/L0NhtbWjHAUnPNGI6dkwyKq/3ffRRNd3aWO88cLk+Cc8wQmTNDD/Ft2Ti9gjxm8L54=
 go:
-- 1.11.x
+  - 1.11.x
 script:
-- make ci
+  - make ci
 deploy:
-- provider: script
-  skip_cleanup: true
-  script: make release
-  on:
-    tags: true
-    condition: "$TRAVIS_OS_NAME = linux"
+  - provider: script
+    skip_cleanup: true
+    script: make release
+    on:
+      tags: true
+      condition: "$TRAVIS_OS_NAME = linux"
