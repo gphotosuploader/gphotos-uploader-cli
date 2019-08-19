@@ -56,9 +56,9 @@ func StartFileUploadWorker(trackingService *completeduploads.Service) (fileUploa
 	return fileUploadsChan, doneUploading
 }
 
-// getGooglePhotosAlbumId return the Id of an album with the specified name.
+// getGooglePhotosAlbumID return the Id of an album with the specified name.
 // If the album doesn't exist, return an empty string.
-func getGooglePhotosAlbumId(name string, c *gphotos.Client) string {
+func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
 	if name == "" {
 		return ""
 	}
@@ -72,13 +72,11 @@ func getGooglePhotosAlbumId(name string, c *gphotos.Client) string {
 }
 
 func (f *Item) upload(completedUploads *completeduploads.Service) error {
-	albumId := getGooglePhotosAlbumId(f.album, f.client)
-	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
+	albumID := getGooglePhotosAlbumID(f.album, f.client)
+	log.Printf("uploading file: file=%s, album=%v", f.path, albumID)
 
 	// upload the file content to Google Photos
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
-	// media, err := f.client.UploadFile(f.path, albumId)
-	_, err := f.client.UploadFile(f.path, albumId)
+	media, err := f.client.UploadFile(f.path, albumID)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
@@ -90,23 +88,13 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	}
 
 	// queue uploaded image for visual check of result + deletion
-
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
-	// v0.4.0: Disable all files removal until we fix the issue properly
-	/*
-		if f.deleteOnSuccess {
-			// get uploaded media URL into mediaItem
-			uploadedMediaItem, err := f.client.MediaItems.Get(media.Id).Do()
-			if err != nil {
-				return errors.Annotate(err, "failed getting uploaded mediaItem")
-			}
-
-			return QueueDeletionJob(DeletionJob{
-				mediaURL: uploadedMediaItem.BaseUrl,
-				mimeType: uploadedMediaItem.MimeType,
-				filePath: f.path,
-			})
+	if f.deleteOnSuccess {
+		job := DeletionJob{
+			ObjectURL:  media.BaseUrl,
+			ObjectPath: media.MimeType,
 		}
-	*/
+		return job.Enqueue()
+	}
+
 	return nil
 }
