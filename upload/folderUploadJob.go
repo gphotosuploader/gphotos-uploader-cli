@@ -107,18 +107,12 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 			album = filepath.Base(filepath.Dir(fp))
 		}
 
-		// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
-		// v0.4.0: Disable all files removal until we fix the issue properly
-		if job.deleteAfterUpload {
-			log.Printf("[WARNING] Removal of local files has been disabled. (See issue #25 https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25")
-		}
-
 		// set file upload options depending on folder upload options
 		var uploadItem = &Item{
 			client:          job.client,
 			path:            fp,
 			album:           album,
-			deleteOnSuccess: false, // TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
+			deleteOnSuccess: job.deleteAfterUpload,
 		}
 
 		// finally, add the file upload to the queue

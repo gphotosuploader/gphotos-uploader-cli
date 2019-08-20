@@ -10,7 +10,7 @@ import (
 )
 
 // number of concurrent workers uploading items
-const WORKERS = 5
+const maxNumberOfWorkers = 5
 
 // Item represents an object to be uploaded to Google Photos
 type Item struct {
@@ -28,7 +28,7 @@ type Item struct {
 //  eg: https://gobyexample.com/waitgroups
 //  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
 func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, completedUploads *completeduploads.Service) {
-	semaphore := make(chan bool, WORKERS)
+	semaphore := make(chan bool, maxNumberOfWorkers)
 	for fileUpload := range fileUploadsChan {
 		semaphore <- true
 		go func(fileUpload *Item) {
@@ -56,29 +56,27 @@ func StartFileUploadWorker(trackingService *completeduploads.Service) (fileUploa
 	return fileUploadsChan, doneUploading
 }
 
-// getGooglePhotosAlbumId return the Id of an album with the specified name.
+// getGooglePhotosAlbumID return the Id of an album with the specified name.
 // If the album doesn't exist, return an empty string.
-func getGooglePhotosAlbumId(name string, c *gphotos.Client) string {
+func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
 	if name == "" {
 		return ""
 	}
 
 	album, err := c.GetOrCreateAlbumByName(name)
 	if err != nil {
-		log.Printf("error creating album: name=%s, error=%v", name, err)
+		log.Printf("Album creation failed: name=%s, error=%v", name, err)
 		return ""
 	}
 	return album.Id
 }
 
 func (f *Item) upload(completedUploads *completeduploads.Service) error {
-	albumId := getGooglePhotosAlbumId(f.album, f.client)
-	log.Printf("uploading file: file=%s, album=%v", f.path, albumId)
+	albumID := getGooglePhotosAlbumID(f.album, f.client)
+	log.Printf("Uploading object: file=%s", f.path)
 
 	// upload the file content to Google Photos
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
-	// media, err := f.client.UploadFile(f.path, albumId)
-	_, err := f.client.UploadFile(f.path, albumId)
+	_, err := f.client.UploadFile(f.path, albumID)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
@@ -86,27 +84,16 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	// mark file as uploaded in the DB
 	err = completedUploads.CacheAsAlreadyUploaded(f.path)
 	if err != nil {
-		log.Printf("error marking file as uploaded: file=%s, error=%v", f.path, err)
+		log.Printf("Tracking file as uploaded failed: file=%s, error=%v", f.path, err)
 	}
 
 	// queue uploaded image for visual check of result + deletion
-
-	// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/25
-	// v0.4.0: Disable all files removal until we fix the issue properly
-	/*
-		if f.deleteOnSuccess {
-			// get uploaded media URL into mediaItem
-			uploadedMediaItem, err := f.client.MediaItems.Get(media.Id).Do()
-			if err != nil {
-				return errors.Annotate(err, "failed getting uploaded mediaItem")
-			}
-
-			return QueueDeletionJob(DeletionJob{
-				mediaURL: uploadedMediaItem.BaseUrl,
-				mimeType: uploadedMediaItem.MimeType,
-				filePath: f.path,
-			})
+	if f.deleteOnSuccess {
+		job := DeletionJob{
+			ObjectPath: f.path,
 		}
-	*/
+		return job.Enqueue()
+	}
+
 	return nil
 }

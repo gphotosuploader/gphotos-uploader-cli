@@ -72,7 +72,9 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// start file upload worker
 	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker)
-	doneDeleting := upload.StartDeletionsWorker()
+
+	deletionQueue := upload.NewDeletionQueue()
+	deletionQueue.StartWorkers()
 
 	// get OAuth2 Configuration with our App credentials
 	oauthConfig := config.OAuthConfig(cfg.APIAppCredentials)
@@ -97,9 +99,10 @@ func startUploader(cmd *cobra.Command, args []string) {
 	// wait for all the uploads to be completed
 	<-doneUploading
 	log.Println("all uploads done")
+
 	// after the last upload is done we're done queueing files for deletion
-	upload.CloseDeletionsChan()
+	deletionQueue.Close()
 	// wait for deletions to be completed before exiting
-	<-doneDeleting
+	deletionQueue.WaitForWorkers()
 	log.Println("all deletions done")
 }
