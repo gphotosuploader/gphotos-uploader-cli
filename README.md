@@ -15,7 +15,7 @@ While the official tool is only supports Mac OS and Windows, this brings an uplo
 - specify folders to upload in config file
 - upload to multiple google accounts
 - include/exclude files & folders using patterns (see [documentation](.docs/configuration.md))
-- ~~optionally delete objects after uploaḍ~~
+- optionally delete objects after uploaḍ
 - security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Getting started

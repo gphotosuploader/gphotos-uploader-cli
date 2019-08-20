@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.6.0
+### Added
+- `deleteAfterUpload` option has been reactivated, it was removed on v0.4.0. If you use this option in [config file](.docs/configuration.md) files will be deleted from local repository after being uploaded to Google Photos.
 ### Changed
 - This repository has transferred to [GPhotos Uploaders organization](https://github.com/gphotosuploader), so all imports has been updated to the new organization's URL.
+### Removed
+- Removed some useless log lines. There are still too much.
 
 ## 0.5.0
 ### Changed
