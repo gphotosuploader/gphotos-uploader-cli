@@ -13,7 +13,6 @@ var (
 
 // DeletionJob represents an object to be deleted from local repository.
 type DeletionJob struct {
-	ObjectURL  string
 	ObjectPath string
 }
 
@@ -24,8 +23,8 @@ func (j *DeletionJob) Enqueue() error {
 }
 
 func (j *DeletionJob) deleteIfCorrectlyUploaded() error {
-	if j.ObjectURL == "" {
-		return errors.NewNotValid(nil, "file was not correctly uploaded, skipping deletion")
+	if j.ObjectPath == "" {
+		return errors.NewNotValid(nil, "object path is empty")
 	}
 
 	err := os.Remove(j.ObjectPath)
@@ -52,10 +51,10 @@ func NewDeletionQueue() *DeletionQueue {
 func (q *DeletionQueue) StartWorkers() {
 	go func() {
 		for job := range q.Requests {
-			log.Printf("Deletion worker: Processing deletion request for: file=%s", job.ObjectPath)
+			log.Printf("Processing deletion request: file=%s", job.ObjectPath)
 			err := job.deleteIfCorrectlyUploaded()
 			if err != nil {
-				log.Printf("File has not been deleted: file=%s, err=%v", job.ObjectPath, err)
+				log.Printf("Deletion request failed: file=%s, err=%v\n", job.ObjectPath, err)
 			}
 		}
 		q.DoneChannel <- true

@@ -10,7 +10,7 @@ import (
 )
 
 // number of concurrent workers uploading items
-const WORKERS = 5
+const maxNumberOfWorkers = 5
 
 // Item represents an object to be uploaded to Google Photos
 type Item struct {
@@ -28,7 +28,7 @@ type Item struct {
 //  eg: https://gobyexample.com/waitgroups
 //  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
 func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, completedUploads *completeduploads.Service) {
-	semaphore := make(chan bool, WORKERS)
+	semaphore := make(chan bool, maxNumberOfWorkers)
 	for fileUpload := range fileUploadsChan {
 		semaphore <- true
 		go func(fileUpload *Item) {
@@ -65,7 +65,7 @@ func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
 
 	album, err := c.GetOrCreateAlbumByName(name)
 	if err != nil {
-		log.Printf("error creating album: name=%s, error=%v", name, err)
+		log.Printf("Album creation failed: name=%s, error=%v", name, err)
 		return ""
 	}
 	return album.Id
@@ -73,10 +73,10 @@ func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
 
 func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	albumID := getGooglePhotosAlbumID(f.album, f.client)
-	log.Printf("uploading file: file=%s, album=%v", f.path, albumID)
+	log.Printf("Uploading object: file=%s", f.path)
 
 	// upload the file content to Google Photos
-	media, err := f.client.UploadFile(f.path, albumID)
+	_, err := f.client.UploadFile(f.path, albumID)
 	if err != nil {
 		return errors.Annotate(err, "failed uploading image")
 	}
@@ -84,14 +84,13 @@ func (f *Item) upload(completedUploads *completeduploads.Service) error {
 	// mark file as uploaded in the DB
 	err = completedUploads.CacheAsAlreadyUploaded(f.path)
 	if err != nil {
-		log.Printf("error marking file as uploaded: file=%s, error=%v", f.path, err)
+		log.Printf("Tracking file as uploaded failed: file=%s, error=%v", f.path, err)
 	}
 
 	// queue uploaded image for visual check of result + deletion
 	if f.deleteOnSuccess {
 		job := DeletionJob{
-			ObjectURL:  media.BaseUrl,
-			ObjectPath: media.MimeType,
+			ObjectPath: f.path,
 		}
 		return job.Enqueue()
 	}
