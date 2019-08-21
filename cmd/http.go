@@ -9,7 +9,7 @@ import (
 	"github.com/int128/oauth2cli"
 	"golang.org/x/oauth2"
 
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
 )
 
 const successPage = `

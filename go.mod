@@ -1,4 +1,4 @@
-module github.com/nmrshll/gphotos-uploader-cli
+module github.com/gphotosuploader/gphotos-uploader-cli
 
 go 1.12
 
@@ -6,6 +6,7 @@ require (
 	github.com/99designs/keyring v0.0.0-20190704105226-2c916c935b9f
 	github.com/Nr90/imgsim v0.0.0-20180202144352-5caa057144b0
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
+	github.com/fatih/color v1.7.0
 	github.com/gphotosuploader/google-photos-api-client-go v1.0.1
 	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/h2non/filetype v1.0.8

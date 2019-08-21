@@ -2,8 +2,8 @@ package completeduploads
 
 import (
 	"fmt"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
-	"log"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // Service represents the repository where uploaded objects are tracked
@@ -71,16 +71,10 @@ func (s *Service) CacheAsAlreadyUploaded(filePath string) error {
 	if err != nil {
 		return err
 	}
-	err = s.repo.Put(item)
-	if err != nil {
-		return err
-	}
-	log.Printf("Marked as uploaded: %s", filePath)
-	return nil
+	return s.repo.Put(item)
 }
 
 // RemoveAsAlreadyUploaded removes a file previously marked as uploaded
 func (s *Service) RemoveAsAlreadyUploaded(filePath string) error {
-	log.Printf("Removing file from upload repository: %s", filePath)
 	return s.repo.Delete(filePath)
 }

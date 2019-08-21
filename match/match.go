@@ -5,9 +5,10 @@
 package match
 
 import (
-	"github.com/juju/errors"
 	"path/filepath"
 	"strings"
+
+	"github.com/juju/errors"
 )
 
 // ErrBadString is returned when Match is called with the empty string as the

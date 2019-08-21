@@ -3,21 +3,19 @@ package cmd
 import (
 	"context"
 	"fmt"
-
-	"golang.org/x/oauth2"
-
-	"github.com/nmrshll/gphotos-uploader-cli/config"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/tokenstore"
-	"github.com/nmrshll/gphotos-uploader-cli/photos"
-	"github.com/nmrshll/gphotos-uploader-cli/upload"
-
 	"log"
 	"os"
 
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/spf13/cobra"
 	"github.com/syndtr/goleveldb/leveldb"
+	"golang.org/x/oauth2"
+
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
 const defaultCfgFile = "~/.config/gphotos-uploader-cli/config.hjson"
@@ -32,7 +30,7 @@ var rootCmd = &cobra.Command{
 
 You can upload folders of pictures to several Google Photos accounts and organize them in albums.
 
-See https://github.com/nmrshll/gphotos-uploader-cli for more information.`,
+See https://github.com/gphotosuploader/gphotos-uploader-cli for more information.`,
 	Run: startUploader,
 }
 
@@ -78,7 +76,9 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// start file upload worker
 	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker)
-	doneDeleting := upload.StartDeletionsWorker()
+
+	deletionQueue := upload.NewDeletionQueue()
+	deletionQueue.StartWorkers()
 
 	ctx := context.Background()
 	// get OAuth2 Configuration with our App credentials
@@ -114,9 +114,10 @@ func startUploader(cmd *cobra.Command, args []string) {
 	// wait for all the uploads to be completed
 	<-doneUploading
 	log.Println("all uploads done")
+
 	// after the last upload is done we're done queueing files for deletion
-	upload.CloseDeletionsChan()
+	deletionQueue.Close()
 	// wait for deletions to be completed before exiting
-	<-doneDeleting
+	deletionQueue.WaitForWorkers()
 	log.Println("all deletions done")
 }

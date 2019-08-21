@@ -7,8 +7,9 @@ import (
 	"github.com/h2non/filetype"
 	filematchers "github.com/h2non/filetype/matchers"
 	"github.com/juju/errors"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"github.com/pierrec/xxHash/xxHash32"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // IsImage asserts file at filePath is an image

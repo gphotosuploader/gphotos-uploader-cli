@@ -8,7 +8,7 @@ VERSION ?= $(shell git describe --tags --abbrev=0)
 BUILD := $(shell git rev-parse --short HEAD)
 
 # Use linker flags to provide version/build settings to the target
-VERSION_IMPORT_PATH := github.com/nmrshll/gphotos-uploader-cli/cmd
+VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/cmd
 RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION) -X=${VERSION_IMPORT_PATH}.build=$(BUILD)
 LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 

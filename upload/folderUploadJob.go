@@ -2,26 +2,28 @@ package upload
 
 import (
 	"fmt"
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
-	"github.com/nmrshll/go-cp"
-	"github.com/nmrshll/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/nmrshll/gphotos-uploader-cli/utils/filesystem"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/nmrshll/go-cp"
+
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
-// job represents a job to upload all photos from the specified folder
-type job struct {
+// Job represents a job to upload all photos from the specified folder
+type Job struct {
 	client          *gphotos.Client
 	trackingService *completeduploads.Service
 
 	sourceFolder string
-	*jobOptions
+	options      *JobOptions
 }
 
-// jobOptions represents all the options that a job can have
-type jobOptions struct {
+// JobOptions represents all the options that a job can have
+type JobOptions struct {
 	createAlbum       bool
 	deleteAfterUpload bool
 	uploadVideos      bool
@@ -30,8 +32,8 @@ type jobOptions struct {
 }
 
 // NewJobOptions create a jobOptions based on the submitted / validated data
-func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *jobOptions {
-	return &jobOptions{
+func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
+	return &JobOptions{
 		createAlbum:       createAlbum,
 		deleteAfterUpload: deleteAfterUpload,
 		uploadVideos:      uploadVideos,
@@ -41,18 +43,18 @@ func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, 
 }
 
 // NewFolderUploadJob creates a job based on the submitted data
-func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *jobOptions) *job {
-	return &job{
+func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, fp string, opt *JobOptions) *Job {
+	return &Job{
 		trackingService: trackingService,
 		client:          client,
 
 		sourceFolder: fp,
-		jobOptions:   opt,
+		options:      opt,
 	}
 }
 
 // ScanFolder uploads folder
-func (job *job) ScanFolder(uploadChan chan<- *Item) error {
+func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 	folderAbsolutePath, err := cp.AbsolutePath(job.sourceFolder)
 	if err != nil {
 		return err
@@ -62,7 +64,7 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
 	}
 
-	filter := NewFilter(job.includePatterns, job.excludePatterns, job.uploadVideos)
+	filter := NewFilter(job.options.includePatterns, job.options.excludePatterns, job.options.uploadVideos)
 
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
@@ -101,14 +103,8 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 
 		// calculate Album Name from the folder name
 		var album string
-		if job.createAlbum {
+		if job.options.createAlbum {
 			album = filepath.Base(filepath.Dir(fp))
-		}
-
-		// TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
-		// v0.4.0: Disable all files removal until we fix the issue properly
-		if job.deleteAfterUpload {
-			log.Printf("[WARNING] Removal of local files has been disabled. (See issue #25 https://github.com/nmrshll/gphotos-uploader-cli/issues/25")
 		}
 
 		// set file upload options depending on folder upload options
@@ -116,7 +112,7 @@ func (job *job) ScanFolder(uploadChan chan<- *Item) error {
 			client:          job.client,
 			path:            fp,
 			album:           album,
-			deleteOnSuccess: false, // TODO: Fix issue #25 - Removal of GIF & Videos is broken: https://github.com/nmrshll/gphotos-uploader-cli/issues/25
+			deleteOnSuccess: job.options.deleteAfterUpload,
 		}
 
 		// finally, add the file upload to the queue
