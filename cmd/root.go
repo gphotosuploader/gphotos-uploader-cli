@@ -14,9 +14,9 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
-const defaultCfgFile = "~/.config/gphotos-uploader-cli/config.hjson"
+const defaultCfgDir = "~/.config/gphotos-uploader-cli"
 
-var cfgFile string
+var cfgDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,21 +40,21 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", defaultCfgFile, "set config file")
+	rootCmd.PersistentFlags().StringVar(&cfgDir, "config", defaultCfgDir, "set config folder")
 }
 
 func startUploader(cmd *cobra.Command, args []string) {
 	var cfg *config.Config
 
-	cfg, err := config.LoadConfigFile(cfgFile)
+	cfg, err := config.LoadConfigFile(cfgDir)
 	if err != nil {
-		log.Fatalf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgFile)
+		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgDir)
 	}
 
 	// load completedUploads DB
-	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
+	db, err := leveldb.OpenFile(cfg.TrackingDBPath, nil)
 	if err != nil {
-		log.Fatalf("Error opening db: path=%s, err=%v", config.GetUploadsDBPath(), err)
+		log.Fatalf("Error opening db: path=%s, err=%v", cfg.TrackingDBPath, err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {

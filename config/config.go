@@ -5,13 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 
-	"github.com/nmrshll/go-cp"
 	"golang.org/x/oauth2"
 
 	"github.com/client9/xson/hjson"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // APIAppCredentials represents Google Photos API credentials for OAuth
@@ -39,7 +40,8 @@ type MakeAlbums struct {
 
 // Config represents this application configuration
 type Config struct {
-	ConfigFile         string
+	ConfigPath         string
+	TrackingDBPath     string
 	Verbose            bool
 	SecretsBackendType string
 	APIAppCredentials  *APIAppCredentials
@@ -113,31 +115,17 @@ func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config
 	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
 }
 
-// GetUploadsDBPath returns the absolute path of uploads DB file
-func GetUploadsDBPath() string {
-	const UploadDBPath = "~/.config/gphotos-uploader-cli/uploads.db"
-
-	dbPathAbsolute, err := cp.AbsolutePath(UploadDBPath)
-	if err != nil {
-		log.Fatal(err) // TODO: should return an error instead a log.Fatal
-	}
-	return dbPathAbsolute
-}
-
 // LoadConfigFile reads HJSON file (absolute path) and decodes its configuration
 func LoadConfigFile(p string) (*Config, error) {
-	path, err := cp.AbsolutePath(p)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path: %s", p)
-	}
+	config := defaultConfig()
+	config.ConfigPath = filesystem.AbsolutePath(p)
+	config.TrackingDBPath = path.Join(config.ConfigPath, "uploads.db")
 
+	path := path.Join(config.ConfigPath, "config.hjson")
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
 	}
-
-	config := defaultConfig()
-	config.ConfigFile = path
 
 	if err := hjson.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
@@ -148,11 +136,7 @@ func LoadConfigFile(p string) (*Config, error) {
 
 // InitConfigFile creates an example config file if it doesn't already exist
 func InitConfigFile(p string) error {
-	path, err := cp.AbsolutePath(p)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path: %s", p)
-	}
-
+	path := filesystem.AbsolutePath(p)
 	dirname := filepath.Dir(path)
 	if _, err := os.Stat(dirname); os.IsNotExist(err) {
 		err := os.MkdirAll(dirname, 0755)
