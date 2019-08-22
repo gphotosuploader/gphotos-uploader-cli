@@ -46,15 +46,15 @@ func init() {
 func startUploader(cmd *cobra.Command, args []string) {
 	var cfg *config.Config
 
-	cfg, err := config.LoadConfigFile(cfgDir)
+	cfg, err := config.LoadConfig(cfgDir)
 	if err != nil {
 		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgDir)
 	}
 
 	// load completedUploads DB
-	db, err := leveldb.OpenFile(cfg.TrackingDBPath, nil)
+	db, err := leveldb.OpenFile(cfg.TrackingDBDir(), nil)
 	if err != nil {
-		log.Fatalf("Error opening db: path=%s, err=%v", cfg.TrackingDBPath, err)
+		log.Fatalf("Error opening db: path=%s, err=%v", cfg.TrackingDBDir(), err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {

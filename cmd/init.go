@@ -14,11 +14,11 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init the configuration file",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.InitConfigFile(defaultCfgDir)
+		err := config.InitConfig(defaultCfgDir)
 		if err != nil {
-			log.Fatalf("Failed to create the init config file: %v", err)
+			log.Fatalf("Failed to create the configuration: path=%s, err=%v", defaultCfgDir, err)
 		}
-		fmt.Printf("Configuration file has been created.\nEdit it by running:\n    nano %s\n", defaultCfgDir)
+		fmt.Printf("Configuration file has been created.\nEdit it by running:\n    nano %s/config.hjson\n", defaultCfgDir)
 	},
 }
 

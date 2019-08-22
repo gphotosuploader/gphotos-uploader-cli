@@ -11,18 +11,18 @@ import (
 )
 
 func TestInitAndLoadConfig(t *testing.T) {
-	// init config file
-	path := filepath.Join(os.TempDir(), fmt.Sprintf("file.%d", time.Now().UnixNano()))
+	// init config folder
+	path := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(path)
+		err := config.InitConfig(path)
 		if err != nil {
 			t.Errorf("could not create init config file: %v", err)
 		}
 	})
 
 	defer func() {
-		err := os.Remove(path)
+		err := os.RemoveAll(path)
 		if err != nil {
 			t.Errorf("could not remove test config file (path: %s): %v", path, err)
 		}
@@ -33,7 +33,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
-		got, err := config.LoadConfigFile(path)
+		got, err := config.LoadConfig(path)
 		if err != nil {
 			t.Errorf("could not load config file, got an error: %v", err)
 		}
