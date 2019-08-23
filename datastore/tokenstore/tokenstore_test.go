@@ -78,9 +78,13 @@ func TestRetrieveExpiredToken(t *testing.T) {
 		t.Errorf("Should not fail, got: %s", err)
 	}
 
-	_, err = s.RetrieveToken(userEmail)
-	if err != ErrInvalidToken {
-		t.Errorf("Expected error ErrInvalidToken, got %s", err)
+	tk, err := s.RetrieveToken(userEmail)
+	if err != nil {
+		t.Errorf("Should not fail, got %s", err)
+	}
+
+	if tk.AccessToken != expectedToken.AccessToken {
+		t.Errorf("Token doens't mismatch: expected %v, got %v", expectedToken, tk)
 	}
 }
 

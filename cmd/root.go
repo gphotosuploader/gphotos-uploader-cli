@@ -1,16 +1,20 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/syndtr/goleveldb/leveldb"
+	"golang.org/x/oauth2"
 
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
@@ -76,18 +80,29 @@ func startUploader(cmd *cobra.Command, args []string) {
 	deletionQueue := upload.NewDeletionQueue()
 	deletionQueue.StartWorkers()
 
+	ctx := context.Background()
 	// get OAuth2 Configuration with our App credentials
-	oauthConfig := config.OAuthConfig(cfg.APIAppCredentials)
+	oauth2Config := oauth2.Config{
+		ClientID:     cfg.APIAppCredentials.ClientID,
+		ClientSecret: cfg.APIAppCredentials.ClientSecret,
+		Endpoint:     photos.Endpoint,
+		Scopes:       photos.Scopes,
+	}
 
 	// launch all folder upload jobs
 	for _, item := range cfg.Jobs {
-		gPhotos, err := upload.Authenticate(tkm, oauthConfig, item.Account)
+
+		client, err := newOAuth2Client(ctx, tkm, oauth2Config, item.Account)
+		if err != nil {
+			log.Fatal(err)
+		}
+		gPhotos, err := gphotos.NewClient(client)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
-		job := upload.NewFolderUploadJob(&gPhotos.Client, fileTracker, item.SourceFolder, opt)
+		job := upload.NewFolderUploadJob(gPhotos, fileTracker, item.SourceFolder, opt)
 
 		if err := job.ScanFolder(uploadChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
