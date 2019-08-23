@@ -7,10 +7,7 @@ import (
 	"os"
 	"path"
 
-	"golang.org/x/oauth2"
-
 	"github.com/client9/xson/hjson"
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
@@ -114,11 +111,23 @@ func LoadConfig(dir string) (*Config, error) {
 	return cfg, nil
 }
 
-// InitConfig creates an example config file if it doesn't already exist
-func InitConfig(dir string) error {
+// InitConfig creates an example config file if it doesn't already exist.
+// If 'force' is set then we are going to remove config dir before creating it.
+func InitConfig(dir string, force bool) error {
 	cfg := NewConfig(dir)
 
-	if _, err := os.Stat(cfg.ConfigPath); os.IsNotExist(err) {
+	// if force, we should remove everything to start from the scratch.
+	if force {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			return err
+		}
+	}
+
+	if _, err := os.Stat(cfg.ConfigPath); !os.IsNotExist(err) {
+		// directory already exist and forced was not set
+		return fmt.Errorf("config directory already exists, use '--force' to overwrite: path=%s", cfg.ConfigPath)
+	} else {
 		err := os.MkdirAll(cfg.ConfigPath, 0755)
 		if err != nil {
 			return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
@@ -144,12 +153,4 @@ func InitConfig(dir string) error {
 	}
 
 	return fh.Sync()
-}
-
-// OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
-func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
-	if uploaderConfigAPICredentials == nil {
-		log.Fatalf("APIAppCredentials can't be nil")
-	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
 }
