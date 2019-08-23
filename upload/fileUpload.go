@@ -3,9 +3,9 @@ package upload
 import (
 	"log"
 
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/juju/errors"
 
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 )
 
