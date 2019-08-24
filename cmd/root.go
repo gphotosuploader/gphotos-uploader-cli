@@ -76,9 +76,9 @@ func startUploader(cmd *cobra.Command, args []string) {
 	tkm := tokenstore.NewService(kr)
 
 	// load upload URLs DB
-	uploadURLsdb, err := leveldb.OpenFile(cfg.UploadURLsTrackingDBDir(), nil)
+	uploadURLsdb, err := leveldb.OpenFile(cfg.ResumableUploadsDBDir(), nil)
 	if err != nil {
-		log.Fatalf("Error opening upload URLs db: path=%s, err=%v", cfg.UploadURLsTrackingDBDir(), err)
+		log.Fatalf("Error opening upload URLs db: path=%s, err=%v", cfg.ResumableUploadsDBDir(), err)
 	}
 	defer uploadURLsdb.Close()
 	uploadURLsService := uploadurls.NewService(uploadURLsdb)

@@ -47,8 +47,8 @@ func (c *Config) CompletedUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "uploads.db")
 }
 
-// UploadURLsTrackingDBDir returns the path of the folder where upload URLs are tracked.
-func (c *Config) UploadURLsTrackingDBDir() string {
+// ResumableUploadsDBDir returns the path of the folder where upload URLs are tracked.
+func (c *Config) ResumableUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "uploadsurls.db")
 }
 
