@@ -12,7 +12,7 @@ import (
 )
 
 func TestInitConfig(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
 		err := config.InitConfig(dir, true)
@@ -38,7 +38,7 @@ func TestInitConfig(t *testing.T) {
 
 func TestInitAndLoadConfig(t *testing.T) {
 	// init config folder
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
 		err := config.InitConfig(dir, true)
@@ -77,7 +77,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 
 func TestLoadConfigWithNonExistentFile(t *testing.T) {
 	// init config folder
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	err := os.RemoveAll(dir)
 	if err != nil {
 		t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
@@ -90,7 +90,7 @@ func TestLoadConfigWithNonExistentFile(t *testing.T) {
 }
 
 func TestConfig_TrackingDBDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
 	expected := path.Join(dir, "uploads.db")
@@ -103,7 +103,7 @@ func TestConfig_TrackingDBDir(t *testing.T) {
 }
 
 func TestConfig_KeyringDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d", time.Now().UnixNano()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
 	expected := dir

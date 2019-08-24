@@ -1,6 +1,9 @@
 package tokenstore
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -27,10 +30,17 @@ var fixedStringPrompt keyring.PromptFunc = func(_ string) (string, error) {
 }
 
 func TestStoreToken(t *testing.T) {
-	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt, dir)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	s := NewService(repo)
 
 	err = s.StoreToken(userEmail, getDefaultToken())
@@ -41,10 +51,17 @@ func TestStoreToken(t *testing.T) {
 
 // TestRetrieveToken tests getting a token from the keyring.
 func TestRetrieveToken(t *testing.T) {
-	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt, dir)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	s := NewService(repo)
 
 	expectedToken := getDefaultToken()
@@ -65,10 +82,17 @@ func TestRetrieveToken(t *testing.T) {
 
 // TestRetrieveExpiredToken tests getting an invalid (expired) token from the keyring.
 func TestRetrieveExpiredToken(t *testing.T) {
-	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt, dir)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	s := NewService(repo)
 
 	expectedToken := getDefaultToken()
@@ -90,10 +114,17 @@ func TestRetrieveExpiredToken(t *testing.T) {
 
 // TestRetrieveInvalidToken tests getting an invalid (empty AccessToken) token from the keyring.
 func TestRetrieveInvalidToken(t *testing.T) {
-	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt, dir)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	s := NewService(repo)
 
 	expectedToken := getDefaultToken()
@@ -111,10 +142,17 @@ func TestRetrieveInvalidToken(t *testing.T) {
 
 // TestRetrieveNonExistingToken tests getting a token not in the keyring.
 func TestRetrieveNonExistingToken(t *testing.T) {
-	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt)
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	repo, err := NewKeyringRepository(secretsBackend, &fixedStringPrompt, dir)
 	if err != nil {
 		t.Errorf("error not expected at this stage: %v", err)
 	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	s := NewService(repo)
 
 	_, err = s.RetrieveToken(userEmail + "fake")

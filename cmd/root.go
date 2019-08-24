@@ -68,7 +68,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(db))
 
 	// token manager service to be used as secrets backend
-	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil)
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
 	if err != nil {
 		log.Fatalf("Unable to use the token repository: %v", err)
 	}
