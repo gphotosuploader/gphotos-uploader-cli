@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.7.0 
 ### Added
-- Google Auth expired token refresh. Once token is expired, `gphotos-uploader-cli` will try to refresh the token without user intervention. **NOTE**: First time you use this version, you should re-authenticate in order to get the token that allows token refresh.
+- Google Auth expired token refresh. Once token is expired, `gphotos-uploader-cli` will try to refresh the token without user intervention. **NOTE**: First time you use this version, you should re-authenticate in order to get the token that allows token refresh. (#103)
+- Add `--config` flag to specify the folder where configuration is kept. (#014)
 
 ## 0.6.0
 ### Added
