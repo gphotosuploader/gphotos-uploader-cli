@@ -41,8 +41,9 @@ steps:
         path: /go
     commands:
       - make release
-      when:
-        event: tag
+    when:
+      event:
+      - tag
 
 volumes:
   - name: deps
