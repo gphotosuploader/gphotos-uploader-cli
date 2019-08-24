@@ -5,49 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-
-	"github.com/nmrshll/go-cp"
-	"golang.org/x/oauth2"
+	"path"
 
 	"github.com/client9/xson/hjson"
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
-// APIAppCredentials represents Google Photos API credentials for OAuth
-type APIAppCredentials struct {
-	ClientID     string
-	ClientSecret string
-}
-
-// FolderUploadJob represents configuration for a folder to be uploaded
-type FolderUploadJob struct {
-	Account           string
-	SourceFolder      string
-	MakeAlbums        MakeAlbums
-	DeleteAfterUpload bool
-	UploadVideos      bool
-	IncludePatterns   []string
-	ExcludePatterns   []string
-}
-
-// MakeAlbums represents configuration about how to create Albums in Google Photos
-type MakeAlbums struct {
-	Enabled bool
-	Use     string
-}
-
-// Config represents this application configuration
-type Config struct {
-	ConfigFile         string
-	Verbose            bool
-	SecretsBackendType string
-	APIAppCredentials  *APIAppCredentials
-	Jobs               []FolderUploadJob
-}
-
-// defaultConfig returns an example Config object
-func defaultConfig() Config {
+// defaultSettings() returns a *Config with the default settings of the application.
+func defaultSettings() *Config {
 	var c Config
 	c.SecretsBackendType = "auto"
 	c.APIAppCredentials = &APIAppCredentials{
@@ -66,11 +31,35 @@ func defaultConfig() Config {
 		UploadVideos:      true,
 	}
 	c.Jobs = append(c.Jobs, job)
-	return c
+	return &c
+}
+
+// NewConfig returns a *Config with the default settings of the application.
+func NewConfig(dir string) *Config {
+	cfg := defaultSettings()
+	cfg.ConfigPath = filesystem.AbsolutePath(dir)
+
+	return cfg
+}
+
+// TrackingDBDir returns the path of the folder where completed uploads are tracked.
+func (c *Config) TrackingDBDir() string {
+	return path.Join(c.ConfigPath, "uploads.db")
+}
+
+// ConfigFile return the path of the configuration file.
+func (c *Config) ConfigFile() string {
+	return path.Join(c.ConfigPath, "config.hjson")
+}
+
+// KeyringDir returns the path of the folder where keyring will be stored.
+// This is only used if 'SecretsBackendType=file'
+func (c *Config) KeyringDir() string {
+	return c.ConfigPath
 }
 
 // String returns a string representation of the Config object
-func (c Config) String() string {
+func (c *Config) String() string {
 	configTemplate := `
 {
   SecretsBackendType: %s,
@@ -105,67 +94,51 @@ func (c Config) String() string {
 		c.Jobs[0].UploadVideos)
 }
 
-// OAuthConfig creates and returns a new oauth Config based on API app credentials found in the uploader's config file
-func OAuthConfig(uploaderConfigAPICredentials *APIAppCredentials) *oauth2.Config {
-	if uploaderConfigAPICredentials == nil {
-		log.Fatalf("APIAppCredentials can't be nil")
+// LoadConfig reads configuration from the specified directory.
+// It reads a HJSON file (given by config.ConfigFile() func) and decodes it.
+func LoadConfig(dir string) (*Config, error) {
+	cfg := NewConfig(dir)
+
+	data, err := ioutil.ReadFile(cfg.ConfigFile())
+	if err != nil {
+		return nil, fmt.Errorf("failed to read configuration: file=%s, err=%v", cfg.ConfigFile(), err)
 	}
-	return gphotos.NewOAuthConfig(gphotos.APIAppCredentials(*uploaderConfigAPICredentials))
+
+	if err := hjson.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to decode configuration data: err=%v", err)
+	}
+
+	return cfg, nil
 }
 
-// GetUploadsDBPath returns the absolute path of uploads DB file
-func GetUploadsDBPath() string {
-	const UploadDBPath = "~/.config/gphotos-uploader-cli/uploads.db"
+// InitConfig creates an example config file if it doesn't already exist.
+// If 'force' is set then we are going to remove config dir before creating it.
+func InitConfig(dir string, force bool) error {
+	cfg := NewConfig(dir)
 
-	dbPathAbsolute, err := cp.AbsolutePath(UploadDBPath)
-	if err != nil {
-		log.Fatal(err) // TODO: should return an error instead a log.Fatal
-	}
-	return dbPathAbsolute
-}
-
-// LoadConfigFile reads HJSON file (absolute path) and decodes its configuration
-func LoadConfigFile(p string) (*Config, error) {
-	path, err := cp.AbsolutePath(p)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path: %s", p)
-	}
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration from file %s, %v", path, err)
-	}
-
-	config := defaultConfig()
-	config.ConfigFile = path
-
-	if err := hjson.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to decode configuration data: %v", err)
-	}
-
-	return &config, nil
-}
-
-// InitConfigFile creates an example config file if it doesn't already exist
-func InitConfigFile(p string) error {
-	path, err := cp.AbsolutePath(p)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path: %s", p)
-	}
-
-	dirname := filepath.Dir(path)
-	if _, err := os.Stat(dirname); os.IsNotExist(err) {
-		err := os.MkdirAll(dirname, 0755)
+	// if force, we should remove everything to start from the scratch.
+	if force {
+		err := os.RemoveAll(dir)
 		if err != nil {
-			return fmt.Errorf("failed to create config parent directory %s: %v", dirname, err)
+			return err
 		}
 	}
 
-	fh, err := os.Open(path)
-	if err != nil {
-		fh, err = os.Create(path)
+	if _, err := os.Stat(cfg.ConfigPath); !os.IsNotExist(err) {
+		// directory already exist and forced was not set
+		return fmt.Errorf("config directory already exists, use '--force' to overwrite: path=%s", cfg.ConfigPath)
+	} else {
+		err := os.MkdirAll(cfg.ConfigPath, 0755)
 		if err != nil {
-			return fmt.Errorf("failed to create config file %s: %v", path, err)
+			return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
+		}
+	}
+
+	fh, err := os.Open(cfg.ConfigFile())
+	if err != nil {
+		fh, err = os.Create(cfg.ConfigFile())
+		if err != nil {
+			return fmt.Errorf("failed to create config: file=%s, err=%v", cfg.ConfigFile(), err)
 		}
 	}
 	defer func() {
@@ -174,9 +147,9 @@ func InitConfigFile(p string) error {
 		}
 	}()
 
-	_, err = fh.WriteString(defaultConfig().String())
+	_, err = fh.WriteString(cfg.String())
 	if err != nil {
-		return fmt.Errorf("failed to write in config file %s: %v", path, err)
+		return fmt.Errorf("failed to write configuration: file=%s, err=%v", cfg.ConfigFile(), err)
 	}
 
 	return fh.Sync()

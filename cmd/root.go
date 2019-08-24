@@ -18,9 +18,9 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
 
-const defaultCfgFile = "~/.config/gphotos-uploader-cli/config.hjson"
+const defaultCfgDir = "~/.config/gphotos-uploader-cli"
 
-var cfgFile string
+var cfgDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,21 +44,21 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", defaultCfgFile, "set config file")
+	rootCmd.PersistentFlags().StringVar(&cfgDir, "config", defaultCfgDir, "set config folder")
 }
 
 func startUploader(cmd *cobra.Command, args []string) {
 	var cfg *config.Config
 
-	cfg, err := config.LoadConfigFile(cfgFile)
+	cfg, err := config.LoadConfig(cfgDir)
 	if err != nil {
-		log.Fatalf("Unable to read configuration file (%s).\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgFile)
+		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgDir)
 	}
 
 	// load completedUploads DB
-	db, err := leveldb.OpenFile(config.GetUploadsDBPath(), nil)
+	db, err := leveldb.OpenFile(cfg.TrackingDBDir(), nil)
 	if err != nil {
-		log.Fatalf("Error opening db: path=%s, err=%v", config.GetUploadsDBPath(), err)
+		log.Fatalf("Error opening db: path=%s, err=%v", cfg.TrackingDBDir(), err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -68,7 +68,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(db))
 
 	// token manager service to be used as secrets backend
-	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil)
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
 	if err != nil {
 		log.Fatalf("Unable to use the token repository: %v", err)
 	}

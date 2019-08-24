@@ -1,15 +1,39 @@
 package filesystem
 
 import (
-	"fmt"
-	"io"
-	"io/ioutil"
+	"log"
 	"os"
-	"strconv"
+	"os/user"
+	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/juju/errors"
 )
+
+// AbsolutePath converts a path (relative or absolute) into an absolute one.
+// Supports '~' notation for $HOME directory of the current user.
+func AbsolutePath(path string) string {
+	usr, err := user.Current()
+	if err != nil {
+		// It's very strange to have an error here, but in any case,
+		// return the same path was given.
+		return path
+	}
+	dir := usr.HomeDir
+
+	if path == "~" {
+		// In case of "~", which won't be caught by the "else if"
+		return dir
+	} else if strings.HasPrefix(path, "~/") {
+		// Use strings.HasPrefix so we don't match paths like
+		// "/something/~/something/"
+		return filepath.Join(dir, path[2:])
+	}
+	abspath, err := filepath.Abs(path)
+	if err != nil {
+		log.Println(err)
+	}
+	return abspath
+}
 
 // IsFile asserts there is a file at path
 func IsFile(path string) bool {
@@ -37,38 +61,4 @@ func GetMTime(path string) (mtime time.Time, err error) {
 	}
 	mtime = fi.ModTime()
 	return
-}
-
-// BufferFromFile opens the file to return a buffer
-func BufferFromFile(filePath string) (buf []byte, _ error) {
-	if !IsFile(filePath) {
-		return nil, fmt.Errorf("not a file")
-	}
-	buf, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, errors.Annotatef(err, "Failed reading file: %s: Ignoring file...\n", filePath)
-	}
-
-	return buf, nil
-}
-
-// BufferHeaderFromFile opens the file to return a buffer of the first HEADERSIZE bytes
-func BufferHeaderFromFile(filePath string, howMany int64) (buf []byte, _ error) {
-	if !IsFile(filePath) {
-		return nil, fmt.Errorf("not a file")
-	}
-	r, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	defer r.Close()
-
-	buf = make([]byte, howMany)
-	_, err = io.ReadFull(r, buf[:])
-	if err != nil {
-		return nil, errors.Annotatef(err, "Failed reading %s bytes of file: %s: Ignoring file...\n", strconv.FormatInt(howMany, 10), filePath)
-	}
-
-	return buf, nil
 }
