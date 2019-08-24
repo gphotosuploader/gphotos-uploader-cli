@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.0 
+### Added
+- Google Auth expired token refresh. Once token is expired, `gphotos-uploader-cli` will try to refresh the token without user intervention. **NOTE**: First time you use this version, you should re-authenticate in order to get the token that allows token refresh. (#103)
+- Add `--config` flag to specify the folder where configuration is kept. (#014)
+### Changed
+- Moved CI/CD platform from Travis to [Drone.io](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli). It has reduce the time to CI by a half.
+
 ## 0.6.0
 ### Added
 - `deleteAfterUpload` option has been reactivated, it was removed on v0.4.0. If you use this option in [config file](.docs/configuration.md) files will be deleted from local repository after being uploaded to Google Photos. (#25)
