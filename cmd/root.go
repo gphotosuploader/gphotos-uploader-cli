@@ -14,6 +14,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
@@ -56,9 +57,9 @@ func startUploader(cmd *cobra.Command, args []string) {
 	}
 
 	// load completedUploads DB
-	db, err := leveldb.OpenFile(cfg.TrackingDBDir(), nil)
+	db, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
 	if err != nil {
-		log.Fatalf("Error opening db: path=%s, err=%v", cfg.TrackingDBDir(), err)
+		log.Fatalf("Error opening completed uploads db: path=%s, err=%v", cfg.CompletedUploadsDBDir(), err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -74,8 +75,20 @@ func startUploader(cmd *cobra.Command, args []string) {
 	}
 	tkm := tokenstore.NewService(kr)
 
+	// load upload URLs DB
+	db, err = leveldb.OpenFile(cfg.ResumableUploadsDBDir(), nil)
+	if err != nil {
+		log.Fatalf("Error opening upload URLs db: path=%s, err=%v", cfg.ResumableUploadsDBDir(), err)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	uploadURLsService := uploadurls.NewService(db)
+
 	// start file upload worker
-	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker)
+	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker, uploadURLsService)
 
 	deletionQueue := upload.NewDeletionQueue()
 	deletionQueue.StartWorkers()
@@ -102,7 +115,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 		}
 
 		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
-		job := upload.NewFolderUploadJob(gPhotos, fileTracker, item.SourceFolder, opt)
+		job := upload.NewFolderUploadJob(gPhotos, fileTracker, uploadURLsService, item.SourceFolder, opt)
 
 		if err := job.ScanFolder(uploadChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
