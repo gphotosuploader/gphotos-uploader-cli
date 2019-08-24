@@ -1,0 +1,56 @@
+---
+kind: pipeline
+name: go-1-11
+
+steps:
+  - name: fetch
+    image: docker:git
+    commands:
+      - git fetch --tags
+
+  - name: test
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make test
+
+  - name: lint
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make lint
+
+  - name: build
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make build
+
+  - name: release
+    image: golang
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make release
+    when:
+      event:
+      - tag
+
+volumes:
+  - name: deps
+    temp: {}
+
+---
+kind: signature
+hmac: e83f4bfa59ad9a319570b4a035eb777597ba97dbed503fbc25e91697fae1cecb
+...
