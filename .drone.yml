@@ -16,12 +16,12 @@ steps:
       - make test
 
   - name: lint
-      image: golang:1.11
-      volumes:
-        - name: deps
-          path: /go
-      commands:
-        - make lint
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make lint
 
   - name: build
     image: golang:1.11
