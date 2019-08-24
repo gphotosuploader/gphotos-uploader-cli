@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.0
+### Added
+- Uploads can be resumed. This will help uploading large files or when connection has fails. Thanks to @pdecat.
+
 ## 0.7.2
 ### Fixed
 - Fix token storing when expired token has been refreshed. See comments on #107.
