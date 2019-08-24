@@ -58,7 +58,7 @@ First initialize the config file using this command:
 $ gphotos-uploader-cli init
 ```
 
-then modify it at `~/.config/gphotos-uploader-cli/config.hjson` to specify your configuration.
+by default configuration folder is `~/.config/gphotos-uploader-cli` but you can specify your own folder using `--config /my/config/dir`. Configuration is kept in the `config.hjson` file inside this folder.
 
 You can review the [documentation](.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
 
