@@ -94,7 +94,7 @@ func TestConfig_TrackingDBDir(t *testing.T) {
 	c := config.NewConfig(dir)
 
 	expected := path.Join(dir, "uploads.db")
-	got := c.CompletedUploadsTrackingDBDir()
+	got := c.CompletedUploadsDBDir()
 
 	if got != expected {
 		t.Errorf("Testing get tracking DB dir: expected: %s, got %s", expected, got)

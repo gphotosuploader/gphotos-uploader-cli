@@ -42,8 +42,8 @@ func NewConfig(dir string) *Config {
 	return cfg
 }
 
-// CompletedUploadsTrackingDBDir returns the path of the folder where completed uploads are tracked.
-func (c *Config) CompletedUploadsTrackingDBDir() string {
+// CompletedUploadsDBDir returns the path of the folder where completed uploads are tracked.
+func (c *Config) CompletedUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "uploads.db")
 }
 
