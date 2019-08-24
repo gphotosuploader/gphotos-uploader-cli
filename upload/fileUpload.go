@@ -94,7 +94,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsServ
 	}
 
 	if err != nil && *ptrUploadURL != "" {
-		log.Printf("Error uploading file '%s', storing upload URL '%s'\n", f.path, *ptrUploadURL)
+		log.Printf("Error uploading file '%s', storing upload URL '%s'", f.path, *ptrUploadURL)
 		if uploadURLsService.PutUploadURL(f.path, *ptrUploadURL) != nil {
 			return fmt.Errorf("failed to store upload URL in database: %s", err)
 		}
