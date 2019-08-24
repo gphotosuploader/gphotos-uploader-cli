@@ -17,6 +17,7 @@ steps:
         path: /go
     commands:
       - make build
+      - ./gphotos-uploader-cli version
 
 volumes:
   - name: deps
