@@ -1,0 +1,23 @@
+kind: pipeline
+name: go-1-11
+
+steps:
+  - name: test
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make ci
+
+  - name: build
+    image: golang:1.11
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - make build
+
+volumes:
+  - name: deps
+    temp: {}
