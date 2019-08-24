@@ -89,7 +89,7 @@ func TestLoadConfigWithNonExistentFile(t *testing.T) {
 	}
 }
 
-func TestConfig_TrackingDBDir(t *testing.T) {
+func TestConfig_CompletedUploadsDBDir(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
@@ -97,7 +97,20 @@ func TestConfig_TrackingDBDir(t *testing.T) {
 	got := c.CompletedUploadsDBDir()
 
 	if got != expected {
-		t.Errorf("Testing get tracking DB dir: expected: %s, got %s", expected, got)
+		t.Errorf("Testing get completed uploads DB dir: expected: %s, got %s", expected, got)
+	}
+
+}
+
+func TestConfig_ResumableUploadsDBDir(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	c := config.NewConfig(dir)
+
+	expected := path.Join(dir, "resumable_uploads.db")
+	got := c.ResumableUploadsDBDir()
+
+	if got != expected {
+		t.Errorf("Testing get resumable uploads DB dir: expected: %s, got %s", expected, got)
 	}
 
 }
