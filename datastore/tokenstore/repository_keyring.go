@@ -68,6 +68,14 @@ func defaultConfig(keyringDir string) keyring.Config {
 
 // StoreToken lets you store a token in the OS keyring
 func (r *KeyringRepository) StoreToken(email string, token *oauth2.Token) error {
+	if token.RefreshToken == "" {
+		// Restore refresh token from previously stored token if available
+		oldToken, _ := r.RetrieveToken(email)
+		if oldToken != nil {
+			token.RefreshToken = oldToken.RefreshToken
+		}
+	}
+
 	tokenJSONBytes, err := json.Marshal(token)
 	if err != nil {
 		return ErrInvalidToken
