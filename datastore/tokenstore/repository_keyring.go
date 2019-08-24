@@ -30,8 +30,8 @@ type KeyringRepository struct {
 //	WinCredBackend       BackendType = "wincred"
 //	FileBackend          BackendType = "file"
 //	PassBackend          BackendType = "pass"
-func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc) (*KeyringRepository, error) {
-	keyringConfig := defaultConfig()
+func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyringDir string) (*KeyringRepository, error) {
+	keyringConfig := defaultConfig(keyringDir)
 	if backend != "" && backend != "auto" {
 		keyringConfig.AllowedBackends = append(keyringConfig.AllowedBackends, keyring.BackendType(backend))
 	}
@@ -45,7 +45,7 @@ func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc) (*Keyr
 	return &KeyringRepository{kr}, nil
 }
 
-func defaultConfig() keyring.Config {
+func defaultConfig(keyringDir string) keyring.Config {
 	return keyring.Config{
 		AllowedBackends:                nil,
 		ServiceName:                    serviceName,
@@ -55,7 +55,7 @@ func defaultConfig() keyring.Config {
 		KeychainAccessibleWhenUnlocked: false,
 		KeychainPasswordFunc:           nil,
 		FilePasswordFunc:               terminalPrompt,
-		FileDir:                        "~/.config/gphotos-uploader-cli",
+		FileDir:                        keyringDir,
 		KWalletAppID:                   "",
 		KWalletFolder:                  "",
 		LibSecretCollectionName:        "",

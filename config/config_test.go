@@ -3,6 +3,7 @@ package config_test
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -10,21 +11,46 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 )
 
-func TestInitAndLoadConfig(t *testing.T) {
-	// init config file
-	path := filepath.Join(os.TempDir(), fmt.Sprintf("file.%d", time.Now().UnixNano()))
+func TestInitConfig(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(path)
+		err := config.InitConfig(dir, true)
 		if err != nil {
 			t.Errorf("could not create init config file: %v", err)
 		}
 	})
 
 	defer func() {
-		err := os.Remove(path)
+		err := os.RemoveAll(dir)
 		if err != nil {
-			t.Errorf("could not remove test config file (path: %s): %v", path, err)
+			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+		}
+	}()
+
+	t.Run("TestInitConfigFileWithExistentFile", func(t *testing.T) {
+		err := config.InitConfig(dir, false)
+		if err == nil {
+			t.Error("an error creating an existent file was expected")
+		}
+	})
+}
+
+func TestInitAndLoadConfig(t *testing.T) {
+	// init config folder
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+
+	t.Run("TestInitConfigFile", func(t *testing.T) {
+		err := config.InitConfig(dir, true)
+		if err != nil {
+			t.Errorf("could not create init config file: %v", err)
+		}
+	})
+
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
 		}
 	}()
 
@@ -33,7 +59,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
-		got, err := config.LoadConfigFile(path)
+		got, err := config.LoadConfig(dir)
 		if err != nil {
 			t.Errorf("could not load config file, got an error: %v", err)
 		}
@@ -47,6 +73,45 @@ func TestInitAndLoadConfig(t *testing.T) {
 			t.Errorf("Jobs are not equal: expected %d jobs, got %d jobs", len(expected.Jobs), len(got.Jobs))
 		}
 	})
+}
+
+func TestLoadConfigWithNonExistentFile(t *testing.T) {
+	// init config folder
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	err := os.RemoveAll(dir)
+	if err != nil {
+		t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+	}
+
+	_, err = config.LoadConfig(dir)
+	if err == nil {
+		t.Error("an error loading a non existent file was expected")
+	}
+}
+
+func TestConfig_TrackingDBDir(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	c := config.NewConfig(dir)
+
+	expected := path.Join(dir, "uploads.db")
+	got := c.TrackingDBDir()
+
+	if got != expected {
+		t.Errorf("Testing get tracking DB dir: expected: %s, got %s", expected, got)
+	}
+
+}
+
+func TestConfig_KeyringDir(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
+	c := config.NewConfig(dir)
+
+	expected := dir
+	got := c.KeyringDir()
+
+	if got != expected {
+		t.Errorf("Testing get keyring dir: expected: %s, got %s", expected, got)
+	}
 }
 
 func createTestConfiguration() *config.Config {
