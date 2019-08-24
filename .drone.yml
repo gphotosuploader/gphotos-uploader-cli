@@ -1,3 +1,4 @@
+---
 kind: pipeline
 name: go-1-11
 
@@ -48,3 +49,8 @@ steps:
 volumes:
   - name: deps
     temp: {}
+
+---
+kind: signature
+hmac: e83f4bfa59ad9a319570b4a035eb777597ba97dbed503fbc25e91697fae1cecb
+...
