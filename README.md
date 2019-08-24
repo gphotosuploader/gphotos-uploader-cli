@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/gphotosuploader/gphotos-uploader-cli.svg?branch=master)](https://travis-ci.org/gphotosuploader/gphotos-uploader-cli)
+[![Build Status](https://cloud.drone.io/api/badges/gphotosuploader/gphotos-uploader-cli/status.svg)](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gphotosuploader/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/gphotosuploader/gphotos-uploader-cli)
 [![GitHub release](https://img.shields.io/github/release/gphotosuploader/gphotos-uploader-cli.svg)](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest)
 [![GitHub](https://img.shields.io/github/license/gphotosuploader/gphotos-uploader-cli.svg)](LICENSE)
