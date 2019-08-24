@@ -2,6 +2,10 @@ kind: pipeline
 name: go-1-11
 
 steps:
+  - name: fetch
+    image: docker:git
+    commands:
+      - git fetch --tags
   - name: test
     image: golang:1.11
     volumes:
