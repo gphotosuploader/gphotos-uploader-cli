@@ -82,6 +82,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsServ
 	curUploadURL, err := uploadURLsService.GetUploadURL(f.path)
 	if err != nil {
 		// Not found, not an error, just an empty upload URL
+		curUploadURL = ""
 		log.Println(err)
 	}
 
