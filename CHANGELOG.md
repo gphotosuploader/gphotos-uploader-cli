@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 0.7.0 
+## 0.7.2
+### Fixed
+- Fix token storing when expired token has been refreshed. See comments on #107.
+- Fix typos in CHANGELOG.
+
+## 0.7.1 
 ### Added
 - Google Auth expired token refresh. Once token is expired, `gphotos-uploader-cli` will try to refresh the token without user intervention. **NOTE**: First time you use this version, you should re-authenticate in order to get the token that allows token refresh. (#103)
-- Add `--config` flag to specify the folder where configuration is kept. (#014)
+- Add `--config` flag to specify the folder where configuration is kept. (#104)
 ### Changed
 - Moved CI/CD platform from Travis to [Drone.io](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli). It has reduce the time to CI by a half.
 
