@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- Updated `google-photos-api-client` to version v1.0.4 to help with broken album creation. (#19)
+
 ## 0.8.0
 ### Added
 - Uploads can be resumed. This will help uploading large files or when connection has fails. Thanks to @pdecat.
