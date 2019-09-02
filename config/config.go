@@ -49,7 +49,8 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("no Jobs has been supplied")
 	}
 
-	for _, item := range c.Jobs {
+	for i := range c.Jobs {
+		item := &c.Jobs[i] // we do that way to modify original object while iterating.
 		path, err := cp.AbsolutePath(item.SourceFolder)
 		if err != nil {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
