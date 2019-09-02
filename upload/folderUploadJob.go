@@ -6,9 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nmrshll/go-cp"
-
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
@@ -58,20 +57,17 @@ func NewFolderUploadJob(client *gphotos.Client, trackingService *completedupload
 
 // ScanFolder uploads folder
 func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
-	folderAbsolutePath, err := cp.AbsolutePath(job.sourceFolder)
-	if err != nil {
-		return err
-	}
+	var err error
 
-	if !filesystem.IsDir(folderAbsolutePath) {
-		return fmt.Errorf("%s is not a folder", folderAbsolutePath)
+	if !filesystem.IsDir(job.sourceFolder) {
+		return fmt.Errorf("%s is not a folder", job.sourceFolder)
 	}
 
 	filter := NewFilter(job.options.includePatterns, job.options.excludePatterns, job.options.uploadVideos)
 
 	// dirs are walked depth-first.   These vars hold the active album
 	// default empty album for makeAlbums.enabled = false
-	errW := filepath.Walk(folderAbsolutePath, func(fp string, fi os.FileInfo, errP error) error {
+	errW := filepath.Walk(job.sourceFolder, func(fp string, fi os.FileInfo, errP error) error {
 		// log.Printf("ScanFolder.Walk: %v, fi: %v, err: %v\n", fp, fi, err)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "error for %v: %v\n", fp, err)
@@ -104,17 +100,18 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 			return nil
 		}
 
-		// calculate Album Name from the folder name
-		var album string
+		// calculate Album from the folder name, we create if it's not exists
+		var albumID string
 		if job.options.createAlbum {
-			album = filepath.Base(filepath.Dir(fp))
+			name := filepath.Base(filepath.Dir(fp))
+			albumID = getGooglePhotosAlbumID(name, job.client)
 		}
 
 		// set file upload options depending on folder upload options
 		var uploadItem = &Item{
 			client:          job.client,
 			path:            fp,
-			album:           album,
+			album:           albumID,
 			deleteOnSuccess: job.options.deleteAfterUpload,
 		}
 
@@ -128,4 +125,19 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 	}
 
 	return nil
+}
+
+// getGooglePhotosAlbumID return the Id of an album with the specified name.
+// If the album doesn't exist, return an empty string.
+func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
+	if name == "" {
+		return ""
+	}
+
+	album, err := c.GetOrCreateAlbumByName(name)
+	if err != nil {
+		log.Printf("Album creation failed: name=%s, error=%v", name, err)
+		return ""
+	}
+	return album.Id
 }

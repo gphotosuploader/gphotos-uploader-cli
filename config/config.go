@@ -8,6 +8,8 @@ import (
 	"path"
 
 	"github.com/client9/xson/hjson"
+	"github.com/nmrshll/go-cp"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
@@ -40,6 +42,25 @@ func NewConfig(dir string) *Config {
 	cfg.ConfigPath = filesystem.AbsolutePath(dir)
 
 	return cfg
+}
+
+func (c *Config) Validate() error {
+	if len(c.Jobs) < 1 {
+		return fmt.Errorf("no Jobs has been supplied")
+	}
+
+	for _, item := range c.Jobs {
+		path, err := cp.AbsolutePath(item.SourceFolder)
+		if err != nil {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
+		}
+		item.SourceFolder = path
+		if !filesystem.IsDir(item.SourceFolder) {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s", item.SourceFolder)
+		}
+	}
+
+	return nil
 }
 
 // CompletedUploadsDBDir returns the path of the folder where completed uploads are tracked.
