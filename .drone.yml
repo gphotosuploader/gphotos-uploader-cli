@@ -10,11 +10,14 @@ steps:
 
   - name: test
     image: golang:1.11
+    environment:
+      COVERALLS_TOKEN:
+        from_secret: coveralls_token
     volumes:
       - name: deps
         path: /go
     commands:
-      - make test
+      - make coveralls
 
   - name: lint
     image: golang:1.11
@@ -52,5 +55,6 @@ volumes:
 
 ---
 kind: signature
-hmac: e83f4bfa59ad9a319570b4a035eb777597ba97dbed503fbc25e91697fae1cecb
+hmac: b97804e2fed0c345dfc0d5fef594cce9c239e9adeb8f0d111786d5522c45b7e6
+
 ...
