@@ -19,7 +19,7 @@ steps:
     commands:
       - make test
       - go get github.com/mattn/goveralls
-      - goveralls -service drone.io
+      - goveralls -v -service drone.io
 
   - name: lint
     image: golang:1.11
