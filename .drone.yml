@@ -10,11 +10,17 @@ steps:
 
   - name: test
     image: golang:1.11
+    environment:
+      COVERALLS_TOKEN:
+        from_secret: coveralls_token
     volumes:
       - name: deps
         path: /go
     commands:
       - make test
+      - go get github.com/axw/gocov/gocov
+      - go get github.com/mattn/goveralls
+      - goveralls -service drone.io -repotoken ${COVERALLS_TOKEN}
 
   - name: lint
     image: golang:1.11
