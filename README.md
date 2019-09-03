@@ -1,7 +1,7 @@
 [![Build Status](https://cloud.drone.io/api/badges/gphotosuploader/gphotos-uploader-cli/status.svg)](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gphotosuploader/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/gphotosuploader/gphotos-uploader-cli)
 [![codebeat badge](https://codebeat.co/badges/9f3561ad-2838-456e-bc92-68988eeb376b)](https://codebeat.co/projects/github-com-gphotosuploader-gphotos-uploader-cli-master)
-[![Coverage Status](https://coveralls.io/repos/github/gphotosuploader/gphotos-uploader-cli/badge.svg?branch=master)](https://coveralls.io/github/gphotosuploader/gphotos-uploader-cli?branch=master)
+[![codecov](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli)
 [![GitHub release](https://img.shields.io/github/release/gphotosuploader/gphotos-uploader-cli.svg)](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest)
 [![GitHub](https://img.shields.io/github/license/gphotosuploader/gphotos-uploader-cli.svg)](LICENSE)
 <!--- [![Snap Status](https://build.snapcraft.io/badge/gphotosuploader/gphotos-uploader-cli.svg)](https://build.snapcraft.io/user/gphotosuploader/gphotos-uploader-cli) --->
