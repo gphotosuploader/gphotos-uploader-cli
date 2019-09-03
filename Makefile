@@ -30,6 +30,11 @@ cover: test ## Run all the tests and opens the coverage report
 	@echo "--> Openning coverage report..."
 	@go tool cover -html=$(COVERAGE_FILE)
 
+.PHONY: coveralls
+coveralls: test ## Run all the tests and send it to Coveralls
+	@echo "--> Sending coverage report to Coveralls..."
+	@goveralls -coverprofile $(COVERAGE_FILE) -service drone.io
+
 build: ## Build the app
 	@echo "--> Building binary artifact ($(BINARY) $(VERSION) (build: $(BUILD)))..."
 	@go build ${LDFLAGS} -o $(BINARY) $(SRC)

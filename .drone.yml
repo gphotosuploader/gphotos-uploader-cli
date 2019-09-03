@@ -10,20 +10,15 @@ steps:
 
   - name: test
     image: golang:1.11
+    environment:
+      COVERALLS_TOKEN:
+        from_secret: coveralls_token
     volumes:
       - name: deps
         path: /go
     commands:
-      - make test COVERAGE_FILE=coverage.txt
-
-  - name: coveralls
-    image: lizheming/drone-coveralls
-    environment:
-      COVERALLS_REPO_TOKEN:
-        from_secret: coveralls_token
-    settings:
-      files:
-        - ./coverage.txt
+      - make test
+      - make coveralls
 
   - name: lint
     image: golang:1.11
