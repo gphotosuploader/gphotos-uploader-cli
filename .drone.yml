@@ -20,7 +20,7 @@ steps:
       - make test
       - go get github.com/axw/gocov/gocov
       - go get github.com/mattn/goveralls
-      - goveralls -service drone.io -repotoken ${COVERALLS_TOKEN}
+      - goveralls -service drone.io -repotoken $COVERALLS_TOKEN
 
   - name: lint
     image: golang:1.11
