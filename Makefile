@@ -15,7 +15,7 @@ LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := main.go
-COVERAGE_FILE ?= coverage.txt
+COVERAGE_FILE := coverage.txt
 
 # Get first path on multiple GOPATH environments
 GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
@@ -31,7 +31,7 @@ cover: test ## Run all the tests and opens the coverage report
 	@go tool cover -html=$(COVERAGE_FILE)
 
 .PHONY: coveralls
-coveralls: test ## Run all the tests and send it to Coveralls
+coveralls: test ## Run all the tests and send it to Coveralls (only CI)
 	@echo "--> Sending coverage report to Coveralls..."
 	@go get github.com/mattn/goveralls
 	@goveralls -coverprofile $(COVERAGE_FILE) -service drone.io
