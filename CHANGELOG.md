@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added
+- Coverage reports in [codecov](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli/) service.
+
 ### Changed
 - Updated `google-photos-api-client` to version v1.0.4 to help with broken album creation. (#19)
 
