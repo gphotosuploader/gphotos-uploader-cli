@@ -46,8 +46,10 @@ steps:
       event:
         - tag
 
+depends_on:
+  - go-1-11
 ---
 kind: signature
-hmac: cbc1738c181291be5a5af10b0a53c381afbe5e0710356e86b44384c26da4b178
+hmac: bbc61b59d485cd4beae86c9be0adaf2897a66e40b02c8118726c19490dfac68c
 
 ...

@@ -46,7 +46,6 @@ GOLANGCI := $(BIN_DIR)/golangci-lint
 GOLANGCI_VERSION := 1.12.3
 
 GORELEASER := $(BIN_DIR)/goreleaser
-CODECOV := $(BIN_DIR)/codecov
 
 $(GOLANGCI):
 	@echo "--> Installing golangci v$(GOLANGCI_VERSION)..."
@@ -55,11 +54,6 @@ $(GOLANGCI):
 $(GORELEASER):
 	@echo "--> Installing goreleaser..."
 	@curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh -s -- -b $(BIN_DIR)
-
-$(CODECOV):
-	@echo "--> Installing codecov..."
-	@curl -sfL https://codecov.io/bash --output $(CODECOV)
-	@chmod +x $(CODECOV)
 
 .PHONY: lint
 lint: $(GOLANGCI) ## Run linter
@@ -73,11 +67,6 @@ ci: build test lint ## Run all the tests and code checks
 release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
 	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
 	@RELEASE_VERSION_TAG="$(RELEASE_VERSION_FLAGS)" $(GORELEASER) release
-
-.PHONY: codecov
-codecov: $(CODECOV) test ## Run all the tests and send it to Codecov (only CI)
-	@echo "--> Sending coverage report to Codecov..."
-	@$(CODECOV) -f $(COVERAGE_FILE)
 
 .PHONY: help
 help: ## Show this help
