@@ -15,7 +15,7 @@ LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := main.go
-COVERAGE_FILE := coverage.txt
+COVERAGE_FILE ?= coverage.txt
 
 # Get first path on multiple GOPATH environments
 GOPATH := $(shell echo ${GOPATH} | cut -d: -f1)
