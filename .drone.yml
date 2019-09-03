@@ -9,20 +9,17 @@ steps:
       - name: deps
         path: /go
     commands:
-      - make test
+      - make test COVERAGE_FILE=coverage.txt
       - make lint
       - make build
 
   - name: coverage
-    image: golang:1.11
-    environment:
-      CODECOV_TOKEN:
+    image: plugins/codecov
+    settings:
+      token:
         from_secret: codecov_token
-    volumes:
-      - name: deps
-        path: /go
-    commands:
-      - make codecov
+    files:
+     - coverage.txt
 
 volumes:
   - name: deps
@@ -51,6 +48,6 @@ steps:
 
 ---
 kind: signature
-hmac: b97804e2fed0c345dfc0d5fef594cce9c239e9adeb8f0d111786d5522c45b7e6
+hmac: cbc1738c181291be5a5af10b0a53c381afbe5e0710356e86b44384c26da4b178
 
 ...
