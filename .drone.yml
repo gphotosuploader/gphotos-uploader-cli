@@ -16,6 +16,7 @@ steps:
   - name: coverage
     image: plugins/codecov
     settings:
+      required: true
       token:
         from_secret: codecov_token
     files:
@@ -42,14 +43,15 @@ steps:
         from_secret: github_token
     commands:
       - make release
-    when:
-      event:
-        - tag
+
+trigger:
+  event:
+  - tag
 
 depends_on:
   - go-1-11
 ---
 kind: signature
-hmac: bbc61b59d485cd4beae86c9be0adaf2897a66e40b02c8118726c19490dfac68c
+hmac: a3a5a3585925432b0110f6eb6ba4ccac6df931c2700b6a6f06ee802fa6801711
 
 ...
