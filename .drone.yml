@@ -17,7 +17,6 @@ steps:
       - name: deps
         path: /go
     commands:
-      - make test
       - make coveralls
 
   - name: lint
@@ -56,6 +55,6 @@ volumes:
 
 ---
 kind: signature
-hmac: d563ebe637a1ccb06694f0ebd59302b529decf5307eee52bf184804d76a0a2e0
+hmac: b97804e2fed0c345dfc0d5fef594cce9c239e9adeb8f0d111786d5522c45b7e6
 
 ...
