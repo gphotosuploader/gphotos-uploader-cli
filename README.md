@@ -61,22 +61,52 @@ First initialize the config file using this command:
 $ gphotos-uploader-cli init
 ```
 
-by default configuration folder is `~/.config/gphotos-uploader-cli` but you can specify your own folder using `--config /my/config/dir`. Configuration is kept in the `config.hjson` file inside this folder.
+> Default configuration folder is `~/.config/gphotos-uploader-cli` but you can specify your own folder using `--config /my/config/dir`. Configuration is kept in the `config.hjson` file inside this folder.
 
-You can review the [documentation](.docs/configuration.md) to specify the folder to upload, add more Google Accounts and tune your configuration.
-
-If you have problems, please open an [issue](https://github.com/gphotosuploader/gphotos-uploader-cli/issues). 
+You should review the [documentation](.docs/configuration.md) to specify your Google Photos API credentials, the folders to upload and the Google Accounts where it will be uploaded.
 
 ## Run
-
 Once it's configured you can start uploading files in this way:
 ``` 
 $ gphotos-uploader-cli
-```    
+```
+
+### First time run
+The first time you run `gphotos-uploader-cli`, after setting your configuration ([Google Photos API credentials](.docs/configuration.md#APIAppCredentials)), few manual steps are needed:
+
+1. You should get an output like this one:
+
+```
+2019/09/07 17:47:11 Token has not been retrieved from token store: failed retrieving token from keyring
+2019/09/07 17:47:11 Open http://localhost:40923
+```
+
+1. A browser will be opened at this point. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
+
+![Google asking for Google Photos API credentials](.docs/images/ask_Google_Photos_API_credentials.png) 
+
+1. After that, you should confirm that you trust on `gphotos-uploader-cli` to access to your Google Photos account, click on **Go to gphotos-uploader**:
+
+![Google ask you to verify gphotos-upload-cli](.docs/images/ask_for_application_verification.png)
+
+1. Finally Google will ask you to confirm permission Google Photos account:
+
+![Google ask permission to your Google Photos account](.docs/images/ask_for_permission.png)
+
+1. A green page is shown if all is fine
+
+![Final confirmation, all was good](.docs/images/final_confirmation.png)
+
+1. Go back to your terminal, you will see something like:
+
+```
+2019/09/07 17:47:23 Token expiration: 2019-09-07 18:47:23.588661948 +0200 CEST m=+3612.289671492
+```
+
+All auth configuration is in place.
 
 # Contributing
 Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/gphotosuploader/gphotos-uploader-cli/issues). 
-
 
 # License
  
