@@ -1,6 +1,8 @@
 # Configuration
 
-Example configuration file (usually at `~/.config/gphotos-uploader-cli/config.hjson`:    
+> The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.config/gphotos-uploader-cli`.
+
+Example configuration file:    
 
 ```hjson
 {
@@ -60,8 +62,18 @@ var backendOrder = []BackendType{
 ```
 
 ## APIAppCredentials
-The credentials that are provided are just example ones. 
-Replace them with credentials you create at [Google Console](https://console.cloud.google.com/apis/api/photoslibrary.googleapis.com).
+
+Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and envolves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
+
+Before you can use `gphotos-uploader-cli`, you must enable the Photos Library API and request an OAuth 2.0 Client ID.
+
+1. Make sure you're logged in into the Google Account where your photos should be uploaded to.
+1. Start by [creating a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (example: _Google Photos Uploader_).
+1. Enable the [Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com) by clicking the <kbd>ENABLE</kbd> button.
+1. Configure the [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
+1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Other** as the application type and give it a name (example: _gphotos-uploader-cli_).
+1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
+1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
 
 ## jobs
 List of folders to upload and upload options for each folder.
