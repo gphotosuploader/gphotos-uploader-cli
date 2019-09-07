@@ -63,7 +63,7 @@ $ gphotos-uploader-cli init
 
 > Default configuration folder is `~/.config/gphotos-uploader-cli` but you can specify your own folder using `--config /my/config/dir`. Configuration is kept in the `config.hjson` file inside this folder.
 
-You should review the [documentation](.docs/configuration.md) to specify your Google Photos API credentials, the folders to upload and the Google Accounts where it will be uploaded.
+You must review the [documentation](.docs/configuration.md) to specify your **Google Photos API credentials**, `APIAppCredentials`. You should tune your `jobs` configuration also.
 
 ## Run
 Once it's configured you can start uploading files in this way:
