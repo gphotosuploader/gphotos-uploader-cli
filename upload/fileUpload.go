@@ -58,23 +58,7 @@ func StartFileUploadWorker(trackingService *completeduploads.Service, uploadURLs
 	return fileUploadsChan, doneUploading
 }
 
-// getGooglePhotosAlbumID return the Id of an album with the specified name.
-// If the album doesn't exist, return an empty string.
-func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
-	if name == "" {
-		return ""
-	}
-
-	album, err := c.GetOrCreateAlbumByName(name)
-	if err != nil {
-		log.Printf("Album creation failed: name=%s, error=%v", name, err)
-		return ""
-	}
-	return album.Id
-}
-
 func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsService *uploadurls.Service) error {
-	albumID := getGooglePhotosAlbumID(f.album, f.client)
 	log.Printf("Uploading object: file=%s", f.path)
 
 	// check upload URL db for previous uploads
@@ -88,7 +72,7 @@ func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsServ
 
 	// upload the file content to Google Photos
 	ptrUploadURL := &curUploadURL
-	_, err = f.client.UploadFileResumable(f.path, ptrUploadURL, albumID)
+	_, err = f.client.UploadFileResumable(f.path, ptrUploadURL, f.album)
 	if err != nil {
 		err = errors.Annotate(err, "failed uploading image")
 	}

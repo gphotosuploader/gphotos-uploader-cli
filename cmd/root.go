@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
@@ -53,7 +54,11 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	cfg, err := config.LoadConfig(cfgDir)
 	if err != nil {
-		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one.", cfgDir)
+		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one. err=%s", cfgDir, err)
+	}
+	err = cfg.Validate()
+	if err != nil {
+		log.Fatalf("Invalid configuration was supplied: file=%s, err=%s", cfg.ConfigFile(), err)
 	}
 
 	// load completedUploads DB
@@ -104,7 +109,6 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, item := range cfg.Jobs {
-
 		client, err := newOAuth2Client(ctx, tkm, oauth2Config, item.Account)
 		if err != nil {
 			log.Fatal(err)
