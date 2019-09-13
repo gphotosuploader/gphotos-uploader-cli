@@ -11,6 +11,7 @@ require (
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/juju/testing v0.0.0-20190613124551-e81189438503 // indirect
+	github.com/mattn/goveralls v0.0.2 // indirect
 	github.com/nmrshll/go-cp v0.0.0-20180115193924-61436d3b7cfa
 	github.com/pierrec/xxHash v0.1.5
 	github.com/spf13/cobra v0.0.5

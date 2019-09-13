@@ -3,54 +3,55 @@ kind: pipeline
 name: go-1-11
 
 steps:
-  - name: fetch
-    image: docker:git
-    commands:
-      - git fetch --tags
-
-  - name: test
+  - name: test-lint-build
     image: golang:1.11
     volumes:
       - name: deps
         path: /go
     commands:
-      - make test
-
-  - name: lint
-    image: golang:1.11
-    volumes:
-      - name: deps
-        path: /go
-    commands:
+      - make test COVERAGE_FILE=coverage.txt
       - make lint
-
-  - name: build
-    image: golang:1.11
-    volumes:
-      - name: deps
-        path: /go
-    commands:
       - make build
 
-  - name: release
-    image: golang
-    environment:
-      GITHUB_TOKEN:
-        from_secret: github_token
-    volumes:
-      - name: deps
-        path: /go
-    commands:
-      - make release
-    when:
-      event:
-      - tag
+  - name: coverage
+    image: plugins/codecov
+    settings:
+      required: true
+      token:
+        from_secret: codecov_token
+    files:
+     - coverage.txt
 
 volumes:
   - name: deps
     temp: {}
 
 ---
+kind: pipeline
+name: release
+
+steps:
+  - name: fetch
+    image: docker:git
+    commands:
+      - git fetch --tags
+
+  - name: release
+    image: golang
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    commands:
+      - make release
+
+trigger:
+  event:
+  - tag
+
+depends_on:
+  - go-1-11
+---
 kind: signature
-hmac: e83f4bfa59ad9a319570b4a035eb777597ba97dbed503fbc25e91697fae1cecb
+hmac: a3a5a3585925432b0110f6eb6ba4ccac6df931c2700b6a6f06ee802fa6801711
+
 ...
