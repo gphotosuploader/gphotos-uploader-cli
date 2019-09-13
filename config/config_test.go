@@ -55,7 +55,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 	}()
 
 	// prepare expected configuration
-	expected := createTestConfiguration()
+	want := createTestConfiguration()
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
@@ -65,12 +65,12 @@ func TestInitAndLoadConfig(t *testing.T) {
 		}
 
 		// check that both configuration are equal
-		if *got.APIAppCredentials != *expected.APIAppCredentials {
-			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", *expected.APIAppCredentials, *got.APIAppCredentials)
+		if *got.APIAppCredentials != *want.APIAppCredentials {
+			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", *want.APIAppCredentials, *got.APIAppCredentials)
 		}
 
-		if len(got.Jobs) != len(expected.Jobs) {
-			t.Errorf("Jobs are not equal: expected %d jobs, got %d jobs", len(expected.Jobs), len(got.Jobs))
+		if len(got.Jobs) != len(want.Jobs) {
+			t.Errorf("Jobs are not equal: expected %d jobs, got %d jobs", len(want.Jobs), len(got.Jobs))
 		}
 	})
 }
@@ -93,11 +93,11 @@ func TestConfig_CompletedUploadsDBDir(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
-	expected := path.Join(dir, "uploads.db")
+	want := path.Join(dir, "uploads.db")
 	got := c.CompletedUploadsDBDir()
 
-	if got != expected {
-		t.Errorf("Testing get completed uploads DB dir: expected: %s, got %s", expected, got)
+	if got != want {
+		t.Errorf("Testing get completed uploads DB dir: expected: %s, got %s", want, got)
 	}
 
 }
@@ -106,11 +106,11 @@ func TestConfig_ResumableUploadsDBDir(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
-	expected := path.Join(dir, "resumable_uploads.db")
+	want := path.Join(dir, "resumable_uploads.db")
 	got := c.ResumableUploadsDBDir()
 
-	if got != expected {
-		t.Errorf("Testing get resumable uploads DB dir: expected: %s, got %s", expected, got)
+	if got != want {
+		t.Errorf("Testing get resumable uploads DB dir: expected: %s, got %s", want, got)
 	}
 
 }
@@ -119,12 +119,53 @@ func TestConfig_KeyringDir(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	c := config.NewConfig(dir)
 
-	expected := dir
+	want := dir
 	got := c.KeyringDir()
 
-	if got != expected {
-		t.Errorf("Testing get keyring dir: expected: %s, got %s", expected, got)
+	if got != want {
+		t.Errorf("Testing get keyring dir: expected: %s, got %s", want, got)
 	}
+}
+
+func TestConfig_Validate(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-test.%d", time.Now().UnixNano()))
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		t.Errorf("no error was expected at this point: err=%s", err)
+	}
+	defer func() {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+		}
+	}()
+
+	t.Run("TestValidateConfigWithValidSettings", func(t *testing.T) {
+		c := createTestConfiguration()
+		c.Jobs[0].SourceFolder = dir
+		got := c.Validate()
+		if got != nil {
+			t.Errorf("config is not validated. That was not expected: err=%v", got)
+		}
+	})
+
+	t.Run("TestValidateConfigWithInvalidSourceFolder", func(t *testing.T) {
+		c := createTestConfiguration()
+		got := c.Validate()
+		if got == nil {
+			t.Errorf("config is validated. That was not expected: err=%v", got)
+		}
+	})
+
+	t.Run("TestValidateConfigWithoutJobs", func(t *testing.T) {
+		c := createTestConfiguration()
+		c.Jobs = make([]config.FolderUploadJob, 0)
+		got := c.Validate()
+		if got == nil {
+			t.Errorf("config is validated. That was not expected: err=%v", got)
+		}
+	})
+
 }
 
 func createTestConfiguration() *config.Config {
