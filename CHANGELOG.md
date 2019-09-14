@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.2
+### Fixed
+- Fix panic when a very big file was uploaded. It was solved in upstream [gphotosuploader/google-photos-api-client-go#17](https://github.com/gphotosuploader/google-photos-api-client-go/issues/17). (#127)
+
 ## 0.8.1
 ### Added
 - Coverage reports in [codecov](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli/) service.
