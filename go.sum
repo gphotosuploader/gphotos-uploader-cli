@@ -49,6 +49,8 @@ github.com/gphotosuploader/google-photos-api-client-go v1.0.3 h1:fw6sta6RAc7To42
 github.com/gphotosuploader/google-photos-api-client-go v1.0.3/go.mod h1:7D8+4oKnv2TcdWSURiNCZ4eDQkVHkFJgfAUQhucVjXY=
 github.com/gphotosuploader/google-photos-api-client-go v1.0.4 h1:9WmIcffu0fRgHKdBCUOpcD+VGuT3kVAOO37qwEJK0F8=
 github.com/gphotosuploader/google-photos-api-client-go v1.0.4/go.mod h1:7D8+4oKnv2TcdWSURiNCZ4eDQkVHkFJgfAUQhucVjXY=
+github.com/gphotosuploader/google-photos-api-client-go v1.0.5 h1:p09OAMonnusKHTHr0WyE2fGGbf9NtWAnDw7XHZdSO/A=
+github.com/gphotosuploader/google-photos-api-client-go v1.0.5/go.mod h1:7D8+4oKnv2TcdWSURiNCZ4eDQkVHkFJgfAUQhucVjXY=
 github.com/gphotosuploader/googlemirror v0.0.0-20190708130251-f249ce03cd95 h1:Cv0811GX9b3ql90ANuJdvHCX2s2THyalfDOfDl2vOZQ=
 github.com/gphotosuploader/googlemirror v0.0.0-20190708130251-f249ce03cd95/go.mod h1:725+/afSOVU01M2Lfi3NIw8L3Oupjit6u/s1MLjK160=
 github.com/gphotosuploader/googlemirror v0.3.2 h1:xaYVJYEDj2rYMYGi5sTGMy6gkD5PVKfz4c3ZW8gQs+M=
