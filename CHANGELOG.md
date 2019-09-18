@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.3
+### Fixed
+- Fix never ending upload due to upstream bug [gphotosuploader/google-photos-api-client-go#19](https://github.com/gphotosuploader/google-photos-api-client-go/issues/19). (#129)
+
+### Changed
+- Updated `int128/oauth2cli` to version v1.5.0 and improve messages in logs. See [int128/oauth2cli#3](https://github.com/int128/oauth2cli/issues/3).
+
 ## 0.8.2
 ### Fixed
 - Fix panic when a very big file was uploaded. It was solved in upstream [gphotosuploader/google-photos-api-client-go#17](https://github.com/gphotosuploader/google-photos-api-client-go/issues/17). (#127)
