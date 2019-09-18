@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/int128/oauth2cli"
+	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
 )
@@ -34,13 +36,7 @@ func newOAuth2Client(ctx context.Context, tkm *tokenstore.Service, oauth2Config 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, newHTTPClient())
 	switch {
 	case token == nil:
-		token, err = oauth2cli.GetToken(ctx, oauth2cli.Config{
-			OAuth2Config: oauth2Config,
-			ShowLocalServerURL: func(url string) {
-				log.Printf("Open %s", url)
-			},
-			LocalServerSuccessHTML: successPage,
-		})
+		token, err = obtainOAuthTokenFromAuthServer(ctx, oauth2Config)
 		if err != nil {
 			return nil, fmt.Errorf("could not get a token: %s", err)
 		}
@@ -66,4 +62,43 @@ func newOAuth2Client(ctx context.Context, tkm *tokenstore.Service, oauth2Config 
 
 	client := oauth2Config.Client(ctx, token)
 	return client, nil
+}
+
+func obtainOAuthTokenFromAuthServer(ctx context.Context, oauth2Config oauth2.Config) (*oauth2.Token, error) {
+	var token *oauth2.Token
+	var err error
+
+	ready := make(chan string, 1)
+	var eg errgroup.Group
+	eg.Go(func() error {
+		select {
+		case url, ok := <-ready:
+			if !ok {
+				return nil
+			}
+			// Open a browser to complete OAuth process.
+			log.Printf("Openning browser to complete authorization.")
+			err = browser.OpenURL(url)
+			if err != nil {
+				log.Printf("Browser was not detected. Complete the authorization browsing to: %s", url)
+			}
+			return nil
+		case err := <-ctx.Done():
+			return fmt.Errorf("context done while waiting for authorization: %s", err)
+		}
+	})
+	eg.Go(func() error {
+		defer close(ready)
+		token, err = oauth2cli.GetToken(ctx, oauth2cli.Config{
+			OAuth2Config:           oauth2Config,
+			LocalServerReadyChan:   ready,
+			LocalServerSuccessHTML: successPage,
+		})
+		return err
+	})
+	if err := eg.Wait(); err != nil {
+		log.Printf("error while authorization: %s", err)
+	}
+
+	return token, err
 }
