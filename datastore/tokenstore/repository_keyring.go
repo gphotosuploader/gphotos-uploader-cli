@@ -96,8 +96,8 @@ func (r *KeyringRepository) RetrieveToken(email string) (*oauth2.Token, error) {
 	}
 
 	// validate token.
-	// It should be non nil and it should have an AccessToken
-	if &tk == nil || tk.AccessToken == "" {
+	// We are not using token.Valid() because we want to retrieve token event though it's expired.
+	if tk.AccessToken == "" {
 		return nil, ErrInvalidToken
 	}
 
