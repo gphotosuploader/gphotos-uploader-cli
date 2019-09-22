@@ -28,6 +28,7 @@ github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a/go.mod h1:7Bv
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
+github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 h1:ZpnhV/YsD2/4cESfV5+Hoeu/iUR3ruzNvZ+yQfO03a0=
 github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2/go.mod h1:bBOAhwG1umN6/6ZUMtDFBMQR8jRg9O75tm9K00oMsK4=
 github.com/godbus/dbus v4.1.0+incompatible h1:WqqLRTsQic3apZUK9qC5sGNfXthmPXzUZ7nQPrNITa4=
 github.com/godbus/dbus v4.1.0+incompatible/go.mod h1:/YcGZj5zSblfDWMMoOzV4fas9FZnQYTkDnsGvmh2Grw=
@@ -48,6 +49,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
 github.com/gphotosuploader/google-photos-api-client-go v1.0.5/go.mod h1:7D8+4oKnv2TcdWSURiNCZ4eDQkVHkFJgfAUQhucVjXY=
 github.com/gphotosuploader/google-photos-api-client-go v1.0.6 h1:yEGF/P74Rl6XykKEPMd10snyARI/Nq6x3Uhfkh99cUw=
 github.com/gphotosuploader/google-photos-api-client-go v1.0.6/go.mod h1:nN1IlJ/nAdt7V08+htNO9emykFINLeS5Y+stLUWt970=
+github.com/gphotosuploader/google-photos-api-client-go v1.0.7 h1:5yCBJT6c/hUq7mwa08iHpPbPuqhdZ6VUFTQfzwWBsRI=
+github.com/gphotosuploader/google-photos-api-client-go v1.0.7/go.mod h1:drQlpEncMykB/tPjsr0TKUKAfGKCOqg5Zl0XLuEopfA=
 github.com/gphotosuploader/googlemirror v0.3.2 h1:xaYVJYEDj2rYMYGi5sTGMy6gkD5PVKfz4c3ZW8gQs+M=
 github.com/gphotosuploader/googlemirror v0.3.2/go.mod h1:725+/afSOVU01M2Lfi3NIw8L3Oupjit6u/s1MLjK160=
 github.com/gphotosuploader/gphotos-uploader-cli v0.8.2/go.mod h1:gYCWsiteVetb1IyjL8sF4Pc22g/N+Gx0tlrGmeUOMTY=
@@ -206,6 +209,7 @@ google.golang.org/appengine v1.5.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7
 google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8/go.mod h1:JiN7NxoALGmiZfu7CAH4rXhgtRTLTxftemlI0sWmxmc=
 google.golang.org/genproto v0.0.0-20190307195333-5fe7a883aa19/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
 google.golang.org/genproto v0.0.0-20190418145605-e7d98fc518a7/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
+google.golang.org/genproto v0.0.0-20190502173448-54afdca5d873 h1:nfPFGzJkUDX6uBmpN/pSw7MbOAWegH5QDQuoXFHedLg=
 google.golang.org/genproto v0.0.0-20190502173448-54afdca5d873/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.20.1/go.mod h1:10oTOabMzJvdu6/UiuZezV6QK5dSlG84ov/aaiqXj38=
