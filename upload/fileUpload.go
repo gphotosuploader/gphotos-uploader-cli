@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/juju/errors"
-
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 )
@@ -37,7 +36,8 @@ func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, c
 			defer func() { <-semaphore }()
 			err := fileUpload.upload(completedUploads, uploadURLsService)
 			if err != nil {
-				log.Fatal(errors.Annotate(err, "failed uploading image"))
+				log.Printf("[ERR] Failed to push media item: file=%s, err=%s", fileUpload.path, err)
+				return
 			}
 		}(fileUpload)
 	}
@@ -73,16 +73,12 @@ func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsServ
 	// upload the file content to Google Photos
 	ptrUploadURL := &curUploadURL
 	_, err = f.client.UploadFileResumable(f.path, ptrUploadURL, f.album)
+
 	if err != nil {
-		err = errors.Annotate(err, "failed uploading image")
-	}
-
-	if err != nil && *ptrUploadURL != "" {
-		log.Printf("Error uploading file '%s', storing upload URL '%s'", f.path, *ptrUploadURL)
-		if uploadURLsService.PutUploadURL(f.path, *ptrUploadURL) != nil {
-			return fmt.Errorf("failed to store upload URL in database: %s", err)
+		if *ptrUploadURL != "" {
+			// TODO: This should be delegated to resumable uploads method
+			_ = uploadURLsService.PutUploadURL(f.path, *ptrUploadURL)
 		}
-
 		return err
 	}
 
