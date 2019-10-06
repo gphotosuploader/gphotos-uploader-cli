@@ -9,6 +9,7 @@ require (
 	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/int128/oauth2cli v1.5.0
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
+	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2 // indirect
 	github.com/nmrshll/go-cp v0.0.0-20180115193924-61436d3b7cfa
 	github.com/pierrec/xxHash v0.1.5
@@ -18,6 +19,5 @@ require (
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
-	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
