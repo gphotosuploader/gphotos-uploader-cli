@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Fixed
+- Fix exit code on clean executions. (#137)
+
 ## 0.8.4
 ### Fixed
 - Fix panic when a unexpected error on media item creation was raised. (#110)
