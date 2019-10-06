@@ -1,14 +1,14 @@
-// Package filter implements filters for files similar to filepath.Glob, but
-// in contrast to filepath.Glob a pattern may specify directories.
+// Package filter implements filters for files similar to `filepath.Glob`, but
+// in contrast to `filepath.Glob` a pattern may specify directories.
 //
-// For a list of valid patterns please see the documentation on filepath.Glob.
+// For a list of valid patterns please see the documentation on `filepath.Glob`.
 package match
 
 import (
+	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
-
-	"github.com/juju/errors"
 )
 
 // ErrBadString is returned when Match is called with the empty string as the
@@ -93,7 +93,7 @@ func match(patterns, strs []string) (matched bool, err error) {
 			for i := len(patterns) - 1; i >= 0; i-- {
 				ok, err := filepath.Match(patterns[i], strs[offset+i])
 				if err != nil {
-					return false, errors.Wrap(err, errors.New("Match"))
+					return false, fmt.Errorf("match: err=%s", err)
 				}
 
 				if !ok {
