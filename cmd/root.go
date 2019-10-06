@@ -66,11 +66,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("Error opening completed uploads db: path=%s, err=%v", cfg.CompletedUploadsDBDir(), err)
 	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	defer db.Close()
 	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(db))
 
 	// token manager service to be used as secrets backend
@@ -85,11 +81,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("Error opening upload URLs db: path=%s, err=%v", cfg.ResumableUploadsDBDir(), err)
 	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	defer db.Close()
 	uploadURLsService := uploadurls.NewService(db)
 
 	// start file upload worker
