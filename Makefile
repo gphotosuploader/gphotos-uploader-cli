@@ -2,14 +2,11 @@ BINARY := gphotos-uploader-cli
 .DEFAULT_GOAL := help
 
 # This VERSION could be set calling `make VERSION=0.2.0`
-VERSION ?= $(shell git describe --tags --abbrev=0)
-
-# This BUILD is automatically calculated and used inside the command
-BUILD := $(shell git rev-parse --short HEAD)
+VERSION ?= $(shell git describe --tags --always --dirty)
 
 # Use linker flags to provide version/build settings to the target
 VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/cmd
-RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION) -X=${VERSION_IMPORT_PATH}.build=$(BUILD)
+RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION)
 LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 
 # go source files, ignore vendor directory
@@ -37,7 +34,7 @@ coveralls: test ## Run all the tests and send it to Coveralls (only CI)
 	@goveralls -coverprofile $(COVERAGE_FILE) -service drone.io
 
 build: ## Build the app
-	@echo "--> Building binary artifact ($(BINARY) $(VERSION) (build: $(BUILD)))..."
+	@echo "--> Building binary artifact ($(BINARY) $(VERSION))..."
 	@go build ${LDFLAGS} -o $(BINARY) $(SRC)
 
 .PHONY: clean
@@ -80,4 +77,4 @@ help: ## Show this help
 
 .PHONY: version
 version: ## Show current version
-	@echo "$(VERSION) (build: $(BUILD))"
+	@echo "$(VERSION)"

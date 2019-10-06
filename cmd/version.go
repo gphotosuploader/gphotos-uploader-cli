@@ -20,17 +20,16 @@ import (
 // releasing a new version, this file is updated by Makefile to reflect the new
 // version, a git annotated tag is used to set this version
 var (
-	version = "v0.0.0" // git tag, output of $(git describe --tags --abbrev=0)
-	build   = "0"      // sha1 from git, output of $(git rev-parse --short HEAD)
+	version = "v0.0.0" // git tag, output of $(git describe --tags --always --dirty)
 )
 
 // versionCmd returns the overall codebase version. It's for detecting what
 // code a binary was built from.
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print current version and build",
+	Short: "Print current version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("gphotos-uploader-cli %s (build: %s)\n", version, build)
+		fmt.Printf("gphotos-uploader-cli %s\n", version)
 	},
 }
 

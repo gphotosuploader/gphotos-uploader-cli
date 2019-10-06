@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- Remove `build` from version. Now `version` has all the tag+build information.
+
 ## 0.8.5
 ### Fixed
 - Fix exit code on clean executions. (#137)
@@ -10,7 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## 0.8.4
 ### Fixed
 - Fix panic when a unexpected error on media item creation was raised. (#110)
-
 ### Changed
 - Update `gphotosuploader/google-photos-api-client-go` to v1.0.7.
 
@@ -19,7 +22,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Fix never ending upload due to upstream bug [gphotosuploader/google-photos-api-client-go#19](https://github.com/gphotosuploader/google-photos-api-client-go/issues/19). (#129)
 - Fix linter warning on `datastore/tokenstore/repository_keyring.go:100`.
 - Fix [Codebeat](https://codebeat.co/projects/github-com-gphotosuploader-gphotos-uploader-cli-master) settings.
-
 ### Changed
 - Updated `int128/oauth2cli` to version v1.5.0 and improve messages in logs. See [int128/oauth2cli#3](https://github.com/int128/oauth2cli/issues/3).
 
