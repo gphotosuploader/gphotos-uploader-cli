@@ -3,9 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.8.6
 ### Changed
 - Remove `build` from version. Now `version` has all the tag+build information.
+### Fixed
+- Fix duplicated album creation. (#135)
 
 ## 0.8.5
 ### Fixed
