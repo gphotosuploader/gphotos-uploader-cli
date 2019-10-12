@@ -17,7 +17,6 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )

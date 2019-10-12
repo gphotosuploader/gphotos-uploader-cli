@@ -58,5 +58,5 @@ func (s *LevelDBStore) Delete(key string) {
 }
 
 func (s *LevelDBStore) Close() {
-	s.Close()
+	_ = s.db.Close()
 }
