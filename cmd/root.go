@@ -110,17 +110,17 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, item := range cfg.Jobs {
-		c, err := newOAuth2Client(ctx, tokenManager, oauth2Config, item.Account)
+		c, err := newOAuth2Client(ctx, app.TokenManager, oauth2Config, item.Account)
 		if err != nil {
 			log.Fatal(err)
 		}
-		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
+		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker, gphotos.OptionLog(app.Log))
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
-		job := upload.NewFolderUploadJob(gPhotos, fileTracker, item.SourceFolder, opt)
+		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
 
 		if err := job.ScanFolder(uploadChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)

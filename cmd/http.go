@@ -11,7 +11,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/app"
 )
 
 const successPage = `
@@ -27,8 +27,8 @@ func newHTTPClient() *http.Client {
 // newOAuth2Client returns a http client for the supplied Google account.
 // It will try to get the credentials from the Token Manager, if they are not valid will try to refresh the token or
 // ask for authenticate again.
-func newOAuth2Client(ctx context.Context, tkm *tokenstore.Service, oauth2Config oauth2.Config, account string) (*http.Client, error) {
-	token, err := tkm.RetrieveToken(account)
+func newOAuth2Client(ctx context.Context, tokenManager app.TokenManager, oauth2Config oauth2.Config, account string) (*http.Client, error) {
+	token, err := tokenManager.RetrieveToken(account)
 	if err != nil {
 		log.Printf("Token has not been retrieved from token store: %s", err)
 	}
@@ -55,7 +55,7 @@ func newOAuth2Client(ctx context.Context, tkm *tokenstore.Service, oauth2Config 
 	}
 
 	// and store the token into the keyring
-	err = tkm.StoreToken(account, token)
+	err = tokenManager.StoreToken(account, token)
 	if err != nil {
 		return nil, fmt.Errorf("failed storing token: %s", err)
 	}
