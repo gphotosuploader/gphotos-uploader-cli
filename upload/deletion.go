@@ -20,9 +20,8 @@ type DeletionJob struct {
 }
 
 // Enqueue adds an object to be deleted to an asynchronous queue.
-func (j *DeletionJob) Enqueue() error {
+func (j *DeletionJob) Enqueue() {
 	deletionQueue <- *j
-	return nil
 }
 
 func (j *DeletionJob) deleteIfCorrectlyUploaded() error {

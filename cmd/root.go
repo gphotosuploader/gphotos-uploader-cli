@@ -12,8 +12,10 @@ import (
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
+	"github.com/gphotosuploader/gphotos-uploader-cli/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
@@ -54,38 +56,46 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	cfg, err := config.LoadConfig(cfgDir)
 	if err != nil {
-		log.Fatalf("Unable to read configuration from '%s'.\nPlease review your configuration or execute 'gphotos-uploader-cli init' to create a new one. err=%s", cfgDir, err)
+		log.Fatalf("[ERR] Unable to read configuration: dir=%s.\nReview your configuration or execute 'gphotos-uploader-cli init' to create a new one: err=%s", cfgDir, err)
 	}
 	err = cfg.Validate()
 	if err != nil {
-		log.Fatalf("Invalid configuration was supplied: file=%s, err=%s", cfg.ConfigFile(), err)
+		log.Fatalf("[ERR] invalid configuration was supplied: file=%s, err=%s", cfg.ConfigFile(), err)
 	}
 
-	// load completedUploads DB
-	db, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
+	// File Tracker service to track uploaded files.
+	ft, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
 	if err != nil {
-		log.Fatalf("Error opening completed uploads db: path=%s, err=%v", cfg.CompletedUploadsDBDir(), err)
+		log.Fatalf("[ERR] opening completed uploads tracker: path=%s, err=%s", cfg.CompletedUploadsDBDir(), err)
 	}
-	defer db.Close()
-	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(db))
+	defer ft.Close()
+	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(ft))
 
-	// token manager service to be used as secrets backend
+	// Token Manager service to be used as secrets backend.
 	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
 	if err != nil {
-		log.Fatalf("Unable to use the token repository: %v", err)
+		log.Fatalf("[ERR] opening token manager: type=%s, err=%s", cfg.SecretsBackendType, err)
 	}
-	tkm := tokenstore.NewService(kr)
+	tokenManager := tokenstore.NewService(kr)
 
-	// load upload URLs DB
-	db, err = leveldb.OpenFile(cfg.ResumableUploadsDBDir(), nil)
+	// Upload Session Tracker to keep upload session to resume uploads.
+	uploadTracker, err := leveldbstore.NewStore(cfg.ResumableUploadsDBDir())
 	if err != nil {
-		log.Fatalf("Error opening upload URLs db: path=%s, err=%v", cfg.ResumableUploadsDBDir(), err)
+		log.Fatalf("[ERR] opening resumable uploads tracker: path=%s, err=%s", cfg.ResumableUploadsDBDir(), err)
 	}
-	defer db.Close()
-	uploadURLsService := uploadurls.NewService(db)
+	defer uploadTracker.Close()
+
+	// Initialize the App
+	app := &app.App{
+		FileTracker:   fileTracker,
+		TokenManager:  tokenManager,
+		UploadTracker: uploadTracker,
+
+		Log: log.New(os.Stderr, "", 0),
+	}
 
 	// start file upload worker
-	uploadChan, doneUploading := upload.StartFileUploadWorker(fileTracker, uploadURLsService)
+	uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker)
 
 	deletionQueue := upload.NewDeletionQueue()
 	deletionQueue.StartWorkers()
@@ -101,17 +111,17 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, item := range cfg.Jobs {
-		client, err := newOAuth2Client(ctx, tkm, oauth2Config, item.Account)
+		c, err := newOAuth2Client(ctx, tokenManager, oauth2Config, item.Account)
 		if err != nil {
 			log.Fatal(err)
 		}
-		gPhotos, err := gphotos.NewClient(client)
+		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
-		job := upload.NewFolderUploadJob(gPhotos, fileTracker, uploadURLsService, item.SourceFolder, opt)
+		job := upload.NewFolderUploadJob(gPhotos, fileTracker, item.SourceFolder, opt)
 
 		if err := job.ScanFolder(uploadChan); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)

@@ -1,13 +1,12 @@
 package upload
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
+	"github.com/gphotosuploader/gphotos-uploader-cli/app"
 )
 
 // number of concurrent workers uploading items
@@ -15,7 +14,7 @@ const maxNumberOfWorkers = 5
 
 // Item represents an object to be uploaded to Google Photos
 type Item struct {
-	client *gphotos.Client
+	gPhotos *gphotos.Client
 
 	path            string
 	album           string
@@ -28,18 +27,20 @@ type Item struct {
 //  eg: https://gobyexample.com/worker-pools
 //  eg: https://gobyexample.com/waitgroups
 //  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
-func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, completedUploads *completeduploads.Service, uploadURLsService *uploadurls.Service) {
+func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, fileTracker app.FileTracker) {
 	semaphore := make(chan bool, maxNumberOfWorkers)
-	for fileUpload := range fileUploadsChan {
+	for item := range fileUploadsChan {
 		semaphore <- true
-		go func(fileUpload *Item) {
+		go func(item *Item) {
 			defer func() { <-semaphore }()
-			err := fileUpload.upload(completedUploads, uploadURLsService)
+			ctx := context.TODO()
+			log.Printf("Uploading object: file=%s", item.path)
+			err := item.process(ctx, fileTracker)
 			if err != nil {
-				log.Printf("[ERR] Failed to push media item: file=%s, err=%s", fileUpload.path, err)
+				log.Printf("[ERR] Failed to process media item: file=%s, err=%s", item.path, err)
 				return
 			}
-		}(fileUpload)
+		}(item)
 	}
 	// drain the semaphore
 	for i := 0; i < cap(semaphore); i++ {
@@ -51,55 +52,29 @@ func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, c
 // StartFileUploadWorker set up channels and start concurrentUpload
 // fileUploadsChan will receive Item structs and upload them
 // will signal doneUploading when fileUploadsChan is done
-func StartFileUploadWorker(trackingService *completeduploads.Service, uploadURLsService *uploadurls.Service) (fileUploadsChan chan *Item, doneUploading chan bool) {
+func StartFileUploadWorker(fileTracker app.FileTracker) (fileUploadsChan chan *Item, doneUploading chan bool) {
 	doneUploading = make(chan bool)
 	fileUploadsChan = make(chan *Item)
-	go concurrentUpload(fileUploadsChan, doneUploading, trackingService, uploadURLsService)
+	go concurrentUpload(fileUploadsChan, doneUploading, fileTracker)
 	return fileUploadsChan, doneUploading
 }
 
-func (f *Item) upload(completedUploads *completeduploads.Service, uploadURLsService *uploadurls.Service) error {
-	log.Printf("Uploading object: file=%s", f.path)
-
-	// check upload URL db for previous uploads
-	log.Println("Looking up upload URLs database for ", f.path)
-	curUploadURL, err := uploadURLsService.GetUploadURL(f.path)
+func (f *Item) process(ctx context.Context, ft app.FileTracker) error {
+	_, err := f.gPhotos.AddMediaItem(ctx, f.path, f.album)
 	if err != nil {
-		// Not found, not an error, just an empty upload URL
-		curUploadURL = ""
-		log.Println(err)
-	}
-
-	// upload the file content to Google Photos
-	ptrUploadURL := &curUploadURL
-	_, err = f.client.UploadFileResumable(f.path, ptrUploadURL, f.album)
-
-	if err != nil {
-		if *ptrUploadURL != "" {
-			// TODO: This should be delegated to resumable uploads method
-			_ = uploadURLsService.PutUploadURL(f.path, *ptrUploadURL)
-		}
 		return err
 	}
 
-	err = uploadURLsService.RemoveUploadURL(f.path)
-	if err != nil {
-		return fmt.Errorf("failed to remove upload URL from database: %s", err)
-	}
-
-	// mark file as uploaded in the DB
-	err = completedUploads.CacheAsAlreadyUploaded(f.path)
+	err = ft.CacheAsAlreadyUploaded(f.path)
 	if err != nil {
 		log.Printf("Tracking file as uploaded failed: file=%s, error=%v", f.path, err)
 	}
 
-	// queue uploaded image for visual check of result + deletion
 	if f.deleteOnSuccess {
 		job := DeletionJob{
 			ObjectPath: f.path,
 		}
-		return job.Enqueue()
+		job.Enqueue()
 	}
-
 	return nil
 }

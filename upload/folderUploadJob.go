@@ -9,15 +9,13 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/uploadurls"
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
 // Job represents a job to upload all photos from the specified folder
 type Job struct {
-	client            *gphotos.Client
-	trackingService   *completeduploads.Service
-	uploadURLsService *uploadurls.Service
+	gPhotos     *gphotos.Client
+	fileTracker *completeduploads.Service
 
 	sourceFolder string
 	options      *JobOptions
@@ -44,11 +42,10 @@ func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, 
 }
 
 // NewFolderUploadJob creates a job based on the submitted data
-func NewFolderUploadJob(client *gphotos.Client, trackingService *completeduploads.Service, uploadURLsService *uploadurls.Service, fp string, opt *JobOptions) *Job {
+func NewFolderUploadJob(gPhotos *gphotos.Client, fileTracker *completeduploads.Service, fp string, opt *JobOptions) *Job {
 	return &Job{
-		trackingService:   trackingService,
-		uploadURLsService: uploadURLsService,
-		client:            client,
+		fileTracker: fileTracker,
+		gPhotos:     gPhotos,
 
 		sourceFolder: fp,
 		options:      opt,
@@ -92,7 +89,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		}
 
 		// check completed uploads db for previous uploads
-		isAlreadyUploaded, err := job.trackingService.IsAlreadyUploaded(fp)
+		isAlreadyUploaded, err := job.fileTracker.IsAlreadyUploaded(fp)
 		if err != nil {
 			log.Println(err)
 		} else if isAlreadyUploaded {
@@ -104,12 +101,12 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		var albumID string
 		if job.options.createAlbum {
 			name := filepath.Base(filepath.Dir(fp))
-			albumID = getGooglePhotosAlbumID(name, job.client)
+			albumID = getGooglePhotosAlbumID(name, job.gPhotos)
 		}
 
 		// set file upload options depending on folder upload options
 		var uploadItem = &Item{
-			client:          job.client,
+			gPhotos:         job.gPhotos,
 			path:            fp,
 			album:           albumID,
 			deleteOnSuccess: job.options.deleteAfterUpload,
