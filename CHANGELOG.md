@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Added
+- [CONTRIBUTING](CONTRIBUTING.md) guide line has been added.
+### Changed
+- [README](README.md) has been updated fixing some typos.
+### Deprecated
+- Once Go 1.13 has been published, previous Go 1.11 support is deprecated. This project will maintain compatibility with the last two major versions published.
+
 ## 0.8.7
 ### Changed
 - Update dependencies to newer versions: [gphotosuploader/google-photos-api-client-go](https://github.com/gphotosuploader/google-photos-api-client-go) v1.1.2 and [int128/oauth2cli](https://github.com/int128/oauth2cli) to v1.7.0.
