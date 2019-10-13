@@ -2,8 +2,8 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
-assignees: ''
+labels: 'bug'
+assignees: 'pacoorozco'
 
 ---
 
@@ -22,11 +22,8 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Version [e.g. 22]
-
-**Client (please complete the following information):**
+**Desktop & Client versions (please complete the following information):**
+ - Operating System: [e.g. windows | linux | mac]
  - Version [e.g. `gphotos-uploader-cli version`]
 
 **Additional context**
