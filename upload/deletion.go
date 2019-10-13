@@ -1,14 +1,17 @@
 package upload
 
 import (
+	"errors"
 	"log"
 	"os"
-
-	"github.com/juju/errors"
 )
 
 var (
 	deletionQueue = make(chan DeletionJob, 25)
+
+	// ErrEmptyObjectPath represents an error when an empty object path has been
+	// supplied.
+	ErrEmptyObjectPath = errors.New("object path is empty")
 )
 
 // DeletionJob represents an object to be deleted from local repository.
@@ -17,14 +20,13 @@ type DeletionJob struct {
 }
 
 // Enqueue adds an object to be deleted to an asynchronous queue.
-func (j *DeletionJob) Enqueue() error {
+func (j *DeletionJob) Enqueue() {
 	deletionQueue <- *j
-	return nil
 }
 
 func (j *DeletionJob) deleteIfCorrectlyUploaded() error {
 	if j.ObjectPath == "" {
-		return errors.NewNotValid(nil, "object path is empty")
+		return ErrEmptyObjectPath
 	}
 
 	err := os.Remove(j.ObjectPath)

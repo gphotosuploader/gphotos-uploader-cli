@@ -46,7 +46,7 @@ clean: ## Clean all built artifacts
 BIN_DIR := $(GOPATH)/bin
 
 GOLANGCI := $(BIN_DIR)/golangci-lint
-GOLANGCI_VERSION := 1.12.3
+GOLANGCI_VERSION := 1.20.0
 
 GORELEASER := $(BIN_DIR)/goreleaser
 

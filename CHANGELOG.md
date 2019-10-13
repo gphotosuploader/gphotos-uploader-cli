@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- Update dependencies to newer versions: [gphotosuploader/google-photos-api-client-go](https://github.com/gphotosuploader/google-photos-api-client-go) v1.1.2 and [int128/oauth2cli](https://github.com/int128/oauth2cli) to v1.7.0.
+- Update [golangci](https://github.com/golangci/golangci-lint) linter to version 1.20.0.
+
 ## 0.8.6
 ### Changed
 - Remove `build` from version. Now `version` has all the tag+build information.
