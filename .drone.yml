@@ -1,57 +1,111 @@
 ---
 kind: pipeline
-name: go-1-11
+name: test
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
-  - name: test-lint-build
-    image: golang:1.11
-    volumes:
-      - name: deps
-        path: /go
-    commands:
-      - make test COVERAGE_FILE=coverage.txt
-      - make lint
-      - make build
+- name: test-build
+  image: golang:1.13
+  commands:
+  - make test
+  - make build
 
-  - name: coverage
-    image: plugins/codecov
-    settings:
-      required: true
-      token:
-        from_secret: codecov_token
-    files:
-     - coverage.txt
+trigger:
+  branch:
+    exclude:
+    - master
+
+---
+kind: pipeline
+name: test-master-go-1-13
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test-build
+  image: golang:1.13
+  commands:
+  - make test COVERAGE_FILE=coverage.txt
+  - make build
+  volumes:
+  - name: deps
+    path: /go
+
+- name: lint
+  image: golang:1.13
+  commands:
+  - make lint
+  volumes:
+  - name: deps
+    path: /go
+
+- name: coverage
+  image: plugins/codecov
+  settings:
+    required: true
+    token:
+      from_secret: codecov_token
 
 volumes:
-  - name: deps
-    temp: {}
+- name: deps
+  temp: {}
+
+trigger:
+  branch:
+  - master
+
+---
+kind: pipeline
+name: test-master-go-1-12
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test-build
+  image: golang:1.12
+  commands:
+  - make test
+  - make build
+
+trigger:
+  branch:
+  - master
 
 ---
 kind: pipeline
 name: release
 
-steps:
-  - name: fetch
-    image: docker:git
-    commands:
-      - git fetch --tags
+platform:
+  os: linux
+  arch: amd64
 
-  - name: release
-    image: golang:1.12
-    environment:
-      GITHUB_TOKEN:
-        from_secret: github_token
-    commands:
-      - make release
+steps:
+- name: fetch
+  image: docker:git
+  commands:
+  - git fetch --tags
+
+- name: release
+  image: golang:1.13
+  commands:
+  - make release
+  environment:
+    GITHUB_TOKEN:
+      from_secret: github_token
 
 trigger:
   event:
   - tag
 
-depends_on:
-  - go-1-11
 ---
 kind: signature
-hmac: 45d7c2ddfde4c90438e05bdeda5933783f125fcf2098ef2eeaaf4714fe74a95b
+hmac: cda23a221a730cd62ef0bf7a9885206085d42654c088eceda87725ddf0162af8
 
 ...

@@ -10,16 +10,17 @@
 
 Command line tool to mass upload media folders to your Google Photos account(s).    
 
-While the official tool is only supports Mac OS and Windows, this brings an uploader to Linux too. Lets you upload photos from, in theory, any OS for which you can compile a Go program.     
+While the official tool only supports Mac OS and Windows, this brings an uploader to Linux too. Lets you upload photos from, in theory, any OS for which you can compile a Go program.     
 
-# Features:
+# Features
 
-- specify folders to upload in config file
-- upload to multiple google accounts
-- include/exclude files & folders using patterns (see [documentation](.docs/configuration.md))
-- resumable uploads
-- optionally delete objects after uploaḍ
-- security: logs you into google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
+- **Customizable configuration**: via JSON-like config file.
+- **Multiple Google accounts support**: upload your pictures to multiple accounts.
+- **Filter files with patterns**: include/exclude files & folders using patterns (see [documentation](.docs/configuration.md)).
+- **Resumable uploads**: Uploads can be resumed, saving time and bandwidth. 
+- **File deletion after uploading**: Clean up local files after being uploaded.
+- **Track already uploaded files**: uploads only new files to save bandwidth.
+- **Secure**: logs you into Google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
 # Getting started
 
@@ -106,7 +107,19 @@ The first time you run `gphotos-uploader-cli`, after setting your configuration 
 All auth configuration is in place.
 
 # Contributing
-Have improvement ideas or want to help ? Please start by opening an [issue](https://github.com/gphotosuploader/gphotos-uploader-cli/issues). 
+Help us make `gphotos-uploader-cli` the best tool for uploading your local pictures to Google Photos.
+
+## Reporting Issues
+If you find a bug while working with `gphotos-uploader-cli`, please [open an issue on GitHub](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?assignees=pacoorozco&labels=bug&template=bug_report.md) and let us know what went wrong. We will try to fix it as quickly as we can.
+
+## Feedback & Feature Requests
+You are more than welcome to open issues in this project to:
+
+- [give feedback](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?title=Feedback:)
+- [suggest new features](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?labels=feature+request&template=feature_request.md)
+
+## Contributing Code
+This project is mainly written in Golang. If you want to contribute code, see [Contributing guide lines](CONTRIBUTING.md) for more information.
 
 # License
  

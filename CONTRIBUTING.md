@@ -5,7 +5,7 @@ Please read this guide if you plan to contribute to this project. We welcome any
 If you find a bug while working with `gphotos-uploader-cli`, please [open an issue on GitHub](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?assignees=pacoorozco&labels=bug&template=bug_report.md) and let us know what went wrong. We will try to fix it as quickly as we can.
 
 ## Feature Requests
-You are more than welcome to open issues in this project to [suggest new features](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?assignees=&labels=feature+request&template=feature_request.md&title=).
+You are more than welcome to open issues in this project to [suggest new features](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?assignees=&labels=feature+request&template=feature_request.md).
 
 ## Contributing Code
 This project is mainly written in Golang. To contribute code,
