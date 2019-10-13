@@ -42,7 +42,9 @@ Download the pre-compiled binaries from the [releases page](https://github.com/g
 
 ### Compiling from source
 
-You can compile the source code in your system. **Go 1.11+** is required to compile this application:
+> This project will maintain compatibility with the last two Go major versions published. Currently Go 1.12 and Go 1.13. 
+
+You can compile the source code in your system. **Go 1.12+** is required to compile this application:
 
 ```
 $ git clone https://github.com/gphotosuploader/gphotos-uploader-cli

@@ -8,8 +8,12 @@ If you find a bug while working with `gphotos-uploader-cli`, please [open an iss
 You are more than welcome to open issues in this project to [suggest new features](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/new?assignees=&labels=feature+request&template=feature_request.md).
 
 ## Contributing Code
-This project is mainly written in Golang. To contribute code,
-1. Ensure you are running golang version 1.11.4 or greater for go module support
+This project is mainly written in Golang.
+
+> This project will maintain compatibility with the last two Go major versions published. Currently Go 1.12 and Go 1.13.
+
+To contribute code:
+1. Ensure you are running golang version 1.12 or greater
 2. Set the following environment variables:
     ```
     GO111MODULE=on
