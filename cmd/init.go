@@ -22,7 +22,9 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Configuration file has been created.\nEdit it by running:\n    nano %s/config.hjson\n", cfgDir)
+		fmt.Println("Configuration file has been created")
+		fmt.Println("Edit it by running:")
+		fmt.Printf("    nano %s/config.hjson\n", cfgDir)
 	},
 }
 

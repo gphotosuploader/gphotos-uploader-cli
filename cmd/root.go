@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,6 +16,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 )
@@ -90,14 +90,14 @@ func startUploader(cmd *cobra.Command, args []string) {
 		TokenManager:  tokenManager,
 		UploadTracker: uploadTracker,
 
-		Log: log.New(os.Stderr, "", 0),
+		Log: log.GetInstance(),
 	}
 
 	// start file upload worker
-	uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker)
+	uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker, app.Log)
 
 	deletionQueue := upload.NewDeletionQueue()
-	deletionQueue.StartWorkers()
+	deletionQueue.StartWorkers(app.Log)
 
 	ctx := context.Background()
 	// get OAuth2 Configuration with our App credentials
@@ -110,11 +110,11 @@ func startUploader(cmd *cobra.Command, args []string) {
 
 	// launch all folder upload jobs
 	for _, item := range cfg.Jobs {
-		c, err := newOAuth2Client(ctx, app.TokenManager, oauth2Config, item.Account)
+		c, err := app.NewOAuth2Client(ctx, oauth2Config, item.Account)
 		if err != nil {
 			log.Fatal(err)
 		}
-		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker, gphotos.OptionLog(app.Log))
+		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -122,7 +122,7 @@ func startUploader(cmd *cobra.Command, args []string) {
 		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
 		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
 
-		if err := job.ScanFolder(uploadChan); err != nil {
+		if err := job.ScanFolder(uploadChan, app.Log); err != nil {
 			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
 		}
 	}
@@ -131,11 +131,11 @@ func startUploader(cmd *cobra.Command, args []string) {
 	close(uploadChan)
 	// wait for all the uploads to be completed
 	<-doneUploading
-	log.Println("all uploads done")
+	log.Done("all uploads done")
 
 	// after the last upload is done we're done queueing files for deletion
 	deletionQueue.Close()
 	// wait for deletions to be completed before exiting
 	deletionQueue.WaitForWorkers()
-	log.Println("all deletions done")
+	log.Done("all deletions done")
 }

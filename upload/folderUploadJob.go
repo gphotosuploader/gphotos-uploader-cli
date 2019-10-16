@@ -2,13 +2,13 @@ package upload
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
@@ -53,7 +53,7 @@ func NewFolderUploadJob(gPhotos *gphotos.Client, fileTracker app.FileTracker, fp
 }
 
 // ScanFolder uploads folder
-func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
+func (job *Job) ScanFolder(uploadChan chan<- *Item, log log.Logger) error {
 	var err error
 
 	if !filesystem.IsDir(job.sourceFolder) {
@@ -90,9 +90,9 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		// check completed uploads db for previous uploads
 		isAlreadyUploaded, err := job.fileTracker.IsAlreadyUploaded(fp)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 		} else if isAlreadyUploaded {
-			log.Printf("already uploaded: %s: skipping file...\n", fp)
+			log.Debugf("Already uploaded: %s: skipping file...", fp)
 			return nil
 		}
 
@@ -100,7 +100,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		var albumID string
 		if job.options.createAlbum {
 			name := filepath.Base(filepath.Dir(fp))
-			albumID = getGooglePhotosAlbumID(name, job.gPhotos)
+			albumID = getGooglePhotosAlbumID(name, job.gPhotos, log)
 		}
 
 		// set file upload options depending on folder upload options
@@ -117,7 +117,7 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 		return nil
 	})
 	if errW != nil {
-		log.Printf("walk error [%v]", errW)
+		log.Errorf("walk error err=%s", errW)
 	}
 
 	return nil
@@ -125,14 +125,14 @@ func (job *Job) ScanFolder(uploadChan chan<- *Item) error {
 
 // getGooglePhotosAlbumID returns the ID of an album with the specified name.
 // If the album didn't exist, it's created thanks to GetOrCreateAlbumByName().
-func getGooglePhotosAlbumID(name string, c *gphotos.Client) string {
+func getGooglePhotosAlbumID(name string, c *gphotos.Client, log log.Logger) string {
 	if name == "" {
 		return ""
 	}
 
 	album, err := c.GetOrCreateAlbumByName(name)
 	if err != nil {
-		log.Printf("Album creation failed: name=%s, error=%v", name, err)
+		log.Warnf("Album creation failed: name=%s, error=%v", name, err)
 		return ""
 	}
 	return album.Id
