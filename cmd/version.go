@@ -38,6 +38,6 @@ func NewVersionCmd() *cobra.Command {
 }
 
 func (cmd *VersionCmd) Run(command *cobra.Command, args []string) error {
-	_, err := fmt.Printf("gphotos-uploader-cli %s\n", version)
+	_, err := fmt.Printf("gphotos-uploader-cli %s", version)
 	return err
 }
