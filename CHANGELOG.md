@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## Unreleased
 ### Added
 - [CONTRIBUTING](CONTRIBUTING.md) guide line has been added.
+- New Logger package to improve log readability.
 ### Changed
 - [README](README.md) has been updated fixing some typos.
 ### Deprecated

@@ -1,9 +1,9 @@
 package app
 
 import (
-	"log"
-
 	"golang.org/x/oauth2"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
 type App struct {
@@ -11,7 +11,7 @@ type App struct {
 	TokenManager  TokenManager
 	UploadTracker UploadTracker
 
-	Log *log.Logger
+	Log log.Logger
 }
 
 type FileTracker interface {

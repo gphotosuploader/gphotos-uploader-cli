@@ -2,8 +2,9 @@ package upload
 
 import (
 	"errors"
-	"log"
 	"os"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
 var (
@@ -50,13 +51,13 @@ func NewDeletionQueue() *DeletionQueue {
 }
 
 // StartWorkers start concurrent deletion workers.
-func (q *DeletionQueue) StartWorkers() {
+func (q *DeletionQueue) StartWorkers(log log.Logger) {
 	go func() {
 		for job := range q.Requests {
-			log.Printf("Processing deletion request: file=%s", job.ObjectPath)
+			log.Debugf("Processing deletion request: file=%s", job.ObjectPath)
 			err := job.deleteIfCorrectlyUploaded()
 			if err != nil {
-				log.Printf("Deletion request failed: file=%s, err=%v\n", job.ObjectPath, err)
+				log.Errorf("Deletion request failed: file=%s, err=%v\n", job.ObjectPath, err)
 			}
 		}
 		q.DoneChannel <- true

@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -11,28 +10,22 @@ import (
 
 // AbsolutePath converts a path (relative or absolute) into an absolute one.
 // Supports '~' notation for $HOME directory of the current user.
-func AbsolutePath(path string) string {
+func AbsolutePath(path string) (string, error) {
 	usr, err := user.Current()
 	if err != nil {
-		// It's very strange to have an error here, but in any case,
-		// return the same path was given.
-		return path
+		return "", err
 	}
 	dir := usr.HomeDir
 
 	if path == "~" {
 		// In case of "~", which won't be caught by the "else if"
-		return dir
+		return dir, nil
 	} else if strings.HasPrefix(path, "~/") {
 		// Use strings.HasPrefix so we don't match paths like
 		// "/something/~/something/"
-		return filepath.Join(dir, path[2:])
+		return filepath.Join(dir, path[2:]), nil
 	}
-	abspath, err := filepath.Abs(path)
-	if err != nil {
-		log.Println(err)
-	}
-	return abspath
+	return filepath.Abs(path)
 }
 
 // IsFile asserts there is a file at path

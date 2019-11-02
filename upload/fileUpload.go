@@ -2,11 +2,11 @@ package upload
 
 import (
 	"context"
-	"log"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
 // number of concurrent workers uploading items
@@ -27,17 +27,17 @@ type Item struct {
 //  eg: https://gobyexample.com/worker-pools
 //  eg: https://gobyexample.com/waitgroups
 //  eg: https://github.schibsted.io/spt-infrastructure/yams-delivery-images/blob/master/images/image_gif.go
-func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, fileTracker app.FileTracker) {
+func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, fileTracker app.FileTracker, log log.Logger) {
 	semaphore := make(chan bool, maxNumberOfWorkers)
 	for item := range fileUploadsChan {
 		semaphore <- true
 		go func(item *Item) {
 			defer func() { <-semaphore }()
 			ctx := context.TODO()
-			log.Printf("Uploading object: file=%s", item.path)
+			log.Debugf("Uploading object: file=%s", item.path)
 			err := item.process(ctx, fileTracker)
 			if err != nil {
-				log.Printf("[ERR] Failed to process media item: file=%s, err=%s", item.path, err)
+				log.Errorf("Failed to process media item: file=%s, err=%s", item.path, err)
 				return
 			}
 		}(item)
@@ -52,10 +52,10 @@ func concurrentUpload(fileUploadsChan <-chan *Item, doneUploading chan<- bool, f
 // StartFileUploadWorker set up channels and start concurrentUpload
 // fileUploadsChan will receive Item structs and upload them
 // will signal doneUploading when fileUploadsChan is done
-func StartFileUploadWorker(fileTracker app.FileTracker) (fileUploadsChan chan *Item, doneUploading chan bool) {
+func StartFileUploadWorker(fileTracker app.FileTracker, log log.Logger) (fileUploadsChan chan *Item, doneUploading chan bool) {
 	doneUploading = make(chan bool)
 	fileUploadsChan = make(chan *Item)
-	go concurrentUpload(fileUploadsChan, doneUploading, fileTracker)
+	go concurrentUpload(fileUploadsChan, doneUploading, fileTracker, log)
 	return fileUploadsChan, doneUploading
 }
 
@@ -67,7 +67,7 @@ func (f *Item) process(ctx context.Context, ft app.FileTracker) error {
 
 	err = ft.CacheAsAlreadyUploaded(f.path)
 	if err != nil {
-		log.Printf("Tracking file as uploaded failed: file=%s, error=%v", f.path, err)
+		log.Warnf("Tracking file as uploaded failed: file=%s, error=%v", f.path, err)
 	}
 
 	if f.deleteOnSuccess {
