@@ -104,6 +104,7 @@ func TestIsFile(t *testing.T) {
 	}{
 		{"testdata/file.txt", true},
 		{"testdata/folder", false},
+		{"testdata/non-existent-file", false},
 	}
 
 	for _, test := range objectsTest {
@@ -121,6 +122,7 @@ func TestIsDir(t *testing.T) {
 	}{
 		{"testdata/file.txt", false},
 		{"testdata/folder", true},
+		{"testdata/non-existent-dir", false},
 	}
 
 	for _, test := range objectsTest {
