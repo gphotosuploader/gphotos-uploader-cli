@@ -180,3 +180,46 @@ func createTestConfiguration() *config.Config {
 	c.Jobs = append(c.Jobs, job)
 	return c
 }
+
+func TestConfigExists(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-test.%d", time.Now().UnixNano()))
+	if err := os.RemoveAll(dir); err != nil {
+		t.Fatalf("no error was expected at this point: err=%s", err)
+	}
+
+	t.Run("TestNonExistingConfiguration", func(t *testing.T) {
+		if config.ConfigExists(dir) {
+			t.Errorf("config file exists. That was not expected: dir=%s", dir)
+		}
+	})
+
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		t.Fatalf("no error was expected at this point: err=%s", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatalf("could not remove test config folder: path=%s err=%s", dir, err)
+		}
+	}()
+
+	cfgFile := filepath.Join(dir, "config.hjson")
+	fh, err := os.Create(cfgFile)
+	if err != nil {
+		t.Fatalf("failed to create config: file=%s, err=%v", cfgFile, err)
+	}
+	defer func() {
+		if err := fh.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	if _, err = fh.WriteString("testTest"); err != nil {
+		t.Fatalf("failed to write configuration: file=%s, err=%v", cfgFile, err)
+	}
+
+	t.Run("TestExistingConfiguration", func(t *testing.T) {
+		if !config.ConfigExists(dir) {
+			t.Errorf("config file doesn't exist. That was not expected: dir=%s", dir)
+		}
+	})
+}

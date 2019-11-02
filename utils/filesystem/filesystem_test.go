@@ -27,7 +27,7 @@ func TestAbsolutePath(t *testing.T) {
 		}
 
 		for _, test := range absolutePathInputs {
-			got := filesystem.AbsolutePath(test.in)
+			got, _ := filesystem.AbsolutePath(test.in)
 			if got != test.out {
 				t.Errorf("failed for '%s': expected '%v', got '%v'", test.in, test.out, got)
 			}
@@ -55,7 +55,7 @@ func TestAbsolutePath(t *testing.T) {
 		}
 
 		for _, test := range relativePathInputs {
-			got := filesystem.AbsolutePath(test.in)
+			got, _ := filesystem.AbsolutePath(test.in)
 			expected := path.Join(cwd, test.out)
 
 			if got != expected {
@@ -87,7 +87,7 @@ func TestAbsolutePath(t *testing.T) {
 		dir := usr.HomeDir
 
 		for _, test := range tildePathInputs {
-			got := filesystem.AbsolutePath(test.in)
+			got, _ := filesystem.AbsolutePath(test.in)
 			expected := path.Join(dir, test.out)
 
 			if got != expected {

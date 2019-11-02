@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/client9/xson/hjson"
-	"github.com/nmrshll/go-cp"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
@@ -40,7 +39,11 @@ func defaultSettings() *Config {
 // NewConfig returns a *Config with the default settings of the application.
 func NewConfig(dir string) *Config {
 	cfg := defaultSettings()
-	cfg.ConfigPath = filesystem.AbsolutePath(dir)
+	absPath, err := filesystem.AbsolutePath(dir)
+	if err != nil {
+		absPath = dir
+	}
+	cfg.ConfigPath = absPath
 
 	return cfg
 }
@@ -52,7 +55,7 @@ func (c *Config) Validate() error {
 
 	for i := range c.Jobs {
 		item := &c.Jobs[i] // we do that way to modify original object while iterating.
-		path, err := cp.AbsolutePath(item.SourceFolder)
+		path, err := filesystem.AbsolutePath(item.SourceFolder)
 		if err != nil {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
 		}
@@ -175,8 +178,12 @@ func InitConfigFile(dir string) error {
 // ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path
 func ConfigExists(path string) bool {
 	// Check config.hjson
-	_, err := os.Stat(filepath.Join(path, DefaultConfigsPath))
-	if err == nil {
+	cfgFile, err := filesystem.AbsolutePath(filepath.Join(path, DefaultConfigsPath))
+	if err != nil {
+		return false
+	}
+	
+	if _, err := os.Stat(cfgFile); err == nil {
 		return true
 	}
 
