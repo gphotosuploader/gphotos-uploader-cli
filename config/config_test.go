@@ -15,25 +15,17 @@ func TestInitConfig(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfig(dir, true)
+		err := config.InitConfigFile(dir)
 		if err != nil {
 			t.Errorf("could not create init config file: %v", err)
 		}
 	})
-
 	defer func() {
 		err := os.RemoveAll(dir)
 		if err != nil {
 			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
 		}
 	}()
-
-	t.Run("TestInitConfigFileWithExistentFile", func(t *testing.T) {
-		err := config.InitConfig(dir, false)
-		if err == nil {
-			t.Error("an error creating an existent file was expected")
-		}
-	})
 }
 
 func TestInitAndLoadConfig(t *testing.T) {
@@ -41,12 +33,11 @@ func TestInitAndLoadConfig(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfig(dir, true)
+		err := config.InitConfigFile(dir)
 		if err != nil {
 			t.Errorf("could not create init config file: %v", err)
 		}
 	})
-
 	defer func() {
 		err := os.RemoveAll(dir)
 		if err != nil {

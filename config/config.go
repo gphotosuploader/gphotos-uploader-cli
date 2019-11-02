@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/client9/xson/hjson"
 	"github.com/nmrshll/go-cp"
@@ -138,35 +139,24 @@ func LoadConfig(dir string) (*Config, error) {
 	return cfg, nil
 }
 
-// InitConfig creates an example config file if it doesn't already exist.
-// If 'force' is set then we are going to remove config dir before creating it.
-func InitConfig(dir string, force bool) error {
+// InitConfigFile creates a config file with default settings.
+func InitConfigFile(dir string) error {
 	cfg := NewConfig(dir)
 
-	// if force, we should remove everything to start from the scratch.
-	if force {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			return err
-		}
-	}
-
-	if _, err := os.Stat(cfg.ConfigPath); !os.IsNotExist(err) {
-		// directory already exist and forced was not set
-		return fmt.Errorf("config directory already exists, use '--force' to overwrite: path=%s", cfg.ConfigPath)
-	} else {
-		err := os.MkdirAll(cfg.ConfigPath, 0755)
-		if err != nil {
-			return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
-		}
-	}
-
-	fh, err := os.Open(cfg.ConfigFile())
+	// Delete config & overwrite config
+	err := os.RemoveAll(dir)
 	if err != nil {
-		fh, err = os.Create(cfg.ConfigFile())
-		if err != nil {
-			return fmt.Errorf("failed to create config: file=%s, err=%v", cfg.ConfigFile(), err)
-		}
+		return err
+	}
+
+	err = os.MkdirAll(cfg.ConfigPath, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
+	}
+
+	fh, err := os.Create(cfg.ConfigFile())
+	if err != nil {
+		return fmt.Errorf("failed to create config: file=%s, err=%v", cfg.ConfigFile(), err)
 	}
 	defer func() {
 		if err := fh.Close(); err != nil {
@@ -180,4 +170,15 @@ func InitConfig(dir string, force bool) error {
 	}
 
 	return fh.Sync()
+}
+
+// ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path
+func ConfigExists(path string) bool {
+	// Check config.hjson
+	_, err := os.Stat(filepath.Join(path, DefaultConfigsPath))
+	if err == nil {
+		return true
+	}
+
+	return false // Config file found
 }

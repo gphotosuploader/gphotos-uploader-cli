@@ -23,16 +23,21 @@ var (
 	version = "v0.0.0" // git tag, output of $(git describe --tags --always --dirty)
 )
 
-// versionCmd returns the overall codebase version. It's for detecting what
-// code a binary was built from.
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print current version",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("gphotos-uploader-cli %s\n", version)
-	},
+type VersionCmd struct {}
+
+func NewVersionCmd() *cobra.Command {
+	cmd := &VersionCmd{}
+
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Prints current version",
+		RunE:  cmd.Run,
+	}
+
+	return versionCmd
 }
 
-func init() {
-	rootCmd.AddCommand(versionCmd)
+func (cmd *VersionCmd) Run(command *cobra.Command, args []string) error {
+	_, err := fmt.Printf("gphotos-uploader-cli %s\n", version)
+	return err
 }
