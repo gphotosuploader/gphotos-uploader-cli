@@ -24,12 +24,12 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initializes configuration file",
-		Long:  `Initializes a new configuration file. Creates a config.hjson with all configuration.`,
+		Long:  `Initializes a new configuration file. Creates a config.hjson with a default configuration.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}
 
-	initCmd.Flags().BoolVarP(&cmd.Reconfigure, "reconfigure", "r", false, "Change existing configuration")
+	initCmd.Flags().BoolVar(&cmd.Reconfigure, "force", false, "Overwrite existing configuration")
 
 	return initCmd
 }
@@ -38,8 +38,8 @@ func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	// Check if config already exists
 	configExists := config.ConfigExists(cmd.CfgDir)
 	if configExists && cmd.Reconfigure == false {
-		log.Info("Config already exists. If you want to recreate the config please run `gphotos-uploader-cli init --reconfigure`")
-		log.Infof("\r         \nIf you want to continue with the existing config, run:\n- `%s` to start uploading files\n", ansi.Color("gphotos-uploader-cli push", "white+b"))
+		log.Infof("Config already exists. If you want to recreate the config please run `%s`", ansi.Color("gphotos-uploader-cli init --force", "white+b"))
+		log.Infof("\r         \nIf you want to continue with the existing config, run:\n- `%s` to start uploading files.\n", ansi.Color("gphotos-uploader-cli push", "white+b"))
 		return nil
 	}
 
@@ -47,9 +47,9 @@ func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log.Done("Configuration file successfully initialized")
-	log.Infof("\r         \nPlease edit: \n- `%s/config.hjson` to add you configuration\n", cmd.CfgDir)
+
+	log.Done("Configuration file successfully initialized.")
+	log.Infof("\r         \nPlease edit: \n- `%s/config.hjson` to add you configuration.\n", cmd.CfgDir)
 
 	return nil
 }
-
