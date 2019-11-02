@@ -182,7 +182,7 @@ func ConfigExists(path string) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	if _, err := os.Stat(cfgFile); err == nil {
 		return true
 	}
