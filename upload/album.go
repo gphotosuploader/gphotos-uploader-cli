@@ -1,30 +1,32 @@
 package upload
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
-// albumID returns the album ID if MakeAlbums is enabled
+// albumID returns the album ID of the created (or existent) Album in Google Photos.
+// If configuration option `MakeAlbum.enabled` is false, it returns empty string.
 func (job *Job) albumID(path string, logger log.Logger) string {
-	if !job.options.createAlbum {
+	if !job.options.CreateAlbum {
 		return ""
 	}
 
-	name := albumNameUsingTemplate(path, job.options.createAlbumBasedOn)
+	// Album name can be customized using `MakeAlbums.use` configuration option.
+	name := albumNameUsingTemplate(path, job.options.CreateAlbumBasedOn)
 	if name == "" {
 		return ""
 	}
 
-	albumID, err := job.createAlbumInGPhotos(name)
+	// get or creates an Album with the calculated name.
+	album, err := job.gPhotos.GetOrCreateAlbumByName(name)
 	if err != nil {
-		logger.Error(err)
+		logger.Errorf("album creation failed: name=%s, error=%s", name, err)
 		return ""
 	}
-	return albumID
+	return album.Id
 }
 
 // albumNameUsingTemplate calculate the Album name for a given path based on full folder path (folderPath)
@@ -55,15 +57,4 @@ func albumNameUsingFolderName(path string) string {
 		return ""
 	}
 	return filepath.Base(p)
-}
-
-// createAlbumInGPhotos returns the ID of an album with the specified name or error if fails.
-// If the album didn't exist, it's created thanks to GetOrCreateAlbumByName().
-func (job *Job) createAlbumInGPhotos(name string) (string, error) {
-	// get album ID from Google Photos API
-	album, err := job.gPhotos.GetOrCreateAlbumByName(name)
-	if err != nil {
-		return "", fmt.Errorf("album creation failed: name=%s, error=%s", name, err)
-	}
-	return album.Id, nil
 }

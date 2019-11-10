@@ -96,8 +96,8 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	// launch all folder upload jobs
-	for _, item := range cfg.Jobs {
-		c, err := app.NewOAuth2Client(ctx, oauth2Config, item.Account)
+	for _, config := range cfg.Jobs {
+		c, err := app.NewOAuth2Client(ctx, oauth2Config, config.Account)
 		if err != nil {
 			return err
 		}
@@ -107,23 +107,24 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		opt := upload.NewJobOptions(
-			item.MakeAlbums.Enabled,
-			item.MakeAlbums.Use,
-			item.DeleteAfterUpload,
-			upload.NewFilter(item.IncludePatterns, item.ExcludePatterns, item.UploadVideos),
-		)
-		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
+		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, config.SourceFolder,
+			upload.JobOptions{
+				CreateAlbum:        config.MakeAlbums.Enabled,
+				CreateAlbumBasedOn: config.MakeAlbums.Use,
+				DeleteAfterUpload:  config.DeleteAfterUpload,
+				Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns, config.UploadVideos),
+			})
 
-		// get items to be uploaded
-		jobs, err := job.ScanFolder(app.Logger)
+		// get Items{} to be uploaded to Google Photos.
+		items, err := job.ScanFolder(app.Logger)
 		if err != nil {
-			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
+			log.Fatalf("Failed to scan folder %s: %v", config.SourceFolder, err)
 		}
 
-		// enqueue items to be uploaded
-		for _, j := range jobs {
-			uploadChan <- &j
+		// enqueue Items{} to be uploaded. The workers will receive it via channel.
+		log.Infof("%d files pending to be uploaded in folder '%s'.", len(items), config.SourceFolder)
+		for _, i := range items {
+			uploadChan <- &i
 		}
 	}
 

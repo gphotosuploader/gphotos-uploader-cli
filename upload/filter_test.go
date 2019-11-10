@@ -26,7 +26,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -36,7 +36,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -46,7 +46,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -56,7 +56,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -83,7 +83,7 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
 
@@ -110,7 +110,7 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
 
@@ -135,7 +135,7 @@ func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
 
@@ -161,7 +161,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -171,7 +171,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -197,7 +197,7 @@ func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
 
@@ -223,7 +223,7 @@ func TestFilter_DisallowVideos(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -233,7 +233,7 @@ func TestFilter_DisallowVideos(t *testing.T) {
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
-				t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 			}
 		}
 	})
@@ -255,7 +255,7 @@ func TestFilter_DisallowAFolder(t *testing.T) {
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
-			t.Errorf("filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
 		}
 	}
 
