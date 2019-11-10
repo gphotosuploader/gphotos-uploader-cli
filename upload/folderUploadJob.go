@@ -61,13 +61,7 @@ func (job *Job) ScanFolder(logger log.Logger) ([]Item, error) {
 
 func (job *Job) createUploadItemListFn(items *[]Item, filter *Filter, logger log.Logger) filepath.WalkFunc {
 	return func(fp string, fi os.FileInfo, errP error) error {
-		if fi == nil {
-			logger.Fatalf("error scanning: folder=%s, err=FileInfo is nil", fp)
-			return nil
-		}
-
-		// avoid processing folders
-		if fi.IsDir() {
+		if fi == nil || fi.IsDir() {
 			return nil
 		}
 
