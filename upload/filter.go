@@ -61,8 +61,6 @@ func NewFilter(includePatterns []string, excludePatterns []string, allowVideos b
 
 // IsAllowed returns if an item should be uploaded.
 // That means:
-//   - item is a file
-//   - item is a not a video if allowVideos is not enabled
 //   - item is in the include pattern
 //   - item is not in the exclude pattern
 func (f *Filter) IsAllowed(fp string) bool {
@@ -70,10 +68,7 @@ func (f *Filter) IsAllowed(fp string) bool {
 	if f.isIncluded(fp) && !f.isExcluded(fp) {
 		return true
 	}
-
-	log.Printf("config doesn't allow to upload this item - skipping: file=%s", fp)
 	return false
-
 }
 
 func translatePatterns(pat []string) []string {

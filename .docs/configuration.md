@@ -17,7 +17,7 @@ Example configuration file:
       sourceFolder: ~/folder/to/upload
       makeAlbums: {
         enabled: true
-        use: folderNames
+        use: folderName
       }
       deleteAfterUpload: false
       uploadVideos: true
@@ -86,7 +86,22 @@ The folder to upload from.
 Must be an absolute path. Can expand the home folder tilde shorthand.
 
 ### `makeAlbums`
-If makeAlbums.enabled set to true, use the last folder path component as album name.
+If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`.
+
+Available options are:
+
+* `folderName`: It will use the name of the item's containing folder as Album name.
+* `folderPath`: It will use the full path of the  item's containing folder as Album name.
+
+```
+# for file: /foo/bar/xyz/file.jpg
+
+use: folderName
+# album name: xyz
+
+use: folderPath
+# album name: foo_bar_xyz
+```
 
 ### `deleteAfterUpload`
 If set to true, media will be deleted from local disk after upload. 

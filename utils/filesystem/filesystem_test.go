@@ -132,3 +132,27 @@ func TestIsDir(t *testing.T) {
 		}
 	}
 }
+
+func TestRelativePath(t *testing.T) {
+	var objectsTest = []struct {
+		base string
+		in   string
+		out  string
+	}{
+		{base: "/foo/bar", in: "/foo/bar/xyz", out: "xyz"},
+		{base: "/foo/bar/", in: "/foo/bar/xyz", out: "xyz"},
+		{base: "/foo/bar", in: "/foo/bar/xyz/", out: "xyz"},
+		{base: "/foo/bar", in: "foo/bar/xyz", out: "foo/bar/xyz"},
+		{base: "/foo/bar", in: "/foo/bar", out: "."},
+		{base: "/foo/bar/", in: "/foo/bar", out: "."},
+		{base: "/foo/bar", in: "/foo/bar/", out: "."},
+		{base: "", in: "/foo/bar", out: "/foo/bar"},
+		{base: "/foo/bar", in: "/abc/def", out: "/abc/def"},
+	}
+	for _, tt := range objectsTest {
+		got := filesystem.RelativePath(tt.base, tt.in)
+		if got != tt.out {
+			t.Errorf("failed for base '%s', path '%s': expected '%s', got '%s'", tt.base, tt.in, tt.out, got)
+		}
+	}
+}

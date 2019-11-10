@@ -27,7 +27,7 @@ func newHTTPClient() *http.Client {
 func (app *App) NewOAuth2Client(ctx context.Context, oauth2Config oauth2.Config, account string) (*http.Client, error) {
 	token, err := app.TokenManager.RetrieveToken(account)
 	if err != nil {
-		app.Log.Debugf("Token has not been retrieved from token store: %s", err)
+		app.Logger.Debugf("Token has not been retrieved from token store: %s", err)
 	}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, newHTTPClient())
@@ -39,7 +39,7 @@ func (app *App) NewOAuth2Client(ctx context.Context, oauth2Config oauth2.Config,
 		}
 
 	case !token.Valid():
-		app.Log.Info("Token has been expired, refreshing")
+		app.Logger.Info("Token has been expired, refreshing")
 		token, err = oauth2Config.TokenSource(ctx, token).Token()
 		if err != nil {
 			return nil, fmt.Errorf("could not refresh the token: %s", err)
@@ -48,7 +48,7 @@ func (app *App) NewOAuth2Client(ctx context.Context, oauth2Config oauth2.Config,
 
 	// debug
 	if token != nil {
-		app.Log.Debugf("Token expiration: %s", token.Expiry.String())
+		app.Logger.Debugf("Token expiration: %s", token.Expiry.String())
 	}
 
 	// and store the token into the keyring
@@ -74,10 +74,10 @@ func (app *App) obtainOAuthTokenFromAuthServer(ctx context.Context, oauth2Config
 				return nil
 			}
 			// Open a browser to complete OAuth process.
-			app.Log.Info("Opening browser to complete authorization.")
+			app.Logger.Info("Opening browser to complete authorization.")
 			err = browser.OpenURL(url)
 			if err != nil {
-				app.Log.Warnf("Browser was not detected. Complete the authorization browsing to: %s", url)
+				app.Logger.Warnf("Browser was not detected. Complete the authorization browsing to: %s", url)
 			}
 			return nil
 		case err := <-ctx.Done():
@@ -94,7 +94,7 @@ func (app *App) obtainOAuthTokenFromAuthServer(ctx context.Context, oauth2Config
 		return err
 	})
 	if err := eg.Wait(); err != nil {
-		app.Log.Errorf("error while authorization: %s", err)
+		app.Logger.Errorf("error while authorization: %s", err)
 	}
 
 	return token, err

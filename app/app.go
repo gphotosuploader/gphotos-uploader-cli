@@ -11,7 +11,7 @@ type App struct {
 	TokenManager  TokenManager
 	UploadTracker UploadTracker
 
-	Log log.Logger
+	Logger log.Logger
 }
 
 type FileTracker interface {
