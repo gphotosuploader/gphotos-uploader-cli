@@ -7,10 +7,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - [CONTRIBUTING](CONTRIBUTING.md) guide line has been added.
 - New Logger package to improve log readability.
+- New flags to control CLI verbosity: `--silent` suppress all logs except Fatal ones, `--debug` enable a lot of verbosity to logs.
+- New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation](.docs/configuration.md#makeAlbums). ([#150][i150])
 ### Changed
+- **ATTENTION**: To upload items, you **must** run `gphotos-uploader-cli push`. The new `push` command substitutes `gphotos-uploader-cli`, that was working in previous versions.
 - [README](README.md) has been updated fixing some typos.
+- Default log verbosity is now `INFO`, use `--debug` if you want more verbose output.
 ### Deprecated
 - Once Go 1.13 has been published, previous Go 1.11 support is deprecated. This project will maintain compatibility with the last two major versions published.
+
+[i150]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/150
 
 ## 0.8.7
 ### Changed
@@ -22,7 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Changed
 - Remove `build` from version. Now `version` has all the tag+build information.
 ### Fixed
-- Fix duplicated album creation. (#135)
+- Fix duplicated album creation. ([#135][i135])
+
+[i135]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/135
 
 ## 0.8.5
 ### Fixed

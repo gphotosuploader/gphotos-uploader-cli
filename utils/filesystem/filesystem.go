@@ -28,6 +28,20 @@ func AbsolutePath(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
+// RelativePath returns a path relative to the given base path. If the path is not
+// under the given base path, the specified path is returned. So all returned paths
+// are under the base path.
+func RelativePath(basepath, path string) string {
+	rp, err := filepath.Rel(basepath, path)
+	if err != nil {
+		return path
+	}
+	if strings.HasPrefix(rp, "../") {
+		return path
+	}
+	return rp
+}
+
 // IsFile asserts there is a file at path
 func IsFile(path string) bool {
 	fi, err := os.Stat(path)

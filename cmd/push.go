@@ -40,91 +40,99 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-		cfg, err := config.LoadConfig(cmd.CfgDir)
+	cfg, err := config.LoadConfig(cmd.CfgDir)
+	if err != nil {
+		return fmt.Errorf("could't read configuration. Please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
+	}
+	err = cfg.Validate()
+	if err != nil {
+		return fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
+	}
+
+	// File Tracker service to track uploaded files.
+	ft, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
+	if err != nil {
+		return fmt.Errorf("open completed uploads tracker failed: path=%s, err=%s", cfg.CompletedUploadsDBDir(), err)
+	}
+	defer ft.Close()
+	fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(ft))
+
+	// Token Manager service to be used as secrets backend.
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
+	if err != nil {
+		return fmt.Errorf("open token manager failed: type=%s, err=%s", cfg.SecretsBackendType, err)
+	}
+	tokenManager := tokenstore.NewService(kr)
+
+	// Upload Session Tracker to keep upload session to resume uploads.
+	uploadTracker, err := leveldbstore.NewStore(cfg.ResumableUploadsDBDir())
+	if err != nil {
+		return fmt.Errorf("open resumable uploads tracker failed: path=%s, err=%s", cfg.ResumableUploadsDBDir(), err)
+	}
+	defer uploadTracker.Close()
+
+	// Initialize the App
+	app := &app.App{
+		FileTracker:   fileTracker,
+		TokenManager:  tokenManager,
+		UploadTracker: uploadTracker,
+
+		Logger: log.GetInstance(),
+	}
+
+	// start file upload worker
+	uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker, app.Logger)
+
+	deletionQueue := upload.NewDeletionQueue()
+	deletionQueue.StartWorkers(app.Logger)
+
+	ctx := context.Background()
+	// get OAuth2 Configuration with our App credentials
+	oauth2Config := oauth2.Config{
+		ClientID:     cfg.APIAppCredentials.ClientID,
+		ClientSecret: cfg.APIAppCredentials.ClientSecret,
+		Endpoint:     photos.Endpoint,
+		Scopes:       photos.Scopes,
+	}
+
+	// launch all folder upload jobs
+	for _, item := range cfg.Jobs {
+		c, err := app.NewOAuth2Client(ctx, oauth2Config, item.Account)
 		if err != nil {
-			return fmt.Errorf("could't read configuration. Please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
+			return err
 		}
-		err = cfg.Validate()
+
+		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
 		if err != nil {
-			return fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
+			return err
 		}
 
-		// File Tracker service to track uploaded files.
-		ft, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
+		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.MakeAlbums.Use, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
+		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
+
+		// get items to be uploaded
+		jobs, err := job.ScanFolder(app.Logger)
 		if err != nil {
-			return fmt.Errorf("open completed uploads tracker failed: path=%s, err=%s", cfg.CompletedUploadsDBDir(), err)
-		}
-		defer ft.Close()
-		fileTracker := completeduploads.NewService(completeduploads.NewLevelDBRepository(ft))
-
-		// Token Manager service to be used as secrets backend.
-		kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
-		if err != nil {
-			return fmt.Errorf("open token manager failed: type=%s, err=%s", cfg.SecretsBackendType, err)
-		}
-		tokenManager := tokenstore.NewService(kr)
-
-		// Upload Session Tracker to keep upload session to resume uploads.
-		uploadTracker, err := leveldbstore.NewStore(cfg.ResumableUploadsDBDir())
-		if err != nil {
-			return fmt.Errorf("open resumable uploads tracker failed: path=%s, err=%s", cfg.ResumableUploadsDBDir(), err)
-		}
-		defer uploadTracker.Close()
-
-		// Initialize the App
-		app := &app.App{
-			FileTracker:   fileTracker,
-			TokenManager:  tokenManager,
-			UploadTracker: uploadTracker,
-
-			Log: log.GetInstance(),
+			log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
 		}
 
-		// start file upload worker
-		uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker, app.Log)
-
-		deletionQueue := upload.NewDeletionQueue()
-		deletionQueue.StartWorkers(app.Log)
-
-		ctx := context.Background()
-		// get OAuth2 Configuration with our App credentials
-		oauth2Config := oauth2.Config{
-			ClientID:     cfg.APIAppCredentials.ClientID,
-			ClientSecret: cfg.APIAppCredentials.ClientSecret,
-			Endpoint:     photos.Endpoint,
-			Scopes:       photos.Scopes,
+		// enqueue items to be uploaded
+		for _, j := range jobs {
+			uploadChan <- &j
 		}
+	}
 
-		// launch all folder upload jobs
-		for _, item := range cfg.Jobs {
-			c, err := app.NewOAuth2Client(ctx, oauth2Config, item.Account)
-			if err != nil {
-				return err
-			}
-			gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
-			if err != nil {
-				return err
-			}
+	// after we've run all the folder upload jobs we're done adding file upload jobs
+	close(uploadChan)
+	// wait for all the uploads to be completed
+	<-doneUploading
+	log.Done("all uploads done")
 
-			opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
-			job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
+	// after the last upload is done we're done queueing files for deletion
+	deletionQueue.Close()
+	// wait for deletions to be completed before exiting
+	deletionQueue.WaitForWorkers()
+	log.Done("all deletions done")
 
-			if err := job.ScanFolder(uploadChan, app.Log); err != nil {
-				log.Fatalf("Failed to upload folder %s: %v", item.SourceFolder, err)
-			}
-		}
-
-		// after we've run all the folder upload jobs we're done adding file upload jobs
-		close(uploadChan)
-		// wait for all the uploads to be completed
-		<-doneUploading
-		log.Done("all uploads done")
-
-		// after the last upload is done we're done queueing files for deletion
-		deletionQueue.Close()
-		// wait for deletions to be completed before exiting
-		deletionQueue.WaitForWorkers()
-		log.Done("all deletions done")
-
-		return nil
+	return nil
 }

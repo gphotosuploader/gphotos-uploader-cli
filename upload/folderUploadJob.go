@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
@@ -23,21 +24,23 @@ type Job struct {
 
 // JobOptions represents all the options that a job can have
 type JobOptions struct {
-	createAlbum       bool
-	deleteAfterUpload bool
-	uploadVideos      bool
-	includePatterns   []string
-	excludePatterns   []string
+	createAlbum        bool
+	createAlbumBasedOn string
+	deleteAfterUpload  bool
+	uploadVideos       bool
+	includePatterns    []string
+	excludePatterns    []string
 }
 
 // NewJobOptions create a jobOptions based on the submitted / validated data
-func NewJobOptions(createAlbum bool, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
+func NewJobOptions(createAlbum bool, createAlbumBasedOn string, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
 	return &JobOptions{
-		createAlbum:       createAlbum,
-		deleteAfterUpload: deleteAfterUpload,
-		uploadVideos:      uploadVideos,
-		includePatterns:   includePatterns,
-		excludePatterns:   excludePatterns,
+		createAlbum:        createAlbum,
+		createAlbumBasedOn: createAlbumBasedOn,
+		deleteAfterUpload:  deleteAfterUpload,
+		uploadVideos:       uploadVideos,
+		includePatterns:    includePatterns,
+		excludePatterns:    excludePatterns,
 	}
 }
 
@@ -52,88 +55,90 @@ func NewFolderUploadJob(gPhotos *gphotos.Client, fileTracker app.FileTracker, fp
 	}
 }
 
-// ScanFolder uploads folder
-func (job *Job) ScanFolder(uploadChan chan<- *Item, log log.Logger) error {
-	var err error
-
-	if !filesystem.IsDir(job.sourceFolder) {
-		return fmt.Errorf("%s is not a folder", job.sourceFolder)
-	}
-
+// ScanFolder return the list of Items{} to be uploaded. It scans the folder and skip
+// non allowed files (includePatterns & excludePattens).
+func (job *Job) ScanFolder(logger log.Logger) ([]Item, error) {
 	filter := NewFilter(job.options.includePatterns, job.options.excludePatterns, job.options.uploadVideos)
 
-	// dirs are walked depth-first.   These vars hold the active album
-	// default empty album for makeAlbums.enabled = false
-	errW := filepath.Walk(job.sourceFolder, func(fp string, fi os.FileInfo, errP error) error {
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "error for %v: %v\n", fp, err)
-			return nil
-		}
+	var result []Item
+	err := filepath.Walk(job.sourceFolder, job.createUploadItemListFn(&result, filter, logger))
+	return result, err
+}
+
+func (job *Job) createUploadItemListFn(items *[]Item, filter *Filter, logger log.Logger) filepath.WalkFunc {
+	return func(fp string, fi os.FileInfo, errP error) error {
 		if fi == nil {
-			_, _ = fmt.Fprintf(os.Stderr, "error for %v: FileInfo is nil\n", fp)
+			logger.Fatalf("error scanning: folder=%s, err=FileInfo is nil", fp)
 			return nil
 		}
 
-		// check if the item should be uploaded (it's a file and it's not exclude
-		if !filter.IsAllowed(fp) {
-			if fi.IsDir() {
-				return filepath.SkipDir
-			}
+		// avoid processing folders
+		if fi.IsDir() {
 			return nil
 		}
 
-		// only files are allowed
-		if !filesystem.IsFile(fp) {
+		// check if the item should be uploaded given the include and exclude patterns in the
+		// configuration file. It uses relative path from the source folder path to facilitate
+		// then set up of includePatterns and excludePatterns.
+		relativePath := filesystem.RelativePath(job.sourceFolder, fp)
+		if !filter.IsAllowed(relativePath) {
+			logger.Infof("Not allowed by config: %s: skipping file...", fp)
 			return nil
 		}
 
 		// check completed uploads db for previous uploads
 		isAlreadyUploaded, err := job.fileTracker.IsAlreadyUploaded(fp)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		} else if isAlreadyUploaded {
-			log.Debugf("Already uploaded: %s: skipping file...", fp)
+			logger.Debugf("Already uploaded: %s: skipping file...", fp)
 			return nil
 		}
+
+		logger.Infof("Adding new item to upload list: item=%s, rel=%s", fp, relativePath)
 
 		// calculate Album from the folder name, we create if it's not exists
 		var albumID string
 		if job.options.createAlbum {
-			name := filepath.Base(filepath.Dir(fp))
-			albumID = getGooglePhotosAlbumID(name, job.gPhotos, log)
+			albumID, err = job.createAlbum(relativePath)
+			if err != nil {
+				logger.Error(err)
+			}
 		}
 
 		// set file upload options depending on folder upload options
-		var uploadItem = &Item{
+		var uploadItem = Item{
 			gPhotos:         job.gPhotos,
 			path:            fp,
 			album:           albumID,
 			deleteOnSuccess: job.options.deleteAfterUpload,
 		}
 
-		// finally, add the file upload to the queue
-		uploadChan <- uploadItem
-
+		*items = append(*items, uploadItem)
 		return nil
-	})
-	if errW != nil {
-		log.Errorf("walk error err=%s", errW)
 	}
-
-	return nil
 }
 
-// getGooglePhotosAlbumID returns the ID of an album with the specified name.
+// createAlbum returns the ID of an album with the specified name or error if fails.
 // If the album didn't exist, it's created thanks to GetOrCreateAlbumByName().
-func getGooglePhotosAlbumID(name string, c *gphotos.Client, log log.Logger) string {
-	if name == "" {
-		return ""
+func (job *Job) createAlbum(path string) (string, error) {
+	var name string
+	switch job.options.createAlbumBasedOn {
+	case "folderPath":
+		name = strings.ReplaceAll(filepath.Dir(path), "/", "_")
+	case "folderName":
+	default:
+		name = filepath.Base(filepath.Dir(path))
 	}
 
-	album, err := c.GetOrCreateAlbumByName(name)
-	if err != nil {
-		log.Warnf("Album creation failed: name=%s, error=%v", name, err)
-		return ""
+	if name == "" {
+		return "", nil
 	}
-	return album.Id
+
+	// get album ID from Google Photos API
+	album, err := job.gPhotos.GetOrCreateAlbumByName(name)
+	if err != nil {
+		return "", fmt.Errorf("album creation failed: name=%s, error=%s", name, err)
+	}
+	return album.Id, nil
 }
