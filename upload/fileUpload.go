@@ -3,23 +3,12 @@ package upload
 import (
 	"context"
 
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
-
 	"github.com/gphotosuploader/gphotos-uploader-cli/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
 // number of concurrent workers uploading items
 const maxNumberOfWorkers = 5
-
-// Item represents an object to be uploaded to Google Photos
-type Item struct {
-	gPhotos *gphotos.Client
-
-	path            string
-	album           string
-	deleteOnSuccess bool
-}
 
 // concurrentUpload read fileUploads chan for each Item struct, and upload the file to gphotos
 // when the fileUploadsChan is done, signal to doneUploading

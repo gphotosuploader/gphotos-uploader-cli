@@ -6,7 +6,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/match"
 )
 
-// Filter is a filter for file uploading
+// Filter is a Filter for file uploading
 type Filter struct {
 	isIncluded func(string) bool
 	isExcluded func(string) bool
