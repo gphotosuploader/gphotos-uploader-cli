@@ -1,10 +1,8 @@
 package upload
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 
@@ -83,50 +81,15 @@ func (job *Job) createUploadItemListFn(items *[]Item, filter *Filter, logger log
 			return nil
 		}
 
-		logger.Infof("Adding new item to upload list: item=%s, rel=%s", fp, relativePath)
-
-		// calculate Album from the folder name, we create if it's not exists
-		var albumID string
-		if job.options.createAlbum {
-			albumID, err = job.createAlbum(relativePath)
-			if err != nil {
-				logger.Error(err)
-			}
-		}
+		logger.Infof("Adding item to upload: %s", fp)
 
 		// set file upload options depending on folder upload options
-		var uploadItem = Item{
+		*items = append(*items, Item{
 			gPhotos:         job.gPhotos,
 			path:            fp,
-			album:           albumID,
+			album:           job.albumID(relativePath, logger),
 			deleteOnSuccess: job.options.deleteAfterUpload,
-		}
-
-		*items = append(*items, uploadItem)
+		})
 		return nil
 	}
-}
-
-// createAlbum returns the ID of an album with the specified name or error if fails.
-// If the album didn't exist, it's created thanks to GetOrCreateAlbumByName().
-func (job *Job) createAlbum(path string) (string, error) {
-	var name string
-	switch job.options.createAlbumBasedOn {
-	case "folderPath":
-		name = strings.ReplaceAll(filepath.Dir(path), "/", "_")
-	case "folderName":
-	default:
-		name = filepath.Base(filepath.Dir(path))
-	}
-
-	if name == "" {
-		return "", nil
-	}
-
-	// get album ID from Google Photos API
-	album, err := job.gPhotos.GetOrCreateAlbumByName(name)
-	if err != nil {
-		return "", fmt.Errorf("album creation failed: name=%s, error=%s", name, err)
-	}
-	return album.Id, nil
 }
