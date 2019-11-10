@@ -54,7 +54,7 @@ func albumNameUsingFolderName(path string) string {
 	if p == "." {
 		return ""
 	}
-	return filepath.Base(path)
+	return filepath.Base(p)
 }
 
 // createAlbumInGPhotos returns the ID of an album with the specified name or error if fails.
