@@ -4,7 +4,7 @@ package config
 type Config struct {
 	ConfigPath         string
 	SecretsBackendType string
-	APIAppCredentials  *APIAppCredentials
+	APIAppCredentials  APIAppCredentials
 	Jobs               []FolderUploadJob
 }
 

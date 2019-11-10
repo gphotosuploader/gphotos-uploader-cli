@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,11 +12,16 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
+const (
+	// DefaultConfigFilename is the default config file name to use
+	DefaultConfigFilename = "config.hjson"
+)
+
 // defaultSettings() returns a *Config with the default settings of the application.
 func defaultSettings() *Config {
 	var c Config
 	c.SecretsBackendType = "auto"
-	c.APIAppCredentials = &APIAppCredentials{
+	c.APIAppCredentials = APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 	}
@@ -55,11 +59,11 @@ func (c *Config) Validate() error {
 
 	for i := range c.Jobs {
 		item := &c.Jobs[i] // we do that way to modify original object while iterating.
-		path, err := filesystem.AbsolutePath(item.SourceFolder)
+		srcFolder, err := filesystem.AbsolutePath(item.SourceFolder)
 		if err != nil {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
 		}
-		item.SourceFolder = path
+		item.SourceFolder = srcFolder
 		if !filesystem.IsDir(item.SourceFolder) {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s", item.SourceFolder)
 		}
@@ -80,7 +84,7 @@ func (c *Config) ResumableUploadsDBDir() string {
 
 // ConfigFile return the path of the configuration file.
 func (c *Config) ConfigFile() string {
-	return path.Join(c.ConfigPath, "config.hjson")
+	return path.Join(c.ConfigPath, DefaultConfigFilename)
 }
 
 // KeyringDir returns the path of the folder where keyring will be stored.
@@ -162,9 +166,7 @@ func InitConfigFile(dir string) error {
 		return fmt.Errorf("failed to create config: file=%s, err=%v", cfg.ConfigFile(), err)
 	}
 	defer func() {
-		if err := fh.Close(); err != nil {
-			log.Fatal(err)
-		}
+		_ = fh.Close()
 	}()
 
 	_, err = fh.WriteString(cfg.String())
@@ -177,8 +179,7 @@ func InitConfigFile(dir string) error {
 
 // ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path
 func ConfigExists(path string) bool {
-	// Check config.hjson
-	cfgFile, err := filesystem.AbsolutePath(filepath.Join(path, DefaultConfigsPath))
+	cfgFile, err := filesystem.AbsolutePath(filepath.Join(path, DefaultConfigFilename))
 	if err != nil {
 		return false
 	}
@@ -187,5 +188,5 @@ func ConfigExists(path string) bool {
 		return true
 	}
 
-	return false // Config file found
+	return false
 }

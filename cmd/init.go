@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
@@ -11,15 +13,14 @@ import (
 
 // InitCmd holds the required data for the init cmd
 type InitCmd struct {
-	CfgDir string
-	// Flags
+	*flags.GlobalFlags
+
+	// command flags
 	Reconfigure bool
 }
 
 func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
-	cmd := &InitCmd{
-		CfgDir: globalFlags.CfgDir,
-	}
+	cmd := &InitCmd{GlobalFlags: globalFlags}
 
 	initCmd := &cobra.Command{
 		Use:   "init",
@@ -49,7 +50,9 @@ func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	log.Done("Configuration file successfully initialized.")
-	log.Infof("\r         \nPlease edit: \n- `%s/config.hjson` to add you configuration.\n", cmd.CfgDir)
+	log.Infof("\r         \nPlease edit: \n- `%s` to add you configuration.\n",
+		ansi.Color(fmt.Sprintf("%s/config.hjson", cmd.CfgDir), "cyan+b"),
+	)
 
 	return nil
 }

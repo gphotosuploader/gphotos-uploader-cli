@@ -56,8 +56,8 @@ func TestInitAndLoadConfig(t *testing.T) {
 		}
 
 		// check that both configuration are equal
-		if *got.APIAppCredentials != *want.APIAppCredentials {
-			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", *want.APIAppCredentials, *got.APIAppCredentials)
+		if got.APIAppCredentials != want.APIAppCredentials {
+			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", want.APIAppCredentials, got.APIAppCredentials)
 		}
 
 		if len(got.Jobs) != len(want.Jobs) {
@@ -162,7 +162,7 @@ func TestConfig_Validate(t *testing.T) {
 func createTestConfiguration() *config.Config {
 	c := &config.Config{}
 	c.SecretsBackendType = "auto"
-	c.APIAppCredentials = &config.APIAppCredentials{
+	c.APIAppCredentials = config.APIAppCredentials{
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 	}

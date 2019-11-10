@@ -3,16 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 1.0.0-alpha.1
+> This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
 ### Added
+- New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation](.docs/configuration.md#makeAlbums). ([#150][i150])
+- New flags to control CLI verbosity: `--silent` suppress all logs except Fatal ones, `--debug` enable a lot of verbosity to logs.
 - [CONTRIBUTING](CONTRIBUTING.md) guide line has been added.
 - New Logger package to improve log readability.
-- New flags to control CLI verbosity: `--silent` suppress all logs except Fatal ones, `--debug` enable a lot of verbosity to logs.
-- New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation](.docs/configuration.md#makeAlbums). ([#150][i150])
 ### Changed
 - **ATTENTION**: To upload items, you **must** run `gphotos-uploader-cli push`. The new `push` command substitutes `gphotos-uploader-cli`, that was working in previous versions.
+- **ATTENTION**: New default config directory: `~/.gphotos-uploader-cli`. Copy your old configuration into the new folder or use `--config ~/.config/gphotos-uploader-cli` in every call.
+- Default log verbosity is now `info` level, use `--debug` if you want more verbose output.
 - [README](README.md) has been updated fixing some typos.
-- Default log verbosity is now `INFO`, use `--debug` if you want more verbose output.
 ### Deprecated
 - Once Go 1.13 has been published, previous Go 1.11 support is deprecated. This project will maintain compatibility with the last two major versions published.
 
