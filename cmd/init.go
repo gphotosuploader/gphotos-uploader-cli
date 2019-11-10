@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
@@ -11,15 +13,14 @@ import (
 
 // InitCmd holds the required data for the init cmd
 type InitCmd struct {
-	CfgDir string
-	// Flags
+	*flags.GlobalFlags
+
+	// command flags
 	Reconfigure bool
 }
 
 func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
-	cmd := &InitCmd{
-		CfgDir: globalFlags.CfgDir,
-	}
+	cmd := &InitCmd{GlobalFlags: globalFlags}
 
 	initCmd := &cobra.Command{
 		Use:   "init",
@@ -36,20 +37,20 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	// Check if config already exists
-	configExists := config.ConfigExists(cmd.CfgDir)
-	if configExists && !cmd.Reconfigure {
+	if config.ConfigExists(cmd.CfgDir) && !cmd.Reconfigure {
 		log.Infof("Config already exists. If you want to recreate the config please run `%s`", ansi.Color("gphotos-uploader-cli init --force", "white+b"))
 		log.Infof("\r         \nIf you want to continue with the existing config, run:\n- `%s` to start uploading files.\n", ansi.Color("gphotos-uploader-cli push", "white+b"))
 		return nil
 	}
 
-	err := config.InitConfigFile(cmd.CfgDir)
-	if err != nil {
+	if err := config.InitConfigFile(cmd.CfgDir); err != nil {
 		return err
 	}
 
 	log.Done("Configuration file successfully initialized.")
-	log.Infof("\r         \nPlease edit: \n- `%s/config.hjson` to add you configuration.\n", cmd.CfgDir)
+	log.Infof("\r         \nPlease edit: \n- `%s` to add you configuration.\n",
+		ansi.Color(fmt.Sprintf("%s/%s", cmd.CfgDir, config.DefaultConfigFilename), "cyan+b"),
+	)
 
 	return nil
 }

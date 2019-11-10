@@ -1,6 +1,6 @@
 # Configuration
 
-> The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.config/gphotos-uploader-cli`.
+> The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.gphotos-uploader-cli`.
 
 Example configuration file:    
 
@@ -30,7 +30,7 @@ Example configuration file:
 ### SecretsBackendType
 This option allows you to choose which backend will be used for secrets storage. You set `auto` to allow the application decide which one will be used given your environment.
 
-Available options for secrets backends are:
+Available options for secrets backend are:
 
 ```
 "auto"              For auto backend selection
@@ -63,7 +63,7 @@ var backendOrder = []BackendType{
 
 ## APIAppCredentials
 
-Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and envolves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
+Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and involves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
 
 Before you can use `gphotos-uploader-cli`, you must enable the Photos Library API and request an OAuth 2.0 Client ID.
 
