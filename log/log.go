@@ -6,7 +6,7 @@ import (
 )
 
 var defaultLog Logger = &stdoutLogger{
-	level: logrus.DebugLevel,
+	level: logrus.InfoLevel,
 }
 
 // Discard is a logger implementation that just discards every log statement
