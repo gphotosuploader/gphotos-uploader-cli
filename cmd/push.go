@@ -107,7 +107,12 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		opt := upload.NewJobOptions(item.MakeAlbums.Enabled, item.MakeAlbums.Use, item.DeleteAfterUpload, item.UploadVideos, item.IncludePatterns, item.ExcludePatterns)
+		opt := upload.NewJobOptions(
+			item.MakeAlbums.Enabled,
+			item.MakeAlbums.Use,
+			item.DeleteAfterUpload,
+			upload.NewFilter(item.IncludePatterns, item.ExcludePatterns, item.UploadVideos),
+		)
 		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, item.SourceFolder, opt)
 
 		// get items to be uploaded

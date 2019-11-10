@@ -27,20 +27,16 @@ type JobOptions struct {
 	createAlbum        bool
 	createAlbumBasedOn string
 	deleteAfterUpload  bool
-	uploadVideos       bool
-	includePatterns    []string
-	excludePatterns    []string
+	filter             *Filter
 }
 
 // NewJobOptions create a jobOptions based on the submitted / validated data
-func NewJobOptions(createAlbum bool, createAlbumBasedOn string, deleteAfterUpload bool, uploadVideos bool, includePatterns []string, excludePatterns []string) *JobOptions {
+func NewJobOptions(createAlbum bool, createAlbumBasedOn string, deleteAfterUpload bool, filter *Filter) *JobOptions {
 	return &JobOptions{
 		createAlbum:        createAlbum,
 		createAlbumBasedOn: createAlbumBasedOn,
 		deleteAfterUpload:  deleteAfterUpload,
-		uploadVideos:       uploadVideos,
-		includePatterns:    includePatterns,
-		excludePatterns:    excludePatterns,
+		filter:             filter,
 	}
 }
 
@@ -58,10 +54,8 @@ func NewFolderUploadJob(gPhotos *gphotos.Client, fileTracker app.FileTracker, fp
 // ScanFolder return the list of Items{} to be uploaded. It scans the folder and skip
 // non allowed files (includePatterns & excludePattens).
 func (job *Job) ScanFolder(logger log.Logger) ([]Item, error) {
-	filter := NewFilter(job.options.includePatterns, job.options.excludePatterns, job.options.uploadVideos)
-
 	var result []Item
-	err := filepath.Walk(job.sourceFolder, job.createUploadItemListFn(&result, filter, logger))
+	err := filepath.Walk(job.sourceFolder, job.createUploadItemListFn(&result, job.options.filter, logger))
 	return result, err
 }
 
