@@ -14,15 +14,7 @@ func (job *Job) albumID(path string, logger log.Logger) string {
 		return ""
 	}
 
-	var name string
-	switch job.options.createAlbumBasedOn {
-	case "folderPath":
-		name = strings.ReplaceAll(filepath.Dir(path), "/", "_")
-	case "folderName":
-	default:
-		name = filepath.Base(filepath.Dir(path))
-	}
-
+	name := albumNameUsingTemplate(path, job.options.createAlbumBasedOn)
 	if name == "" {
 		return ""
 	}
@@ -33,6 +25,36 @@ func (job *Job) albumID(path string, logger log.Logger) string {
 		return ""
 	}
 	return albumID
+}
+
+// albumNameUsingTemplate calculate the Album name for a given path based on full folder path (folderPath)
+// or folder name (folderName).
+func albumNameUsingTemplate(path, template string) string {
+	switch template {
+	case "folderPath":
+		return albumNameUsingFolderPath(path)
+	case "folderName":
+		return albumNameUsingFolderName(path)
+	}
+	return ""
+}
+
+// albumNameUsingFolderPath returns an Album name using the full path of the given folder.
+func albumNameUsingFolderPath(path string) string {
+	p := filepath.Dir(path)
+	if p == "." {
+		return ""
+	}
+	return strings.ReplaceAll(p, "/", "_")
+}
+
+// albumNameUsingFolderName returns an Album name using the name of the given folder.
+func albumNameUsingFolderName(path string) string {
+	p := filepath.Dir(path)
+	if p == "." {
+		return ""
+	}
+	return filepath.Base(path)
 }
 
 // createAlbumInGPhotos returns the ID of an album with the specified name or error if fails.
