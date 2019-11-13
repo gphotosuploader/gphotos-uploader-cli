@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/99designs/keyring v1.1.2
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
-	github.com/gphotosuploader/google-photos-api-client-go v1.1.2
+	github.com/gphotosuploader/google-photos-api-client-go v1.1.3
 	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/int128/oauth2cli v1.7.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
