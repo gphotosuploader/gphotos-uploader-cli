@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.0.0-alpha.2
+> This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
+### Fix
+- Fix issue uploading photos without the correct file name. ([#158][i158])
+
+[i158]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/158
+
 ## 1.0.0-alpha.1
 > This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
 ### Added

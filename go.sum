@@ -41,6 +41,8 @@ github.com/google/pprof v0.0.0-20181206194817-3ea8567a2e57/go.mod h1:zfwlbNMJ+OI
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/gphotosuploader/google-photos-api-client-go v1.1.2 h1:11VDD+ZkxyxMphC/C8IBQsscOVwBf5MaHJZYCu2k1so=
 github.com/gphotosuploader/google-photos-api-client-go v1.1.2/go.mod h1:drQlpEncMykB/tPjsr0TKUKAfGKCOqg5Zl0XLuEopfA=
+github.com/gphotosuploader/google-photos-api-client-go v1.1.3 h1:FWyu43osmTcjbUpP+tcVKCxhNGFsi1GvG8TmIYYTqok=
+github.com/gphotosuploader/google-photos-api-client-go v1.1.3/go.mod h1:WgKsL9SxFf1zdQqCzR6olqaCyv1r5dDK64bceeRmt+I=
 github.com/gphotosuploader/googlemirror v0.3.2 h1:xaYVJYEDj2rYMYGi5sTGMy6gkD5PVKfz4c3ZW8gQs+M=
 github.com/gphotosuploader/googlemirror v0.3.2/go.mod h1:725+/afSOVU01M2Lfi3NIw8L3Oupjit6u/s1MLjK160=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c h1:6rhixN/i8ZofjG1Y75iExal34USq5p+wiN1tpie8IrU=
