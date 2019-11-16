@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/spf13/cobra"
@@ -18,11 +19,15 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/worker"
 )
 
 // PushCmd holds the required data for the push cmd
 type PushCmd struct {
 	*flags.GlobalFlags
+
+	// command flags
+	NumberOfWorkers int
 }
 
 func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
@@ -35,6 +40,8 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}
+
+	pushCmd.Flags().IntVar(&cmd.NumberOfWorkers, "workers", 5, "Number of workers")
 
 	return pushCmd
 }
@@ -80,13 +87,6 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		Logger: log.GetInstance(),
 	}
 
-	// start file upload worker
-	uploadChan, doneUploading := upload.StartFileUploadWorker(app.FileTracker, app.Logger)
-
-	deletionQueue := upload.NewDeletionQueue()
-	deletionQueue.StartWorkers(app.Logger)
-
-	ctx := context.Background()
 	// get OAuth2 Configuration with our App credentials
 	oauth2Config := oauth2.Config{
 		ClientID:     cfg.APIAppCredentials.ClientID,
@@ -95,50 +95,53 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		Scopes:       photos.Scopes,
 	}
 
+	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, app.Logger)
+	uploadQueue.Start()
+	defer uploadQueue.Stop()
+	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
+
 	// launch all folder upload jobs
+	ctx := context.Background()
 	for _, config := range cfg.Jobs {
 		c, err := app.NewOAuth2Client(ctx, oauth2Config, config.Account)
 		if err != nil {
 			return err
 		}
 
-		gPhotos, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
+		photosService, err := gphotos.NewClientWithResumableUploads(c, app.UploadTracker)
 		if err != nil {
 			return err
 		}
 
-		job := upload.NewFolderUploadJob(gPhotos, app.FileTracker, config.SourceFolder,
-			upload.JobOptions{
-				CreateAlbum:        config.MakeAlbums.Enabled,
-				CreateAlbumBasedOn: config.MakeAlbums.Use,
-				DeleteAfterUpload:  config.DeleteAfterUpload,
-				Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns, config.UploadVideos),
-			})
+		folder := upload.UploadFolderJob{
+			FileTracker: app.FileTracker,
 
-		// get Items{} to be uploaded to Google Photos.
-		items, err := job.ScanFolder(app.Logger)
+			SourceFolder:       config.SourceFolder,
+			CreateAlbum:        config.MakeAlbums.Enabled,
+			CreateAlbumBasedOn: config.MakeAlbums.Use,
+			Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns, config.UploadVideos),
+		}
+
+		// get UploadItem{} to be uploaded to Google Photos.
+		itemsToUpload, err := folder.ScanFolder(app.Logger)
 		if err != nil {
 			log.Fatalf("Failed to scan folder %s: %v", config.SourceFolder, err)
 		}
 
-		// enqueue Items{} to be uploaded. The workers will receive it via channel.
-		log.Infof("%d files pending to be uploaded in folder '%s'.", len(items), config.SourceFolder)
-		for _, i := range items {
-			uploadChan <- &i
+		// enqueue files to be uploaded. The workers will receive it via channel.
+		log.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
+		for _, i := range itemsToUpload {
+			uploadQueue.Submit(&upload.EnqueuedJob{
+				Context:       ctx,
+				PhotosService: photosService,
+				FileTracker:   app.FileTracker,
+				Logger:        app.Logger,
+
+				Path:            i.Path,
+				AlbumName:       i.AlbumName,
+				DeleteOnSuccess: config.DeleteAfterUpload,
+			})
 		}
 	}
-
-	// after we've run all the folder upload jobs we're done adding file upload jobs
-	close(uploadChan)
-	// wait for all the uploads to be completed
-	<-doneUploading
-	log.Done("all uploads done")
-
-	// after the last upload is done we're done queueing files for deletion
-	deletionQueue.Close()
-	// wait for deletions to be completed before exiting
-	deletionQueue.WaitForWorkers()
-	log.Done("all deletions done")
-
 	return nil
 }

@@ -1,80 +1,61 @@
 package upload
 
 import (
-	"context"
-	"errors"
 	"testing"
-
-	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
-type MockGPhotosService struct {
-	AlbumID string
-}
+func TestAlbumName(t *testing.T) {
+	var testData = []struct {
+		name               string
+		createAlbum        bool
+		createAlbumBasedOn string
 
-func (m *MockGPhotosService) GetOrCreateAlbumByName(name string) (*photoslibrary.Album, error) {
-	if name == "makeMyTestFail" {
-		return &photoslibrary.Album{}, errors.New("error")
-	}
-	return &photoslibrary.Album{Id: m.AlbumID}, nil
-}
-
-func (m *MockGPhotosService) AddMediaItem(ctx context.Context, path string, album string) (*photoslibrary.MediaItem, error) {
-	return &photoslibrary.MediaItem{}, nil
-}
-
-func TestAlbumId(t *testing.T) {
-	// set an AlbumID different than expected, in order to ensure it's returning empty
-	// due to CreateAlbum == false.
-	job := Job{
-		gPhotos: &MockGPhotosService{AlbumID: "testAlbumID"},
-		options: JobOptions{
-			CreateAlbum:        false,
-			CreateAlbumBasedOn: "folderPath",
+		in   string
+		want string
+	}{
+		{
+			name:               "createAlbumDisabled_With_folderName",
+			createAlbum:        false,
+			createAlbumBasedOn: "folderName",
+			in:                 "/foo/bar/file.jpg",
+			want:               "",
+		},
+		{
+			name:               "createAlbumDisabled_With_folderPath",
+			createAlbum:        false,
+			createAlbumBasedOn: "folderPath",
+			in:                 "/foo/bar/file.jpg",
+			want:               "",
+		},
+		{
+			name:               "createAlbum_With_folderName",
+			createAlbum:        true,
+			createAlbumBasedOn: "folderName",
+			in:                 "/foo/bar/file.jpg",
+			want:               "bar",
+		},
+		{
+			name:               "createAlbum_With_folderPath",
+			createAlbum:        true,
+			createAlbumBasedOn: "folderPath",
+			in:                 "/foo/bar/file.jpg",
+			want:               "foo_bar",
 		},
 	}
 
-	t.Run("CreateAlbumDisabled", func(t *testing.T) {
-		job.options.CreateAlbum = false
-		want := ""
-		got := job.albumID("foo/bar/file.jpg", log.Discard)
+	for _, tt := range testData {
+		t.Run(tt.name, func(t *testing.T) {
+			job := UploadFolderJob{
+				CreateAlbum:        tt.createAlbum,
+				CreateAlbumBasedOn: tt.createAlbumBasedOn,
+			}
+			got := job.albumName(tt.in)
+			if got != tt.want {
+				t.Errorf("albumName for '%s' failed: expected '%s', got '%s'", tt.in, tt.want, got)
+			}
+		})
 
-		if got != want {
-			t.Errorf("albumID test faild: expected '%s', got '%s'", want, got)
-		}
-	})
-
-	t.Run("WithEmptyPath", func(t *testing.T) {
-		job.options.CreateAlbum = true
-		want := ""
-		got := job.albumID("", log.Discard)
-
-		if got != want {
-			t.Errorf("albumID test faild: expected '%s', got '%s'", want, got)
-		}
-	})
-
-	t.Run("WithSuccessfulCall", func(t *testing.T) {
-		job.options.CreateAlbum = true
-		want := "testAlbumID"
-		got := job.albumID("foo/bar/file.jpg", log.Discard)
-
-		if got != want {
-			t.Errorf("albumID test faild: expected '%s', got '%s'", want, got)
-		}
-	})
-
-	t.Run("WithFailedCall", func(t *testing.T) {
-		job.options.CreateAlbum = true
-		want := ""
-		got := job.albumID("makeMyTestFail/file.jpg", log.Discard)
-
-		if got != want {
-			t.Errorf("albumID test faild: expected '%s', got '%s'", want, got)
-		}
-	})
+	}
 }
 
 func TestAlbumNameUsingTemplate(t *testing.T) {
@@ -83,8 +64,10 @@ func TestAlbumNameUsingTemplate(t *testing.T) {
 		template string
 		out      string
 	}{
+		{in: "/foo/bar/xyz", template: "folderPath", out: "foo_bar"},
 		{in: "foo/bar/xyz", template: "folderPath", out: "foo_bar"},
 		{in: "foo/bar/xyz", template: "folderName", out: "bar"},
+		{in: "/foo/bar/xyz/file", template: "folderPath", out: "foo_bar_xyz"},
 		{in: "foo/bar/xyz/file", template: "folderPath", out: "foo_bar_xyz"},
 		{in: "foo/bar/xyz/file", template: "folderName", out: "xyz"},
 		{in: "foo/bar/xyz", template: "invalidTemplate", out: ""},
@@ -107,6 +90,8 @@ func TestAlbumNameUsingFolderPath(t *testing.T) {
 		{in: "foo/", out: "foo"},
 		{in: "foo/bar", out: "foo"},
 		{in: "foo/bar/", out: "foo_bar"},
+		{in: "/foo/bar", out: "foo"},
+		{in: "/foo/bar/", out: "foo_bar"},
 	}
 	for _, tt := range testData {
 		got := albumNameUsingFolderPath(tt.in)
@@ -126,6 +111,8 @@ func TestAlbumNameUsingFolderName(t *testing.T) {
 		{in: "foo/", out: "foo"},
 		{in: "foo/bar", out: "foo"},
 		{in: "foo/bar/", out: "bar"},
+		{in: "/foo/bar", out: "foo"},
+		{in: "/foo/bar/", out: "bar"},
 	}
 	for _, tt := range testData {
 		got := albumNameUsingFolderName(tt.in)
