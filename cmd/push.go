@@ -102,6 +102,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	// launch all folder upload jobs
 	ctx := context.Background()
+	var totalItems int
 	for _, config := range cfg.Jobs {
 		c, err := app.NewOAuth2Client(ctx, oauth2Config, config.Account)
 		if err != nil {
@@ -130,6 +131,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 		// enqueue files to be uploaded. The workers will receive it via channel.
 		log.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
+		totalItems += len(itemsToUpload)
 		for _, i := range itemsToUpload {
 			uploadQueue.Submit(&upload.EnqueuedJob{
 				Context:       ctx,
@@ -143,5 +145,20 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			})
 		}
 	}
+
+	// get responses from the enqueued jobs
+	var uploadedItems int
+	for i := 0; i < totalItems; i++ {
+		r := <-uploadQueue.GetResult()
+
+		if r.Err != nil {
+			log.Failf("Error processing %s", r.ID)
+		} else {
+			uploadedItems++
+			log.Donef("Successfully processing %s", r.ID)
+		}
+	}
+
+	log.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil
 }

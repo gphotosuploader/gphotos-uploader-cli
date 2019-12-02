@@ -13,7 +13,7 @@ type TestJob struct {
 	opsPtr *uint64
 }
 
-func (t *TestJob) ID() string { return fmt.Sprintf("Worker #%d", t.id) }
+func (t *TestJob) ID() string { return fmt.Sprintf("Job #%d", t.id) }
 
 func (t *TestJob) Process() error {
 	for i := 0; i < 1000; i++ {
@@ -29,12 +29,13 @@ func TestQueue(t *testing.T) {
 		want            uint64
 	}{
 		{numberOfWorkers: 1, numberOfJobs: 1, want: 1000},
+		{numberOfWorkers: 1, numberOfJobs: 2, want: 2000},
 		{numberOfWorkers: 1, numberOfJobs: 5, want: 5000},
 		{numberOfWorkers: 5, numberOfJobs: 5, want: 5000},
 		{numberOfWorkers: 5, numberOfJobs: 50, want: 50000},
 	}
 
-	var logger = &log.DiscardLogger{}
+	var logger = log.Discard
 
 	for _, tt := range testData {
 		t.Run(fmt.Sprintf("Workers[%d]_Jobs[%d]", tt.numberOfWorkers, tt.numberOfJobs), func(t *testing.T) {
@@ -42,15 +43,24 @@ func TestQueue(t *testing.T) {
 
 			queue := NewJobQueue(tt.numberOfWorkers, logger)
 			queue.Start()
+			defer queue.Stop()
 
+			// send jobs to the queue
 			for i := 0; i < tt.numberOfJobs; i++ {
-				queue.Submit(&TestJob{id: i, opsPtr: &ops})
+				queue.Submit(&TestJob{id: i + 1, opsPtr: &ops})
 			}
 
-			queue.Stop()
+			// get results from queue
+			for i := 0; i < tt.numberOfJobs; i++ {
+				r := <-queue.GetResult()
+				want := "processed successfully"
+				if r.Message != want {
+					t.Errorf("invalid message: want=%s, got=%s", want, r.Message)
+				}
+			}
 
 			if ops != tt.want {
-				t.Errorf("test failed: want=%d, got=%d", tt.want, ops)
+				t.Errorf("invalid result: want=%d, got=%d", tt.want, ops)
 			}
 		})
 	}
