@@ -12,5 +12,5 @@ func NewService(r TokenManager) *Service {
 
 // Close closes the service.
 func (s *Service) Close() error {
-	return s.Close()
+	return s.TokenManager.Close()
 }
