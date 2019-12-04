@@ -51,7 +51,9 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer cli.Stop()
+	defer func() {
+		_ = cli.Stop()
+	}()
 
 	// get OAuth2 Configuration with our App credentials
 	oauth2Config := oauth2.Config{
