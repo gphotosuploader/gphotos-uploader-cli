@@ -5,4 +5,5 @@ type Repository interface {
 	Get(key string) (CompletedUploadedFileItem, error)
 	Put(item CompletedUploadedFileItem) error
 	Delete(key string) error
+	Close() error
 }

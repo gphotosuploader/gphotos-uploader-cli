@@ -104,6 +104,12 @@ func (r *KeyringRepository) RetrieveToken(email string) (*oauth2.Token, error) {
 	return &tk, nil
 }
 
+// Close closes the keyring repository.
+func (r *KeyringRepository) Close() error {
+	// in this particular implementation we don't need to do anything.
+	return nil
+}
+
 // getToken returns the specified token from the repository
 func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 	item, err := r.Get(email)
@@ -119,6 +125,7 @@ func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 
 	return tk, nil
 }
+
 
 func terminalPrompt(prompt string) (string, error) {
 	fmt.Printf("%s: ", prompt)

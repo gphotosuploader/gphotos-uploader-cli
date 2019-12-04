@@ -11,6 +11,11 @@ func NewLevelDBRepository(db *leveldb.DB) *LevelDBRepository {
 	return &LevelDBRepository{db: db}
 }
 
+// Close closes the DB.
+func (r *LevelDBRepository) Close() error {
+	return r.db.Close()
+}
+
 // Get an item
 func (r *LevelDBRepository) Get(path string) (CompletedUploadedFileItem, error) {
 	val, err := r.db.Get([]byte(path), nil)

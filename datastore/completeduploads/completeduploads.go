@@ -16,6 +16,13 @@ func NewService(r Repository) *Service {
 	return &Service{repo: r}
 }
 
+// Close closes the service.
+//
+// No operation could be done after that.
+func (s *Service) Close() error {
+	return s.repo.Close()
+}
+
 // IsAlreadyUploaded checks if the file was already uploaded
 func (s *Service) IsAlreadyUploaded(filePath string) (bool, error) {
 	// find a previous upload in the repository

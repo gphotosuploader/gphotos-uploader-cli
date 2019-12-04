@@ -52,7 +52,7 @@ func TestQueue(t *testing.T) {
 
 			// get results from queue
 			for i := 0; i < tt.numberOfJobs; i++ {
-				r := <-queue.GetResult()
+				r := <-queue.ChanJobResults()
 				want := "processed successfully"
 				if r.Message != want {
 					t.Errorf("invalid message: want=%s, got=%s", want, r.Message)
@@ -60,7 +60,7 @@ func TestQueue(t *testing.T) {
 			}
 
 			if ops != tt.want {
-				t.Errorf("invalid result: want=%d, got=%d", tt.want, ops)
+				t.Errorf("invalid jobResults: want=%d, got=%d", tt.want, ops)
 			}
 		})
 	}

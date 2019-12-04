@@ -13,7 +13,7 @@ type Job interface {
 	ID() string
 }
 
-// JobResult - the result of a processed Job
+// JobResult - the jobResults of a processed Job
 type JobResult struct {
 	ID      string
 	Message string
@@ -27,8 +27,8 @@ type Worker struct {
 	readyPool        chan chan Job
 	assignedJobQueue chan Job
 
-	result chan JobResult
-	quit   chan bool
+	jobResults chan JobResult
+	quit       chan bool
 
 	logger log.Logger
 }
@@ -40,7 +40,7 @@ type JobQueue struct {
 	workers           []*Worker
 	dispatcherStopped sync.WaitGroup
 	workersStopped    *sync.WaitGroup
-	result            chan JobResult
+	jobResults        chan JobResult
 	quit              chan bool
 }
 
@@ -48,10 +48,14 @@ type JobQueue struct {
 func NewJobQueue(maxWorkers int, logger log.Logger) *JobQueue {
 	workersStopped := sync.WaitGroup{}
 	readyPool := make(chan chan Job, maxWorkers)
+
+	// we need to ensure that the results channel is big enough to fulfill workers needs
+	jobResults := make(chan JobResult, maxWorkers*10)
+
+	// create the pool of workers
 	workers := make([]*Worker, maxWorkers)
-	result := make(chan JobResult, maxWorkers * 10)
 	for i := 0; i < maxWorkers; i++ {
-		workers[i] = NewWorker(fmt.Sprintf("#%d", i+1), readyPool, result, &workersStopped, logger)
+		workers[i] = NewWorker(fmt.Sprintf("#%d", i+1), readyPool, jobResults, &workersStopped, logger)
 	}
 	return &JobQueue{
 		internalQueue:     make(chan Job),
@@ -59,13 +63,13 @@ func NewJobQueue(maxWorkers int, logger log.Logger) *JobQueue {
 		workers:           workers,
 		dispatcherStopped: sync.WaitGroup{},
 		workersStopped:    &workersStopped,
-		result:            result,
+		jobResults:        jobResults,
 		quit:              make(chan bool),
 	}
 }
 
-func (q *JobQueue) GetResult() chan JobResult {
-	return q.result
+func (q *JobQueue) ChanJobResults() chan JobResult {
+	return q.jobResults
 }
 
 // Start - starts the worker routines and dispatcher routine
@@ -112,7 +116,7 @@ func NewWorker(id string, readyPool chan chan Job, result chan JobResult, done *
 		done:             done,
 		readyPool:        readyPool,
 		assignedJobQueue: make(chan Job),
-		result:           result,
+		jobResults:       result,
 		quit:             make(chan bool),
 		logger:           logger,
 	}
@@ -140,8 +144,8 @@ func (w *Worker) Start() {
 					w.logger.Error(r.Err)
 				}
 
-				// send the result of the processed Job
-				w.result <- r
+				// send the jobResults of the processed Job
+				w.jobResults <- r
 			case <-w.quit:
 				w.done.Done()
 				return

@@ -9,3 +9,8 @@ type Service struct {
 func NewService(r TokenManager) *Service {
 	return &Service{r}
 }
+
+// Close closes the service.
+func (s *Service) Close() error {
+	return s.Close()
+}
