@@ -3,14 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 1.0.0-alpha.2
-> This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
-### Fix
-- Fix issue uploading photos without the correct file name. ([#158][i158])
-
-[i158]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/158
-
-## 1.0.0-alpha.1
+## 1.0.0
 > This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
 ### Added
 - New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation](.docs/configuration.md#makeAlbums). ([#150][i150])
@@ -24,8 +17,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - [README](README.md) has been updated fixing some typos.
 ### Deprecated
 - Once Go 1.13 has been published, previous Go 1.11 support is deprecated. This project will maintain compatibility with the last two major versions published.
+- Configuration parameter `uploadVideos` has been deprecated in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation](.docs/configuration.md) for details.
+### Fixed
+- Fix issue uploading photos without the correct file name. ([#158][i158])
+- Fix issue uploading photos multiple times and ignoring others. ([#160][i160])
 
 [i150]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/150
+[i158]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/158
+[i160]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/160
 
 ## 0.8.7
 ### Changed
