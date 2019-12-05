@@ -10,6 +10,13 @@ func NewInMemRepository() *InMemRepository {
 	return &InMemRepository{m: m}
 }
 
+// Close closes the repository
+func (r *InMemRepository) Close() error {
+	// Clean the whole map, garbage will free up the memory
+	r.m = map[string]*CompletedUploadedFileItem{}
+	return nil
+}
+
 // Get an item
 func (r *InMemRepository) Get(path string) (CompletedUploadedFileItem, error) {
 	if r.m[path] == nil {

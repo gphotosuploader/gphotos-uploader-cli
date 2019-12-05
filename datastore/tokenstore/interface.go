@@ -24,4 +24,5 @@ const (
 type TokenManager interface {
 	StoreToken(email string, token *oauth2.Token) error
 	RetrieveToken(email string) (*oauth2.Token, error)
+	Close() error
 }

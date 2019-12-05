@@ -80,8 +80,7 @@ The first time you run `gphotos-uploader-cli`, after setting your configuration 
 1. You should get an output like this one:
 
 ```
-2019/09/07 17:47:11 Token has not been retrieved from token store: failed retrieving token from keyring
-2019/09/07 17:47:11 Open http://localhost:40923
+[info]   Opening browser to complete authorization.
 ```
 
 1. A browser will be opened at this point. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
@@ -99,12 +98,6 @@ The first time you run `gphotos-uploader-cli`, after setting your configuration 
 1. A green page is shown if all is fine
 
 ![Final confirmation, all was good](.docs/images/final_confirmation.png)
-
-1. Go back to your terminal, you will see something like:
-
-```
-2019/09/07 17:47:23 Token expiration: 2019-09-07 18:47:23.588661948 +0200 CEST m=+3612.289671492
-```
 
 All auth configuration is in place.
 

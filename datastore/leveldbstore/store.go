@@ -57,6 +57,7 @@ func (s *LevelDBStore) Delete(key string) {
 	_ = s.db.Delete([]byte(key), nil)
 }
 
-func (s *LevelDBStore) Close() {
-	_ = s.db.Close()
+// Close closes the service
+func (s *LevelDBStore) Close() error {
+	return s.db.Close()
 }

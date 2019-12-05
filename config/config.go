@@ -146,6 +146,18 @@ func LoadConfig(dir string) (*Config, error) {
 	return cfg, nil
 }
 
+func LoadConfigAndValidate(dir string) (*Config, error) {
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		return cfg, fmt.Errorf("could't read configuration: file=%s, err=%s", dir, err)
+	}
+	err = cfg.Validate()
+	if err != nil {
+		return cfg, fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
+	}
+	return cfg, nil
+}
+
 // InitConfigFile creates a config file with default settings.
 func InitConfigFile(dir string) error {
 	cfg := NewConfig(dir)

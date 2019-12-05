@@ -20,7 +20,6 @@ Example configuration file:
         use: folderName
       }
       deleteAfterUpload: false
-      uploadVideos: true
       includePatterns: [ "*.jpg", "*.png" ]
       excludePatterns: [ "*ScreenShot*" ]
     }
@@ -104,12 +103,13 @@ use: folderPath
 ```
 
 ### `deleteAfterUpload`
+(Only for versions >= v0.6.0)
+
 If set to true, media will be deleted from local disk after upload. 
 
-> **NOTE:** This option was not working properly prior v0.6.0.
-
-### `uploadVideos`
-> **DEPRECATION NOTICE:** This option will be deprecated in the future in favor of `_ALL_VIDEO_FILES_` tagged pattern used in `includePatterns` or `excludePatterns`.
+### `uploadVideos` 
+(Only for versions < v1.0.0)
+> **DEPRECATION NOTICE:** This option has been deprecated in v1.0.0 in favor of `_ALL_VIDEO_FILES_` tagged pattern used in `includePatterns` or `excludePatterns`.
 
 If set to `true`, video media items will be included (uploaded). If `false`, video files will be excluded.
 

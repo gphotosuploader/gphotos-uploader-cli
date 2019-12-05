@@ -3,33 +3,20 @@ package upload
 import (
 	"path/filepath"
 	"strings"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
-// albumID returns the album ID of the created (or existent) Album in Google Photos.
+// albumName returns Album name based on a path.
 // If configuration option `MakeAlbum.enabled` is false, it returns empty string.
-func (job *Job) albumID(path string, logger log.Logger) string {
-	if !job.options.CreateAlbum {
+func (job *UploadFolderJob) albumName(path string) string {
+	if !job.CreateAlbum {
 		return ""
 	}
 
-	// Album name can be customized using `MakeAlbums.use` configuration option.
-	name := albumNameUsingTemplate(path, job.options.CreateAlbumBasedOn)
-	if name == "" {
-		return ""
-	}
-
-	// get or creates an Album with the calculated name.
-	album, err := job.gPhotos.GetOrCreateAlbumByName(name)
-	if err != nil {
-		logger.Errorf("album creation failed: name=%s, error=%s", name, err)
-		return ""
-	}
-	return album.Id
+	// AlbumName name can be customized using `MakeAlbums.use` configuration option.
+	return albumNameUsingTemplate(path, job.CreateAlbumBasedOn)
 }
 
-// albumNameUsingTemplate calculate the Album name for a given path based on full folder path (folderPath)
+// albumNameUsingTemplate calculate the AlbumName name for a given Path based on full folder Path (folderPath)
 // or folder name (folderName).
 func albumNameUsingTemplate(path, template string) string {
 	switch template {
@@ -41,16 +28,23 @@ func albumNameUsingTemplate(path, template string) string {
 	return ""
 }
 
-// albumNameUsingFolderPath returns an Album name using the full path of the given folder.
+// albumNameUsingFolderPath returns an AlbumName name using the full Path of the given folder.
 func albumNameUsingFolderPath(path string) string {
 	p := filepath.Dir(path)
 	if p == "." {
 		return ""
 	}
-	return strings.ReplaceAll(p, "/", "_")
+
+	p = strings.ReplaceAll(p, "/", "_")
+
+	// In path starts with '/' remove it before.
+	if p[0] == '_' {
+		return p[1:]
+	}
+	return p
 }
 
-// albumNameUsingFolderName returns an Album name using the name of the given folder.
+// albumNameUsingFolderName returns an AlbumName name using the name of the given folder.
 func albumNameUsingFolderName(path string) string {
 	p := filepath.Dir(path)
 	if p == "." {
