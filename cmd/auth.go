@@ -56,8 +56,7 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 	for _, job := range cfg.Jobs {
-		_, err := cli.NewOAuth2Client(ctx, oauth2Config, job.Account)
-		if err != nil {
+		if _, err := cli.NewOAuth2Client(ctx, oauth2Config, job.Account); err != nil {
 			cli.Logger.Failf("Failed authentication for account: %s", job.Account)
 			cli.Logger.Debugf("Authentication error: err=%s", err)
 			return err
@@ -67,4 +66,6 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	return nil
 }
+
+
 
