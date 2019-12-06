@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.0.1
+### Added
+- New command `auth` to authenticate against Google Photos. It's useful to refresh authentication tokens.
+
 ## 1.0.0
 > This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
 ### Added
