@@ -64,6 +64,7 @@ func init() {
 	rootCmd.AddCommand(NewVersionCmd())
 	rootCmd.AddCommand(NewInitCmd(globalFlags))
 	rootCmd.AddCommand(NewPushCmd(globalFlags))
+	rootCmd.AddCommand(NewAuthCmd(globalFlags))
 }
 
 // GetRoot returns the root command
