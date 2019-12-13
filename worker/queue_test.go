@@ -31,8 +31,10 @@ func TestQueue(t *testing.T) {
 		{numberOfWorkers: 1, numberOfJobs: 1, want: 1000},
 		{numberOfWorkers: 1, numberOfJobs: 2, want: 2000},
 		{numberOfWorkers: 1, numberOfJobs: 5, want: 5000},
+		{numberOfWorkers: 1, numberOfJobs: 20, want: 20000},
 		{numberOfWorkers: 5, numberOfJobs: 5, want: 5000},
 		{numberOfWorkers: 5, numberOfJobs: 50, want: 50000},
+		{numberOfWorkers: 5, numberOfJobs: 100, want: 100000},
 	}
 
 	var logger = log.Discard

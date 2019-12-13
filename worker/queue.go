@@ -104,9 +104,9 @@ func (q *JobQueue) dispatch() {
 	}
 }
 
-// Submit - adds a new job to be processed, uses another function to prevent blocking
+// Submit - adds a new job to be processed, uses a subroutine to avoid deadlock when the queue is full
 func (q *JobQueue) Submit(job Job) {
-	q.internalQueue <- job
+	go func(job Job) { q.internalQueue <- job }(job)
 }
 
 // NewWorker - creates a new worker
