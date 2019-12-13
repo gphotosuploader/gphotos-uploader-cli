@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.0.2
+### Fixed
+- Fix issue that hung the application when the `results` queue was full. This happened every time that the number of files to upload was higher than 10x number of concurrent processes. ([#167][i167])
+
+[i167]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/167
+
 ## 1.0.1
 ### Added
 - New command `auth` to authenticate against Google Photos. It's useful to refresh authentication tokens. ([#125][i125])
