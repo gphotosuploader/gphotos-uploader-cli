@@ -172,7 +172,7 @@ func createTestConfiguration() *config.Config {
 		SourceFolder: "~/folder/to/upload",
 		MakeAlbums: config.MakeAlbums{
 			Enabled: true,
-			Use:     "folderNames",
+			Use:     "folderName",
 		},
 		DeleteAfterUpload: true,
 		UploadVideos:      true,
