@@ -31,7 +31,7 @@ func defaultSettings() *Config {
 		SourceFolder: "~/folder/to/upload",
 		MakeAlbums: MakeAlbums{
 			Enabled: true,
-			Use:     "folderNames",
+			Use:     "folderName",
 		},
 		DeleteAfterUpload: true,
 		UploadVideos:      true,
