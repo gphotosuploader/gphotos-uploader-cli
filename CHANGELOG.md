@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.0.4
+### Fixed
+- Fix `init` command error when it was used with root folders. ([#172][i172])
+
+[i170]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/172
+
 ## 1.0.3
 ### Fixed
 - Fix inconsistent use of `folderName` configuration option. ([#170][i170])
