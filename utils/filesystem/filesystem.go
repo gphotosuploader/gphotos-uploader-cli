@@ -28,6 +28,22 @@ func AbsolutePath(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
+// RemoveDirContent removes all files and folders inside the specified path.
+// It could be similar to RemoveAll() but without removing the folder itself.
+func RemoveDirContent(path string) error {
+	files, err := filepath.Glob(filepath.Join(path, "*"))
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		err = os.RemoveAll(file)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // RelativePath returns a path relative to the given base path. If the path is not
 // under the given base path, the specified path is returned. So all returned paths
 // are under the base path.

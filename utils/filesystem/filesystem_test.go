@@ -6,6 +6,8 @@ import (
 	"path"
 	"testing"
 
+	"github.com/Flaque/filet"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
 )
 
@@ -154,5 +156,28 @@ func TestRelativePath(t *testing.T) {
 		if got != tt.out {
 			t.Errorf("failed for base '%s', path '%s': expected '%s', got '%s'", tt.base, tt.in, tt.out, got)
 		}
+	}
+}
+
+func TestRemoveDirContent(t *testing.T) {
+	defer filet.CleanUp(t)
+
+	// create a fake config dir with a file inside of it
+	cfgDir := filet.TmpDir(t, "")
+	file := filet.TmpFile(t, cfgDir, "")
+
+	err := filesystem.RemoveDirContent(cfgDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// dir should exists after removal
+	if _, err := os.Stat(cfgDir); err != nil {
+		t.Errorf("failed: dir has been deleted, that was unexpected")
+	}
+
+	// file should not exists after removal
+	if _, err := os.Stat(file.Name()); err == nil {
+		t.Errorf("failed: there are content inside dir, that was unexpected")
 	}
 }

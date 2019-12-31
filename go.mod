@@ -4,13 +4,13 @@ go 1.12
 
 require (
 	github.com/99designs/keyring v1.1.2
+	github.com/Flaque/filet v0.0.0-20190209224823-fc4d33cfcf93
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/gphotosuploader/google-photos-api-client-go v1.1.3
 	github.com/gphotosuploader/googlemirror v0.3.2
 	github.com/int128/oauth2cli v1.7.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
-	github.com/nmrshll/go-cp v0.0.0-20180115193924-61436d3b7cfa
 	github.com/pierrec/xxHash v0.1.5
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/sirupsen/logrus v1.4.2
