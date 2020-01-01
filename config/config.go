@@ -132,11 +132,9 @@ func (c *Config) String() string {
 func (c *Config) WriteToFile() error {
 	fh, err := os.Create(c.ConfigFile())
 	if err != nil {
-		return fmt.Errorf("failed to create config: file=%s, err=%v", c.ConfigFile(), err)
+		return err
 	}
-	defer func() {
-		_ = fh.Close()
-	}()
+	defer fh.Close()
 
 	_, err = fh.WriteString(c.String())
 	if err != nil {
