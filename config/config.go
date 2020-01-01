@@ -129,9 +129,24 @@ func (c *Config) String() string {
 		c.Jobs[0].UploadVideos)
 }
 
-// LoadConfig reads configuration from the specified directory.
+func (c *Config) WriteToFile() error {
+	fh, err := os.Create(c.ConfigFile())
+	if err != nil {
+		return err
+	}
+	defer fh.Close()
+
+	_, err = fh.WriteString(c.String())
+	if err != nil {
+		return fmt.Errorf("failed to write configuration: file=%s, err=%v", c.ConfigFile(), err)
+	}
+
+	return fh.Sync()
+}
+
+// LoadConfigFromFile reads configuration from the specified directory.
 // It reads a HJSON file (given by config.ConfigFile() func) and decodes it.
-func LoadConfig(dir string) (*Config, error) {
+func LoadConfigFromFile(dir string) (*Config, error) {
 	cfg := NewConfig(dir)
 
 	data, err := ioutil.ReadFile(cfg.ConfigFile())
@@ -146,13 +161,13 @@ func LoadConfig(dir string) (*Config, error) {
 	return cfg, nil
 }
 
+// LoadConfigAndValidate reads configuration from the specified directory and validate it.
 func LoadConfigAndValidate(dir string) (*Config, error) {
-	cfg, err := LoadConfig(dir)
+	cfg, err := LoadConfigFromFile(dir)
 	if err != nil {
 		return cfg, fmt.Errorf("could't read configuration: file=%s, err=%s", dir, err)
 	}
-	err = cfg.Validate()
-	if err != nil {
+	if err = cfg.Validate(); err != nil {
 		return cfg, fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
 	}
 	return cfg, nil
@@ -162,31 +177,11 @@ func LoadConfigAndValidate(dir string) (*Config, error) {
 func InitConfigFile(dir string) error {
 	cfg := NewConfig(dir)
 
-	// Delete config & overwrite config
-	err := os.RemoveAll(dir)
-	if err != nil {
-		return err
-	}
-
-	err = os.MkdirAll(cfg.ConfigPath, 0755)
-	if err != nil {
+	if err := filesystem.EmptyOrCreateDir(cfg.ConfigPath); err != nil {
 		return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
 	}
 
-	fh, err := os.Create(cfg.ConfigFile())
-	if err != nil {
-		return fmt.Errorf("failed to create config: file=%s, err=%v", cfg.ConfigFile(), err)
-	}
-	defer func() {
-		_ = fh.Close()
-	}()
-
-	_, err = fh.WriteString(cfg.String())
-	if err != nil {
-		return fmt.Errorf("failed to write configuration: file=%s, err=%v", cfg.ConfigFile(), err)
-	}
-
-	return fh.Sync()
+	return cfg.WriteToFile()
 }
 
 // ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path

@@ -17,15 +17,48 @@ func AbsolutePath(path string) (string, error) {
 	}
 	dir := usr.HomeDir
 
+	// In case of "~", which won't be caught by the next case
 	if path == "~" {
-		// In case of "~", which won't be caught by the "else if"
 		return dir, nil
-	} else if strings.HasPrefix(path, "~/") {
-		// Use strings.HasPrefix so we don't match paths like
-		// "/something/~/something/"
+	}
+
+	// Use strings.HasPrefix so we don't match paths like
+	// "/something/~/something/"
+	if strings.HasPrefix(path, "~/") {
 		return filepath.Join(dir, path[2:]), nil
 	}
 	return filepath.Abs(path)
+}
+
+// EmptyDir removes all files and folders inside the specified path.
+// It could be similar to RemoveAll() but without removing the folder itself.
+func EmptyDir(path string) error {
+	files, err := filepath.Glob(filepath.Join(path, "*"))
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		if err := os.RemoveAll(file); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CreateDirIfDoesNotExist creates a directory if the specified path does not exist
+func CreateDirIfDoesNotExist(path string) error {
+	if IsDir(path) {
+		return nil
+	}
+	return os.MkdirAll(path, 0755)
+}
+
+// EmptyOrCreateDir create a new folder or empty an existing one
+func EmptyOrCreateDir(path string) error {
+	if err := CreateDirIfDoesNotExist(path); err != nil {
+		return err
+	}
+	return EmptyDir(path)
 }
 
 // RelativePath returns a path relative to the given base path. If the path is not
