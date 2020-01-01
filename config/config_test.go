@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Flaque/filet"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
 )
 
@@ -50,7 +52,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
 		// test load config file
-		got, err := config.LoadConfig(dir)
+		got, err := config.LoadConfigFromFile(dir)
 		if err != nil {
 			t.Errorf("could not load config file, got an error: %v", err)
 		}
@@ -74,7 +76,7 @@ func TestLoadConfigWithNonExistentFile(t *testing.T) {
 		t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
 	}
 
-	_, err = config.LoadConfig(dir)
+	_, err = config.LoadConfigFromFile(dir)
 	if err == nil {
 		t.Error("an error loading a non existent file was expected")
 	}
@@ -156,7 +158,6 @@ func TestConfig_Validate(t *testing.T) {
 			t.Errorf("config is validated. That was not expected: err=%v", got)
 		}
 	})
-
 }
 
 func createTestConfiguration() *config.Config {
@@ -220,6 +221,69 @@ func TestConfigExists(t *testing.T) {
 	t.Run("TestExistingConfiguration", func(t *testing.T) {
 		if !config.ConfigExists(dir) {
 			t.Errorf("config file doesn't exist. That was not expected: dir=%s", dir)
+		}
+	})
+}
+
+func TestLoadConfigAndValidate(t *testing.T) {
+	defer filet.CleanUp(t)
+
+	want := struct {
+		cfgDir    string
+		srcFolder string
+	}{
+		cfgDir:    filet.TmpDir(t, ""),
+		srcFolder: filet.TmpDir(t, ""),
+	}
+
+	t.Run("WithValidSourceFolder", func(t *testing.T) {
+		// prepare a valid config file
+		cfg := createTestConfiguration()
+		cfg.Jobs[0].SourceFolder = want.srcFolder
+		cfg.ConfigPath = want.cfgDir
+		if err := cfg.WriteToFile(); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := config.LoadConfigAndValidate(want.cfgDir)
+		if err != nil {
+			t.Errorf("failed to load and validate config file: err=%v", err)
+		}
+
+		if got.Jobs[0].SourceFolder != want.srcFolder {
+			t.Errorf("failed: want=%s, got=%s", want.srcFolder, got.Jobs[0].SourceFolder)
+		}
+	})
+	t.Run("WithInvalidSourceFolder", func(t *testing.T) {
+		// prepare a valid config file
+		cfg := createTestConfiguration()
+		cfg.Jobs[0].SourceFolder = want.srcFolder
+		if err := os.RemoveAll(want.srcFolder); err != nil {
+			t.Fatalf("could not remove test source folder: err=%v", err)
+		}
+		cfg.ConfigPath = want.cfgDir
+		if err := cfg.WriteToFile(); err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
+			t.Errorf("failed: invalid configuration was expected")
+		}
+	})
+	t.Run("WithNonExistentConfig", func(t *testing.T) {
+		// prepare a valid config file
+		cfg := createTestConfiguration()
+		cfg.Jobs[0].SourceFolder = want.srcFolder
+		cfg.ConfigPath = want.cfgDir
+		if err := cfg.WriteToFile(); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.RemoveAll(want.cfgDir); err != nil {
+			t.Fatalf("could not remove config folder: err=%v", err)
+		}
+
+		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
+			t.Errorf("failed: invalid configuration was expected")
 		}
 	})
 }
