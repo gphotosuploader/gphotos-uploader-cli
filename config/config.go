@@ -162,16 +162,8 @@ func LoadConfigAndValidate(dir string) (*Config, error) {
 func InitConfigFile(dir string) error {
 	cfg := NewConfig(dir)
 
-	if !filesystem.IsDir(dir) {
-		err := os.MkdirAll(cfg.ConfigPath, 0755)
-		if err != nil {
-			return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
-		}
-	}
-
-	err := filesystem.RemoveDirContent(dir)
-	if err != nil {
-		return fmt.Errorf("failed to remove config directory: path=%s, err=%v", cfg.ConfigPath, err)
+	if err := filesystem.EmptyOrCreateDir(cfg.ConfigPath); err != nil {
+		return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
 	}
 
 	fh, err := os.Create(cfg.ConfigFile())

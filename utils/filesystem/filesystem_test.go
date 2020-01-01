@@ -1,10 +1,13 @@
 package filesystem_test
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/Flaque/filet"
 
@@ -159,25 +162,100 @@ func TestRelativePath(t *testing.T) {
 	}
 }
 
-func TestRemoveDirContent(t *testing.T) {
+func TestEmptyDirWithOneFile(t *testing.T) {
 	defer filet.CleanUp(t)
 
-	// create a fake config dir with a file inside of it
-	cfgDir := filet.TmpDir(t, "")
-	file := filet.TmpFile(t, cfgDir, "")
+	// create a dir with a file inside of it
+	dir := filet.TmpDir(t, "")
+	file := filet.TmpFile(t, dir, "")
 
-	err := filesystem.RemoveDirContent(cfgDir)
+	err := filesystem.EmptyDir(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// dir should exists after removal
-	if _, err := os.Stat(cfgDir); err != nil {
+	if _, err := os.Stat(dir); err != nil {
 		t.Errorf("failed: dir has been deleted, that was unexpected")
 	}
 
 	// file should not exists after removal
 	if _, err := os.Stat(file.Name()); err == nil {
 		t.Errorf("failed: there are content inside dir, that was unexpected")
+	}
+}
+
+func TestEmptyDirWithOneDir(t *testing.T) {
+	defer filet.CleanUp(t)
+
+	// create a dir with a file inside of it
+	parentDir := filet.TmpDir(t, "")
+	childDir := filet.TmpDir(t, parentDir)
+
+	err := filesystem.EmptyDir(parentDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// parent dir should exists after removal
+	if _, err := os.Stat(parentDir); err != nil {
+		t.Errorf("failed: paret dir has been deleted, that was unexpected")
+	}
+
+	// child dir should not exists after removal
+	if _, err := os.Stat(childDir); err == nil {
+		t.Errorf("failed: there are content inside parent dir, that was unexpected")
+	}
+}
+
+func TestEmptyOrCreateDirExistingDir(t *testing.T) {
+	const numberOfIterations = 10
+	defer filet.CleanUp(t)
+
+	for i := 0; i < numberOfIterations; i++ {
+		// create a dir with a file inside of it
+		dir := filet.TmpDir(t, "")
+		file := filet.TmpFile(t, dir, "")
+
+		err := filesystem.EmptyOrCreateDir(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// dir should exists after removal
+		if _, err := os.Stat(dir); err != nil {
+			t.Errorf("failed: dir has been deleted, that was unexpected")
+		}
+
+		// file should not exists after removal
+		if _, err := os.Stat(file.Name()); err == nil {
+			t.Errorf("failed: there are content inside dir, that was unexpected")
+		}
+	}
+}
+
+func TestEmptyOrCreateDirNonExistingDir(t *testing.T) {
+	const numberOfIterations = 10
+	var dirs [numberOfIterations]string
+
+	for i := 0; i < numberOfIterations; i++ {
+		dirs[i] = filepath.Join(os.TempDir(), fmt.Sprintf("dir-%d.%d", i, time.Now().UnixNano()))
+	}
+	defer func(dirs [numberOfIterations]string) {
+		for _, dir := range dirs {
+			_ = os.RemoveAll(dir)
+		}
+	}(dirs)
+
+	for _, dir := range dirs {
+		err := filesystem.EmptyOrCreateDir(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// dir should exists
+		if _, err := os.Stat(dir); err != nil {
+			t.Errorf("failed: dir has been deleted, that was unexpected")
+		}
 	}
 }

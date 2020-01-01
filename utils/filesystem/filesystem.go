@@ -28,9 +28,9 @@ func AbsolutePath(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
-// RemoveDirContent removes all files and folders inside the specified path.
+// EmptyDir removes all files and folders inside the specified path.
 // It could be similar to RemoveAll() but without removing the folder itself.
-func RemoveDirContent(path string) error {
+func EmptyDir(path string) error {
 	files, err := filepath.Glob(filepath.Join(path, "*"))
 	if err != nil {
 		return err
@@ -42,6 +42,22 @@ func RemoveDirContent(path string) error {
 		}
 	}
 	return nil
+}
+
+// CreateDirIfDoesNotExist creates a directory if the specified path does not exist
+func CreateDirIfDoesNotExist(path string) error {
+	if IsDir(path) {
+		return nil
+	}
+	return os.MkdirAll(path, 0755)
+}
+
+// EmptyOrCreateDir create a new folder or empty an existing one
+func EmptyOrCreateDir(path string) error {
+	if err := CreateDirIfDoesNotExist(path); err != nil {
+		return err
+	}
+	return EmptyDir(path)
 }
 
 // RelativePath returns a path relative to the given base path. If the path is not
