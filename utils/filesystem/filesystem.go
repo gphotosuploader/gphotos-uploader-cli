@@ -17,12 +17,14 @@ func AbsolutePath(path string) (string, error) {
 	}
 	dir := usr.HomeDir
 
+	// In case of "~", which won't be caught by the next case
 	if path == "~" {
-		// In case of "~", which won't be caught by the "else if"
 		return dir, nil
-	} else if strings.HasPrefix(path, "~/") {
-		// Use strings.HasPrefix so we don't match paths like
-		// "/something/~/something/"
+	}
+
+	// Use strings.HasPrefix so we don't match paths like
+	// "/something/~/something/"
+	if strings.HasPrefix(path, "~/") {
 		return filepath.Join(dir, path[2:]), nil
 	}
 	return filepath.Abs(path)
@@ -36,8 +38,7 @@ func EmptyDir(path string) error {
 		return err
 	}
 	for _, file := range files {
-		err = os.RemoveAll(file)
-		if err != nil {
+		if err := os.RemoveAll(file); err != nil {
 			return err
 		}
 	}
