@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 - Fix `init` command error when it was used with root folders. ([#172][i172])
 
-[i170]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/172
+[i172]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/172
 
 ## 1.0.3
 ### Fixed
