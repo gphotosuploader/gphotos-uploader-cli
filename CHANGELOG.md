@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.0.5
+### Fixed
+- Fix issue when installing CLI with `go get`. ([#183][i183])
+
+[i183]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/182
+
 ## 1.0.4
 ### Fixed
 - Fix `init` command error when it was used with root folders. ([#172][i172])
