@@ -22,6 +22,13 @@ While the official tool only supports Mac OS and Windows, this brings an uploade
 - **Track already uploaded files**: uploads only new files to save bandwidth.
 - **Secure**: logs you into Google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 
+# Limitations
+## Rate Limiting
+Google Photos imposes a rate limit on all API clients. The quota limit for requests to the Library API is 10,000 requests per project per day. The quota limit for requests to access media bytes (by loading a photo or video from a base URL) is 75,000 requests per project per day.
+
+## Photo storage and quality
+All media items uploaded to Google Photos using the API [are stored in full resolution](https://support.google.com/photos/answer/6220791) at original quality. **They count toward the user’s storage**.
+
 # Getting started
 
 ## Install
