@@ -85,7 +85,7 @@ The folder to upload from.
 Must be an absolute path. Can expand the home folder tilde shorthand.
 
 ### `makeAlbums`
-If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`.
+If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`. The `sourceFolder` is not taking into account, only child folders will be.
 
 Available options are:
 
@@ -93,13 +93,14 @@ Available options are:
 * `folderPath`: It will use the full path of the  item's containing folder as Album name.
 
 ```
+# Given souceFolder: /foo
 # for file: /foo/bar/xyz/file.jpg
 
 use: folderName
 # album name: xyz
 
 use: folderPath
-# album name: foo_bar_xyz
+# album name: bar_xyz
 ```
 
 ### `deleteAfterUpload`
