@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- Bump github.com/int128/oauth2cli to v1.12.1 ([#206][i206])
+- Bump golang.org/x/oauth2 to v0.0.0-20200107190931-bf48bf16ab8d ([#205][i205])
+
+[i206]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/206
+[i205]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/205
+
 ## 1.0.6
 ### Changed
 - Updated some dependencies
