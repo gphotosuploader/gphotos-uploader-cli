@@ -5,9 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## Unreleased
 ### Changed
+- Fix (temporary) OAuth broken process ([#181][i181])
 - Bump github.com/int128/oauth2cli to v1.12.1 ([#206][i206])
 - Bump golang.org/x/oauth2 to v0.0.0-20200107190931-bf48bf16ab8d ([#205][i205])
 
+[i181]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/181
 [i206]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/206
 [i205]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/205
 

@@ -82,6 +82,8 @@ $ gphotos-uploader-cli push
 ```
 
 ### First time run
+> NOTE: The Google Authorization process has been temporary changed due to a bug, please read how to use the new one  [here](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/181#issuecomment-660625164).
+
 The first time you run `gphotos-uploader-cli`, after setting your configuration ([Google Photos API credentials](.docs/configuration.md#APIAppCredentials)), few manual steps are needed:
 
 1. You should get an output like this one:
