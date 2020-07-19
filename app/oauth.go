@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/int128/oauth2cli"
-	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
-	"golang.org/x/sync/errgroup"
 )
 
+/*
+Disabled due to the unused obtainOAuthTokenFromPAuthServer() method.
+--
 const successPage = `
 		<div style="height:100px; width:100%!; display:flex; flex-direction: column; justify-content: center; align-items:center; background-color:#2ecc71; color:white; font-size:22"><div>Success!</div></div>
 		<p style="margin-top:20px; font-size:18; text-align:center">You are authenticated, you can now return to the program. This will auto-close</p>
 		<script>window.onload=function(){setTimeout(this.close, 4000)}</script>
-		`
+		`*/
 
 func newHTTPClient() *http.Client {
 	return http.DefaultClient
@@ -95,6 +95,10 @@ func exchangeToken(ctx context.Context, config oauth2.Config, code string) (*oau
 	return config.Exchange(ctx, code)
 }
 
+/**
+Disable this method in favor of obtainOAuthTokenFromPrompt().
+In the future a global flag (e.g. --headless) should allow users to use the current one or this one.
+--
 func (app *App) obtainOAuthTokenFromAuthServer(ctx context.Context, oauth2Config oauth2.Config) (*oauth2.Token, error) {
 	app.Logger.Debug("Trying to get token from browser...")
 	var token *oauth2.Token
@@ -133,4 +137,4 @@ func (app *App) obtainOAuthTokenFromAuthServer(ctx context.Context, oauth2Config
 	}
 
 	return token, err
-}
+}*/
