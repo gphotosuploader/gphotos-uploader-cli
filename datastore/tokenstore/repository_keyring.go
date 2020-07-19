@@ -127,8 +127,8 @@ func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 }
 
 
-func terminalPrompt(prompt string) (string, error) {
-	fmt.Printf("%s: ", prompt)
+func terminalPrompt(_ string) (string, error) {
+	fmt.Print("Enter the passphrase to open the token store: ")
 	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		return "", err
