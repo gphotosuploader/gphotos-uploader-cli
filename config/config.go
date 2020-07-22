@@ -25,6 +25,7 @@ func defaultSettings() *Config {
 		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 	}
+	c.SkipTerminalPrompt = false
 	c.Jobs = make([]FolderUploadJob, 0)
 	job := FolderUploadJob{
 		Account:      "youremail@gmail.com",
@@ -102,6 +103,7 @@ func (c *Config) String() string {
     ClientID:     "%s",
     ClientSecret: "%s",
   }
+	SkipTerminalPrompt: %t,
   jobs: [
     {
       account: %s
@@ -121,6 +123,7 @@ func (c *Config) String() string {
 		c.SecretsBackendType,
 		c.APIAppCredentials.ClientID,
 		c.APIAppCredentials.ClientSecret,
+		c.SkipTerminalPrompt,
 		c.Jobs[0].Account,
 		c.Jobs[0].SourceFolder,
 		c.Jobs[0].MakeAlbums.Enabled,

@@ -6,6 +6,7 @@ type Config struct {
 	SecretsBackendType string
 	APIAppCredentials  APIAppCredentials
 	Jobs               []FolderUploadJob
+	SkipTerminalPrompt bool
 }
 
 // APIAppCredentials represents Google Photos API credentials for OAuth

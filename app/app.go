@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/99designs/keyring"
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/oauth2"
 
@@ -36,8 +37,15 @@ func Start(cfg *config.Config) (*App, error) {
 	}
 	app.FileTracker = completeduploads.NewService(completeduploads.NewLevelDBRepository(ft))
 
+	var promptFunc keyring.PromptFunc = nil
+	if cfg.SkipTerminalPrompt {
+		promptFunc = func(_ string) (string, error) {
+			return string(""), nil
+		}
+	}
+
 	// Use Keyring to store / read secrets
-	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
+	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, &promptFunc, cfg.KeyringDir())
 	if err != nil {
 		return app, fmt.Errorf("open token manager failed: type=%s, err=%s", cfg.SecretsBackendType, err)
 	}
