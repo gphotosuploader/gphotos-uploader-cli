@@ -37,8 +37,8 @@ Available options for secrets backend are:
 "keychain"          For OS X keychain support
 "kwallet"           For KDE Secrets Manager support
 "wincred"           For Windows credentials support
-"file"              For encrypted file support - needs interation to supply a symetric encryption key
-"pass"              For Password Store support - needs user interation to supply a GPG pass key
+"file"              For encrypted file support - needs interaction to supply a symetric encryption key
+"pass"              For Password Store support - needs user interaction to supply a GPG pass key
 ```
 
 Most of the times `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
