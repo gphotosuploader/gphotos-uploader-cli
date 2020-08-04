@@ -27,13 +27,14 @@ func (m *MockedPhotosService) AddMediaItem(ctx context.Context, path string, alb
 
 func TestAlbumId(t *testing.T) {
 	var testData = []struct {
-		name string
-		in   string
-		want string
+		name         string
+		in           string
+		want         string
+		err_expected bool
 	}{
-		{name: "WithEmptyPath", in: "", want: ""},
-		{name: "WithSuccessfulCall", in: "bar", want: "testAlbumID"},
-		{name: "WithFailedCall", in: "makeMyTestFail", want: ""},
+		{name: "WithEmptyPath", in: "", want: "", err_expected: false},
+		{name: "WithSuccessfulCall", in: "bar", want: "testAlbumID", err_expected: false},
+		{name: "WithFailedCall", in: "makeMyTestFail", want: "", err_expected: true},
 	}
 
 	job := EnqueuedJob{
@@ -44,9 +45,14 @@ func TestAlbumId(t *testing.T) {
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job.AlbumName = tt.in
-			got, _ := job.albumID()
+			got, err := job.albumID()
 			if got != tt.want {
 				t.Errorf("albumID test failed: expected '%s', got '%s'", tt.want, got)
+			}
+			if tt.err_expected && err == nil {
+				t.Errorf("albumID test failed: expected error")
+			} else if !tt.err_expected && err != nil {
+				t.Errorf("albumID test failed: didn't expect error: '%s'", err)
 			}
 		})
 
