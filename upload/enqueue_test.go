@@ -44,7 +44,7 @@ func TestAlbumId(t *testing.T) {
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job.AlbumName = tt.in
-			got := job.albumID()
+			got, _ := job.albumID()
 			if got != tt.want {
 				t.Errorf("albumID test failed: expected '%s', got '%s'", tt.want, got)
 			}
