@@ -51,6 +51,8 @@ github.com/gphotosuploader/google-photos-api-client-go v1.1.5 h1:C0CGCzW8yUxGsb5
 github.com/gphotosuploader/google-photos-api-client-go v1.1.5/go.mod h1:QtI0KAujf3FYFFHlGjgVgL7H6XgEOuAHR7RWumzPdJk=
 github.com/gphotosuploader/googlemirror v0.3.5 h1:YyCpmFVqawmjowpvtNkictAQwR0qyJChXJxJPwlX/uQ=
 github.com/gphotosuploader/googlemirror v0.3.5/go.mod h1:L6A+2KW6d/OwjZ5QH2fGXJXsOtR115tj9w+YxdyjfUI=
+github.com/gphotosuploader/googlemirror v0.3.7 h1:PX7rIwDi7bXnKMWbUE+2NJYMJR5lW75EBL4fE7MEeDQ=
+github.com/gphotosuploader/googlemirror v0.3.7/go.mod h1:L6A+2KW6d/OwjZ5QH2fGXJXsOtR115tj9w+YxdyjfUI=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c h1:6rhixN/i8ZofjG1Y75iExal34USq5p+wiN1tpie8IrU=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c/go.mod h1:NMPJylDgVpX0MLRlPy15sqSwOFv/U1GZ2m21JhFfek0=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
