@@ -2,6 +2,7 @@ package upload
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/log"
@@ -19,8 +20,14 @@ type EnqueuedJob struct {
 }
 
 func (job *EnqueuedJob) Process() error {
+	// Get or create the album
+	albumId, err := job.albumID()
+	if err != nil {
+		return err
+	}
+
 	// Upload the file and add it to PhotosService.
-	_, err := job.PhotosService.AddMediaItem(job.Context, job.Path, job.albumID())
+	_, err = job.PhotosService.AddMediaItem(job.Context, job.Path, albumId)
 	if err != nil {
 		return err
 	}
@@ -45,16 +52,15 @@ func (job *EnqueuedJob) ID() string {
 }
 
 // albumID returns the album ID of the created (or existent) album in PhotosService.
-func (job *EnqueuedJob) albumID() string {
+func (job *EnqueuedJob) albumID() (string, error) {
 	// Return if empty to avoid a PhotosService call.
 	if job.AlbumName == "" {
-		return ""
+		return "", nil
 	}
 
 	album, err := job.PhotosService.GetOrCreateAlbumByName(job.AlbumName)
 	if err != nil {
-		job.Logger.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
-		return ""
+		return "", fmt.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
 	}
-	return album.Id
+	return album.Id, nil
 }
