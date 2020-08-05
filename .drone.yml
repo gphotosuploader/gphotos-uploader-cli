@@ -8,7 +8,7 @@ platform:
 
 steps:
 - name: test-build
-  image: golang:1.13
+  image: golang:1.14
   commands:
   - make test
   - make build
@@ -20,7 +20,7 @@ trigger:
 
 ---
 kind: pipeline
-name: test-master-go-1-13
+name: test-master-go-1-14
 
 platform:
   os: linux
@@ -28,7 +28,7 @@ platform:
 
 steps:
 - name: test-build
-  image: golang:1.13
+  image: golang:1.14
   commands:
   - make test COVERAGE_FILE=coverage.txt
   - make build
@@ -37,7 +37,7 @@ steps:
     path: /go
 
 - name: lint
-  image: golang:1.13
+  image: golang:1.14
   commands:
   - make lint
   volumes:
@@ -61,7 +61,7 @@ trigger:
 
 ---
 kind: pipeline
-name: test-master-go-1-12
+name: test-master-go-1-13
 
 platform:
   os: linux
@@ -69,7 +69,7 @@ platform:
 
 steps:
 - name: test-build
-  image: golang:1.12
+  image: golang:1.13
   commands:
   - make test
   - make build
@@ -93,7 +93,7 @@ steps:
   - git fetch --tags
 
 - name: release
-  image: golang:1.13
+  image: golang:1.14
   commands:
   - make release
   environment:
@@ -106,6 +106,6 @@ trigger:
 
 ---
 kind: signature
-hmac: cda23a221a730cd62ef0bf7a9885206085d42654c088eceda87725ddf0162af8
+hmac: ef56b89c8922fe27ca10c339cecd8f7bd4b6edf7a2724afdd18c065f7777b023
 
 ...
