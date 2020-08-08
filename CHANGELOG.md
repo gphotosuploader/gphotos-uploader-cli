@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Changed
+- The `init` command sets `deleteAfterUpload: false` as default value. ([#214][i214])
+
+[i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/214
 
 ## 1.0.8
 ### Changed
