@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added
+- Flag `--dry-run` to `push` command. It's useful to validate `includePatterns` and `excludePatterns` configuration. ([#216][i216])
+
 ### Changed
 - The `init` command sets `deleteAfterUpload: false` as default value. ([#214][i214])
 
+[i216]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/216
 [i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/214
 
 ## 1.0.8

@@ -23,6 +23,7 @@ type PushCmd struct {
 
 	// command flags
 	NumberOfWorkers int
+	DryRunMode      bool
 }
 
 func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
@@ -37,6 +38,7 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 	}
 
 	pushCmd.Flags().IntVar(&cmd.NumberOfWorkers, "workers", 5, "Number of workers")
+	pushCmd.Flags().BoolVar(&cmd.DryRunMode, "dry-run", false, "Dry run mode")
 
 	return pushCmd
 }
@@ -55,6 +57,10 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
+	if cmd.DryRunMode {
+		cli.Logger.Info("Running in dry run mode. No changes will be made.")
+	}
+
 	// get OAuth2 Configuration with our App credentials
 	oauth2Config := oauth2.Config{
 		ClientID:     cfg.APIAppCredentials.ClientID,
@@ -69,19 +75,8 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
 	// launch all folder upload jobs
-	ctx := context.Background()
 	var totalItems int
 	for _, config := range cfg.Jobs {
-		c, err := cli.NewOAuth2Client(ctx, oauth2Config, config.Account)
-		if err != nil {
-			return err
-		}
-
-		photosService, err := gphotos.NewClientWithResumableUploads(c, cli.UploadTracker)
-		if err != nil {
-			return err
-		}
-
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
@@ -97,20 +92,37 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			cli.Logger.Fatalf("Failed to scan folder %s: %v", config.SourceFolder, err)
 		}
 
-		// enqueue files to be uploaded. The workers will receive it via channel.
 		cli.Logger.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
+
+		// get a Google Photos client for the specified account.
+		ctx := context.Background()
+		c, err := cli.NewOAuth2Client(ctx, oauth2Config, config.Account)
+		if err != nil {
+			return err
+		}
+
+		photosService, err := gphotos.NewClientWithResumableUploads(c, cli.UploadTracker)
+		if err != nil {
+			return err
+		}
+
+		// enqueue files to be uploaded. The workers will receive it via channel.
 		totalItems += len(itemsToUpload)
 		for _, i := range itemsToUpload {
-			uploadQueue.Submit(&upload.EnqueuedJob{
-				Context:       ctx,
-				PhotosService: photosService,
-				FileTracker:   cli.FileTracker,
-				Logger:        cli.Logger,
+			if cmd.DryRunMode {
+				uploadQueue.Submit(&upload.NoOpJob{})
+			} else {
+				uploadQueue.Submit(&upload.EnqueuedJob{
+					Context:       ctx,
+					PhotosService: photosService,
+					FileTracker:   cli.FileTracker,
+					Logger:        cli.Logger,
 
-				Path:            i.Path,
-				AlbumName:       i.AlbumName,
-				DeleteOnSuccess: config.DeleteAfterUpload,
-			})
+					Path:            i.Path,
+					AlbumName:       i.AlbumName,
+					DeleteOnSuccess: config.DeleteAfterUpload,
+				})
+			}
 		}
 	}
 
@@ -127,6 +139,10 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		}
 	}
 
-	cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
+	if cmd.DryRunMode {
+		cli.Logger.Info("Running in dry run mode. No changes has been made.")
+	} else {
+		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
+	}
 	return nil
 }

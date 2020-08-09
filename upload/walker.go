@@ -45,7 +45,7 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]UploadItem, logger log.Log
 			return nil
 		}
 
-		logger.Infof("Found item to upload: %s", fp)
+		logger.Infof("File '%s' will be uploaded to album '%s'.", fp, job.albumName(relativePath))
 
 		// set file upload Options depending on folder upload Options
 		*reqs = append(*reqs, UploadItem{
