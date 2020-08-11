@@ -65,10 +65,12 @@ func NewFilter(includePatterns []string, excludePatterns []string, allowVideos b
 //   - item is not in the exclude pattern
 func (f *Filter) IsAllowed(fp string) bool {
 	// allow all included files that are not excluded
-	if f.isIncluded(fp) && !f.isExcluded(fp) {
-		return true
-	}
-	return false
+	return f.isIncluded(fp) && !f.isExcluded(fp)
+}
+
+// Useful for skipping directories that match an exclude
+func (f *Filter) IsExcluded(fp string) bool {
+	return f.isExcluded(fp)
 }
 
 func translatePatterns(pat []string) []string {

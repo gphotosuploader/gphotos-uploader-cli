@@ -23,14 +23,27 @@ func (job *UploadFolderJob) ScanFolder(logger log.Logger) ([]UploadItem, error) 
 
 func (job *UploadFolderJob) getItemToUploadFn(reqs *[]UploadItem, logger log.Logger) filepath.WalkFunc {
 	return func(fp string, fi os.FileInfo, errP error) error {
-		if fi == nil || fi.IsDir() {
+		if fi == nil {
 			return nil
+		}
+
+		relativePath := filesystem.RelativePath(job.SourceFolder, fp)
+
+		// If a directory is excluded, skip it!
+		if fi.IsDir() {
+			if job.Filter.IsExcluded(relativePath) {
+				logger.Infof("Not allowed by config: %s: skipping directory...",
+					fp)
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
 		}
 
 		// check if the item should be uploaded given the include and exclude patterns in the
 		// configuration file. It uses relative Path from the source folder Path to facilitate
 		// then set up of includePatterns and excludePatterns.
-		relativePath := filesystem.RelativePath(job.SourceFolder, fp)
+
 		if !job.Filter.IsAllowed(relativePath) {
 			logger.Infof("Not allowed by config: %s: skipping file...", fp)
 			return nil
