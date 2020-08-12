@@ -68,7 +68,8 @@ func (f *Filter) IsAllowed(fp string) bool {
 	return f.isIncluded(fp) && !f.isExcluded(fp)
 }
 
-// Useful for skipping directories that match an exclude
+// IsExcluded return if an item should be excluded.
+// It's useful for skipping directories that match with an exclusion.
 func (f *Filter) IsExcluded(fp string) bool {
 	return f.isExcluded(fp)
 }
