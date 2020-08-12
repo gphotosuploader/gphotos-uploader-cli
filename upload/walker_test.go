@@ -73,7 +73,7 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 
 func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	var includePatterns = []string{""}
-	var excludePatterns = []string{"folder1/"}
+	var excludePatterns = []string{"folder1"}
 	var allowVideos = true
 
 	var want = map[string]bool{
