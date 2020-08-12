@@ -32,12 +32,10 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]UploadItem, logger log.Log
 		// If a directory is excluded, skip it!
 		if fi.IsDir() {
 			if job.Filter.IsExcluded(relativePath) {
-				logger.Infof("Not allowed by config: %s: skipping directory...",
-					fp)
+				logger.Infof("Not allowed by config: %s: skipping directory...", fp)
 				return filepath.SkipDir
-			} else {
-				return nil
 			}
+			return nil
 		}
 
 		// check if the item should be uploaded given the include and exclude patterns in the
