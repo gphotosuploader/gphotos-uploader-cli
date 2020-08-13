@@ -12,6 +12,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/cache"
 	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/worker"
@@ -106,6 +107,9 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		// cache to reduce the number of call to photoService and avoid inconsistent album creations.
+		albumCache := cache.NewMemoryCache()
+
 		// enqueue files to be uploaded. The workers will receive it via channel.
 		totalItems += len(itemsToUpload)
 		for _, i := range itemsToUpload {
@@ -116,6 +120,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 					Context:       ctx,
 					PhotosService: photosService,
 					FileTracker:   cli.FileTracker,
+					AlbumCache:    albumCache,
 					Logger:        cli.Logger,
 
 					Path:            i.Path,

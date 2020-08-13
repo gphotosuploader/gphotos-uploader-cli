@@ -12,6 +12,7 @@ type EnqueuedJob struct {
 	Context       context.Context
 	PhotosService gPhotosService
 	FileTracker   FileTracker
+	AlbumCache    Cache
 	Logger        log.Logger
 
 	Path            string
@@ -52,15 +53,23 @@ func (job *EnqueuedJob) ID() string {
 }
 
 // albumID returns the album ID of the created (or existent) album in PhotosService.
+// It uses cache to reduce number of request to PhotoService.
 func (job *EnqueuedJob) albumID() (string, error) {
 	// Return if empty to avoid a PhotosService call.
 	if job.AlbumName == "" {
 		return "", nil
 	}
 
+	albumID, err := job.AlbumCache.Get(job.AlbumName)
+	if err == nil {
+		return albumID.(string), nil
+	}
+
 	album, err := job.PhotosService.GetOrCreateAlbumByName(job.AlbumName)
 	if err != nil {
-		return "", fmt.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
+		return "", fmt.Errorf("album creation failed: name=%s, error=%s", job.AlbumName, err)
 	}
-	return album.Id, nil
+
+	err = job.AlbumCache.Put(job.AlbumName, album.Id)
+	return album.Id, err
 }

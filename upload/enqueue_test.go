@@ -7,38 +7,57 @@ import (
 
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 
+	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/cache"
 	"github.com/gphotosuploader/gphotos-uploader-cli/log"
 )
 
-type MockedPhotosService struct {
-	AlbumID string
+type mockedPhotosService struct {
+	albumID string
 }
 
-func (m *MockedPhotosService) GetOrCreateAlbumByName(name string) (*photoslibrary.Album, error) {
+func (ms *mockedPhotosService) GetOrCreateAlbumByName(name string) (*photoslibrary.Album, error) {
 	if name == "makeMyTestFail" {
 		return &photoslibrary.Album{}, errors.New("error")
 	}
-	return &photoslibrary.Album{Id: m.AlbumID}, nil
+	return &photoslibrary.Album{Id: ms.albumID}, nil
 }
 
-func (m *MockedPhotosService) AddMediaItem(ctx context.Context, path string, album string) (*photoslibrary.MediaItem, error) {
+func (ms *mockedPhotosService) AddMediaItem(ctx context.Context, path string, album string) (*photoslibrary.MediaItem, error) {
 	return &photoslibrary.MediaItem{}, nil
+}
+
+type mockedCache struct {
+	key   string
+	value interface{}
+}
+
+func (mc *mockedCache) Get(key string) (interface{}, error) {
+	if key == mc.key {
+		return mc.value, nil
+	}
+	return nil, cache.ErrNotFound
+}
+
+func (mc *mockedCache) Put(key string, value interface{}) error {
+	return nil
 }
 
 func TestAlbumId(t *testing.T) {
 	var testData = []struct {
-		name         string
-		in           string
-		want         string
-		err_expected bool
+		name        string
+		in          string
+		want        string
+		errExpected bool
 	}{
-		{name: "WithEmptyPath", in: "", want: "", err_expected: false},
-		{name: "WithSuccessfulCall", in: "bar", want: "testAlbumID", err_expected: false},
-		{name: "WithFailedCall", in: "makeMyTestFail", want: "", err_expected: true},
+		{name: "WithEmptyPath", in: "", want: "", errExpected: false},
+		{name: "WithAlbumInCache", in: "foo", want: "testAlbumID", errExpected: false},
+		{name: "WithSuccessfulCallToPhotoService", in: "bar", want: "testAlbumID", errExpected: false},
+		{name: "WithFailedCall", in: "makeMyTestFail", want: "", errExpected: true},
 	}
 
 	job := EnqueuedJob{
-		PhotosService: &MockedPhotosService{AlbumID: "testAlbumID"},
+		PhotosService: &mockedPhotosService{albumID: "testAlbumID"},
+		AlbumCache:    &mockedCache{key: "foo", value: "testAlbumID"},
 		Logger:        log.Discard,
 	}
 
@@ -49,9 +68,9 @@ func TestAlbumId(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("albumID test failed: expected '%s', got '%s'", tt.want, got)
 			}
-			if tt.err_expected && err == nil {
+			if tt.errExpected && err == nil {
 				t.Errorf("albumID test failed: expected error")
-			} else if !tt.err_expected && err != nil {
+			} else if !tt.errExpected && err != nil {
 				t.Errorf("albumID test failed: didn't expect error: '%s'", err)
 			}
 		})

@@ -21,10 +21,16 @@ type FileTracker interface {
 
 // UploadFolderJob represents a job to upload all photos from the specified folder
 type UploadFolderJob struct {
-	FileTracker   FileTracker
+	FileTracker FileTracker
 
 	SourceFolder       string
 	CreateAlbum        bool
 	CreateAlbumBasedOn string
 	Filter             *Filter
+}
+
+// Cache represents a temporary storage to reduce number of PhotoService calls.
+type Cache interface {
+	Get(key string) (interface{}, error)
+	Put(key string, value interface{}) error
 }
