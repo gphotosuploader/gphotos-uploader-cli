@@ -126,13 +126,18 @@ func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 	return tk, nil
 }
 
-
 func terminalPrompt(_ string) (string, error) {
-	fmt.Print("Enter the passphrase to open the token store: ")
-	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-	if err != nil {
-		return "", err
+	pwd := os.Getenv("KEYRING_ENCRYPTION_KEY")
+
+	if pwd == "" {
+		fmt.Print("Enter the passphrase to open the token store: ")
+		b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			return "", err
+		}
+		fmt.Println()
+		pwd = string(b)
 	}
-	fmt.Println()
-	return string(b), nil
+
+	return pwd, nil
 }
