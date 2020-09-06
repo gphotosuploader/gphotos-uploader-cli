@@ -37,7 +37,8 @@ Available options for secrets backend are:
 "keychain"          For OS X keychain support
 "kwallet"           For KDE Secrets Manager support
 "wincred"           For Windows credentials support
-"file"              For encrypted file support - needs interaction to supply a symetric encryption key
+"file"              For encrypted file support - the symetric encryption key is read from the environment variable 
+                    `KEYRING_ENCRYPTION_KEY` if it is set, otherwise it is read from the terminal (needs interaction).
 "pass"              For Password Store support - needs user interaction to supply a GPG pass key
 ```
 
