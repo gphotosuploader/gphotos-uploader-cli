@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 type TestJob struct {

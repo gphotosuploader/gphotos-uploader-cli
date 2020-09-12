@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 )
 
 // InitCmd holds the required data for the init cmd

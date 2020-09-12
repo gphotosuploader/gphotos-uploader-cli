@@ -3,8 +3,8 @@ package upload_test
 import (
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
-	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
 func TestWalker_GetAllFiles(t *testing.T) {

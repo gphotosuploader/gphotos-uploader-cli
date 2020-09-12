@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
-	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 )
 
 type UploadItem struct {

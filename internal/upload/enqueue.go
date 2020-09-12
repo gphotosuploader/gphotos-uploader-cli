@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 type EnqueuedJob struct {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/cmd"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
 )
 
 func main() {

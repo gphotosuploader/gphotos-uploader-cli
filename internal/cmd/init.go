@@ -6,9 +6,9 @@ import (
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 // InitCmd holds the required data for the init cmd

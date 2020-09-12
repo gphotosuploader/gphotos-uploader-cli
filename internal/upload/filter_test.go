@@ -3,7 +3,7 @@ package upload_test
 import (
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
 func TestFilter_AllowAllFiles(t *testing.T) {

@@ -3,7 +3,7 @@ package upload
 import (
 	"log"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/match"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/match"
 )
 
 // Filter is a Filter for file uploading

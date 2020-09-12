@@ -2,7 +2,7 @@
 VERSION ?= $(shell git describe --tags --always --dirty)
 
 # Use linker flags to provide version/build settings to the target
-VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/cmd
+VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd
 RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION)
 LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 

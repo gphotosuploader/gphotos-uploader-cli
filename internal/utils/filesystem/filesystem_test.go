@@ -11,7 +11,7 @@ import (
 
 	"github.com/Flaque/filet"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 )
 
 func TestAbsolutePath(t *testing.T) {

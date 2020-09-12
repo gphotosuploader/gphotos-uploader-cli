@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/match"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/match"
 )
 
 var matchTests = []struct {
