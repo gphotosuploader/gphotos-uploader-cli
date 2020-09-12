@@ -37,22 +37,22 @@ func TestAlbumId(t *testing.T) {
 		{name: "WithFailedCall", in: "makeMyTestFail", want: "", err_expected: true},
 	}
 
-	job := EnqueuedJob{
-		PhotosService: &MockedPhotosService{AlbumID: "testAlbumID"},
-		Logger:        log.Discard,
+	job := EnqueuedUpload{
+		PhotosClient: &MockedPhotosService{AlbumID: "testAlbumID"},
+		Logger:       log.Discard,
 	}
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job.AlbumName = tt.in
-			got, err := job.albumID()
+			got, err := job.getOrCreateAlbumByTitle()
 			if got != tt.want {
-				t.Errorf("albumID test failed: expected '%s', got '%s'", tt.want, got)
+				t.Errorf("getOrCreateAlbumByTitle test failed: expected '%s', got '%s'", tt.want, got)
 			}
 			if tt.err_expected && err == nil {
-				t.Errorf("albumID test failed: expected error")
+				t.Errorf("getOrCreateAlbumByTitle test failed: expected error")
 			} else if !tt.err_expected && err != nil {
-				t.Errorf("albumID test failed: didn't expect error: '%s'", err)
+				t.Errorf("getOrCreateAlbumByTitle test failed: didn't expect error: '%s'", err)
 			}
 		})
 
