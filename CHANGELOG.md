@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+## 1.1.0
 ### Added
 - Flag `--dry-run` to `push` command. It's useful to validate `includePatterns` and `excludePatterns` configuration. ([#216][i216])
 ### Changed
 - The `init` command sets `deleteAfterUpload: false` as default value. ([#214][i214])
 - CI has been moved to GitHub actions (previously was drone.io).
+- Bump `gphotosuploader/googlemirror` from `v0.3.7` to `v0.4.0`.
+- Bump `99designs/keyring` from `v1.1.2` to `v1.1.5`.
 
 [i216]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/216
 [i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/214
