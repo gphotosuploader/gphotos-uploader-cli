@@ -82,7 +82,7 @@ ci: lint test cover build ## Run all the tests and code checks
 .PHONY: release
 release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
 	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
-	@RELEASE_VERSION_TAG="$(RELEASE_VERSION_FLAGS)" $(GORELEASER) release
+	@RELEASE_VERSION_TAG="$(RELEASE_VERSION_FLAGS)" $(GORELEASER) release --skip-publish
 
 .PHONY: version
 version: ## Show current version

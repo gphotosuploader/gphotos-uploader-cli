@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## Unreleased
 ### Added
 - Flag `--dry-run` to `push` command. It's useful to validate `includePatterns` and `excludePatterns` configuration. ([#216][i216])
-
 ### Changed
 - The `init` command sets `deleteAfterUpload: false` as default value. ([#214][i214])
+- All internal packages has been moved to `internal/` folder.
 
 [i216]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/216
 [i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/214
