@@ -5,7 +5,7 @@ on:
       - v*
 jobs:
   create-release:
-    name: Create Release
+    name: GoReleaser
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
