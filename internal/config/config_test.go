@@ -10,7 +10,7 @@ import (
 
 	"github.com/Flaque/filet"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 )
 
 func TestInitConfig(t *testing.T) {

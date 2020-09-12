@@ -6,11 +6,11 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/oauth2"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/completeduploads"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/leveldbstore"
-	"github.com/gphotosuploader/gphotos-uploader-cli/datastore/tokenstore"
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 // App represents a running application with all the dependant services.

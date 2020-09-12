@@ -7,7 +7,7 @@ import (
 
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 type MockedPhotosService struct {

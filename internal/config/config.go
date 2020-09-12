@@ -9,7 +9,7 @@ import (
 
 	"github.com/client9/xson/hjson"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/utils/filesystem"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 )
 
 const (

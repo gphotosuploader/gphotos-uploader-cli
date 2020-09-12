@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 // Job - interface for job processing

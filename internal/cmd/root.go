@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 // rootCmd represents the base command when called without any subcommands

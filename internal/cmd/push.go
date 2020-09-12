@@ -9,12 +9,12 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/photos"
-	"github.com/gphotosuploader/gphotos-uploader-cli/upload"
-	"github.com/gphotosuploader/gphotos-uploader-cli/worker"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
 )
 
 // PushCmd holds the required data for the push cmd
