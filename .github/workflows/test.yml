@@ -1,6 +1,6 @@
-on: [pull_request]
+on: [push, pull_request]
 
-name: Test Pull Request
+name: Test, build and coverage
 jobs:
   test-matrix:
     strategy:
@@ -26,3 +26,8 @@ jobs:
         run: make build
       - name: Run tests
         run: make test
+      - name: Send code coverage
+        uses: codecov/codecov-action@v1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          fail_ci_if_error: true
