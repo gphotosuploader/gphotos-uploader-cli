@@ -6,8 +6,8 @@
 /dist/
 /gphotos-uploader-cli
 
-# Tests files
-/coverage.txt
+# Used for temporary files such as coverage files.
+/.tmp/
 
 # Other files
 /snap.login
