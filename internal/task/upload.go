@@ -1,4 +1,4 @@
-package upload
+package task
 
 import (
 	"context"
@@ -7,16 +7,18 @@ import (
 	"os"
 	"path"
 
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
 type GooglePĥotosService interface {
 	FindAlbum(ctx context.Context, title string) (*photoslibrary.Album, error)
 	CreateAlbum(ctx context.Context, title string) (*photoslibrary.Album, error)
 
-	AddMediaToAlbum(ctx context.Context, item UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error)
+	AddMediaToAlbum(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error)
 }
 
 // FileUploadItem represents a local file.
@@ -56,7 +58,7 @@ func (m FileUploadItem) Size() int64 {
 type EnqueuedUpload struct {
 	Context      context.Context
 	PhotosClient GooglePĥotosService
-	FileTracker  FileTracker
+	FileTracker  upload.FileTracker
 	Logger       log.Logger
 
 	Path            string
@@ -66,13 +68,13 @@ type EnqueuedUpload struct {
 
 func (job *EnqueuedUpload) Process() error {
 	// Get or create the album
-	albumId, err := job.getOrCreateAlbumByTitle()
+	album, err := job.getOrCreateAlbumByTitle()
 	if err != nil {
 		return err
 	}
 
 	// Upload the file and add it to PhotosService.
-	_, err = job.PhotosClient.AddMediaToAlbum(job.Context, FileUploadItem(job.Path), albumId)
+	_, err = job.PhotosClient.AddMediaToAlbum(job.Context, FileUploadItem(job.Path), album)
 	if err != nil {
 		return err
 	}
@@ -97,15 +99,15 @@ func (job *EnqueuedUpload) ID() string {
 }
 
 // getOrCreateAlbumByTitle returns the album ID of the created (or existent) album in PhotosService.
-func (job *EnqueuedUpload) getOrCreateAlbumByTitle() (string, error) {
+func (job *EnqueuedUpload) getOrCreateAlbumByTitle() (*photoslibrary.Album, error) {
 	// Return if empty to avoid a PhotosService call.
 	if job.AlbumName == "" {
-		return "", nil
+		return &photoslibrary.Album{}, nil
 	}
 
 	album, err := job.PhotosClient.CreateAlbum(job.Context, job.AlbumName)
 	if err != nil {
-		return "", fmt.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
+		return &photoslibrary.Album{}, fmt.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
 	}
-	return album.Id, nil
+	return album, nil
 }

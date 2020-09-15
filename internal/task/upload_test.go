@@ -1,44 +1,43 @@
-package upload
+package task
 
 import (
 	"context"
 	"errors"
 	"testing"
 
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/mock"
 )
 
-type MockedPhotosService struct {
-	AlbumID string
-}
-
-func (m *MockedPhotosService) GetOrCreateAlbumByName(name string) (*photoslibrary.Album, error) {
-	if name == "makeMyTestFail" {
-		return &photoslibrary.Album{}, errors.New("error")
-	}
-	return &photoslibrary.Album{Id: m.AlbumID}, nil
-}
-
-func (m *MockedPhotosService) AddMediaItem(ctx context.Context, path string, album string) (*photoslibrary.MediaItem, error) {
-	return &photoslibrary.MediaItem{}, nil
+var mockedService = &mock.GPhotosClient{
+	CreateAlbumFn: func(ctx context.Context, title string) (album *photoslibrary.Album, err error) {
+		if title == "makeMyTestFail" {
+			return &photoslibrary.Album{}, errors.New("error")
+		}
+		return &photoslibrary.Album{Id: title + "ID", Title: title}, nil
+	},
+	AddMediaToAlbumFn: func(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error) {
+		return &photoslibrary.MediaItem{}, nil
+	},
 }
 
 func TestAlbumId(t *testing.T) {
 	var testData = []struct {
-		name         string
-		in           string
-		want         string
-		err_expected bool
+		name        string
+		in          string
+		want        string
+		errExpected bool
 	}{
-		{name: "WithEmptyPath", in: "", want: "", err_expected: false},
-		{name: "WithSuccessfulCall", in: "bar", want: "testAlbumID", err_expected: false},
-		{name: "WithFailedCall", in: "makeMyTestFail", want: "", err_expected: true},
+		{name: "WithEmptyPath", in: "", want: "", errExpected: false},
+		{name: "WithSuccessfulCall", in: "bar", want: "barID", errExpected: false},
+		{name: "WithFailedCall", in: "makeMyTestFail", want: "", errExpected: true},
 	}
 
 	job := EnqueuedUpload{
-		PhotosClient: &MockedPhotosService{AlbumID: "testAlbumID"},
+		PhotosClient: mockedService,
 		Logger:       log.Discard,
 	}
 
@@ -46,12 +45,12 @@ func TestAlbumId(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			job.AlbumName = tt.in
 			got, err := job.getOrCreateAlbumByTitle()
-			if got != tt.want {
-				t.Errorf("getOrCreateAlbumByTitle test failed: expected '%s', got '%s'", tt.want, got)
+			if got.Id != tt.want {
+				t.Errorf("getOrCreateAlbumByTitle test failed: expected '%s', got '%s'", tt.want, got.Id)
 			}
-			if tt.err_expected && err == nil {
+			if tt.errExpected && err == nil {
 				t.Errorf("getOrCreateAlbumByTitle test failed: expected error")
-			} else if !tt.err_expected && err != nil {
+			} else if !tt.errExpected && err != nil {
 				t.Errorf("getOrCreateAlbumByTitle test failed: didn't expect error: '%s'", err)
 			}
 		})

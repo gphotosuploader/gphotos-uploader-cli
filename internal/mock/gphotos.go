@@ -23,7 +23,7 @@ type GPhotosClient struct {
 	AddMediaToLibraryFn      func(ctx context.Context, item gphotos.UploadItem) (*photoslibrary.MediaItem, error)
 	AddMediaToLibraryInvoked bool
 
-	AddMediaToAlbumFn      func(ctx context.Context, item gphotos.UploadItem, albumID string) (*photoslibrary.MediaItem, error)
+	AddMediaToAlbumFn      func(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error)
 	AddMediaToAlbumInvoked bool
 }
 
@@ -58,7 +58,7 @@ func (g *GPhotosClient) AddMediaToLibrary(ctx context.Context, item gphotos.Uplo
 }
 
 // AddMediaToAlbum invokes the mock implementation and marks the function as invoked.
-func (g *GPhotosClient) AddMediaToAlbum(ctx context.Context, item gphotos.UploadItem, albumID string) (*photoslibrary.MediaItem, error) {
+func (g *GPhotosClient) AddMediaToAlbum(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error) {
 	g.AddMediaToAlbumInvoked = true
-	return g.AddMediaToAlbumFn(ctx, item, albumID)
+	return g.AddMediaToAlbumFn(ctx, item, album)
 }
