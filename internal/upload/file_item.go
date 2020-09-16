@@ -7,7 +7,10 @@ import (
 )
 
 // FileItem represents a local file.
-type FileItem string
+type FileItem struct {
+	Path string
+	AlbumName string
+}
 
 // Open returns a stream.
 // Caller should close it finally.
@@ -29,7 +32,7 @@ func (m FileItem) Name() string {
 }
 
 func (m FileItem) String() string {
-	return string(m)
+	return string(m.Path)
 }
 
 func (m FileItem) Size() int64 {

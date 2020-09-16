@@ -18,7 +18,7 @@ func TestFileItem_Open(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		f := upload.FileItem(tc.in)
+		f := upload.FileItem{Path: tc.in}
 		_, size, err := f.Open()
 		switch {
 		case tc.errExpected && err == nil:
@@ -42,7 +42,7 @@ func TestFileItem_Name(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		f := upload.FileItem(tc.in)
+		f := upload.FileItem{Path: tc.in}
 		if got := f.Name(); got != tc.want {
 			t.Errorf("TestCase(%s), want: %s, got: %s", tc.in, tc.want, got)
 		}
@@ -60,7 +60,7 @@ func TestFileItem_String(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		f := upload.FileItem(tc.in)
+		f := upload.FileItem{Path: tc.in}
 		if got := f.String(); got != tc.want {
 			t.Errorf("TestCase(%s), want: %s, got: %s", tc.in, tc.want, got)
 		}
@@ -78,7 +78,7 @@ func TestFileItem_Size(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		f := upload.FileItem(tc.in)
+		f := upload.FileItem{Path: tc.in}
 		if got := f.Size(); got != tc.want {
 			t.Errorf("Test Case(%s), want: %d, got: %d", tc.in, tc.want, got)
 		}
