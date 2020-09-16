@@ -8,21 +8,8 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/mock"
 )
-
-var mockedService = &mock.GPhotosClient{
-	CreateAlbumFn: func(ctx context.Context, title string) (album *photoslibrary.Album, err error) {
-		if title == "makeMyTestFail" {
-			return &photoslibrary.Album{}, errors.New("error")
-		}
-		return &photoslibrary.Album{Id: title + "ID", Title: title}, nil
-	},
-	AddMediaToAlbumFn: func(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error) {
-		return &photoslibrary.MediaItem{}, nil
-	},
-}
 
 func TestAlbumId(t *testing.T) {
 	var testData = []struct {
@@ -36,15 +23,27 @@ func TestAlbumId(t *testing.T) {
 		{name: "WithFailedCall", in: "makeMyTestFail", want: "", errExpected: true},
 	}
 
+	var mockedService = &mock.GPhotosClient{
+		CreateAlbumFn: func(ctx context.Context, title string) (album *photoslibrary.Album, err error) {
+			if title == "makeMyTestFail" {
+				return &photoslibrary.Album{}, errors.New("error")
+			}
+			return &photoslibrary.Album{Id: title + "ID", Title: title}, nil
+		},
+		AddMediaToAlbumFn: func(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error) {
+			return &photoslibrary.MediaItem{}, nil
+		},
+	}
+
 	job := EnqueuedUpload{
 		PhotosClient: mockedService,
-		Logger:       log.Discard,
+		Logger:       &mock.Logger{},
 	}
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job.AlbumName = tt.in
-			got, err := job.getOrCreateAlbumByTitle()
+			got, err := job.getOrCreateAlbum()
 			if got.Id != tt.want {
 				t.Errorf("getOrCreateAlbumByTitle test failed: expected '%s', got '%s'", tt.want, got.Id)
 			}
