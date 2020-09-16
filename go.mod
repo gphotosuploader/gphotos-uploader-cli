@@ -14,6 +14,7 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/pierrec/xxHash v0.1.5
 	github.com/sirupsen/logrus v1.4.2
+	github.com/spf13/afero v1.1.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	github.com/syndtr/goleveldb v1.0.0
