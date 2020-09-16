@@ -103,6 +103,31 @@ func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	}
 }
 
+func TestRelativePath(t *testing.T) {
+	var objectsTest = []struct {
+		base string
+		in   string
+		want string
+	}{
+		{base: "/foo/bar", in: "/foo/bar/xyz", want: "xyz"},
+		{base: "/foo/bar/", in: "/foo/bar/xyz", want: "xyz"},
+		{base: "/foo/bar", in: "/foo/bar/xyz/", want: "xyz"},
+		{base: "/foo/bar", in: "foo/bar/xyz", want: "foo/bar/xyz"},
+		{base: "/foo/bar", in: "/foo/bar", want: "."},
+		{base: "/foo/bar/", in: "/foo/bar", want: "."},
+		{base: "/foo/bar", in: "/foo/bar/", want: "."},
+		{base: "", in: "/foo/bar", want: "/foo/bar"},
+		{base: "/foo/bar", in: "/abc/def", want: "/abc/def"},
+	}
+	for _, tc := range objectsTest {
+
+		got := upload.RelativePath(tc.base, tc.in)
+		if got != tc.want {
+			t.Errorf("Test Case (%s), basepath '%s': want '%s', got '%s'", tc.base, tc.in, tc.want, got)
+		}
+	}
+}
+
 func getScanFolderResult(includePatterns []string, excludePatterns []string, allowVideos bool) (map[string]bool, error) {
 	ft := &mock.FileTracker{
 		CacheAsAlreadyUploadedFn: func(path string) error {

@@ -22,7 +22,7 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 			return nil
 		}
 
-		relativePath := job.relativePath(fp)
+		relativePath := RelativePath(job.SourceFolder, fp)
 
 		// If a directory is excluded, skip it!
 		if fi.IsDir() {
@@ -62,9 +62,11 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 	}
 }
 
-// relativePath returns a path relative to the job.SourceFolder.
-func (job *UploadFolderJob) relativePath(path string) string {
-	rp, err := filepath.Rel(job.SourceFolder, path)
+// RelativePath returns a path relative to the base.
+// If a relative path could not be calculated or it contains ' ../`,
+// returns the original path.
+func RelativePath(base string, path string) string {
+	rp, err := filepath.Rel(base, path)
 	if err != nil {
 		return path
 	}
