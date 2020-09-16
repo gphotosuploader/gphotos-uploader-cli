@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 	"fmt"
-	"os"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
@@ -31,35 +30,45 @@ type EnqueuedUpload struct {
 }
 
 func (job *EnqueuedUpload) Process() error {
-	// Get or create the album
-	album, err := job.getOrCreateAlbum()
-	if err != nil {
-		return err
-	}
+	item := upload.NewFileItem(job.Path)
 
 	// Upload the file and add it to PhotosService.
-	_, err = job.PhotosClient.AddMediaToAlbum(job.Context, upload.NewFileItem(job.Path), album)
-	if err != nil {
+	if err := job.addMediaToAlbum(item); err != nil {
 		return err
 	}
 
 	// Mark the file as uploaded in the FileTracker.
-	err = job.FileTracker.CacheAsAlreadyUploaded(job.Path)
-	if err != nil {
+	if err := job.FileTracker.CacheAsAlreadyUploaded(job.Path); err != nil {
 		job.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", job.Path, err)
 	}
 
 	// If was requested, remove the file after being uploaded.
+	return job.removeIfItWasRequested(item)
+}
+
+func (job *EnqueuedUpload) ID() string {
+	return job.Path
+}
+
+func (job *EnqueuedUpload) removeIfItWasRequested(item upload.FileItem) error {
 	if job.DeleteOnSuccess {
-		if err := os.Remove(job.Path); err != nil {
+		if err := item.Remove(); err != nil {
 			job.Logger.Errorf("Deletion request failed: file=%s, err=%v", job.Path, err)
 		}
 	}
 	return nil
 }
 
-func (job *EnqueuedUpload) ID() string {
-	return job.Path
+func (job *EnqueuedUpload) addMediaToAlbum(item upload.FileItem) error {
+	// Get the album
+	album, err := job.getOrCreateAlbum()
+	if err != nil {
+		return err
+	}
+	if _, err = job.PhotosClient.AddMediaToAlbum(job.Context, item, album); err != nil {
+		return err
+	}
+	return nil
 }
 
 // getOrCreateAlbum returns the created (or existent) album in PhotosService.
