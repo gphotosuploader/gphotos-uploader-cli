@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 - Fix duplicated albums creation. ([#192][i192])
 
-[i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/192
+[i192]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/192
 
 ## 1.1.0
 ### Added
