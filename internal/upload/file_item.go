@@ -12,6 +12,12 @@ type FileItem struct {
 	AlbumName string
 }
 
+func NewFileItem(path string) FileItem {
+	return FileItem{
+		Path:      path,
+	}
+}
+
 // Open returns a stream.
 // Caller should close it finally.
 func (m FileItem) Open() (io.ReadSeeker, int64, error) {

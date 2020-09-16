@@ -3,9 +3,7 @@ package task
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
-	"path"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
@@ -21,40 +19,6 @@ type GooglePĥotosService interface {
 	AddMediaToAlbum(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error)
 }
 
-// FileUploadItem represents a local file.
-type FileUploadItem string
-
-// Open returns a stream.
-// Caller should close it finally.
-func (m FileUploadItem) Open() (io.ReadSeeker, int64, error) {
-	f, err := os.Stat(m.String())
-	if err != nil {
-		return nil, 0, err
-	}
-	r, err := os.Open(m.String())
-	if err != nil {
-		return nil, 0, err
-	}
-	return r, f.Size(), nil
-}
-
-// Name returns the filename.
-func (m FileUploadItem) Name() string {
-	return path.Base(m.String())
-}
-
-func (m FileUploadItem) String() string {
-	return string(m)
-}
-
-func (m FileUploadItem) Size() int64 {
-	f, err := os.Stat(m.String())
-	if err != nil {
-		return 0
-	}
-	return f.Size()
-}
-
 type EnqueuedUpload struct {
 	Context      context.Context
 	PhotosClient GooglePĥotosService
@@ -68,13 +32,13 @@ type EnqueuedUpload struct {
 
 func (job *EnqueuedUpload) Process() error {
 	// Get or create the album
-	album, err := job.getOrCreateAlbumByTitle()
+	album, err := job.getOrCreateAlbum()
 	if err != nil {
 		return err
 	}
 
 	// Upload the file and add it to PhotosService.
-	_, err = job.PhotosClient.AddMediaToAlbum(job.Context, FileUploadItem(job.Path), album)
+	_, err = job.PhotosClient.AddMediaToAlbum(job.Context, upload.NewFileItem(job.Path), album)
 	if err != nil {
 		return err
 	}
@@ -98,16 +62,18 @@ func (job *EnqueuedUpload) ID() string {
 	return job.Path
 }
 
-// getOrCreateAlbumByTitle returns the album ID of the created (or existent) album in PhotosService.
-func (job *EnqueuedUpload) getOrCreateAlbumByTitle() (*photoslibrary.Album, error) {
-	// Return if empty to avoid a PhotosService call.
+// getOrCreateAlbum returns the created (or existent) album in PhotosService.
+func (job *EnqueuedUpload) getOrCreateAlbum() (*photoslibrary.Album, error) {
+	var nullAlbum = &photoslibrary.Album{}
+
+	// Returns if empty to avoid a PhotosService call.
 	if job.AlbumName == "" {
-		return &photoslibrary.Album{}, nil
+		return nullAlbum, nil
 	}
 
 	album, err := job.PhotosClient.CreateAlbum(job.Context, job.AlbumName)
 	if err != nil {
-		return &photoslibrary.Album{}, fmt.Errorf("Album creation failed: name=%s, error=%s", job.AlbumName, err)
+		return nullAlbum, fmt.Errorf("album creation failed: name=%s, error=%s", job.AlbumName, err)
 	}
 	return album, nil
 }
