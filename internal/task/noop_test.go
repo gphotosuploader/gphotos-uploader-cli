@@ -1,13 +1,13 @@
-package upload_test
+package task_test
 
 import (
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 )
 
 func TestNoOpJob_ID(t *testing.T) {
-	j := upload.NoOpJob{}
+	j := task.NoOpJob{}
 
 	want := "noop"
 	got := j.ID()
@@ -18,7 +18,7 @@ func TestNoOpJob_ID(t *testing.T) {
 }
 
 func TestNoOpJob_Process(t *testing.T) {
-	j := upload.NoOpJob{}
+	j := task.NoOpJob{}
 
 	err := j.Process()
 	if err != nil {

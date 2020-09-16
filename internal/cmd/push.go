@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
@@ -13,6 +13,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
 )
@@ -101,7 +102,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		photosService, err := gphotos.NewClientWithResumableUploads(c, cli.UploadTracker)
+		photosService, err := gphotos.NewClient(c, gphotos.WithSessionStorer(cli.UploadTracker))
 		if err != nil {
 			return err
 		}
@@ -110,13 +111,13 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		totalItems += len(itemsToUpload)
 		for _, i := range itemsToUpload {
 			if cmd.DryRunMode {
-				uploadQueue.Submit(&upload.NoOpJob{})
+				uploadQueue.Submit(&task.NoOpJob{})
 			} else {
-				uploadQueue.Submit(&upload.EnqueuedJob{
-					Context:       ctx,
-					PhotosService: photosService,
-					FileTracker:   cli.FileTracker,
-					Logger:        cli.Logger,
+				uploadQueue.Submit(&task.EnqueuedUpload{
+					Context:      ctx,
+					PhotosClient: photosService,
+					FileTracker:  cli.FileTracker,
+					Logger:       cli.Logger,
 
 					Path:            i.Path,
 					AlbumName:       i.AlbumName,

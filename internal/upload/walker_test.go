@@ -3,7 +3,7 @@ package upload_test
 import (
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/mock"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
@@ -103,16 +103,52 @@ func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	}
 }
 
+func TestRelativePath(t *testing.T) {
+	var objectsTest = []struct {
+		base string
+		in   string
+		want string
+	}{
+		{base: "/foo/bar", in: "/foo/bar/xyz", want: "xyz"},
+		{base: "/foo/bar/", in: "/foo/bar/xyz", want: "xyz"},
+		{base: "/foo/bar", in: "/foo/bar/xyz/", want: "xyz"},
+		{base: "/foo/bar", in: "foo/bar/xyz", want: "foo/bar/xyz"},
+		{base: "/foo/bar", in: "/foo/bar", want: "."},
+		{base: "/foo/bar/", in: "/foo/bar", want: "."},
+		{base: "/foo/bar", in: "/foo/bar/", want: "."},
+		{base: "", in: "/foo/bar", want: "/foo/bar"},
+		{base: "/foo/bar", in: "/abc/def", want: "/abc/def"},
+	}
+	for _, tc := range objectsTest {
+
+		got := upload.RelativePath(tc.base, tc.in)
+		if got != tc.want {
+			t.Errorf("Test Case (%s), basepath '%s': want '%s', got '%s'", tc.base, tc.in, tc.want, got)
+		}
+	}
+}
+
 func getScanFolderResult(includePatterns []string, excludePatterns []string, allowVideos bool) (map[string]bool, error) {
+	ft := &mock.FileTracker{
+		CacheAsAlreadyUploadedFn: func(path string) error {
+			return nil
+		},
+		IsAlreadyUploadedFn: func(path string) (bool, error) {
+			return false, nil
+		},
+		RemoveAsAlreadyUploadedFn: func(path string) error {
+			return nil
+		},
+	}
 	u := upload.UploadFolderJob{
-		FileTracker:        new(mockedFileTracker),
+		FileTracker:        ft,
 		SourceFolder:       "testdata",
 		CreateAlbum:        false,
 		CreateAlbumBasedOn: "",
 		Filter:             upload.NewFilter(includePatterns, excludePatterns, allowVideos),
 	}
 
-	foundItems, err := u.ScanFolder(new(log.DiscardLogger))
+	foundItems, err := u.ScanFolder(&mock.Logger{})
 	if err != nil {
 		return nil, err
 	}
@@ -123,16 +159,4 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string, all
 	}
 
 	return results, nil
-}
-
-type mockedFileTracker struct{}
-
-func (ft *mockedFileTracker) CacheAsAlreadyUploaded(_ string) error {
-	return nil
-}
-func (ft *mockedFileTracker) IsAlreadyUploaded(_ string) (bool, error) {
-	return false, nil
-}
-func (ft *mockedFileTracker) RemoveAsAlreadyUploaded(_ string) error {
-	return nil
 }

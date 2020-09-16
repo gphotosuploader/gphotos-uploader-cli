@@ -4,8 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+
+## 1.1.1
 ### Changed
 - Internal packages have been moved to `internal/` folder to discourage its usage.
+- Bump `google-photos-api-client-go` from `v1.1.5` to `v2.0.0-beta-1`.
+### Fixed
+- Fix duplicated albums creation. ([#192][i192])
+
+[i214]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/192
 
 ## 1.1.0
 ### Added

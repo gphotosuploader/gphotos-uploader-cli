@@ -37,7 +37,7 @@ func TestQueue(t *testing.T) {
 		{numberOfWorkers: 5, numberOfJobs: 100, want: 100000},
 	}
 
-	var logger = log.Discard
+	var logger = &log.DiscardLogger{}
 
 	for _, tt := range testData {
 		t.Run(fmt.Sprintf("Workers[%d]_Jobs[%d]", tt.numberOfWorkers, tt.numberOfJobs), func(t *testing.T) {
