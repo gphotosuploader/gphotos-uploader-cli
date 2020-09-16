@@ -39,114 +39,114 @@ type Logger struct {
 	GetLevelInvoked bool
 }
 
-// Debug implements logger interface
+// Debug marks the function as invoked.
 func (l *Logger) Debug(args ...interface{}) {
 	l.DebugInvoked = true
 }
 
-// Debugf implements logger interface
+// Debugf marks the function as invoked.
 func (l *Logger) Debugf(format string, args ...interface{}) {
 	l.DebugfInvoked = true
 }
 
-// Info implements logger interface
+// Info marks the function as invoked.
 func (l *Logger) Info(args ...interface{}) {
 	l.InfoInvoked = true
 }
 
-// Infof implements logger interface
+// Infof marks the function as invoked.
 func (l *Logger) Infof(format string, args ...interface{}) {
 	l.InfofInvoked = true
 }
 
-// Warn implements logger interface
+// Warn marks the function as invoked.
 func (l *Logger) Warn(args ...interface{}) {
 	l.WarnInvoked = true
 }
 
-// Warnf implements logger interface
+// Warnf marks the function as invoked.
 func (l *Logger) Warnf(format string, args ...interface{}) {
 	l.WarnfInvoked = true
 }
 
-// Error implements logger interface
+// Error marks the function as invoked.
 func (l *Logger) Error(args ...interface{}) {
 	l.ErrorInvoked = true
 }
 
-// Errorf implements logger interface
+// Errorf marks the function as invoked.
 func (l *Logger) Errorf(format string, args ...interface{}) {
 	l.ErrorfInvoked = true
 }
 
-// Fatal implements logger interface
+// Fatal marks the function as invoked.
 func (l *Logger) Fatal(args ...interface{}) {
 	l.FatalInvoked = true
 }
 
-// Fatalf implements logger interface
+// Fatalf marks the function as invoked.
 func (l *Logger) Fatalf(format string, args ...interface{}) {
 	l.FatalfInvoked = true
 }
 
-// Panic implements logger interface
+// Panic marks the function as invoked.
 func (l *Logger) Panic(args ...interface{}) {
 	l.PanicInvoked = true
 }
 
-// Panicf implements logger interface
+// Panicf marks the function as invoked.
 func (l *Logger) Panicf(format string, args ...interface{}) {
 	l.PanicfInvoked = true
 }
 
-// Done implements logger interface
+// Done marks the function as invoked.
 func (l *Logger) Done(args ...interface{}) {
 	l.DoneInvoked = true
 }
 
-// Donef implements logger interface
+// Donef marks the function as invoked.
 func (l *Logger) Donef(format string, args ...interface{}) {
 	l.DonefInvoked = true
 }
 
-// Fail implements logger interface
+// Fail marks the function as invoked.
 func (l *Logger) Fail(args ...interface{}) {
 	l.FailInvoked = true
 }
 
-// Failf implements logger interface
+// Failf marks the function as invoked.
 func (l *Logger) Failf(format string, args ...interface{}) {
 	l.FailfInvoked = true
 }
 
-// Print implements logger interface
+// Print marks the function as invoked.
 func (l *Logger) Print(level logrus.Level, args ...interface{}) {
 	l.PrintInvoked = true
 }
 
-// Printf implements logger interface
+// Printf marks the function as invoked.
 func (l *Logger) Printf(level logrus.Level, format string, args ...interface{}) {
 	l.PrintfInvoked = true
 }
 
-// SetLevel implements logger interface
+// SetLevel marks the function as invoked.
 func (l *Logger) SetLevel(level logrus.Level) {
 	l.SetLevelInvoked = true
 }
 
-// GetLevel implements logger interface
+// GetLevel invokes the mock implementation and marks the function as invoked.
 func (l *Logger) GetLevel() logrus.Level {
 	l.GetLevelInvoked = true
 	return l.GetLevelFn()
 }
 
-// Write implements logger interface
+// Write invokes the mock implementation and marks the function as invoked.
 func (l *Logger) Write(message []byte) (int, error) {
 	l.WriteFnInvoked = true
 	return l.WriteFn(message)
 }
 
-// WriteString implements logger interface
+// WriteString marks the function as invoked.
 func (l *Logger) WriteString(message string) {
 	l.WriteStringInvoked = true
 }
