@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+## 1.1.2
+### Fixed
+- Fix homebrew tap creation. ([#233][i233])
+
+[i233]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/233
 
 ## 1.1.1
 ### Changed

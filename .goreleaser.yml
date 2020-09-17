@@ -17,6 +17,7 @@ brews:
   - tap:
       owner: gphotosuploader
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
     commit_author:
       name: pacoorozco
