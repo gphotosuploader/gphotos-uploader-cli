@@ -12,17 +12,16 @@ var (
 
 	// ErrInvalidToken is the expected error if the token is not a valid one
 	ErrInvalidToken = errors.New("invalid token")
-
-	// ErrNotStoredToken is the expected error if the token has not been stored
-	ErrNotStoredToken = errors.New("failed storing token into keyring")
 )
 
-const (
-	serviceName = "gPhotosUploader"
-)
-
+// TokenManager allows you to set/get oauth.Token into a permanent repository.
 type TokenManager interface {
+	// StoreToken stores a oauth.Token in the repository.
 	StoreToken(email string, token *oauth2.Token) error
+
+	// RetrieveToken returns the stored oauth.Token.
 	RetrieveToken(email string) (*oauth2.Token, error)
+
+	// Close closes the repository.
 	Close() error
 }

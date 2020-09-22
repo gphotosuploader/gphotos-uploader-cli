@@ -41,7 +41,7 @@ func Start(cfg *config.Config) (*App, error) {
 	if err != nil {
 		return app, fmt.Errorf("open token manager failed: type=%s, err=%s", cfg.SecretsBackendType, err)
 	}
-	app.TokenManager = tokenstore.NewService(kr)
+	app.TokenManager = kr
 
 	// Upload session tracker to keep upload session to resume uploads.
 	app.UploadTracker, err = leveldbstore.NewStore(cfg.ResumableUploadsDBDir())
