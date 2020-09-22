@@ -88,10 +88,13 @@ The first time you run `gphotos-uploader-cli`, after setting your configuration 
 1. You should get an output like this one:
 
 ```
-[info]   Opening browser to complete authorization.
+Visit the following URL in your browser:
+https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=...
+
+After completing the authorization flow, enter the authorization code here:
 ```
 
-1. A browser will be opened at this point. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
+1. Open a browser and point to the previous URL. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
 
 ![Google asking for Google Photos API credentials](.docs/images/ask_Google_Photos_API_credentials.png) 
 
@@ -103,9 +106,15 @@ The first time you run `gphotos-uploader-cli`, after setting your configuration 
 
 ![Google ask permission to your Google Photos account](.docs/images/ask_for_permission.png)
 
-1. A green page is shown if all is fine
+1. A page with a code is shown in your browser, copy this code and go back to the terminal.
 
 ![Final confirmation, all was good](.docs/images/final_confirmation.png)
+
+1. Paste the previous code in your terminal to complete the process.
+
+```
+After completing the authorization flow, enter the authorization code here: 4/4QFPtCv11dN3a-hVYhHkMryZe5g
+```
 
 All auth configuration is in place.
 
