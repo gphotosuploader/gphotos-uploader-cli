@@ -1,4 +1,8 @@
-# Configuration
+# Table of Contents
+1. [Configuration options](#configuration-options)
+2. [Environment variables](#environment-variables)
+
+# Configuration options
 
 > The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.gphotos-uploader-cli`.
 
@@ -155,3 +159,13 @@ There are some common patterns that has been tagged, you can use them to simplif
 * `_ALL_VIDEO_FILES_`: Matches all video file extensions supported by Google Photos.
 > Supported video extensions are sourced by [Google Photos support](https://support.google.com/googleone/answer/6193313) and it includes:
 > .mpg, .mod, .mmv, .tod, .wmv, .asf, .avi, .divx, .mov, .m4v, .3gp, .3g2, .mp4, .m2t, .m2ts, .mts, and .mkv files.
+
+# Environment variables
+
+## GPHOTOS_CLI_TOKENSTORE_KEY
+
+This variable is used to read the token store key for opening the secrets storage. It works when `SecretsBackendType: file` and it is intended to be used by headless runners.
+
+```bash
+$ GPHOTOS_CLI_TOKEN_STORE_KEY=my-super-secret gphotos-uploader-cli push
+```
