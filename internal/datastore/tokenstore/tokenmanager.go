@@ -2,8 +2,6 @@ package tokenstore
 
 import (
 	"errors"
-
-	"golang.org/x/oauth2"
 )
 
 var (
@@ -14,14 +12,3 @@ var (
 	ErrInvalidToken = errors.New("invalid token")
 )
 
-// TokenManager allows you to set/get oauth.Token into a permanent repository.
-type TokenManager interface {
-	// StoreToken stores a oauth.Token in the repository.
-	StoreToken(email string, token *oauth2.Token) error
-
-	// RetrieveToken returns the stored oauth.Token.
-	RetrieveToken(email string) (*oauth2.Token, error)
-
-	// Close closes the repository.
-	Close() error
-}

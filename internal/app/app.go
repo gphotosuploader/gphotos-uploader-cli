@@ -84,8 +84,7 @@ type FileTracker interface {
 	Close() error
 }
 
-// TokenManager represents a service to keep and read secrets (like passwords,
-// tokens...)
+// TokenManager represents a service to keep and read secrets (like passwords, tokens...)
 type TokenManager interface {
 	StoreToken(email string, token *oauth2.Token) error
 	RetrieveToken(email string) (*oauth2.Token, error)

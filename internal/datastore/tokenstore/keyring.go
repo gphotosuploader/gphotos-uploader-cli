@@ -11,10 +11,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	serviceName = "gPhotosUploader"
-)
-
 // KeyringRepository represents a repository provided by different secrets
 // backend using github.com/99designs/keyring package.
 //
@@ -92,11 +88,12 @@ func (r *KeyringRepository) getRefreshToken(email string, token *oauth2.Token) s
 }
 
 func defaultConfig(keyringDir string) keyring.Config {
+	const serviceName = "gPhotosUploader"
 	return keyring.Config{
 		ServiceName:          serviceName,
 		KeychainName:         serviceName,
-		KeychainPasswordFunc: promptFn(StdInPasswordReader{}),
-		FilePasswordFunc:     promptFn(StdInPasswordReader{}),
+		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
+		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
 		FileDir:              keyringDir,
 	}
 }
@@ -131,14 +128,14 @@ func (r *KeyringRepository) getToken(email string) (*oauth2.Token, error) {
 	return &token, nil
 }
 
-// PasswordReader represents a function to read a password.
-type PasswordReader interface {
+// passwordReader represents a function to read a password.
+type passwordReader interface {
 	ReadPassword() (string, error)
 }
 
 // promptFn returns the key to open the keyring.
 // It will read it from an environment var if is set, or read from the terminal otherwise.
-func promptFn(pr PasswordReader) func(string) (string, error) {
+func promptFn(pr passwordReader) func(string) (string, error) {
 	return func(_ string) (string, error) {
 		if key := os.Getenv("GPHOTOS_CLI_TOKENSTORE_KEY"); len(key) > 0 {
 			return key, nil
@@ -149,10 +146,10 @@ func promptFn(pr PasswordReader) func(string) (string, error) {
 	}
 }
 
-// StdInPasswordReader reads a password from the stdin.
-type StdInPasswordReader struct{}
+// stdInPasswordReader reads a password from the stdin.
+type stdInPasswordReader struct{}
 
-func (pr StdInPasswordReader) ReadPassword() (string, error) {
+func (pr *stdInPasswordReader) ReadPassword() (string, error) {
 	pwd, err := terminal.ReadPassword(syscall.Stdin)
 	return string(pwd), err
 }
