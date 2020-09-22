@@ -47,22 +47,11 @@ func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyrin
 
 func defaultConfig(keyringDir string) keyring.Config {
 	return keyring.Config{
-		AllowedBackends:                nil,
-		ServiceName:                    serviceName,
-		KeychainName:                   serviceName,
-		KeychainTrustApplication:       false,
-		KeychainSynchronizable:         false,
-		KeychainAccessibleWhenUnlocked: false,
-		KeychainPasswordFunc:           nil,
-		FilePasswordFunc:               terminalPrompt,
-		FileDir:                        keyringDir,
-		KWalletAppID:                   "",
-		KWalletFolder:                  "",
-		LibSecretCollectionName:        "",
-		PassDir:                        "",
-		PassCmd:                        "",
-		PassPrefix:                     "",
-		WinCredPrefix:                  "",
+		ServiceName:          serviceName,
+		KeychainName:         serviceName,
+		KeychainPasswordFunc: encryptionKeyFromEnvVarOrTerminal,
+		FilePasswordFunc:     encryptionKeyFromEnvVarOrTerminal,
+		FileDir:              keyringDir,
 	}
 }
 
@@ -126,8 +115,12 @@ func (r *KeyringRepository) getToken(email string) (oauth2.Token, error) {
 	return tk, nil
 }
 
-
-func terminalPrompt(_ string) (string, error) {
+// encryptionKeyFromEnvVarOrTerminal returns the key to open the keyring.
+// It will read it from an environment var if is set, or read from the terminal otherwise.
+func encryptionKeyFromEnvVarOrTerminal(_ string) (string, error) {
+	if key := os.Getenv("GPHOTOS_CLI_TOKENSTORE_KEY"); len(key) > 0 {
+		return key, nil
+	}
 	fmt.Print("Enter the passphrase to open the token store: ")
 	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
