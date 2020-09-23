@@ -12,11 +12,21 @@ import (
 )
 
 // KeyringRepository represents a repository provided by different secrets
-// backend using github.com/99designs/keyring package.
-//
-// See https://github.com/99designs/keyring for details.
+// backend using `99designs/keyring` package.
 type KeyringRepository struct {
-	keyring.Keyring
+	store keyring.Keyring
+}
+
+// defaultConfig returns the default configuration from the keyring package.
+func defaultConfig(keyringDir string) keyring.Config {
+	const serviceName = "gPhotosUploader"
+	return keyring.Config{
+		ServiceName:          serviceName,
+		KeychainName:         serviceName,
+		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
+		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
+		FileDir:              keyringDir,
+	}
 }
 
 // NewKeyringRepository creates a new repository
@@ -43,79 +53,27 @@ func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyrin
 	if err != nil {
 		return nil, err
 	}
-	return &KeyringRepository{kr}, nil
+	return &KeyringRepository{store: kr}, nil
 }
 
-// StoreToken lets you store a token in the OS keyring
-func (r *KeyringRepository) StoreToken(email string, token *oauth2.Token) error {
-	if token.AccessToken == "" {
-		return ErrInvalidToken
-	}
-
-	// Restore refresh token from previously stored token if it's not available on the current one.
-	token.RefreshToken = r.getRefreshToken(email, token)
-
-	return r.setToken(email, token)
-}
-
-// RetrieveToken lets you get a token from the OS keyring.
-func (r *KeyringRepository) RetrieveToken(email string) (*oauth2.Token, error) {
-	tk, err := r.getToken(email)
-	if err != nil {
-		return nil, err
-	}
-
-	return tk, nil
-}
-
-// Close closes the keyring repository.
-func (r *KeyringRepository) Close() error {
-	// in this particular implementation we don't need to do anything.
-	return nil
-}
-
-// getRefreshToken returns the most updated Refresh Token for the account (email).
-func (r *KeyringRepository) getRefreshToken(email string, token *oauth2.Token) string {
-	if token.RefreshToken != "" {
-		return token.RefreshToken
-	}
-
-	// Returns the previous Refresh Token for the account (email).
-	if token, err := r.getToken(email); err == nil {
-		return token.RefreshToken
-	}
-	return ""
-}
-
-func defaultConfig(keyringDir string) keyring.Config {
-	const serviceName = "gPhotosUploader"
-	return keyring.Config{
-		ServiceName:          serviceName,
-		KeychainName:         serviceName,
-		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
-		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
-		FileDir:              keyringDir,
-	}
-}
-
-// setToken stores the token into the repository.
-func (r *KeyringRepository) setToken(email string, token *oauth2.Token) error {
+// Set stores a token into the OS keyring.
+func (r *KeyringRepository) Set(email string, token *oauth2.Token) error {
 	tokenJSONBytes, err := json.Marshal(token)
 	if err != nil {
 		return ErrInvalidToken
 	}
 
-	return r.Set(keyring.Item{
+	return r.store.Set(keyring.Item{
 		Key:  email,
 		Data: tokenJSONBytes,
 	})
 }
 
 // getToken returns the specified token from the repository.
-func (r *KeyringRepository) getToken(email string) (*oauth2.Token, error) {
+func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 	var nullToken = &oauth2.Token{}
 
-	item, err := r.Get(email)
+	item, err := r.store.Get(email)
 	if err != nil {
 		return nullToken, ErrNotFound
 	}
@@ -126,6 +84,12 @@ func (r *KeyringRepository) getToken(email string) (*oauth2.Token, error) {
 	}
 
 	return &token, nil
+}
+
+// Close closes the keyring repository.
+func (r *KeyringRepository) Close() error {
+	// in this particular implementation we don't need to do anything.
+	return nil
 }
 
 // passwordReader represents a function to read a password.

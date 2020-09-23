@@ -16,7 +16,7 @@ var fixedStringPrompt keyring.PromptFunc = func(_ string) (string, error) {
 	return "no more secrets", nil
 }
 
-func TestKeyringRepository_StoreToken(t *testing.T) {
+func TestKeyringRepository_Set(t *testing.T) {
 	dir := tempDir()
 	repo, err := NewKeyringRepository("file", &fixedStringPrompt, dir)
 	if err != nil {
@@ -29,44 +29,12 @@ func TestKeyringRepository_StoreToken(t *testing.T) {
 		}
 	}()
 
-	t.Run("ShouldReturnSuccess", func(t *testing.T) {
-		if err := repo.StoreToken("user@domain.com", getDefaultToken()); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-	})
-
-	t.Run("ShouldReturnErrInvalidTokenWhenTokenIsEmpty", func(t *testing.T) {
-		token := &oauth2.Token{}
-		if err := repo.StoreToken("user@domain.com", token); err != ErrInvalidToken {
-			t.Errorf("want: %s, got: %v", ErrInvalidToken, err)
-		}
-	})
-
-	t.Run("ShouldStoreOldRefreshTokenIfItIsNotProvided", func(t *testing.T) {
-		oldToken := getDefaultToken()
-		if err := repo.StoreToken("user@domain.com", oldToken); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-
-		// newToken is not defining the RefreshToken.
-		newToken := &oauth2.Token{
-			AccessToken: "my-new-access-token",
-		}
-		if err := repo.StoreToken("user@domain.com", newToken); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-
-		got, err := repo.RetrieveToken("user@domain.com")
-		if err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-		if got.RefreshToken != oldToken.RefreshToken {
-			t.Errorf("want: %s, got: %s", oldToken.RefreshToken, got.RefreshToken)
-		}
-	})
+	if err := repo.Set("user@domain.com", getDefaultToken()); err != nil {
+		t.Errorf("error was not expected: err=%s", err)
+	}
 }
 
-func TestKeyringRepository_RetrieveToken(t *testing.T) {
+func TestKeyringRepository_Get(t *testing.T) {
 	dir := tempDir()
 	repo, err := NewKeyringRepository("file", &fixedStringPrompt, dir)
 	if err != nil {
@@ -80,13 +48,13 @@ func TestKeyringRepository_RetrieveToken(t *testing.T) {
 	}()
 
 	want := getDefaultToken()
-	err = repo.StoreToken("user@domain.com", want)
+	err = repo.Set("user@domain.com", want)
 	if err != nil {
 		t.Fatalf("error was not expected: err=%s", err)
 	}
 
 	t.Run("ShouldSuccess", func(t *testing.T) {
-		got, err := repo.RetrieveToken("user@domain.com")
+		got, err := repo.Get("user@domain.com")
 		if err != nil {
 			t.Errorf("error was not expected: err=%s", err)
 		}
@@ -97,7 +65,7 @@ func TestKeyringRepository_RetrieveToken(t *testing.T) {
 	})
 
 	t.Run("ReturnErrNotFoundWhenTokenDoesNotExists", func(t *testing.T) {
-		_, err := repo.RetrieveToken("non-existent")
+		_, err := repo.Get("non-existent")
 		if err != ErrNotFound {
 			t.Errorf("want: %s, got: %v", ErrNotFound, err)
 		}
