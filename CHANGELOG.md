@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+
+## 1.2.0
 ### Added
 - `GPHOTOS_CLI_TOKENSTORE_KEY` env var could be used to read token store encryption key from. This allows you to run the CLI non-interactively. ([#224][i224])
 

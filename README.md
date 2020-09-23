@@ -81,8 +81,6 @@ $ gphotos-uploader-cli push
 ```
 
 ### First time run
-> NOTE: The Google Authorization process has been temporary changed due to a bug, please read how to use the new one  [here](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/181#issuecomment-660625164).
-
 The first time you run `gphotos-uploader-cli`, after setting your configuration ([Google Photos API credentials](.docs/configuration.md#APIAppCredentials)), few manual steps are needed:
 
 1. You should get an output like this one:
@@ -94,23 +92,23 @@ https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=...
 After completing the authorization flow, enter the authorization code here:
 ```
 
-1. Open a browser and point to the previous URL. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
+2. Open a browser and point to the previous URL. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
 
 ![Google asking for Google Photos API credentials](.docs/images/ask_Google_Photos_API_credentials.png) 
 
-1. After that, you should confirm that you trust on `gphotos-uploader-cli` to access to your Google Photos account, click on **Go to gphotos-uploader**:
+3. After that, you should confirm that you trust on `gphotos-uploader-cli` to access to your Google Photos account, click on **Go to gphotos-uploader**:
 
 ![Google ask you to verify gphotos-upload-cli](.docs/images/ask_for_application_verification.png)
 
-1. Finally Google will ask you to confirm permission Google Photos account:
+4. Finally Google will ask you to confirm permission Google Photos account:
 
 ![Google ask permission to your Google Photos account](.docs/images/ask_for_permission.png)
 
-1. A page with a code is shown in your browser, copy this code and go back to the terminal.
+5. A page with a code is shown in your browser, copy this code and go back to the terminal.
 
 ![Final confirmation, all was good](.docs/images/final_confirmation.png)
 
-1. Paste the previous code in your terminal to complete the process.
+6. Paste the previous code in your terminal to complete the process.
 
 ```
 After completing the authorization flow, enter the authorization code here: 4/4QFPtCv11dN3a-hVYhHkMryZe5g
