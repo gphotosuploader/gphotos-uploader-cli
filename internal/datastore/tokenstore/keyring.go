@@ -11,16 +11,22 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	serviceName = "gPhotosUploader"
-)
-
 // KeyringRepository represents a repository provided by different secrets
-// backend using github.com/99designs/keyring package.
-//
-// See https://github.com/99designs/keyring for details.
+// backend using `99designs/keyring` package.
 type KeyringRepository struct {
-	keyring.Keyring
+	store keyring.Keyring
+}
+
+// defaultConfig returns the default configuration from the keyring package.
+func defaultConfig(keyringDir string) keyring.Config {
+	const serviceName = "gPhotosUploader"
+	return keyring.Config{
+		ServiceName:          serviceName,
+		KeychainName:         serviceName,
+		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
+		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
+		FileDir:              keyringDir,
+	}
 }
 
 // NewKeyringRepository creates a new repository
@@ -47,78 +53,27 @@ func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyrin
 	if err != nil {
 		return nil, err
 	}
-	return &KeyringRepository{kr}, nil
+	return &KeyringRepository{store: kr}, nil
 }
 
-// StoreToken lets you store a token in the OS keyring
-func (r *KeyringRepository) StoreToken(email string, token *oauth2.Token) error {
-	if token.AccessToken == "" {
-		return ErrInvalidToken
-	}
-
-	// Restore refresh token from previously stored token if it's not available on the current one.
-	token.RefreshToken = r.getRefreshToken(email, token)
-
-	return r.setToken(email, token)
-}
-
-// RetrieveToken lets you get a token from the OS keyring.
-func (r *KeyringRepository) RetrieveToken(email string) (*oauth2.Token, error) {
-	tk, err := r.getToken(email)
-	if err != nil {
-		return nil, err
-	}
-
-	return tk, nil
-}
-
-// Close closes the keyring repository.
-func (r *KeyringRepository) Close() error {
-	// in this particular implementation we don't need to do anything.
-	return nil
-}
-
-// getRefreshToken returns the most updated Refresh Token for the account (email).
-func (r *KeyringRepository) getRefreshToken(email string, token *oauth2.Token) string {
-	if token.RefreshToken != "" {
-		return token.RefreshToken
-	}
-
-	// Returns the previous Refresh Token for the account (email).
-	if token, err := r.getToken(email); err == nil {
-		return token.RefreshToken
-	}
-	return ""
-}
-
-func defaultConfig(keyringDir string) keyring.Config {
-	return keyring.Config{
-		ServiceName:          serviceName,
-		KeychainName:         serviceName,
-		KeychainPasswordFunc: promptFn(StdInPasswordReader{}),
-		FilePasswordFunc:     promptFn(StdInPasswordReader{}),
-		FileDir:              keyringDir,
-	}
-}
-
-// setToken stores the token into the repository.
-func (r *KeyringRepository) setToken(email string, token *oauth2.Token) error {
+// Set stores a token into the OS keyring.
+func (r *KeyringRepository) Set(email string, token *oauth2.Token) error {
 	tokenJSONBytes, err := json.Marshal(token)
 	if err != nil {
 		return ErrInvalidToken
 	}
 
-	return r.Set(keyring.Item{
+	return r.store.Set(keyring.Item{
 		Key:  email,
 		Data: tokenJSONBytes,
 	})
 }
 
 // getToken returns the specified token from the repository.
-func (r *KeyringRepository) getToken(email string) (*oauth2.Token, error) {
+func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 	var nullToken = &oauth2.Token{}
 
-	item, err := r.Get(email)
+	item, err := r.store.Get(email)
 	if err != nil {
 		return nullToken, ErrNotFound
 	}
@@ -131,14 +86,20 @@ func (r *KeyringRepository) getToken(email string) (*oauth2.Token, error) {
 	return &token, nil
 }
 
-// PasswordReader represents a function to read a password.
-type PasswordReader interface {
+// Close closes the keyring repository.
+func (r *KeyringRepository) Close() error {
+	// in this particular implementation we don't need to do anything.
+	return nil
+}
+
+// passwordReader represents a function to read a password.
+type passwordReader interface {
 	ReadPassword() (string, error)
 }
 
 // promptFn returns the key to open the keyring.
 // It will read it from an environment var if is set, or read from the terminal otherwise.
-func promptFn(pr PasswordReader) func(string) (string, error) {
+func promptFn(pr passwordReader) func(string) (string, error) {
 	return func(_ string) (string, error) {
 		if key := os.Getenv("GPHOTOS_CLI_TOKENSTORE_KEY"); len(key) > 0 {
 			return key, nil
@@ -149,10 +110,10 @@ func promptFn(pr PasswordReader) func(string) (string, error) {
 	}
 }
 
-// StdInPasswordReader reads a password from the stdin.
-type StdInPasswordReader struct{}
+// stdInPasswordReader reads a password from the stdin.
+type stdInPasswordReader struct{}
 
-func (pr StdInPasswordReader) ReadPassword() (string, error) {
+func (pr *stdInPasswordReader) ReadPassword() (string, error) {
 	pwd, err := terminal.ReadPassword(syscall.Stdin)
 	return string(pwd), err
 }
