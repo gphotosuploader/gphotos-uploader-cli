@@ -13,18 +13,20 @@ func TestWalker_GetAllFiles(t *testing.T) {
 	var allowVideos = true
 
 	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":            true,
-		"testdata/SampleJPGImage.jpg":         true,
-		"testdata/SamplePNGImage.png":         true,
-		"testdata/SampleSVGImage.svg":         true,
-		"testdata/SampleText.txt":             true,
-		"testdata/SampleVideo.mp4":            true,
-		"testdata/ScreenShotJPG.jpg":          true,
-		"testdata/ScreenShotPNG.png":          true,
-		"testdata/folder1/SamplePNGImage.png": true,
-		"testdata/folder1/SampleJPGImage.jpg": true,
-		"testdata/folder2/SamplePNGImage.png": true,
-		"testdata/folder2/SampleJPGImage.jpg": true,
+		"testdata/SampleAudio.mp3":                   true,
+		"testdata/SampleJPGImage.jpg":                true,
+		"testdata/SamplePNGImage.png":                true,
+		"testdata/SampleSVGImage.svg":                true,
+		"testdata/SampleText.txt":                    true,
+		"testdata/SampleVideo.mp4":                   true,
+		"testdata/ScreenShotJPG.jpg":                 true,
+		"testdata/ScreenShotPNG.png":                 true,
+		"testdata/folder1/SamplePNGImage.png":        true,
+		"testdata/folder1/SampleJPGImage.jpg":        true,
+		"testdata/folder2/SamplePNGImage.png":        true,
+		"testdata/folder2/SampleJPGImage.jpg":        true,
+		"testdata/folder-symlink/SamplePNGImage.png": true,
+		"testdata/folder-symlink/SampleJPGImage.jpg": true,
 	}
 
 	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)
@@ -45,18 +47,20 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 	var allowVideos = false
 
 	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":            false,
-		"testdata/SampleJPGImage.jpg":         false,
-		"testdata/SamplePNGImage.png":         true,
-		"testdata/SampleSVGImage.svg":         false,
-		"testdata/SampleText.txt":             false,
-		"testdata/SampleVideo.mp4":            false,
-		"testdata/ScreenShotJPG.jpg":          false,
-		"testdata/ScreenShotPNG.png":          true,
-		"testdata/folder1/SamplePNGImage.png": true,
-		"testdata/folder1/SampleJPGImage.jpg": false,
-		"testdata/folder2/SamplePNGImage.png": true,
-		"testdata/folder2/SampleJPGImage.jpg": false,
+		"testdata/SampleAudio.mp3":                   false,
+		"testdata/SampleJPGImage.jpg":                false,
+		"testdata/SamplePNGImage.png":                true,
+		"testdata/SampleSVGImage.svg":                false,
+		"testdata/SampleText.txt":                    false,
+		"testdata/SampleVideo.mp4":                   false,
+		"testdata/ScreenShotJPG.jpg":                 false,
+		"testdata/ScreenShotPNG.png":                 true,
+		"testdata/folder1/SamplePNGImage.png":        true,
+		"testdata/folder1/SampleJPGImage.jpg":        false,
+		"testdata/folder2/SamplePNGImage.png":        true,
+		"testdata/folder2/SampleJPGImage.jpg":        false,
+		"testdata/folder-symlink/SamplePNGImage.png": true,
+		"testdata/folder-symlink/SampleJPGImage.jpg": false,
 	}
 
 	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)
@@ -77,18 +81,20 @@ func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	var allowVideos = true
 
 	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":            true,
-		"testdata/SampleJPGImage.jpg":         true,
-		"testdata/SamplePNGImage.png":         true,
-		"testdata/SampleSVGImage.svg":         true,
-		"testdata/SampleText.txt":             true,
-		"testdata/SampleVideo.mp4":            true,
-		"testdata/ScreenShotJPG.jpg":          true,
-		"testdata/ScreenShotPNG.png":          true,
-		"testdata/folder1/SamplePNGImage.png": false,
-		"testdata/folder1/SampleJPGImage.jpg": false,
-		"testdata/folder2/SamplePNGImage.png": true,
-		"testdata/folder2/SampleJPGImage.jpg": true,
+		"testdata/SampleAudio.mp3":                   true,
+		"testdata/SampleJPGImage.jpg":                true,
+		"testdata/SamplePNGImage.png":                true,
+		"testdata/SampleSVGImage.svg":                true,
+		"testdata/SampleText.txt":                    true,
+		"testdata/SampleVideo.mp4":                   true,
+		"testdata/ScreenShotJPG.jpg":                 true,
+		"testdata/ScreenShotPNG.png":                 true,
+		"testdata/folder1/SamplePNGImage.png":        false,
+		"testdata/folder1/SampleJPGImage.jpg":        false,
+		"testdata/folder2/SamplePNGImage.png":        true,
+		"testdata/folder2/SampleJPGImage.jpg":        true,
+		"testdata/folder-symlink/SamplePNGImage.png": true,
+		"testdata/folder-symlink/SampleJPGImage.jpg": true,
 	}
 
 	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)

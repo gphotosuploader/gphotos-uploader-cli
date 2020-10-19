@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/facebookgo/symwalk"
+
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -12,7 +14,7 @@ import (
 // non allowed files (includePatterns & excludePattens).
 func (job *UploadFolderJob) ScanFolder(logger log.Logger) ([]FileItem, error) {
 	var result []FileItem
-	err := filepath.Walk(job.SourceFolder, job.getItemToUploadFn(&result, logger))
+	err := symwalk.Walk(job.SourceFolder, job.getItemToUploadFn(&result, logger))
 	return result, err
 }
 
