@@ -87,6 +87,7 @@ Needs to be unique. It's the Google Account identity (e-mail address) where the 
 ### `sourceFolder`
 The folder to upload from.
 Must be an absolute path. Can expand the home folder tilde shorthand.
+> The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
 ### `makeAlbums`
 If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`. The `sourceFolder` is not taking into account, only child folders will be.
