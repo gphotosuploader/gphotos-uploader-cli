@@ -4,13 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Changed
+- `includePatterns` and `excludePatterns` configuration options has changed. It's using a new format, please review de [configuration documentation](.docs/configuration.md).
 ### Fixed
-- Symlinks are now supported when scanning a folder. ([#190][190])
+- Symlinks are now supported when scanning a folder. ([#190][i190])
 > **Note:** This application does not terminate if there are any non-terminating loops in the file structure.
+- `includePatterns` works as expected, with a clearer (I hope so) format. ([#152][i152])  
 ### Removed
 - Deprecated `uploadVideos` configuration option. It was deprecated in [v0.4.0](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/tag/v0.4.0).
                                                     
 [i190]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/190
+[i152]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/152
 
 ## 1.2.0
 ### Added

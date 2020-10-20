@@ -24,8 +24,8 @@ Example configuration file:
         use: folderName
       }
       deleteAfterUpload: false
-      includePatterns: [ "*.jpg", "*.png" ]
-      excludePatterns: [ "*ScreenShot*" ]
+      includePatterns: [ "**/*.jpg", "**/*.png" ]
+      excludePatterns: [ "**/ScreenShot*" ]
     }
   ]
 }
@@ -118,25 +118,43 @@ You can include and exclude files by specifying the `includePatterns` and `exclu
 
 For example, to upload all _JPG and PNG files_ that are not named _*ScreenShots*_ you can configure it like this:
 ```
-includePatterns: [ "*.jpg", "*.png" ]
-excludePatterns: [ "*ScreenShot*" ]
+includePatterns: [ "**/*.jpg", "**/*.png" ]
+excludePatterns: [ "**/ScreenShot*" ]
+```
+
+Another example excluding an specific directory (and folders inside it):
+```
+includePatterns: [ "_ALL_FILES_" ]
+excludePatterns: [ "**/Temp/**" ]
 ```
 
 ### Patterns
-Patterns use [filepath.Glob](https://golang.org/pkg/path/filepath/#Glob) internally, see [filepath.Match](https://golang.org/pkg/path/filepath/#Match) for syntax. 
+Supports the following special terms in the patterns:
 
-Regular wildcards cannot be used to match over the directory separator `/`. For example: `b*ash` matches `/dir/bash` but does not match `/dirb/ash`.
+Special Terms | Meaning
+------------- | -------
+`*`           | matches any sequence of non-path-separators
+`**`          | matches any sequence of characters, including path separators
+`?`           | matches any single non-path-separator character
+`[class]`     | matches any single non-path-separator character against a class of characters ([see below](#character-classes))
+`{alt1,...}`  | matches a sequence of characters if one of the comma-separated alternatives matches
 
-For this, the special wildcard `**` can be used to match arbitrary sub-directories: The pattern `foo/**/bar` matches:
+Any character with a special meaning can be escaped with a backslash (`\`).
 
-* `/dir1/foo/dir2/bar/file`
-* `/foo/bar/file`
-* `/tmp/foo/bar`
+#### Character Classes
+
+Character classes support the following:
+
+Class      | Meaning
+---------- | -------
+`[abc]`    | matches any single character within the set
+`[a-z]`    | matches any single character in the range
+`[^class]` | matches any single character which does *not* match the class
 
 #### Tagged patterns
 There are some common patterns that has been tagged, you can use them to simplify your configuration.
 
-* `_ALL_FILES_`: Matches all files, is the same as using `*`. 
+* `_ALL_FILES_`: Matches all files, is the same as using `**`. 
 * `_ALL_VIDEO_FILES_`: Matches all video file extensions supported by Google Photos.
 > Supported video extensions are sourced by [Google Photos support](https://support.google.com/googleone/answer/6193313) and it includes:
 > .mpg, .mod, .mmv, .tod, .wmv, .asf, .avi, .divx, .mov, .m4v, .3gp, .3g2, .mp4, .m2t, .m2ts, .mts, and .mkv files.
