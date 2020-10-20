@@ -22,7 +22,7 @@ var patternDictionary = map[string][]string{
 }
 
 // NewFilter returns an initialized Filter struct
-func NewFilter(includePatterns []string, excludePatterns []string, allowVideos bool) *Filter {
+func NewFilter(includePatterns []string, excludePatterns []string) *Filter {
 	var f Filter
 
 	// remove empty patterns
@@ -31,12 +31,6 @@ func NewFilter(includePatterns []string, excludePatterns []string, allowVideos b
 
 	if len(includePatterns) < 1 {
 		includePatterns = []string{"*"}
-	}
-
-	if allowVideos {
-		includePatterns = append(includePatterns, patternDictionary["_ALL_VIDEO_FILES_"]...)
-	} else {
-		excludePatterns = append(excludePatterns, patternDictionary["_ALL_VIDEO_FILES_"]...)
 	}
 
 	f.isIncluded = func(item string) bool {

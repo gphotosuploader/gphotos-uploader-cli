@@ -84,7 +84,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			SourceFolder:       config.SourceFolder,
 			CreateAlbum:        config.MakeAlbums.Enabled,
 			CreateAlbumBasedOn: config.MakeAlbums.Use,
-			Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns, config.UploadVideos),
+			Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns),
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.

@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 - Symlinks are now supported when scanning a folder. ([#190][190])
 > **Note:** This application does not terminate if there are any non-terminating loops in the file structure.
+### Removed
+- Deprecated `uploadVideos` configuration option. It was deprecated in [v0.4.0](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/tag/v0.4.0).
                                                     
 [i190]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/190
 

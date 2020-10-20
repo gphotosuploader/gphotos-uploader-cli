@@ -113,26 +113,6 @@ use: folderPath
 
 If set to true, media will be deleted from local disk after upload. 
 
-### `uploadVideos` 
-(Only for versions < v1.0.0)
-> **DEPRECATION NOTICE:** This option has been deprecated in v1.0.0 in favor of `_ALL_VIDEO_FILES_` tagged pattern used in `includePatterns` or `excludePatterns`.
-
-If set to `true`, video media items will be included (uploaded). If `false`, video files will be excluded.
-
-If you want to upload video files (`uploadVideos: true`), you can use:
-```
-includePatterns: [ "_ALL_VIDEO_FILES_" ]
-excludePatterns: []
-```
-
-If you don't want to upload video files (`uploadVideos: false`), you can use:
-```
-includePatterns: [ "_ALL_FILES_" ]
-excludePatterns: [ "_ALL_VIDEO_FILES_" ]
-```
-
-**NOTE:** It means that as far as `uploadVideos` options is present, video files are always included or excluded,
-
 ## Including and Excluding files
 You can include and exclude files by specifying the `includePatterns` and `excludePatterns` options. You can add one or more patterns separated by commas `,`. These patterns are always applied to `sourceFolder`.
 
