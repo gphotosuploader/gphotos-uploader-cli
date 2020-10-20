@@ -12,6 +12,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
@@ -84,7 +85,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			SourceFolder:       config.SourceFolder,
 			CreateAlbum:        config.MakeAlbums.Enabled,
 			CreateAlbumBasedOn: config.MakeAlbums.Use,
-			Filter:             upload.NewFilter(config.IncludePatterns, config.ExcludePatterns),
+			Filter:             filter.New(config.IncludePatterns, config.ExcludePatterns),
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.

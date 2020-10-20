@@ -3,6 +3,7 @@ package upload_test
 import (
 	"testing"
 
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/mock"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
@@ -41,7 +42,7 @@ func TestWalker_GetAllFiles(t *testing.T) {
 }
 
 func TestWalker_GetAllPNGFiles(t *testing.T) {
-	var includePatterns = []string{"*.png"}
+	var includePatterns = []string{"**/*.png"}
 	var excludePatterns = []string{""}
 
 	var want = map[string]bool{
@@ -148,7 +149,7 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 		SourceFolder:       "testdata",
 		CreateAlbum:        false,
 		CreateAlbumBasedOn: "",
-		Filter:             upload.NewFilter(includePatterns, excludePatterns),
+		Filter:             filter.New(includePatterns, excludePatterns),
 	}
 
 	foundItems, err := u.ScanFolder(&mock.Logger{})

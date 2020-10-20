@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/99designs/keyring v1.1.5
 	github.com/Flaque/filet v0.0.0-20190209224823-fc4d33cfcf93
+	github.com/bmatcuk/doublestar/v2 v2.0.1
 	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
