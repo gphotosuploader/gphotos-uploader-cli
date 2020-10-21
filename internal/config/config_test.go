@@ -176,7 +176,6 @@ func createTestConfiguration() *config.Config {
 			Use:     "folderName",
 		},
 		DeleteAfterUpload: false,
-		UploadVideos:      true,
 	}
 	c.Jobs = append(c.Jobs, job)
 	return c

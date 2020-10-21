@@ -34,7 +34,6 @@ func defaultSettings() *Config {
 			Use:     "folderName",
 		},
 		DeleteAfterUpload: false,
-		UploadVideos:      true,
 	}
 	c.Jobs = append(c.Jobs, job)
 	return &c
@@ -111,7 +110,6 @@ func (c *Config) String() string {
         use: %s
       }
       deleteAfterUpload: %t
-      uploadVideos: %t
       includePatterns: []
 	  excludePatterns: []
     }
@@ -125,8 +123,7 @@ func (c *Config) String() string {
 		c.Jobs[0].SourceFolder,
 		c.Jobs[0].MakeAlbums.Enabled,
 		c.Jobs[0].MakeAlbums.Use,
-		c.Jobs[0].DeleteAfterUpload,
-		c.Jobs[0].UploadVideos)
+		c.Jobs[0].DeleteAfterUpload)
 }
 
 func (c *Config) WriteToFile() error {

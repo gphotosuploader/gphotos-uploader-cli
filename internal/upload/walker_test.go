@@ -3,6 +3,7 @@ package upload_test
 import (
 	"testing"
 
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/mock"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
@@ -10,7 +11,6 @@ import (
 func TestWalker_GetAllFiles(t *testing.T) {
 	var includePatterns = []string{""}
 	var excludePatterns = []string{""}
-	var allowVideos = true
 
 	var want = map[string]bool{
 		"testdata/SampleAudio.mp3":                   true,
@@ -29,7 +29,7 @@ func TestWalker_GetAllFiles(t *testing.T) {
 		"testdata/folder-symlink/SampleJPGImage.jpg": true,
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)
+	got, err := getScanFolderResult(includePatterns, excludePatterns)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,9 +42,8 @@ func TestWalker_GetAllFiles(t *testing.T) {
 }
 
 func TestWalker_GetAllPNGFiles(t *testing.T) {
-	var includePatterns = []string{"*.png"}
+	var includePatterns = []string{"**/*.png"}
 	var excludePatterns = []string{""}
-	var allowVideos = false
 
 	var want = map[string]bool{
 		"testdata/SampleAudio.mp3":                   false,
@@ -63,7 +62,7 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 		"testdata/folder-symlink/SampleJPGImage.jpg": false,
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)
+	got, err := getScanFolderResult(includePatterns, excludePatterns)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +77,6 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	var includePatterns = []string{""}
 	var excludePatterns = []string{"folder1"}
-	var allowVideos = true
 
 	var want = map[string]bool{
 		"testdata/SampleAudio.mp3":                   true,
@@ -97,7 +95,7 @@ func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 		"testdata/folder-symlink/SampleJPGImage.jpg": true,
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns, allowVideos)
+	got, err := getScanFolderResult(includePatterns, excludePatterns)
 	if err != nil {
 		t.Fatalf("no error was expected at this point: err=%s", err)
 	}
@@ -134,7 +132,7 @@ func TestRelativePath(t *testing.T) {
 	}
 }
 
-func getScanFolderResult(includePatterns []string, excludePatterns []string, allowVideos bool) (map[string]bool, error) {
+func getScanFolderResult(includePatterns []string, excludePatterns []string) (map[string]bool, error) {
 	ft := &mock.FileTracker{
 		CacheAsAlreadyUploadedFn: func(path string) error {
 			return nil
@@ -151,7 +149,7 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string, all
 		SourceFolder:       "testdata",
 		CreateAlbum:        false,
 		CreateAlbumBasedOn: "",
-		Filter:             upload.NewFilter(includePatterns, excludePatterns, allowVideos),
+		Filter:             filter.New(includePatterns, excludePatterns),
 	}
 
 	foundItems, err := u.ScanFolder(&mock.Logger{})

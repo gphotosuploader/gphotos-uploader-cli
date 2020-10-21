@@ -20,7 +20,6 @@ type FolderUploadJob struct {
 	SourceFolder      string
 	MakeAlbums        MakeAlbums
 	DeleteAfterUpload bool
-	UploadVideos      bool
 	IncludePatterns   []string
 	ExcludePatterns   []string
 }

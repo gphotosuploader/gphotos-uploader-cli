@@ -1,10 +1,33 @@
-package upload_test
+package filter_test
 
 import (
 	"testing"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 )
+
+func TestFilter_Validate(t *testing.T) {
+	testCases := []struct {
+		name            string
+		includePatterns []string
+		excludePatterns []string
+		errExpected     bool
+	}{
+		{name: "empty patterns", includePatterns: []string{""}, excludePatterns: []string{""}, errExpected: false},
+		{name: "valid patterns", includePatterns: []string{"**"}, excludePatterns: []string{"**/*.png"}, errExpected: false},
+		{name: "invalid includePattern", includePatterns: []string{"[]a]"}, excludePatterns: []string{""}, errExpected: true},
+		{name: "invalid excludePattern", includePatterns: []string{""}, excludePatterns: []string{"[]a]"}, errExpected: true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			f := filter.New(tc.includePatterns, tc.excludePatterns)
+			if err := f.Validate(); err != nil && !tc.errExpected {
+				t.Errorf("error was not expected, got: %v", err)
+			}
+		})
+	}
+}
 
 func TestFilter_AllowAllFiles(t *testing.T) {
 	var testCases = []struct {
@@ -22,7 +45,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	}
 
 	t.Run("ByUsingEmptyPatterns", func(t *testing.T) {
-		f := upload.NewFilter([]string{""}, []string{""}, true)
+		f := filter.New([]string{""}, []string{""})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -32,7 +55,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingRepeatedEmptyPatterns", func(t *testing.T) {
-		f := upload.NewFilter([]string{"", "", ""}, []string{"", "", ""}, true)
+		f := filter.New([]string{"", "", ""}, []string{"", "", ""})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -42,7 +65,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingWildCardPattern", func(t *testing.T) {
-		f := upload.NewFilter([]string{"*"}, []string{""}, true)
+		f := filter.New([]string{"**"}, []string{""})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -52,7 +75,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f := upload.NewFilter([]string{"_ALL_FILES_"}, []string{""}, true)
+		f := filter.New([]string{"_ALL_FILES_"}, []string{""})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -79,7 +102,7 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
-	f := upload.NewFilter([]string{"*.png"}, []string{""}, false)
+	f := filter.New([]string{"**/*.png"}, []string{""})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -106,7 +129,7 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
-	f := upload.NewFilter([]string{"*.png", "*.jpg"}, []string{""}, false)
+	f := filter.New([]string{"**/*.png", "**/*.jpg"}, []string{""})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -131,7 +154,7 @@ func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", false},
 	}
 
-	f := upload.NewFilter([]string{"Sample*"}, []string{"*.mp3", "*.txt", "*.mp4"}, false)
+	f := filter.New([]string{"**/Sample*"}, []string{"**/*.mp3", "**/*.txt", "**/*.mp4"})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -157,7 +180,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 	}
 
 	t.Run("ByUsingWildcardPattern", func(t *testing.T) {
-		f := upload.NewFilter([]string{"*"}, []string{"*"}, false)
+		f := filter.New([]string{"**"}, []string{"**"})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -167,7 +190,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f := upload.NewFilter([]string{"_ALL_FILES_"}, []string{"_ALL_FILES_"}, false)
+		f := filter.New([]string{"_ALL_FILES_"}, []string{"_ALL_FILES_"})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -193,7 +216,7 @@ func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", false},
 	}
 
-	f := upload.NewFilter([]string{""}, []string{"*ScreenShot*"}, true)
+	f := filter.New([]string{""}, []string{"**/ScreenShot*"})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -218,18 +241,8 @@ func TestFilter_DisallowVideos(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", true},
 	}
 
-	t.Run("ByUsingParameter", func(t *testing.T) {
-		f := upload.NewFilter([]string{"*"}, []string{""}, false)
-		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
-		}
-	})
-
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f := upload.NewFilter([]string{"_ALL_FILES_"}, []string{"_ALL_VIDEO_FILES_"}, false)
+		f := filter.New([]string{"_ALL_FILES_"}, []string{"_ALL_VIDEO_FILES_"})
 		for _, tc := range testCases {
 			got := f.IsAllowed(tc.file)
 			if tc.out != got {
@@ -253,7 +266,7 @@ func TestFilter_IncludingPNGExceptAFolder(t *testing.T) {
 		{"testdata/folder2/SamplePNGImage.png", true},
 	}
 
-	f := upload.NewFilter([]string{"*.png"}, []string{"folder1"}, true)
+	f := filter.New([]string{"**/*.png"}, []string{"*/folder1/*"})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {
@@ -277,7 +290,7 @@ func TestFilter_ExcludingAFolder(t *testing.T) {
 	}
 
 	t.Run("ExcludingFolder1", func(t *testing.T) {
-		f := upload.NewFilter([]string{""}, []string{"folder1"}, true)
+		f := filter.New([]string{""}, []string{"**/folder1/*"})
 		for _, tc := range testCases {
 			got := f.IsExcluded(tc.file)
 			if tc.out != got {
