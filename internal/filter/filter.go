@@ -58,11 +58,7 @@ func (f *Filter) IsExcluded(fp string) bool {
 
 // matchAnyPattern returns true if str matches one of the patterns. Empty patterns are ignored.
 func matchAnyPattern(patterns []string, str string) (matched bool, err error) {
-	for _, pat := range patterns {
-		if pat == "" {
-			continue
-		}
-
+	for _, pat := range deleteEmpty(patterns) {
 		matched, err := doublestar.Match(pat, str)
 		if err != nil {
 			return false, err

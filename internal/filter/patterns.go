@@ -11,22 +11,24 @@ var patternDictionary = map[string][]string{
 
 // translatePatterns returns an array of patterns once tagged patterns has been
 // resolved using patternDictionary.
-func translatePatterns(pat []string) []string {
+func translatePatterns(patterns []string) []string {
 	var r []string
-	for _, p := range pat {
-		if p == "" {
-			continue
-		}
-		hasTag := false
-		for tag, val := range patternDictionary {
-			if p == tag {
-				r = append(r, val...)
-				hasTag = true
-				break
-			}
-		}
-		if !hasTag {
+	for _, p := range deleteEmpty(patterns) {
+		if val, exist := patternDictionary[p]; exist {
+			r = append(r, val...)
+		} else {
 			r = append(r, p)
+		}
+	}
+	return r
+}
+
+// deleteEmpty removes empty string from an array.
+func deleteEmpty (s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
 		}
 	}
 	return r
