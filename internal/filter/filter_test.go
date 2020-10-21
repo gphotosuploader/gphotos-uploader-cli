@@ -6,6 +6,29 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 )
 
+func TestFilter_Validate(t *testing.T) {
+	testCases := []struct {
+		name            string
+		includePatterns []string
+		excludePatterns []string
+		errExpected     bool
+	}{
+		{name: "empty patterns", includePatterns: []string{""}, excludePatterns: []string{""}, errExpected: false},
+		{name: "valid patterns", includePatterns: []string{"**"}, excludePatterns: []string{"**/*.png"}, errExpected: false},
+		{name: "invalid includePattern", includePatterns: []string{"[]a]"}, excludePatterns: []string{""}, errExpected: true},
+		{name: "invalid excludePattern", includePatterns: []string{""}, excludePatterns: []string{"[]a]"}, errExpected: true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			f := filter.New(tc.includePatterns, tc.excludePatterns)
+			if err := f.Validate(); err != nil && !tc.errExpected {
+				t.Errorf("error was not expected, got: %v", err)
+			}
+		})
+	}
+}
+
 func TestFilter_AllowAllFiles(t *testing.T) {
 	var testCases = []struct {
 		file string
