@@ -1,8 +1,6 @@
-# Table of Contents
-1. [Configuration options](#configuration-options)
-2. [Environment variables](#environment-variables)
+# Configuration
 
-# Configuration options
+## Configuration options
 
 > The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.gphotos-uploader-cli`.
 
@@ -30,7 +28,7 @@ Example configuration file:
   ]
 }
 ```
-### SecretsBackendType
+### SecretsBackendType <!-- {docsify-ignore} -->
 This option allows you to choose which backend will be used for secrets storage. You set `auto` to allow the application decide which one will be used given your environment.
 
 Available options for secrets backend are:
@@ -64,7 +62,7 @@ var backendOrder = []BackendType{
 }
 ```
 
-## APIAppCredentials
+## APIAppCredentials <!-- {docsify-ignore} -->
 
 Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and involves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
 
@@ -78,18 +76,18 @@ Before you can use `gphotos-uploader-cli`, you must enable the Photos Library AP
 1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
 1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
 
-## jobs
+## jobs <!-- {docsify-ignore} -->
 List of folders to upload and upload options for each folder.
 
-### `account`
+### account
 Needs to be unique. It's the Google Account identity (e-mail address) where the files of this job are going to be uploaded.
 
-### `sourceFolder`
+### sourceFolder
 The folder to upload from.
 Must be an absolute path. Can expand the home folder tilde shorthand.
 > The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
-### `makeAlbums`
+### makeAlbums
 If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`. The `sourceFolder` is not taking into account, only child folders will be.
 
 Available options are:
@@ -108,7 +106,7 @@ use: folderPath
 # album name: bar_xyz
 ```
 
-### `deleteAfterUpload`
+### deleteAfterUpload
 (Only for versions >= v0.6.0)
 
 If set to true, media will be deleted from local disk after upload. 
@@ -159,9 +157,9 @@ There are some common patterns that has been tagged, you can use them to simplif
 > Supported video extensions are sourced by [Google Photos support](https://support.google.com/googleone/answer/6193313) and it includes:
 > .mpg, .mod, .mmv, .tod, .wmv, .asf, .avi, .divx, .mov, .m4v, .3gp, .3g2, .mp4, .m2t, .m2ts, .mts, and .mkv files.
 
-# Environment variables
+## Environment variables
 
-## GPHOTOS_CLI_TOKENSTORE_KEY
+### GPHOTOS_CLI_TOKENSTORE_KEY
 
 This variable is used to read the token store key for opening the secrets storage. It works when `SecretsBackendType: file` and it is intended to be used by headless runners.
 

@@ -8,7 +8,7 @@ Here are the steps for each of them:
 ### Install the pre-compiled binary
 
 **homebrew tap** (only on macOS for now):
-```
+```bash
 $ brew install gphotosuploader/tap/gphotos-uploader-cli
 ```
 
@@ -22,7 +22,7 @@ Download the pre-compiled binaries from the [releases page](https://github.com/g
 
 You can compile the source code in your system.
 
-```
+```bash
 $ git clone https://github.com/gphotosuploader/gphotos-uploader-cli
 $ cd gphotos-uploader-cli
 $ make build
@@ -30,13 +30,13 @@ $ make build
 
 Or you can use `go get` if you prefer it:
 
-```
+```bash
 $ go get github.com/gphotosuploader/gphotos-uploader-cli
 ```
 
 ## Configure
 First initialize the config file using this command:
-```
+```bash
 $ gphotos-uploader-cli init
 ```
 
@@ -46,7 +46,7 @@ You must review the [documentation](configuration.md) to specify your **Google P
 
 ## Run
 Once it's configured you can start uploading files in this way:
-``` 
+```bash 
 $ gphotos-uploader-cli push
 ```
 
