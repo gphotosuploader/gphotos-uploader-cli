@@ -10,11 +10,11 @@ type Filter struct {
 	excludePatterns []string
 }
 
-// New returns an initialized Filter struct. If includePatterns is empty, _ALL_FILES_ tagged pattern is used instead.
+// New returns an initialized Filter struct. If includePatterns is empty, _IMAGE_EXTENSIONS_ tagged pattern is used instead.
 func New(includePatterns []string, excludePatterns []string) *Filter {
 	includePatterns = translatePatterns(includePatterns)
 	if len(includePatterns) == 0 {
-		includePatterns = patternDictionary["_ALL_FILES_"]
+		includePatterns = patternDictionary["_IMAGE_EXTENSIONS_"]
 	}
 
 	f := Filter{

@@ -29,17 +29,17 @@ func TestFilter_Validate(t *testing.T) {
 	}
 }
 
-func TestFilter_AllowAllFiles(t *testing.T) {
+func TestFilter_AllowDefaultFiles(t *testing.T) {
 	var testCases = []struct {
 		file string
 		out  bool
 	}{
-		{"testdata/SampleAudio.mp3", true},
+		{"testdata/SampleAudio.mp3", false},
 		{"testdata/SampleJPGImage.jpg", true},
 		{"testdata/SamplePNGImage.png", true},
-		{"testdata/SampleSVGImage.svg", true},
-		{"testdata/SampleText.txt", true},
-		{"testdata/SampleVideo.mp4", true},
+		{"testdata/SampleSVGImage.svg", false},
+		{"testdata/SampleText.txt", false},
+		{"testdata/SampleVideo.mp4", false},
 		{"testdata/ScreenShotJPG.jpg", true},
 		{"testdata/ScreenShotPNG.png", true},
 	}
@@ -63,6 +63,32 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
+		f := filter.New([]string{"_IMAGE_EXTENSIONS_"}, []string{""})
+		for _, tc := range testCases {
+			got := f.IsAllowed(tc.file)
+			if tc.out != got {
+				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
+			}
+		}
+	})
+}
+
+func TestFilter_AllowAllFiles(t *testing.T) {
+	var testCases = []struct {
+		file string
+		out  bool
+	}{
+		{"testdata/SampleAudio.mp3", true},
+		{"testdata/SampleJPGImage.jpg", true},
+		{"testdata/SamplePNGImage.png", true},
+		{"testdata/SampleSVGImage.svg", true},
+		{"testdata/SampleText.txt", true},
+		{"testdata/SampleVideo.mp4", true},
+		{"testdata/ScreenShotJPG.jpg", true},
+		{"testdata/ScreenShotPNG.png", true},
+	}
 
 	t.Run("ByUsingWildCardPattern", func(t *testing.T) {
 		f := filter.New([]string{"**"}, []string{""})
@@ -216,7 +242,7 @@ func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", false},
 	}
 
-	f := filter.New([]string{""}, []string{"**/ScreenShot*"})
+	f := filter.New([]string{"_ALL_FILES_"}, []string{"**/ScreenShot*"})
 	for _, tc := range testCases {
 		got := f.IsAllowed(tc.file)
 		if tc.out != got {

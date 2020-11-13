@@ -9,7 +9,7 @@ import (
 )
 
 func TestWalker_GetAllFiles(t *testing.T) {
-	var includePatterns = []string{""}
+	var includePatterns = []string{"_ALL_FILES_"}
 	var excludePatterns = []string{""}
 
 	var want = map[string]bool{
@@ -75,7 +75,7 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 }
 
 func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
-	var includePatterns = []string{""}
+	var includePatterns = []string{"_ALL_FILES_"}
 	var excludePatterns = []string{"folder1"}
 
 	var want = map[string]bool{

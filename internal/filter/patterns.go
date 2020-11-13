@@ -6,6 +6,15 @@ var patternDictionary = map[string][]string{
 	// _ALL_FILES match with all file extensions
 	"_ALL_FILES_": {"**"},
 
+	// _IMAGE_EXTENSIONS_ match with the supported photos file type extensions
+	// Source: https://support.google.com/photos/answer/6193313
+	"_IMAGE_EXTENSIONS_": {"**/*.jpg", "**/*.JPG", "**/*.jpeg", "**/*.JPEG", "**/*.png", "**/*.PNG", "**/*.webp", "**/*.WEBP", "**/*.gif", "**/*.GIF"},
+
+	// _RAW_EXTENSIONS_ match with the RAW file type extensions
+	// Source: https://support.google.com/photos/answer/6193313
+	// Source: https://en.wikipedia.org/wiki/Raw_image_format#Raw_filename_extensions_and_respective_camera_manufacturers
+	"_RAW_EXTENSIONS_": {"**/*.arw", "**/*.srf", "**/*.sr2", "**/*.crw", "**/*.cr2", "**/*.cr3", "**/*.dng", "**/*.nef", "**/*.nrw", "**/*.orf", "**/*.raf", "**/*.raw", "**/*.rw2"},
+
 	// _ALL_VIDEO_FILES match with all video file extensions supported by Google Photos
 	// Source: https://support.google.com/photos/answer/6193313.
 	"_ALL_VIDEO_FILES_": {"**/*.mpg", "**/*.mod", "**/*.mmv", "**/*.tod", "**/*.wmv", "**/*.asf", "**/*.avi", "**/*.divx", "**/*.mov", "**/*.m4v", "**/*.3gp", "**/*.3g2", "**/*.mp4", "**/*.m2t", "**/*.m2ts", "**/*.mts", "**/*.mkv",},
