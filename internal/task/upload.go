@@ -2,25 +2,17 @@ package task
 
 import (
 	"context"
-	"fmt"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
-	"github.com/gphotosuploader/googlemirror/api/photoslibrary/v1"
+	"github.com/gphotosuploader/google-photos-api-client-go/v2/albums"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
-type GooglePĥotosService interface {
-	FindAlbum(ctx context.Context, title string) (*photoslibrary.Album, error)
-	CreateAlbum(ctx context.Context, title string) (*photoslibrary.Album, error)
-
-	AddMediaToAlbum(ctx context.Context, item gphotos.UploadItem, album *photoslibrary.Album) (*photoslibrary.MediaItem, error)
-}
-
 type EnqueuedUpload struct {
 	Context      context.Context
-	PhotosClient GooglePĥotosService
+	PhotosClient *gphotos.Client
 	FileTracker  upload.FileTracker
 	Logger       log.Logger
 
@@ -65,24 +57,22 @@ func (job *EnqueuedUpload) addMediaToAlbum(item upload.FileItem) error {
 	if err != nil {
 		return err
 	}
-	if _, err = job.PhotosClient.AddMediaToAlbum(job.Context, item, album); err != nil {
+	if _, err = job.PhotosClient.UploadFileToAlbum(job.Context, album.ID, item.Path); err != nil {
 		return err
 	}
 	return nil
 }
 
 // getOrCreateAlbum returns the created (or existent) album in PhotosService.
-func (job *EnqueuedUpload) getOrCreateAlbum() (*photoslibrary.Album, error) {
-	var nullAlbum = &photoslibrary.Album{}
-
+func (job *EnqueuedUpload) getOrCreateAlbum() (*albums.Album, error) {
 	// Returns if empty to avoid a PhotosService call.
 	if job.AlbumName == "" {
-		return nullAlbum, nil
+		return &albums.Album{}, nil
 	}
 
-	album, err := job.PhotosClient.CreateAlbum(job.Context, job.AlbumName)
-	if err != nil {
-		return nullAlbum, fmt.Errorf("album creation failed: name=%s, error=%s", job.AlbumName, err)
+	if album, err := job.PhotosClient.Albums.GetByTitle(job.Context, job.AlbumName); err == nil {
+		return album, nil
 	}
-	return album, nil
+
+	return  job.PhotosClient.Albums.Create(job.Context, job.AlbumName)
 }

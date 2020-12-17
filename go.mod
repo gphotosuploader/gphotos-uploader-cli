@@ -12,8 +12,8 @@ require (
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/facebookgo/testname v0.0.0-20150612200628-5443337c3a12 // indirect
-	github.com/gphotosuploader/google-photos-api-client-go/v2 v2.0.0-beta-1
-	github.com/gphotosuploader/googlemirror v0.4.0
+	github.com/gphotosuploader/google-photos-api-client-go/v2 v2.0.0
+	github.com/gphotosuploader/googlemirror v0.5.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
