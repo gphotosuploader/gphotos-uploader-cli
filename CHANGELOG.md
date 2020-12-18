@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 1.3.0
+## 2.0.0
+> This is a **major upgrade** and it has some **non-backwards compatible changes**:
+> - `includePatterns` and `excludePatterns` configuration options has changed.
+> - `includePatterns` has a new default (`_IMAGE_EXTENSIONS_`).
+> - `uploadVideos` configuration option has been removed.
 ### Added
 - Two new tagged patterns has been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249])
 - Retries management. It's implementing exponential back-off with a maximum of 4 retries by default.  ([#253][i253]) 
