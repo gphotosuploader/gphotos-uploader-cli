@@ -14,6 +14,7 @@ While the official tool only supports Mac OS and Windows, this brings an uploade
 - **Track already uploaded files**: uploads only new files to save bandwidth.
 - **Caches request results**: keep a local cache to reduce number of queries to Google Photos.
 - **Secure**: logs you into Google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
+- **Retryable**: all the requests are retried using exponential back-off as is recommended by [Google Photos best practices](https://developers.google.com/photos/library/guides/best-practices#error-handling).
 
 ## Limitations
 Only images and videos can be uploaded. If you attempt to upload non videos or images or formats that Google Photos doesn't understand, `gphotos-uploader-cli` will upload the file, then Google Photos will give an error when it is put turned into a media item.
