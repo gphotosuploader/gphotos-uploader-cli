@@ -17,6 +17,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
 )
 
@@ -80,10 +81,18 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	// launch all folder upload jobs
 	var totalItems int
 	for _, config := range cfg.Jobs {
+		srcFolder, err := filesystem.AbsolutePath(config.SourceFolder)
+		if err != nil {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", config.SourceFolder, err)
+		}
+		if !filesystem.IsDir(srcFolder) {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s", srcFolder)
+		}
+
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
-			SourceFolder:       config.SourceFolder,
+			SourceFolder:       srcFolder,
 			CreateAlbum:        config.MakeAlbums.Enabled,
 			CreateAlbumBasedOn: config.MakeAlbums.Use,
 			Filter:             filter.New(config.IncludePatterns, config.ExcludePatterns),
