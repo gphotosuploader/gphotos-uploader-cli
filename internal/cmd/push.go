@@ -6,6 +6,7 @@ import (
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
+	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
@@ -103,7 +104,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		photosService, err := gphotos.NewClient(c, gphotos.WithSessionStorer(cli.UploadTracker))
+		u, err := resumable.NewResumableUploader(c, cli.UploadTracker)
+		if err != nil {
+			return err
+		}
+		photosService, err := gphotos.NewClient(c, gphotos.WithUploader(u))
 		if err != nil {
 			return err
 		}
