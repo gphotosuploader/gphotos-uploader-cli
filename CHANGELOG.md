@@ -3,19 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 1.3.0
 ### Added
-- Two new tagged patterns has been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249]) 
+- Two new tagged patterns has been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249])
+- Retries management. It's implementing exponential back-off with a maximum of 4 retries by default.  ([#253][i253]) 
 ### Changed
 - `includePatterns` and `excludePatterns` configuration options has changed. It's using a new format, please review de [configuration documentation](.docs/configuration.md).
 - By default, if `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used. ([#249][i249])  
+- Bump `google-photos-api-client-go` from `v2.0.0-beta-1` to `v2.0.0`.
 ### Fixed
 - Symlinks are now supported when scanning a folder. ([#190][i190])
 > **Note:** This application does not terminate if there are any non-terminating loops in the file structure.
 - `includePatterns` works as expected, with a clearer (I hope so) format. ([#152][i152])  
 ### Removed
 - Deprecated `uploadVideos` configuration option. It was deprecated in [v0.4.0](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/tag/v0.4.0).
-                                          
+
+[i253]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/253                                          
 [i249]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/249                                               
 [i190]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/190
 [i152]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/152
