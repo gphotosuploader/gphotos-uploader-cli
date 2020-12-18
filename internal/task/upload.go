@@ -3,18 +3,28 @@ package task
 import (
 	"context"
 
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/albums"
+	"github.com/gphotosuploader/google-photos-api-client-go/v2/media_items"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
+type AlbumsService interface {
+	Create(ctx context.Context, title string) (*albums.Album, error)
+	GetByTitle(ctx context.Context, title string) (*albums.Album, error)
+}
+
+type UploadsService interface {
+	UploadFileToAlbum(ctx context.Context, albumId string, filePath string) (media_items.MediaItem, error)
+}
+
 type EnqueuedUpload struct {
-	Context      context.Context
-	PhotosClient *gphotos.Client
-	FileTracker  upload.FileTracker
-	Logger       log.Logger
+	Context     context.Context
+	Albums      AlbumsService
+	Uploads     UploadsService
+	FileTracker upload.FileTracker
+	Logger      log.Logger
 
 	Path            string
 	AlbumName       string
@@ -57,7 +67,7 @@ func (job *EnqueuedUpload) addMediaToAlbum(item upload.FileItem) error {
 	if err != nil {
 		return err
 	}
-	if _, err = job.PhotosClient.UploadFileToAlbum(job.Context, album.ID, item.Path); err != nil {
+	if _, err = job.Uploads.UploadFileToAlbum(job.Context, album.ID, item.Path); err != nil {
 		return err
 	}
 	return nil
@@ -70,9 +80,9 @@ func (job *EnqueuedUpload) getOrCreateAlbum() (*albums.Album, error) {
 		return &albums.Album{}, nil
 	}
 
-	if album, err := job.PhotosClient.Albums.GetByTitle(job.Context, job.AlbumName); err == nil {
+	if album, err := job.Albums.GetByTitle(job.Context, job.AlbumName); err == nil {
 		return album, nil
 	}
 
-	return  job.PhotosClient.Albums.Create(job.Context, job.AlbumName)
+	return job.Albums.Create(job.Context, job.AlbumName)
 }
