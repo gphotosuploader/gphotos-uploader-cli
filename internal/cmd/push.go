@@ -120,10 +120,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 				uploadQueue.Submit(&task.NoOpJob{})
 			} else {
 				uploadQueue.Submit(&task.EnqueuedUpload{
-					Context:      ctx,
-					PhotosClient: photosService,
-					FileTracker:  cli.FileTracker,
-					Logger:       cli.Logger,
+					Context:     ctx,
+					Albums:      photosService.Albums,
+					Uploads:     photosService,
+					FileTracker: cli.FileTracker,
+					Logger:      cli.Logger,
 
 					Path:            i.Path,
 					AlbumName:       i.AlbumName,
