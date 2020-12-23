@@ -160,27 +160,6 @@ func TestConfig_Validate(t *testing.T) {
 	})
 }
 
-func createTestConfiguration() *config.Config {
-	c := &config.Config{}
-	c.SecretsBackendType = "auto"
-	c.APIAppCredentials = config.APIAppCredentials{
-		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-	}
-	c.Jobs = make([]config.FolderUploadJob, 0)
-	job := config.FolderUploadJob{
-		Account:      "youremail@gmail.com",
-		SourceFolder: "~/folder/to/upload",
-		MakeAlbums: config.MakeAlbums{
-			Enabled: true,
-			Use:     "folderName",
-		},
-		DeleteAfterUpload: false,
-	}
-	c.Jobs = append(c.Jobs, job)
-	return c
-}
-
 func TestConfigExists(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-test.%d", time.Now().UnixNano()))
 	if err := os.RemoveAll(dir); err != nil {
@@ -286,3 +265,34 @@ func TestLoadConfigAndValidate(t *testing.T) {
 		}
 	})
 }
+
+func createTestConfiguration() *config.Config {
+	return &config.Config{
+		SecretsBackendType: "auto",
+		APIAppCredentials: config.APIAppCredentials{
+			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+		},
+		Jobs: []config.FolderUploadJob{
+			{
+				Account:      "youremail@gmail.com",
+				SourceFolder: "~/folder/to/upload",
+				MakeAlbums: config.MakeAlbums{
+					Enabled: true,
+					Use:     "folderName",
+				},
+				DeleteAfterUpload: false,
+			},
+		},
+	}
+}
+
+func assertExpectedError(t *testing.T, isExpected bool, err error) {
+	if isExpected && err == nil {
+		t.Fatalf("error was expected, but not produced")
+	}
+	if !isExpected && err != nil {
+		t.Fatalf("error was not expected, err: %s", err)
+	}
+}
+

@@ -6,7 +6,6 @@ require (
 	github.com/99designs/keyring v1.1.5
 	github.com/Flaque/filet v0.0.0-20190209224823-fc4d33cfcf93
 	github.com/bmatcuk/doublestar/v2 v2.0.1
-	github.com/client9/xson v0.0.0-20180321172152-0e50cdfc08c0
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
@@ -14,7 +13,7 @@ require (
 	github.com/facebookgo/testname v0.0.0-20150612200628-5443337c3a12 // indirect
 	github.com/gphotosuploader/google-photos-api-client-go/v2 v2.0.0
 	github.com/gphotosuploader/googlemirror v0.5.0
-	github.com/hjson/hjson-go v3.1.0+incompatible // indirect
+	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect

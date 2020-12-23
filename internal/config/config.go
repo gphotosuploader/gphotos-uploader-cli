@@ -1,13 +1,16 @@
 package config
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/client9/xson/hjson"
+	"github.com/hjson/hjson-go"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 )
@@ -17,26 +20,14 @@ const (
 	DefaultConfigFilename = "config.hjson"
 )
 
-// defaultSettings() returns a *Config with the default settings of the application.
-func defaultSettings() *Config {
-	var c Config
-	c.SecretsBackendType = "auto"
-	c.APIAppCredentials = APIAppCredentials{
-		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-	}
-	c.Jobs = make([]FolderUploadJob, 0)
-	job := FolderUploadJob{
-		Account:      "youremail@gmail.com",
-		SourceFolder: "~/folder/to/upload",
-		MakeAlbums: MakeAlbums{
-			Enabled: true,
-			Use:     "folderName",
-		},
-		DeleteAfterUpload: false,
-	}
-	c.Jobs = append(c.Jobs, job)
-	return &c
+// ParseError denotes failing to parse configuration file.
+type ParseError struct {
+	err error
+}
+
+// Error returns the formatted configuration error.
+func (e ParseError) Error() string {
+	return fmt.Sprintf("While parsing config: %s", e.err.Error())
 }
 
 // NewConfig returns a *Config with the default settings of the application.
@@ -67,7 +58,7 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s", item.SourceFolder)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -146,16 +137,41 @@ func (c *Config) WriteToFile() error {
 func LoadConfigFromFile(dir string) (*Config, error) {
 	cfg := NewConfig(dir)
 
-	data, err := ioutil.ReadFile(cfg.ConfigFile())
+	file, err := ioutil.ReadFile(cfg.ConfigFile())
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration: file=%s, err=%v", cfg.ConfigFile(), err)
 	}
 
-	if err := hjson.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to decode configuration data: err=%v", err)
+	if err := unmarshalReader(bytes.NewReader(file), cfg); err != nil {
+		return nil, ParseError{err}
 	}
 
 	return cfg, nil
+}
+
+// unmarshalReader unmarshal HJSON data.
+func unmarshalReader(in io.Reader, c interface{}) error {
+	buf := new(bytes.Buffer)
+	_, _ = buf.ReadFrom(in)
+
+	b, err := convertHjsonToJson(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	// unmarshal
+	return json.Unmarshal(b, c)
+}
+
+// convertHjsonToJson converts from HJSON to JSON.
+func convertHjsonToJson(in []byte) ([]byte, error) {
+	var raw map[string]interface{}
+	if err := hjson.Unmarshal(in, &raw); err != nil {
+		return nil, err
+	}
+
+	// convert to JSON
+	return json.Marshal(raw)
 }
 
 // LoadConfigAndValidate reads configuration from the specified directory and validate it.
@@ -165,7 +181,7 @@ func LoadConfigAndValidate(dir string) (*Config, error) {
 		return cfg, fmt.Errorf("could't read configuration: file=%s, err=%s", dir, err)
 	}
 	if err = cfg.Validate(); err != nil {
-		return cfg, fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
+		return cfg, ParseError{err}
 	}
 	return cfg, nil
 }
@@ -193,4 +209,26 @@ func ConfigExists(path string) bool {
 	}
 
 	return false
+}
+
+// defaultSettings() returns a *Config with the default settings of the application.
+func defaultSettings() *Config {
+	return &Config{
+		SecretsBackendType: "auto",
+		APIAppCredentials: APIAppCredentials{
+			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+		},
+		Jobs: []FolderUploadJob{
+			{
+				Account:      "youremail@gmail.com",
+				SourceFolder: "~/folder/to/upload",
+				MakeAlbums: MakeAlbums{
+					Enabled: true,
+					Use:     "folderName",
+				},
+				DeleteAfterUpload: false,
+			},
+		},
+	}
 }
