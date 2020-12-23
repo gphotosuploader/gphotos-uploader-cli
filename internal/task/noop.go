@@ -1,6 +1,6 @@
 package task
 
-type NoOpJob struct {}
+type NoOpJob struct{}
 
 func (job *NoOpJob) Process() error {
 	return nil

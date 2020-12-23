@@ -66,6 +66,3 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	return nil
 }
-
-
-
