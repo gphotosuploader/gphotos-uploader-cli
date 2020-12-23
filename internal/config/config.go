@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	// DefaultConfigFilename is the default config file name to use
+	// DefaultConfigFilename is the default config File name to use
 	DefaultConfigFilename = "config.hjson"
 )
 
-// ParseError denotes failing to parse configuration file.
+// ParseError denotes failing to parse configuration File.
 type ParseError struct {
 	err error
 }
@@ -40,6 +40,18 @@ func NewConfig(dir string) *Config {
 	cfg.ConfigPath = absPath
 
 	return cfg
+}
+
+// LoadConfigAndValidate reads configuration from the specified directory and validate it.
+func LoadConfigAndValidate(dir string) (*Config, error) {
+	cfg, err := LoadConfigFromFile(dir)
+	if err != nil {
+		return cfg, fmt.Errorf("could't read configuration: File=%s, err=%s", dir, err)
+	}
+	if err = cfg.Validate(); err != nil {
+		return cfg, ParseError{err}
+	}
+	return cfg, nil
 }
 
 func (c *Config) Validate() error {
@@ -72,13 +84,13 @@ func (c *Config) ResumableUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "resumable_uploads.db")
 }
 
-// ConfigFile return the path of the configuration file.
-func (c *Config) ConfigFile() string {
+// File return the path of the configuration File.
+func (c *Config) File() string {
 	return path.Join(c.ConfigPath, DefaultConfigFilename)
 }
 
 // KeyringDir returns the path of the folder where keyring will be stored.
-// This is only used if 'SecretsBackendType=file'
+// This is only used if 'SecretsBackendType=File'
 func (c *Config) KeyringDir() string {
 	return c.ConfigPath
 }
@@ -118,7 +130,7 @@ func (c *Config) String() string {
 }
 
 func (c *Config) WriteToFile() error {
-	fh, err := os.Create(c.ConfigFile())
+	fh, err := os.Create(c.File())
 	if err != nil {
 		return err
 	}
@@ -126,20 +138,20 @@ func (c *Config) WriteToFile() error {
 
 	_, err = fh.WriteString(c.String())
 	if err != nil {
-		return fmt.Errorf("failed to write configuration: file=%s, err=%v", c.ConfigFile(), err)
+		return fmt.Errorf("failed to write configuration: File=%s, err=%v", c.File(), err)
 	}
 
 	return fh.Sync()
 }
 
 // LoadConfigFromFile reads configuration from the specified directory.
-// It reads a HJSON file (given by config.ConfigFile() func) and decodes it.
+// It reads a HJSON File (given by config.File() func) and decodes it.
 func LoadConfigFromFile(dir string) (*Config, error) {
 	cfg := NewConfig(dir)
 
-	file, err := ioutil.ReadFile(cfg.ConfigFile())
+	file, err := ioutil.ReadFile(cfg.File())
 	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration: file=%s, err=%v", cfg.ConfigFile(), err)
+		return nil, fmt.Errorf("failed to read configuration: File=%s, err=%v", cfg.File(), err)
 	}
 
 	if err := unmarshalReader(bytes.NewReader(file), cfg); err != nil {
@@ -174,19 +186,7 @@ func convertHjsonToJson(in []byte) ([]byte, error) {
 	return json.Marshal(raw)
 }
 
-// LoadConfigAndValidate reads configuration from the specified directory and validate it.
-func LoadConfigAndValidate(dir string) (*Config, error) {
-	cfg, err := LoadConfigFromFile(dir)
-	if err != nil {
-		return cfg, fmt.Errorf("could't read configuration: file=%s, err=%s", dir, err)
-	}
-	if err = cfg.Validate(); err != nil {
-		return cfg, ParseError{err}
-	}
-	return cfg, nil
-}
-
-// InitConfigFile creates a config file with default settings.
+// InitConfigFile creates a config File with default settings.
 func InitConfigFile(dir string) error {
 	cfg := NewConfig(dir)
 
@@ -197,8 +197,8 @@ func InitConfigFile(dir string) error {
 	return cfg.WriteToFile()
 }
 
-// ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path
-func ConfigExists(path string) bool {
+// Exists checks if a gphotos-uplaoder-cli configuration exists at a certain path
+func Exists(path string) bool {
 	cfgFile, err := filesystem.AbsolutePath(filepath.Join(path, DefaultConfigFilename))
 	if err != nil {
 		return false

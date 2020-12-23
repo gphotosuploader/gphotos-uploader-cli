@@ -19,13 +19,13 @@ func TestInitConfig(t *testing.T) {
 	t.Run("TestInitConfigFile", func(t *testing.T) {
 		err := config.InitConfigFile(dir)
 		if err != nil {
-			t.Errorf("could not create init config file: %v", err)
+			t.Errorf("could not create init config File: %v", err)
 		}
 	})
 	defer func() {
 		err := os.RemoveAll(dir)
 		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+			t.Errorf("could not remove test config File (dir: %s): %v", dir, err)
 		}
 	}()
 }
@@ -37,13 +37,13 @@ func TestInitAndLoadConfig(t *testing.T) {
 	t.Run("TestInitConfigFile", func(t *testing.T) {
 		err := config.InitConfigFile(dir)
 		if err != nil {
-			t.Errorf("could not create init config file: %v", err)
+			t.Errorf("could not create init config File: %v", err)
 		}
 	})
 	defer func() {
 		err := os.RemoveAll(dir)
 		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+			t.Errorf("could not remove test config File (dir: %s): %v", dir, err)
 		}
 	}()
 
@@ -51,10 +51,10 @@ func TestInitAndLoadConfig(t *testing.T) {
 	want := createTestConfiguration()
 
 	t.Run("TestLoadConfigFile", func(t *testing.T) {
-		// test load config file
+		// test load config File
 		got, err := config.LoadConfigFromFile(dir)
 		if err != nil {
-			t.Errorf("could not load config file, got an error: %v", err)
+			t.Errorf("could not load config File, got an error: %v", err)
 		}
 
 		// check that both configuration are equal
@@ -73,12 +73,12 @@ func TestLoadConfigWithNonExistentFile(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 	err := os.RemoveAll(dir)
 	if err != nil {
-		t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+		t.Errorf("could not remove test config File (dir: %s): %v", dir, err)
 	}
 
 	_, err = config.LoadConfigFromFile(dir)
 	if err == nil {
-		t.Error("an error loading a non existent file was expected")
+		t.Error("an error loading a non existent File was expected")
 	}
 }
 
@@ -129,7 +129,7 @@ func TestConfig_Validate(t *testing.T) {
 	defer func() {
 		err := os.RemoveAll(dir)
 		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
+			t.Errorf("could not remove test config File (dir: %s): %v", dir, err)
 		}
 	}()
 
@@ -167,8 +167,8 @@ func TestConfigExists(t *testing.T) {
 	}
 
 	t.Run("TestNonExistingConfiguration", func(t *testing.T) {
-		if config.ConfigExists(dir) {
-			t.Errorf("config file exists. That was not expected: dir=%s", dir)
+		if config.Exists(dir) {
+			t.Errorf("config File exists. That was not expected: dir=%s", dir)
 		}
 	})
 
@@ -184,7 +184,7 @@ func TestConfigExists(t *testing.T) {
 	cfgFile := filepath.Join(dir, "config.hjson")
 	fh, err := os.Create(cfgFile)
 	if err != nil {
-		t.Fatalf("failed to create config: file=%s, err=%v", cfgFile, err)
+		t.Fatalf("failed to create config: File=%s, err=%v", cfgFile, err)
 	}
 	defer func() {
 		if err := fh.Close(); err != nil {
@@ -193,12 +193,12 @@ func TestConfigExists(t *testing.T) {
 	}()
 
 	if _, err = fh.WriteString("testTest"); err != nil {
-		t.Fatalf("failed to write configuration: file=%s, err=%v", cfgFile, err)
+		t.Fatalf("failed to write configuration: File=%s, err=%v", cfgFile, err)
 	}
 
 	t.Run("TestExistingConfiguration", func(t *testing.T) {
-		if !config.ConfigExists(dir) {
-			t.Errorf("config file doesn't exist. That was not expected: dir=%s", dir)
+		if !config.Exists(dir) {
+			t.Errorf("config File doesn't exist. That was not expected: dir=%s", dir)
 		}
 	})
 }
@@ -215,7 +215,7 @@ func TestLoadConfigAndValidate(t *testing.T) {
 	}
 
 	t.Run("WithValidSourceFolder", func(t *testing.T) {
-		// prepare a valid config file
+		// prepare a valid config File
 		cfg := createTestConfiguration()
 		cfg.Jobs[0].SourceFolder = want.srcFolder
 		cfg.ConfigPath = want.cfgDir
@@ -225,7 +225,7 @@ func TestLoadConfigAndValidate(t *testing.T) {
 
 		got, err := config.LoadConfigAndValidate(want.cfgDir)
 		if err != nil {
-			t.Errorf("failed to load and validate config file: err=%v", err)
+			t.Errorf("failed to load and validate config File: err=%v", err)
 		}
 
 		if got.Jobs[0].SourceFolder != want.srcFolder {
@@ -233,7 +233,7 @@ func TestLoadConfigAndValidate(t *testing.T) {
 		}
 	})
 	t.Run("WithInvalidSourceFolder", func(t *testing.T) {
-		// prepare a valid config file
+		// prepare a valid config File
 		cfg := createTestConfiguration()
 		cfg.Jobs[0].SourceFolder = want.srcFolder
 		if err := os.RemoveAll(want.srcFolder); err != nil {
@@ -249,7 +249,7 @@ func TestLoadConfigAndValidate(t *testing.T) {
 		}
 	})
 	t.Run("WithNonExistentConfig", func(t *testing.T) {
-		// prepare a valid config file
+		// prepare a valid config File
 		cfg := createTestConfiguration()
 		cfg.Jobs[0].SourceFolder = want.srcFolder
 		cfg.ConfigPath = want.cfgDir
