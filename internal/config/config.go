@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -20,18 +21,8 @@ const (
 	DefaultConfigFilename = "config.hjson"
 )
 
-// ParseError denotes failing to parse configuration File.
-type ParseError struct {
-	err error
-}
-
-// Error returns the formatted configuration error.
-func (e ParseError) Error() string {
-	return fmt.Sprintf("While parsing config: %s", e.err.Error())
-}
-
-// NewConfig returns a *Config with the default settings of the application.
-func NewConfig(dir string) *Config {
+// NewConfig returns a *AppConfig with the default settings of the application.
+func NewConfig(dir string) *AppConfig {
 	cfg := defaultSettings()
 	absPath, err := filesystem.AbsolutePath(dir)
 	if err != nil {
@@ -42,8 +33,18 @@ func NewConfig(dir string) *Config {
 	return cfg
 }
 
+// ParseError denotes failing to parse configuration File.
+type ParseError struct {
+	err error
+}
+
+// Error returns the formatted configuration error.
+func (e ParseError) Error() string {
+	return fmt.Sprintf("While parsing config: %s", e.err.Error())
+}
+
 // LoadConfigAndValidate reads configuration from the specified directory and validate it.
-func LoadConfigAndValidate(dir string) (*Config, error) {
+func LoadConfigAndValidate(dir string) (*AppConfig, error) {
 	cfg, err := LoadConfigFromFile(dir)
 	if err != nil {
 		return cfg, fmt.Errorf("could't read configuration: File=%s, err=%s", dir, err)
@@ -54,59 +55,110 @@ func LoadConfigAndValidate(dir string) (*Config, error) {
 	return cfg, nil
 }
 
-func (c *Config) Validate() error {
+// Validate returns if the current configuration is valid.
+func (c *AppConfig) Validate() error {
+	if err := c.validateSecretsBackendType(); err != nil {
+		return err
+	}
+	if err := c.validateAPIAppCredentials(); err != nil {
+		return err
+	}
+	if err := c.validateAccount(); err != nil {
+		return err
+	}
+	if err := c.validateJobs(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *AppConfig) validateSecretsBackendType() error {
+	if c.SecretsBackendType != "auto" &&
+		c.SecretsBackendType != "secret-service" &&
+		c.SecretsBackendType != "keychain" &&
+		c.SecretsBackendType != "kwallet" &&
+		c.SecretsBackendType != "file" {
+		return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
+	}
+	return nil
+}
+
+func (c *AppConfig) validateAPIAppCredentials() error {
+	if c.APIAppCredentials.ClientID == "" || c.APIAppCredentials.ClientSecret == "" {
+		return errors.New("config: APIAppCredentials are invalid")
+	}
+	return nil
+}
+
+func (c *AppConfig) validateAccount() error {
+	if c.Account == "" {
+		return errors.New("config: Account could not be empty")
+	}
+	return nil
+}
+
+func (c *AppConfig) validateJobs() error {
 	if len(c.Jobs) < 1 {
-		return fmt.Errorf("no Jobs has been supplied")
+		return errors.New("config: At least one Job must be configured")
 	}
 
+	for _, job := range c.Jobs {
+		if !filesystem.IsDir(job.SourceFolder) {
+			return fmt.Errorf("config: The provided SourceFolder is not a folder. [%s]", job.SourceFolder)
+		}
+		if job.MakeAlbums.Enabled &&
+			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
+			return errors.New("config: The provided MakeAlbums option is invalid")
+		}
+	}
+	return nil
+}
+
+func (c *AppConfig) ensureSourceFolderAbsolutePaths() error {
 	for i := range c.Jobs {
 		item := &c.Jobs[i] // we do that way to modify original object while iterating.
 		srcFolder, err := filesystem.AbsolutePath(item.SourceFolder)
 		if err != nil {
-			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
+			return ParseError{err}
 		}
 		item.SourceFolder = srcFolder
-		if !filesystem.IsDir(item.SourceFolder) {
-			return fmt.Errorf("invalid source folder. SourceFolder=%s", item.SourceFolder)
-		}
 	}
-
 	return nil
 }
 
 // CompletedUploadsDBDir returns the path of the folder where completed uploads are tracked.
-func (c *Config) CompletedUploadsDBDir() string {
+func (c *AppConfig) CompletedUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "uploads.db")
 }
 
 // ResumableUploadsDBDir returns the path of the folder where upload URLs are tracked.
-func (c *Config) ResumableUploadsDBDir() string {
+func (c *AppConfig) ResumableUploadsDBDir() string {
 	return path.Join(c.ConfigPath, "resumable_uploads.db")
 }
 
 // File return the path of the configuration File.
-func (c *Config) File() string {
+func (c *AppConfig) File() string {
 	return path.Join(c.ConfigPath, DefaultConfigFilename)
 }
 
 // KeyringDir returns the path of the folder where keyring will be stored.
 // This is only used if 'SecretsBackendType=File'
-func (c *Config) KeyringDir() string {
+func (c *AppConfig) KeyringDir() string {
 	return c.ConfigPath
 }
 
-// String returns a string representation of the Config object
-func (c *Config) String() string {
+// String returns a string representation of the AppConfig object
+func (c *AppConfig) String() string {
 	configTemplate := `
 {
-  SecretsBackendType: %s,
+  SecretsBackendType: "%s",
   APIAppCredentials: {
     ClientID:     "%s",
     ClientSecret: "%s",
   }
+  Account: "%s"
   jobs: [
     {
-      account: %s
       sourceFolder: %s
       makeAlbums: {
         enabled: %t
@@ -122,14 +174,14 @@ func (c *Config) String() string {
 		c.SecretsBackendType,
 		c.APIAppCredentials.ClientID,
 		c.APIAppCredentials.ClientSecret,
-		c.Jobs[0].Account,
+		c.Account,
 		c.Jobs[0].SourceFolder,
 		c.Jobs[0].MakeAlbums.Enabled,
 		c.Jobs[0].MakeAlbums.Use,
 		c.Jobs[0].DeleteAfterUpload)
 }
 
-func (c *Config) WriteToFile() error {
+func (c *AppConfig) WriteToFile() error {
 	fh, err := os.Create(c.File())
 	if err != nil {
 		return err
@@ -146,7 +198,7 @@ func (c *Config) WriteToFile() error {
 
 // LoadConfigFromFile reads configuration from the specified directory.
 // It reads a HJSON File (given by config.File() func) and decodes it.
-func LoadConfigFromFile(dir string) (*Config, error) {
+func LoadConfigFromFile(dir string) (*AppConfig, error) {
 	cfg := NewConfig(dir)
 
 	file, err := ioutil.ReadFile(cfg.File())
@@ -155,6 +207,11 @@ func LoadConfigFromFile(dir string) (*Config, error) {
 	}
 
 	if err := unmarshalReader(bytes.NewReader(file), cfg); err != nil {
+		return nil, ParseError{err}
+	}
+
+	// convert all path to absolute paths.
+	if err := cfg.ensureSourceFolderAbsolutePaths(); err != nil {
 		return nil, ParseError{err}
 	}
 
@@ -211,17 +268,17 @@ func Exists(path string) bool {
 	return false
 }
 
-// defaultSettings() returns a *Config with the default settings of the application.
-func defaultSettings() *Config {
-	return &Config{
+// defaultSettings() returns a *AppConfig with the default settings of the application.
+func defaultSettings() *AppConfig {
+	fc := &Config{
 		SecretsBackendType: "auto",
 		APIAppCredentials: APIAppCredentials{
 			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 		},
+		Account: "youremail@gmail.com",
 		Jobs: []FolderUploadJob{
 			{
-				Account:      "youremail@gmail.com",
 				SourceFolder: "~/folder/to/upload",
 				MakeAlbums: MakeAlbums{
 					Enabled: true,
@@ -230,5 +287,9 @@ func defaultSettings() *Config {
 				DeleteAfterUpload: false,
 			},
 		},
+	}
+
+	return &AppConfig{
+		Config: fc,
 	}
 }

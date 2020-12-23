@@ -1,31 +1,65 @@
 package config
 
-// Config represents the application settings.
-type Config struct {
-	ConfigPath         string
-	SecretsBackendType string
-	APIAppCredentials  APIAppCredentials
-	Jobs               []FolderUploadJob
+// AppConfig represents the application settings.
+type AppConfig struct {
+	*Config
+
+	// ConfigPath is the path to the App folder
+	ConfigPath string
 }
 
-// APIAppCredentials represents Google Photos API credentials for OAuth
+// Config represents the content of configuration file.
+// It defines the schema for Marshal and Unmarshal the data of the configuration file.
+type Config struct {
+	// APIAppCredentials represents Google Photos API credentials for OAuth.
+	APIAppCredentials APIAppCredentials
+
+	// Account is the Google Photos account to work with.
+	Account string
+
+	// SecretsBackendType is the type of backend to store secrets.
+	SecretsBackendType string
+
+	// Jobs are the source folders to work with.
+	Jobs []FolderUploadJob
+}
+
+// APIAppCredentials represents Google Photos API credentials for OAuth.
 type APIAppCredentials struct {
-	ClientID     string
+	// ClientID is the app identifier generated on the Google API console.
+	ClientID string
+	// ClientSecret is the secret key generated on the Google API console.
 	ClientSecret string
 }
 
 // FolderUploadJob represents configuration for a folder to be uploaded
 type FolderUploadJob struct {
-	Account           string
-	SourceFolder      string
-	MakeAlbums        MakeAlbums
+	// DEPRECATED: Account is deprecated, use Config.Account instead.
+	Account string
+
+	// SourceFolder is the folder containing the objects to be uploaded.
+	SourceFolder string
+
+	// MakeAlbums is the configuration to create albums on Google Photos.
+	MakeAlbums MakeAlbums
+
+	// DeleteAfterUpload if it is true, the app will remove files after upload them.
 	DeleteAfterUpload bool
-	IncludePatterns   []string
-	ExcludePatterns   []string
+
+	// IncludePatterns are the patterns to include files to work with.
+	IncludePatterns []string
+
+	// ExcludePatterns are the patterns to exclude files.
+	ExcludePatterns []string
 }
 
 // MakeAlbums represents configuration about how to create Albums in Google Photos
 type MakeAlbums struct {
+	// Enabled enables or disables album creation.
 	Enabled bool
-	Use     string
+
+	// Use defines the name of the albums.
+	// `folderPath`: Album name is based on full folder path.
+	// `folderName`: Album name is the folder name.
+	Use string
 }

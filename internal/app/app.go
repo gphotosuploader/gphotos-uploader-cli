@@ -23,7 +23,7 @@ type App struct {
 }
 
 // Start initializes the application with the services defined by a given configuration.
-func Start(cfg *config.Config) (*App, error) {
+func Start(cfg *config.AppConfig) (*App, error) {
 	app := &App{}
 
 	// Initialize the logger

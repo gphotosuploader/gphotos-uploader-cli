@@ -266,16 +266,16 @@ func TestLoadConfigAndValidate(t *testing.T) {
 	})
 }
 
-func createTestConfiguration() *config.Config {
-	return &config.Config{
+func createTestConfiguration() *config.AppConfig {
+	fc := &config.Config{
 		SecretsBackendType: "auto",
 		APIAppCredentials: config.APIAppCredentials{
 			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
 			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
 		},
+		Account: "youremail@gmail.com",
 		Jobs: []config.FolderUploadJob{
 			{
-				Account:      "youremail@gmail.com",
 				SourceFolder: "~/folder/to/upload",
 				MakeAlbums: config.MakeAlbums{
 					Enabled: true,
@@ -285,14 +285,7 @@ func createTestConfiguration() *config.Config {
 			},
 		},
 	}
-}
-
-func assertExpectedError(t *testing.T, isExpected bool, err error) {
-	if isExpected && err == nil {
-		t.Fatalf("error was expected, but not produced")
-	}
-	if !isExpected && err != nil {
-		t.Fatalf("error was not expected, err: %s", err)
+	return &config.AppConfig{
+		Config: fc,
 	}
 }
-
