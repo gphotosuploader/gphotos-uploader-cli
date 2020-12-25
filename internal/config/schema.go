@@ -44,7 +44,7 @@ type FolderUploadJob struct {
 	MakeAlbums MakeAlbums `json:"MakeAlbums"`
 
 	// DeleteAfterUpload if it is true, the app will remove files after upload them.
-	DeleteAfterUpload bool `json: "DeleteAfterUpload"`
+	DeleteAfterUpload bool `json:"DeleteAfterUpload"`
 
 	// IncludePatterns are the patterns to include files to work with.
 	IncludePatterns []string `json:"IncludePatterns"`
