@@ -33,7 +33,7 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.LoadConfigAndValidate(cmd.CfgDir)
+	cfg, err := config.FromFile(AppFs, cmd.CfgDir)
 	if err != nil {
 		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
 	}

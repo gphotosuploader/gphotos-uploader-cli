@@ -6,6 +6,7 @@ import (
 
 	"github.com/mgutz/ansi"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
@@ -38,6 +39,9 @@ var rootCmd = &cobra.Command{
     once it's configured, start uploading your files:
     $ gphotos-uploader-cli push`,
 }
+
+
+var AppFs = afero.NewOsFs()
 
 var globalFlags *flags.GlobalFlags
 

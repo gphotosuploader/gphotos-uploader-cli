@@ -13,11 +13,11 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
 )
 
@@ -48,7 +48,7 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.LoadConfigAndValidate(cmd.CfgDir)
+	cfg, err := config.FromFile(AppFs, cmd.CfgDir)
 	if err != nil {
 		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
 	}

@@ -1,23 +1,61 @@
 package config_test
 
 import (
-	"fmt"
-	"os"
-	"path"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/Flaque/filet"
+	"github.com/spf13/afero"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 )
 
+
+var AppFs = afero.NewOsFs()
+
+func TestNew(t *testing.T) {
+	// Setup a temporary FS to run tests
+	defer filet.CleanUp(t)
+	testsFolder := filet.TmpDir(t, "")
+
+	testCases := []struct{
+		name          string
+		path          string
+		isErrExpected bool
+	}{
+		{"Should success with absolute path", testsFolder + "/foo", false},
+		{"Should fail due to permission denial", "/foo", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := config.New(AppFs, tc.path)
+			assertExpectedError(t, tc.isErrExpected, err)
+
+			filename := filepath.Join(tc.path, config.DefaultConfigFilename)
+			if !tc.isErrExpected && !filesystem.IsFile(filename) {
+				t.Fatalf("not created: %s", filename)
+			}
+		})
+	}
+}
+
+func assertExpectedError(t *testing.T, errExpected bool, err error) {
+	if errExpected && err == nil {
+		t.Fatalf("error was expected, but not produced")
+	}
+	if !errExpected && err != nil {
+		t.Fatalf("error was not expected, err: %s", err)
+	}
+}
+
+/*
 func TestInitConfig(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(dir)
+		err := config.New(dir)
 		if err != nil {
 			t.Errorf("could not create init config File: %v", err)
 		}
@@ -35,7 +73,7 @@ func TestInitAndLoadConfig(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
 
 	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(dir)
+		err := config.New(dir)
 		if err != nil {
 			t.Errorf("could not create init config File: %v", err)
 		}
@@ -219,13 +257,13 @@ func TestLoadConfigAndValidate(t *testing.T) {
 		cfg := createTestConfiguration()
 		cfg.Jobs[0].SourceFolder = want.srcFolder
 		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
+		if err := cfg.writeFile(cfg.File()); err != nil {
 			t.Fatal(err)
 		}
 
-		got, err := config.LoadConfigAndValidate(want.cfgDir)
+		got, err := config.FromFile(want.cfgDir)
 		if err != nil {
-			t.Errorf("failed to load and validate config File: err=%v", err)
+			t.Errorf("failed to load and Validate config File: err=%v", err)
 		}
 
 		if got.Jobs[0].SourceFolder != want.srcFolder {
@@ -240,11 +278,11 @@ func TestLoadConfigAndValidate(t *testing.T) {
 			t.Fatalf("could not remove test source folder: err=%v", err)
 		}
 		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
+		if err := cfg.writeFile(cfg.File()); err != nil {
 			t.Fatal(err)
 		}
 
-		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
+		if _, err := config.FromFile(want.cfgDir); err == nil {
 			t.Errorf("failed: invalid configuration was expected")
 		}
 	})
@@ -253,14 +291,14 @@ func TestLoadConfigAndValidate(t *testing.T) {
 		cfg := createTestConfiguration()
 		cfg.Jobs[0].SourceFolder = want.srcFolder
 		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
+		if err := cfg.writeFile(cfg.File()); err != nil {
 			t.Fatal(err)
 		}
 		if err := os.RemoveAll(want.cfgDir); err != nil {
 			t.Fatalf("could not remove config folder: err=%v", err)
 		}
 
-		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
+		if _, err := config.FromFile(want.cfgDir); err == nil {
 			t.Errorf("failed: invalid configuration was expected")
 		}
 	})
@@ -289,3 +327,4 @@ func createTestConfiguration() *config.AppConfig {
 		Config: fc,
 	}
 }
+*/

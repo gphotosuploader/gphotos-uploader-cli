@@ -37,13 +37,13 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	// Check if config already exists
-	if config.Exists(cmd.CfgDir) && !cmd.Reconfigure {
+	if config.Exists(AppFs, cmd.CfgDir) && !cmd.Reconfigure {
 		log.Infof("AppConfig already exists. If you want to recreate the config please run `%s`", ansi.Color("gphotos-uploader-cli init --force", "white+b"))
 		log.Infof("\r         \nIf you want to continue with the existing config, run:\n- `%s` to start uploading files.\n", ansi.Color("gphotos-uploader-cli push", "white+b"))
 		return nil
 	}
 
-	if err := config.InitConfigFile(cmd.CfgDir); err != nil {
+	if _, err := config.New(AppFs, cmd.CfgDir); err != nil {
 		return err
 	}
 

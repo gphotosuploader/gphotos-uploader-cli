@@ -3,7 +3,7 @@ package completeduploads
 import (
 	"fmt"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 )
 
 // Service represents the repository where uploaded objects are tracked

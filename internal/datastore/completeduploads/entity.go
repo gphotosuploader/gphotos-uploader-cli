@@ -10,7 +10,7 @@ import (
 
 	"github.com/pierrec/xxHash/xxHash32"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 )
 
 var (
