@@ -1,13 +1,5 @@
 package config
 
-// AppConfig represents the application settings.
-type AppConfig struct {
-	*Config
-
-	// ConfigPath is the path to the App folder
-	ConfigPath string
-}
-
 // Config represents the content of configuration file.
 // It defines the schema for Marshal and Unmarshal the data of the configuration file.
 type Config struct {
