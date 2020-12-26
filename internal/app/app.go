@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/spf13/afero"
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/oauth2"
 
@@ -12,6 +13,11 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+)
+
+const (
+	// DefaultConfigFilename is the default config file name.
+	DefaultConfigFilename = "config.hjson"
 )
 
 // App represents a running application with all the dependant services.
@@ -25,6 +31,10 @@ type App struct {
 
 	Logger log.Logger
 
+	// fs points to the file system.
+	// Useful for testing.
+	fs afero.Fs
+
 	// appDir is the directory application directory.
 	appDir string
 
@@ -33,18 +43,19 @@ type App struct {
 }
 
 // Start initializes the application with the services defined by a given configuration.
-func Start(path string) (*App, error) {
+func Start(fs afero.Fs, path string) (*App, error) {
 	var err error
 
 	app := &App{
 		appDir: path,
 		Logger: log.GetInstance(),
+		fs:     fs,
 	}
 
-	app.Logger.Debugf("Reading configuration from '%s'", app.appDir)
-	app.Config, err = config.FromFile(app.appDir)
+	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
+	app.Config, err = config.FromFile(app.fs, app.configFilename())
 	if err != nil {
-		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.appDir, err)
+		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.configFilename(), err)
 	}
 
 	if err := app.startServices(); err != nil {
@@ -52,6 +63,15 @@ func Start(path string) (*App, error) {
 	}
 
 	return app, nil
+}
+
+// Start initializes the application without reading the configuration.
+func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
+	return &App{
+		appDir: path,
+		Logger: log.GetInstance(),
+		fs:     fs,
+	}, nil
 }
 
 // Stop stops the application releasing all service resources.
@@ -76,6 +96,33 @@ func (app *App) Stop() error {
 
 	app.Logger.Debug("All services has been shut down successfully")
 	return nil
+}
+
+// CreateAppDataDir return the filename after creating the application directory and the configuration file with defaults.
+// CreateAppDataDir destroys previous application directory.
+func (app App) CreateAppDataDir() (string, error) {
+	if err := app.emptyDir(app.appDir); err != nil {
+		return "", err
+	}
+	filename := app.configFilename()
+	_, err := config.Create(app.fs, filename)
+	if err != nil {
+		return "", err
+	}
+	return filename, nil
+}
+
+// AppDataDirExists return true if the application data dir exists.
+func (app App) AppDataDirExists() bool {
+	exist, err := afero.Exists(app.fs, app.configFilename())
+	if err != nil {
+		return false
+	}
+	return exist
+}
+
+func (app App) configFilename() string {
+	return filepath.Join(app.appDir, DefaultConfigFilename)
 }
 
 func (app App) startServices() error {
@@ -116,6 +163,13 @@ func (app App) defaultTokenManager(backendType string) (*tokenstore.TokenManager
 
 func (app App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
 	return leveldbstore.NewStore(filepath.Join(app.appDir, "resumable_uploads.db"))
+}
+
+func (app App) emptyDir(path string) error {
+	if err := app.fs.RemoveAll(path); err != nil {
+		return err
+	}
+	return app.fs.MkdirAll(path, 0700)
 }
 
 // FileTracker represents a service to track file already uploaded.

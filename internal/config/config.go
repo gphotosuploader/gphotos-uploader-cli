@@ -13,15 +13,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-const (
-	// DefaultConfigFilename is the default config File name to use
-	DefaultConfigFilename = "config.hjson"
-)
-
-// Os points to the (real) file system.
-// Useful for testing.
-var Os = afero.NewOsFs()
-
 // ParseError denotes failing to parse configuration file.
 type ParseError struct {
 	err error
@@ -32,25 +23,23 @@ func (e ParseError) Error() string {
 	return fmt.Sprintf("parsing config: %s", e.err.Error())
 }
 
-// Create returns the configuration file name created with default settings.
-func Create(dir string) (string, error) {
+// Create returns the configuration data after creating file with default settings.
+func Create(fs afero.Fs, filename string) (*Config, error) {
 	cfg := defaultSettings()
-	file := defaultConfigFilePath(dir)
-	if err := cfg.writeFile(file); err != nil {
-		return "", err
+	if err := cfg.writeFile(fs, filename); err != nil {
+		return nil, err
 	}
-	return file, nil
+	return &cfg, nil
 }
 
-// FromFile returns the configuration data read from the specified directory.
+// FromFile returns the configuration data read from the specified file.
 // FromFile returns a ParseError{} if the configuration validation fails.
-func FromFile(dir string) (*Config, error) {
-	filename := defaultConfigFilePath(dir)
-	cfg, err := readFile(filename)
+func FromFile(fs afero.Fs, filename string) (*Config, error) {
+	cfg, err := readFile(fs, filename)
 	if err != nil {
 		return nil, ParseError{err}
 	}
-	if err := cfg.validate(); err != nil {
+	if err := cfg.validate(fs); err != nil {
 		return cfg, ParseError{err}
 	}
 
@@ -58,17 +47,16 @@ func FromFile(dir string) (*Config, error) {
 }
 
 // Exists checks the existence of the configuration file
-func Exists(path string) bool {
-	file := defaultConfigFilePath(path)
-	file = normalizePath(file)
-	if _, err := Os.Stat(file); err != nil {
+func Exists(fs afero.Fs, filename string) bool {
+	filename = normalizePath(filename)
+	if _, err := fs.Stat(filename); err != nil {
 		return false
 	}
 	return true
 }
 
 // validate returns if the current configuration is valid.
-func (c Config) validate() error {
+func (c Config) validate(fs afero.Fs) error {
 	if err := c.validateSecretsBackendType(); err != nil {
 		return err
 	}
@@ -78,7 +66,7 @@ func (c Config) validate() error {
 	if err := c.validateAccount(); err != nil {
 		return err
 	}
-	if err := c.validateJobs(); err != nil {
+	if err := c.validateJobs(fs); err != nil {
 		return err
 	}
 	return nil
@@ -87,18 +75,18 @@ func (c Config) validate() error {
 // writeFile writes the configuration data to a file named by filename.
 // If the file does not exist, writeFile creates it;
 // otherwise writeFile truncates it before writing.
-func (c Config) writeFile(filename string) error {
+func (c Config) writeFile(fs afero.Fs, filename string) error {
 	b, err := hjson.MarshalWithOptions(c, hjson.DefaultOptions())
 	if err != nil {
 		return err
 
 	}
-	return afero.WriteFile(Os, filename, b, 0600)
+	return afero.WriteFile(fs, filename, b, 0600)
 }
 
 // readFile loads the configuration data reading the file named by filename.
-func readFile(filename string) (*Config, error) {
-	b, err := afero.ReadFile(Os, filename)
+func readFile(fs afero.Fs, filename string) (*Config, error) {
+	b, err := afero.ReadFile(fs, filename)
 	if err != nil {
 		return nil, err
 	}
@@ -130,13 +118,13 @@ func (c Config) validateAccount() error {
 	return nil
 }
 
-func (c Config) validateJobs() error {
+func (c Config) validateJobs(fs afero.Fs) error {
 	if len(c.Jobs) < 1 {
 		return errors.New("config: At least one Job must be configured")
 	}
 
 	for _, job := range c.Jobs {
-		exist, err := afero.DirExists(Os, job.SourceFolder)
+		exist, err := afero.DirExists(fs, job.SourceFolder)
 		if err != nil {
 			return fmt.Errorf("config: The provided folder '%s' could not be used, err=%s", job.SourceFolder, err)
 		}
@@ -161,11 +149,6 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item.SourceFolder = normalizePath(src)
 	}
 	return nil
-}
-
-func defaultConfigFilePath(path string) string {
-	path = filepath.Join(path, DefaultConfigFilename)
-	return normalizePath(path)
 }
 
 // unmarshalReader unmarshal HJSON data.

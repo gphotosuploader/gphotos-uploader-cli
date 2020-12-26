@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -13,26 +14,22 @@ func TestCreate(t *testing.T) {
 		name          string
 		preCreate     string
 		path          string
-		want          string
 		isErrExpected bool
 	}{
-		{"Should success", "", "/home/foo", "/home/foo/config.hjson", false},
-		{"Should success w/ existing dir", "/home/bar", "/home/bar", "/home/bar/config.hjson", false},
+		{"Should success", "", "/home/foo/config.hjson", false},
+		{"Should success w/ existing dir", "/home/bar/config.hjson", "/home/bar/config.hjson", false},
 	}
-
-	t.Cleanup(func() {
-		config.Os = afero.NewOsFs()
-	})
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			config.Os = afero.NewMemMapFs()
-			createTestDir(t, tc.preCreate)
+			fs := afero.NewMemMapFs()
+			createTestConfigurationFile(t, fs, tc.preCreate)
 
-			got, err := config.Create(tc.path)
+			_, err := config.Create(fs, tc.path)
 			assertExpectedError(t, tc.isErrExpected, err)
-			if !tc.isErrExpected && tc.want != got {
-				t.Errorf("want: %s, got: %s", tc.want, got)
+
+			if !tc.isErrExpected {
+				assertFileExistence(t, fs, tc.path)
 			}
 		})
 	}
@@ -44,13 +41,14 @@ func TestExists(t *testing.T) {
 		path string
 		want bool
 	}{
-		{"Should return true if exist", "testdata/valid-config", true},
-		{"Should return false if not exist", "testdata/non-existent", false},
+		{"Should return true if exist", "testdata/valid-config/config.hjson", true},
+		{"Should return false if not exist", "testdata/non-existent/config.hjson", false},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := config.Exists(tc.path)
+			fs := afero.OsFs{}
+			got := config.Exists(fs, tc.path)
 			if tc.want != got {
 				t.Errorf("configuration file does not exist, path: %s", tc.path)
 			}
@@ -65,14 +63,15 @@ func TestFromFile(t *testing.T) {
 		want          string
 		isErrExpected bool
 	}{
-		{"Should success", "testdata/valid-config", "youremail@domain.com", false},
-		{"Should fail if dir does not exist", "testdata/non-existent", "", true},
-		{"Should fail if config data is invalid", "testdata/invalid-config", "", true},
+		{"Should success", "testdata/valid-config/config.hjson", "youremail@domain.com", false},
+		{"Should fail if dir does not exist", "testdata/non-existent/config.hjson", "", true},
+		{"Should fail if config data is invalid", "testdata/invalid-config/config.hjson", "", true},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := config.FromFile(tc.path)
+			fs := afero.OsFs{}
+			got, err := config.FromFile(fs, tc.path)
 			assertExpectedError(t, tc.isErrExpected, err)
 
 			if !tc.isErrExpected && (got.Account != tc.want) {
@@ -82,12 +81,15 @@ func TestFromFile(t *testing.T) {
 	}
 }
 
-func createTestDir(t *testing.T, path string) {
+func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
 	if path == "" {
 		return
 	}
-	if err := config.Os.MkdirAll(path, 0700); err != nil {
-		t.Fatalf("error creating test dir, err: %s", err)
+	if err := fs.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatalf("creating test dir, err: %s", err)
+	}
+	if err := afero.WriteFile(fs, path, []byte("my"), 0600); err != nil {
+		t.Fatalf("creating test configuration file, err: %s", err)
 	}
 }
 
@@ -97,5 +99,15 @@ func assertExpectedError(t *testing.T, errExpected bool, err error) {
 	}
 	if !errExpected && err != nil {
 		t.Fatalf("error was not expected, err: %s", err)
+	}
+}
+
+func assertFileExistence(t *testing.T, fs afero.Fs, path string) {
+	exist, err := afero.Exists(fs, path)
+	if err != nil {
+		t.Fatalf("checking file existence, err: %s", err)
+	}
+	if !exist {
+		t.Errorf("file expected, but it does not exist")
 	}
 }

@@ -31,7 +31,7 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cli, err := app.Start(cmd.CfgDir)
+	cli, err := app.Start(Os, cmd.CfgDir)
 	if err != nil {
 		return err
 	}

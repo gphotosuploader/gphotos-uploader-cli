@@ -48,12 +48,12 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.FromFile(cmd.CfgDir)
+	cfg, err := config.FromFile(Os, cmd.CfgDir)
 	if err != nil {
 		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
 	}
 
-	cli, err := app.Start(cmd.CfgDir)
+	cli, err := app.Start(Os, cmd.CfgDir)
 	if err != nil {
 		return err
 	}
