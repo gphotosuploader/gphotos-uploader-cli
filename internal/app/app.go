@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/oauth2"
@@ -15,38 +16,39 @@ import (
 
 // App represents a running application with all the dependant services.
 type App struct {
-	FileTracker   FileTracker
-	TokenManager  TokenManager
-	UploadTracker UploadTracker
+	// FileTracker tracks local files already uploaded.
+	FileTracker FileTracker
+	// TokenManager keeps secrets (like tokens).
+	TokenManager TokenManager
+	// UploadSessionTracker tracks uploads sessions to implement resumable uploads.
+	UploadSessionTracker UploadSessionTracker
 
 	Logger log.Logger
+
+	// appDir is the directory application directory.
+	appDir string
+
+	// Config keeps the application configuration.
+	Config *config.Config
 }
 
 // Start initializes the application with the services defined by a given configuration.
-func Start(cfg *config.AppConfig) (*App, error) {
-	app := &App{}
+func Start(path string) (*App, error) {
+	var err error
 
-	// Initialize the logger
-	app.Logger = log.GetInstance()
-
-	// Use LevelDB to track already uploaded files
-	ft, err := leveldb.OpenFile(cfg.CompletedUploadsDBDir(), nil)
-	if err != nil {
-		return app, fmt.Errorf("open completed uploads tracker failed: path=%s, err=%s", cfg.CompletedUploadsDBDir(), err)
+	app := &App{
+		appDir: path,
+		Logger: log.GetInstance(),
 	}
-	app.FileTracker = completeduploads.NewService(completeduploads.NewLevelDBRepository(ft))
 
-	// Use Keyring to store / read secrets
-	kr, err := tokenstore.NewKeyringRepository(cfg.SecretsBackendType, nil, cfg.KeyringDir())
+	app.Logger.Debugf("Reading configuration from '%s'", app.appDir)
+	app.Config, err = config.FromFile(app.appDir)
 	if err != nil {
-		return app, fmt.Errorf("open token manager failed: type=%s, err=%s", cfg.SecretsBackendType, err)
+		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.appDir, err)
 	}
-	app.TokenManager = tokenstore.New(kr)
 
-	// Upload session tracker to keep upload session to resume uploads.
-	app.UploadTracker, err = leveldbstore.NewStore(cfg.ResumableUploadsDBDir())
-	if err != nil {
-		return app, fmt.Errorf("open resumable uploads tracker failed: path=%s, err=%s", cfg.ResumableUploadsDBDir(), err)
+	if err := app.startServices(); err != nil {
+		return nil, err
 	}
 
 	return app, nil
@@ -62,7 +64,7 @@ func (app *App) Stop() error {
 
 	// Close upload session tracker
 	app.Logger.Debug("Shutting down Upload Tracker service...")
-	if err := app.UploadTracker.Close(); err != nil {
+	if err := app.UploadSessionTracker.Close(); err != nil {
 		return err
 	}
 
@@ -74,6 +76,46 @@ func (app *App) Stop() error {
 
 	app.Logger.Debug("All services has been shut down successfully")
 	return nil
+}
+
+func (app App) startServices() error {
+	var err error
+	app.FileTracker, err = app.defaultFileTracker()
+	if err != nil {
+		app.Logger.Errorf("File tracker could not be started, err: %s", err)
+		return fmt.Errorf("file tracker could not be started, err: %s", err)
+	}
+	app.TokenManager, err = app.defaultTokenManager(app.Config.SecretsBackendType)
+	if err != nil {
+		app.Logger.Errorf("Token manager could not be started, err: %s", err)
+		return fmt.Errorf("token manager could not be started, type:%s, err: %s", app.Config.SecretsBackendType, err)
+	}
+	app.UploadSessionTracker, err = app.defaultUploadsSessionTracker()
+	if err != nil {
+		app.Logger.Errorf("Uploads session tracker could not be started, err: %s", err)
+		return fmt.Errorf("uploads session tracker could not be started, err:%s", err)
+	}
+	return nil
+}
+
+func (app App) defaultFileTracker() (*completeduploads.Service, error) {
+	ft, err := leveldb.OpenFile(filepath.Join(app.appDir, "uploads.db"), nil)
+	if err != nil {
+		return nil, err
+	}
+	return completeduploads.NewService(completeduploads.NewLevelDBRepository(ft)), nil
+}
+
+func (app App) defaultTokenManager(backendType string) (*tokenstore.TokenManager, error) {
+	kr, err := tokenstore.NewKeyringRepository(backendType, nil, app.appDir)
+	if err != nil {
+		return nil, err
+	}
+	return tokenstore.New(kr), nil
+}
+
+func (app App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
+	return leveldbstore.NewStore(filepath.Join(app.appDir, "resumable_uploads.db"))
 }
 
 // FileTracker represents a service to track file already uploaded.
@@ -91,8 +133,8 @@ type TokenManager interface {
 	Close() error
 }
 
-// UploadTracker represents a service to keep resumable upload sessions.
-type UploadTracker interface {
+// UploadSessionTracker represents a service to keep resumable upload sessions.
+type UploadSessionTracker interface {
 	Get(fingerprint string) []byte
 	Set(fingerprint string, url []byte)
 	Delete(fingerprint string)

@@ -32,18 +32,6 @@ func (e ParseError) Error() string {
 	return fmt.Sprintf("parsing config: %s", e.err.Error())
 }
 
-// CreateError denotes failing to create configuration file.
-type CreateError struct {
-	path string
-	err  error
-}
-
-// Error returns the formatted configuration error.
-func (e CreateError) Error() string {
-	return fmt.Sprintf("creating config path '%s': %s", e.path, e.err.Error())
-
-}
-
 // Create returns the configuration file name created with default settings.
 func Create(dir string) (string, error) {
 	cfg := defaultSettings()
@@ -72,7 +60,7 @@ func FromFile(dir string) (*Config, error) {
 // Exists checks the existence of the configuration file
 func Exists(path string) bool {
 	file := defaultConfigFilePath(path)
-	path = normalizePath(path)
+	file = normalizePath(file)
 	if _, err := Os.Stat(file); err != nil {
 		return false
 	}
@@ -80,7 +68,7 @@ func Exists(path string) bool {
 }
 
 // validate returns if the current configuration is valid.
-func (c *Config) validate() error {
+func (c Config) validate() error {
 	if err := c.validateSecretsBackendType(); err != nil {
 		return err
 	}
@@ -210,13 +198,13 @@ func defaultSettings() Config {
 	return Config{
 		SecretsBackendType: "auto",
 		APIAppCredentials: APIAppCredentials{
-			ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-			ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+			ClientID:     "YOUR_APP_CLIENT_ID",
+			ClientSecret: "YOUR_APP_CLIENT_SECRET",
 		},
-		Account: "youremail@gmail.com",
+		Account: "YOUR_GOOGLE_PHOTOS_ACCOUNT",
 		Jobs: []FolderUploadJob{
 			{
-				SourceFolder: "~/folder/to/upload",
+				SourceFolder: "YOUR_FOLDER_PATH",
 				MakeAlbums: MakeAlbums{
 					Enabled: true,
 					Use:     "folderName",

@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 )
 
@@ -33,12 +31,7 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.FromFile(AppFs, cmd.CfgDir)
-	if err != nil {
-		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
-	}
-
-	cli, err := app.Start(cfg)
+	cli, err := app.Start(cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -48,21 +41,20 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	// get OAuth2 Configuration with our App credentials
 	oauth2Config := oauth2.Config{
-		ClientID:     cfg.APIAppCredentials.ClientID,
-		ClientSecret: cfg.APIAppCredentials.ClientSecret,
+		ClientID:     cli.Config.APIAppCredentials.ClientID,
+		ClientSecret: cli.Config.APIAppCredentials.ClientSecret,
 		Endpoint:     photos.Endpoint,
 		Scopes:       photos.Scopes,
 	}
 
 	ctx := context.Background()
-	for _, job := range cfg.Jobs {
-		if _, err := cli.NewOAuth2Client(ctx, oauth2Config, job.Account); err != nil {
-			cli.Logger.Failf("Failed authentication for account: %s", job.Account)
-			cli.Logger.Debugf("Authentication error: err=%s", err)
-			return err
-		}
-		cli.Logger.Donef("Successful authentication for account: %s", job.Account)
+
+	if _, err := cli.NewOAuth2Client(ctx, oauth2Config, cli.Config.Account); err != nil {
+		cli.Logger.Failf("Failed authentication for account: %s", cli.Config.Account)
+		cli.Logger.Debugf("Authentication error: err=%s", err)
+		return err
 	}
+	cli.Logger.Donef("Successful authentication for account: %s", cli.Config.Account)
 
 	return nil
 }

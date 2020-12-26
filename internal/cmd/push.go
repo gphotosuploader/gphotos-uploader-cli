@@ -48,12 +48,12 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.FromFile(AppFs, cmd.CfgDir)
+	cfg, err := config.FromFile(cmd.CfgDir)
 	if err != nil {
 		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
 	}
 
-	cli, err := app.Start(cfg)
+	cli, err := app.Start(cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		u, err := resumable.NewResumableUploader(c, cli.UploadTracker)
+		u, err := resumable.NewResumableUploader(c, cli.UploadSessionTracker)
 		if err != nil {
 			return err
 		}

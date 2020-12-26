@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"path/filepath"
 
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
@@ -24,8 +24,8 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initializes configuration file",
-		Long:  `Initializes a new configuration file. Creates a config.hjson with a default configuration.`,
+		Short: "Initializes the configuration",
+		Long:  `Initializes a new configuration with defaults.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}
@@ -36,21 +36,40 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
+	path, _ := filepath.Abs(cmd.CfgDir)
+
 	// Check if config already exists
-	if config.Exists(AppFs, cmd.CfgDir) && !cmd.Reconfigure {
-		log.Infof("AppConfig already exists. If you want to recreate the config please run `%s`", ansi.Color("gphotos-uploader-cli init --force", "white+b"))
-		log.Infof("\r         \nIf you want to continue with the existing config, run:\n- `%s` to start uploading files.\n", ansi.Color("gphotos-uploader-cli push", "white+b"))
+	if config.Exists(path) && !cmd.Reconfigure {
+		log.Infof("Configuration file already exists. If you proceed, %s", ansi.Color("ALL THE APPLICATION DATA WILL BE DELETED!", "white+b"))
+		log.Infof("Use `%s` flag to proceed and recreate the configuration file", ansi.Color("--force", "white+b"))
 		return nil
 	}
 
-	if _, err := config.New(AppFs, cmd.CfgDir); err != nil {
+	file, err := recreateAppDir(path)
+	if err != nil {
+		log.Failf("Unable to create configuration file, err: %s", err)
 		return err
 	}
 
-	log.Done("Configuration file successfully initialized.")
+	log.Done("Configuration file created successfully.")
 	log.Infof("\r         \nPlease edit: \n- `%s` to add you configuration.\n",
-		ansi.Color(fmt.Sprintf("%s/%s", cmd.CfgDir, config.DefaultConfigFilename), "cyan+b"),
+		ansi.Color(file, "cyan+b"),
 	)
 
 	return nil
+}
+
+// recreateAppDir returns the configuration file name created after creating the application directory.
+func recreateAppDir(path string) (string, error) {
+	if err := emptyDir(path); err != nil {
+		return "", err
+	}
+	return config.Create(path)
+}
+
+func emptyDir(path string) error {
+	if err := Os.RemoveAll(path); err != nil {
+		return err
+	}
+	return Os.MkdirAll(path, 0700)
 }
