@@ -17,7 +17,7 @@ import (
 
 const (
 	// DefaultConfigFilename is the default config file name.
-	DefaultConfigFilename = "config.hjson"
+	DefaultConfigFilename = "SourceFolder.hjson"
 )
 
 // App represents a running application with all the dependant services.

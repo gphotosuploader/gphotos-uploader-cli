@@ -16,8 +16,8 @@ func TestCreate(t *testing.T) {
 		path          string
 		isErrExpected bool
 	}{
-		{"Should success", "", "/home/foo/config.hjson", false},
-		{"Should success w/ existing dir", "/home/bar/config.hjson", "/home/bar/config.hjson", false},
+		{"Should success", "", "/home/foo/SourceFolder.hjson", false},
+		{"Should success w/ existing dir", "/home/bar/SourceFolder.hjson", "/home/bar/SourceFolder.hjson", false},
 	}
 
 	for _, tc := range testCases {
@@ -65,7 +65,12 @@ func TestFromFile(t *testing.T) {
 	}{
 		{"Should success", "testdata/valid-config/config.hjson", "youremail@domain.com", false},
 		{"Should fail if dir does not exist", "testdata/non-existent/config.hjson", "", true},
-		{"Should fail if config data is invalid", "testdata/invalid-config/config.hjson", "", true},
+		{"Should fail if Account is invalid", "testdata/invalid-config/Account.hjson", "", true},
+		{"Should fail if SourceFolder is invalid", "testdata/invalid-config/SourceFolder.hjson", "", true},
+		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/SecretsBackendType.hjson", "", true},
+		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/AppAPICredentials.hjson", "", true},
+		{"Should fail if MakeAlbums is invalid", "testdata/invalid-config/MakeAlbums.hjson", "", true},
+		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
 	}
 
 	for _, tc := range testCases {

@@ -55,7 +55,7 @@ func Exists(fs afero.Fs, filename string) bool {
 	return true
 }
 
-// validate returns if the current configuration is valid.
+// validate validates the current configuration.
 func (c Config) validate(fs afero.Fs) error {
 	if err := c.validateSecretsBackendType(); err != nil {
 		return err
@@ -125,16 +125,24 @@ func (c Config) validateJobs(fs afero.Fs) error {
 
 	for _, job := range c.Jobs {
 		exist, err := afero.DirExists(fs, job.SourceFolder)
-		if err != nil {
+		if err != nil || !exist {
 			return fmt.Errorf("config: The provided folder '%s' could not be used, err=%s", job.SourceFolder, err)
-		}
-		if !exist {
-			return fmt.Errorf("config: The provided folder '%s' is not a folder", job.SourceFolder)
 		}
 		if job.MakeAlbums.Enabled &&
 			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
 			return errors.New("config: The provided MakeAlbums option is invalid")
 		}
+	}
+	return nil
+}
+
+func (c Config) validateSecretsBackendType() error {
+	if c.SecretsBackendType != "auto" &&
+		c.SecretsBackendType != "secret-service" &&
+		c.SecretsBackendType != "keychain" &&
+		c.SecretsBackendType != "kwallet" &&
+		c.SecretsBackendType != "file" {
+		return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
 	}
 	return nil
 }
@@ -196,17 +204,6 @@ func defaultSettings() Config {
 			},
 		},
 	}
-}
-
-func (c Config) validateSecretsBackendType() error {
-	if c.SecretsBackendType != "auto" &&
-		c.SecretsBackendType != "secret-service" &&
-		c.SecretsBackendType != "keychain" &&
-		c.SecretsBackendType != "kwallet" &&
-		c.SecretsBackendType != "file" {
-		return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
-	}
-	return nil
 }
 
 func normalizePath(path string) string {
