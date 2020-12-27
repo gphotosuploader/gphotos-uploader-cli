@@ -1,118 +1,137 @@
-package tokenstore_test
+package tokenmanager_test
 
 import (
-	"errors"
-	"reflect"
 	"testing"
 	"time"
 
 	"golang.org/x/oauth2"
 
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
 )
 
-type mockedRepository struct {
-	value oauth2.Token
-}
+const (
+	ScenarioShouldSuccess = "should-success"
+	ScenarioInvalidToken  = "invalid-token"
+	ScenarioTokenNotFound = "token-not-found"
+	ScenarioRefreshToken  = "refresh-token"
+)
 
-func (mr *mockedRepository) Get(key string) (*oauth2.Token, error) {
-	var nullToken = &oauth2.Token{}
+var valueInRepo oauth2.Token
 
-	if key == "non-existent" {
-		return nullToken, tokenstore.ErrNotFound
+func TestTokenManager_Get(t *testing.T) {
+	testCases := []struct {
+		name        string
+		input       string
+		expectedErr error
+	}{
+		{"Should success", ScenarioShouldSuccess, nil},
+		{"Should fail when token is not found", ScenarioTokenNotFound, tokenmanager.ErrTokenNotFound},
 	}
 
-	return &mr.value, nil
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want := getTestToken(tc.input)
+			valueInRepo = want
+			tm := tokenmanager.New(&mockedRepository{})
+
+			got, err := tm.Get(tc.input)
+			if tc.expectedErr != err {
+				t.Errorf("err, want: %s, got: %s", tc.expectedErr, err)
+			}
+			if err == nil && !equalTokens(want, *got) {
+				t.Errorf("token, want: %v, got: %v", want, got)
+			}
+		})
+	}
 }
 
-func (mr *mockedRepository) Set(key string, token *oauth2.Token) error {
-	if key == "should-not-success" {
-		return errors.New("error")
+func TestTokenManager_Put(t *testing.T) {
+	testCases := []struct {
+		name        string
+		input       string
+		expectedErr error
+	}{
+		{"Should success", ScenarioShouldSuccess, nil},
+		{"Should success besides refresh token is empty", ScenarioRefreshToken, nil},
+		{"Should fail when token is invalid", ScenarioInvalidToken, tokenmanager.ErrInvalidToken},
 	}
 
-	if len(token.RefreshToken) == 0 {
-		return errors.New("error")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want := getTestToken(tc.input)
+			mr := &mockedRepository{}
+			tm := tokenmanager.New(mr)
+
+			err := tm.Put(tc.input, &want)
+			if tc.expectedErr != err {
+				t.Errorf("err, want: %s, got: %s", tc.expectedErr, err)
+			}
+
+			if err == nil && !equalTokens(want, valueInRepo) {
+				t.Errorf("token, want: %v, got: %v", want, valueInRepo)
+			}
+		})
 	}
-
-	return nil
 }
 
-func (mr *mockedRepository) Close() error {
-	return nil
-}
+func TestTokenManager_Close(t *testing.T) {
+	tm := tokenmanager.New(&mockedRepository{})
 
-func TestStoreToken(t *testing.T) {
-	t.Run("ShouldReturnSuccess", func(t *testing.T) {
-		token := getDefaultToken()
-		tm := tokenstore.New(&mockedRepository{value: token})
-
-		if err := tm.Get("foo@foo.bar", &token); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-	})
-
-	t.Run("ShouldReturnErrInvalidTokenWhenTokenIsEmpty", func(t *testing.T) {
-		token := oauth2.Token{}
-		tm := tokenstore.New(&mockedRepository{})
-
-		if err := tm.Get("foo@foo.bar", &token); err != tokenstore.ErrInvalidToken {
-			t.Errorf("want: %s, got: %v", tokenstore.ErrInvalidToken, err)
-		}
-	})
-
-	t.Run("ShouldStoreOldRefreshTokenIfItIsNotProvided", func(t *testing.T) {
-		tm := tokenstore.New(&mockedRepository{value: getDefaultToken()})
-
-		// newToken is not defining the RefreshToken.
-		token := &oauth2.Token{
-			AccessToken: "my-new-access-token",
-		}
-		if err := tm.Get("foo@foo.bar", token); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-	})
-
-}
-
-func TestRetrieveToken(t *testing.T) {
-	want := getDefaultToken()
-	tm := tokenstore.New(&mockedRepository{value: want})
-
-	t.Run("ShouldSuccess", func(t *testing.T) {
-		got, err := tm.Put("user@domain.com")
-		if err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-
-		if reflect.DeepEqual(got, want) {
-			t.Errorf("want: %v, got: %v", want, got)
-		}
-	})
-
-	t.Run("ReturnErrNotFoundWhenTokenDoesNotExists", func(t *testing.T) {
-		_, err := tm.Put("non-existent")
-		if err != tokenstore.ErrNotFound {
-			t.Errorf("want: %s, got: %v", tokenstore.ErrNotFound, err)
-		}
-	})
-}
-
-func TestClose(t *testing.T) {
-	tm := tokenstore.New(&mockedRepository{})
-
-	t.Run("ShouldSuccess", func(t *testing.T) {
+	t.Run("Should Success", func(t *testing.T) {
 		if err := tm.Close(); err != nil {
-			t.Errorf("error was not expected: err=%s", err)
+			t.Errorf("error was not expected, err: %s", err)
 		}
 	})
+}
+
+type mockedRepository struct{}
+
+func (mr mockedRepository) Get(key string) (*oauth2.Token, error) {
+	if key == ScenarioShouldSuccess {
+		token := valueInRepo
+		return &token, nil
+	}
+	return nil, tokenmanager.ErrTokenNotFound
+}
+
+func (mr mockedRepository) Set(key string, token *oauth2.Token) error {
+	valueInRepo = oauth2.Token{
+		AccessToken:  token.AccessToken,
+		TokenType:    token.TokenType,
+		RefreshToken: token.RefreshToken,
+		Expiry:       token.Expiry,
+	}
+	return nil
+}
+
+func (mr mockedRepository) Close() error {
+	return nil
 }
 
 // getDefaultToken return a token to complete tests
-func getDefaultToken() oauth2.Token {
-	return oauth2.Token{
-		AccessToken:  "my-access-token",
-		TokenType:    "my-token-type",
-		RefreshToken: "my-refresh-token",
-		Expiry:       time.Now().Add(time.Minute),
+func getTestToken(base string) oauth2.Token {
+	token := oauth2.Token{
+		AccessToken:  base + "-AccessToken",
+		TokenType:    "Bearer",
+		RefreshToken: base + "-RefreshToken",
+		Expiry:       time.Now().Add(time.Hour),
 	}
+
+	switch base {
+	case ScenarioInvalidToken:
+		token.AccessToken = ""
+	case ScenarioRefreshToken:
+		token.RefreshToken = ""
+	}
+	return token
+}
+
+func equalTokens(want, in oauth2.Token) bool {
+	if want.AccessToken == in.AccessToken &&
+		want.RefreshToken == in.RefreshToken &&
+		want.TokenType == in.TokenType &&
+		want.Expiry == in.Expiry {
+		return true
+	}
+	return false
 }

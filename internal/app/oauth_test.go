@@ -83,10 +83,10 @@ func newTestApp(scenario string) *app.App {
 	}
 	testApp := &app.App{
 		TokenManager: &mockedTokenManager{
-			RetrieveTokenFn: func(email string) (*oauth2.Token, error) {
+			GetFn: func(email string) (*oauth2.Token, error) {
 				return tokenManagerValue, tokenManagerErr
 			},
-			StoreTokenFn: func(email string, token *oauth2.Token) error {
+			PutFn: func(email string, token *oauth2.Token) error {
 				return nil
 			},
 		},
@@ -149,17 +149,17 @@ func getValueFromBody(body []byte, key string) string {
 }
 
 type mockedTokenManager struct {
-	StoreTokenFn    func(email string, token *oauth2.Token) error
-	RetrieveTokenFn func(email string) (*oauth2.Token, error)
-	CloseFn         func() error
+	PutFn   func(email string, token *oauth2.Token) error
+	GetFn   func(email string) (*oauth2.Token, error)
+	CloseFn func() error
 }
 
-func (m mockedTokenManager) StoreToken(email string, token *oauth2.Token) error {
-	return m.StoreTokenFn(email, token)
+func (m mockedTokenManager) Put(email string, token *oauth2.Token) error {
+	return m.PutFn(email, token)
 }
 
-func (m mockedTokenManager) RetrieveToken(email string) (*oauth2.Token, error) {
-	return m.RetrieveTokenFn(email)
+func (m mockedTokenManager) Get(email string) (*oauth2.Token, error) {
+	return m.GetFn(email)
 }
 
 func (m mockedTokenManager) Close() error {

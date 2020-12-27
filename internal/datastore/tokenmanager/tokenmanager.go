@@ -1,4 +1,4 @@
-package tokenstore
+package tokenmanager
 
 import (
 	"errors"
@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	// ErrNotFound is the expected error if the token is not found in the keyring
-	ErrNotFound = errors.New("failed retrieving token from keyring")
+	// ErrTokenNotFound is the expected error if the token is not found.
+	ErrTokenNotFound = errors.New("token was not found")
 
-	// ErrInvalidToken is the expected error if the token is not a valid one
+	// ErrInvalidToken is the expected error if the token is not a valid.
 	ErrInvalidToken = errors.New("invalid token")
 )
 
@@ -31,20 +31,24 @@ func New(repo Repository) *TokenManager {
 	return &TokenManager{repo: repo}
 }
 
-// StoreToken stores the Token into the repository.
-func (tm *TokenManager) Get(email string, token *oauth2.Token) error {
+// Put stores the token, using email as key, into the repository.
+func (tm *TokenManager) Put(email string, token *oauth2.Token) error {
 	if token.AccessToken == "" {
 		return ErrInvalidToken
 	}
 
-	// Restore refresh token from previously stored token if it's not available on the current one.
-	token.RefreshToken = tm.getRefreshToken(email, token)
+	if token.RefreshToken == "" {
+		// Set RefreshToken from the token previously stored.
+		if previousToken, err := tm.repo.Get(email); err == nil {
+			token.RefreshToken = previousToken.RefreshToken
+		}
+	}
 
 	return tm.repo.Set(email, token)
 }
 
-// RetrieveToken returns the Token from the repository.
-func (tm *TokenManager) Put(email string) (*oauth2.Token, error) {
+// Get returns the token, associated with email, from the repository.
+func (tm *TokenManager) Get(email string) (*oauth2.Token, error) {
 	tk, err := tm.repo.Get(email)
 	if err != nil {
 		return nil, err
@@ -53,17 +57,7 @@ func (tm *TokenManager) Put(email string) (*oauth2.Token, error) {
 	return tk, nil
 }
 
-// Close closes the Token repository.
+// Close closes the token repository.
 func (tm *TokenManager) Close() error {
 	return tm.repo.Close()
-}
-
-// getRefreshToken returns the most updated Refresh Token for the account (email).
-func (tm *TokenManager) getRefreshToken(email string, token *oauth2.Token) string {
-	// Get the previous stored Token.
-	oldToken, err := tm.repo.Get(email)
-	if token.RefreshToken == "" && err == nil {
-		return oldToken.RefreshToken
-	}
-	return token.RefreshToken
 }

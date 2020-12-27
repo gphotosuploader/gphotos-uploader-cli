@@ -11,7 +11,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/completeduploads"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenstore"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -153,12 +153,12 @@ func (app App) defaultFileTracker() (*completeduploads.Service, error) {
 	return completeduploads.NewService(completeduploads.NewLevelDBRepository(ft)), nil
 }
 
-func (app App) defaultTokenManager(backendType string) (*tokenstore.TokenManager, error) {
-	kr, err := tokenstore.NewKeyringRepository(backendType, nil, app.appDir)
+func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
+	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, app.appDir)
 	if err != nil {
 		return nil, err
 	}
-	return tokenstore.New(kr), nil
+	return tokenmanager.New(kr), nil
 }
 
 func (app App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
@@ -182,8 +182,8 @@ type FileTracker interface {
 
 // TokenManager represents a service to keep and read secrets (like passwords, tokens...)
 type TokenManager interface {
-	StoreToken(email string, token *oauth2.Token) error
-	RetrieveToken(email string) (*oauth2.Token, error)
+	Put(email string, token *oauth2.Token) error
+	Get(email string) (*oauth2.Token, error)
 	Close() error
 }
 

@@ -32,7 +32,7 @@ func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 	account := app.Config.Account
 	app.Logger.Debugf("Getting OAuth token for %s", account)
 
-	token, err := app.TokenManager.RetrieveToken(account)
+	token, err := app.TokenManager.Get(account)
 	if err != nil {
 		app.Logger.Debugf("Unable to retrieve token from token manager: %s", err)
 	}
@@ -64,7 +64,7 @@ func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 
 	app.Logger.Infof("Token expiration: %s", token.Expiry.String())
 
-	if err := app.TokenManager.StoreToken(account, token); err != nil {
+	if err := app.TokenManager.Put(account, token); err != nil {
 		return nil, fmt.Errorf("failed storing token: %s", err)
 	}
 
