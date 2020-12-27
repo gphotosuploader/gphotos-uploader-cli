@@ -67,6 +67,15 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	defer uploadQueue.Stop()
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
+	u, err := resumable.NewResumableUploader(client, cli.UploadSessionTracker)
+	if err != nil {
+		return err
+	}
+	photosService, err := gphotos.NewClient(client, gphotos.WithUploader(u))
+	if err != nil {
+		return err
+	}
+
 	// launch all folder upload jobs
 	var totalItems int
 	for _, config := range cli.Config.Jobs {
@@ -88,15 +97,6 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		}
 
 		cli.Logger.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
-
-		u, err := resumable.NewResumableUploader(client, cli.UploadSessionTracker)
-		if err != nil {
-			return err
-		}
-		photosService, err := gphotos.NewClient(client, gphotos.WithUploader(u))
-		if err != nil {
-			return err
-		}
 
 		// enqueue files to be uploaded. The workers will receive it via channel.
 		totalItems += len(itemsToUpload)
