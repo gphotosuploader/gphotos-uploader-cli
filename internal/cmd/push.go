@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
@@ -76,7 +77,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", config.SourceFolder, err)
 		}
-		if !filesystem.IsDir(srcFolder) {
+		if !isDir(srcFolder) {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s", srcFolder)
 		}
 
@@ -146,4 +147,13 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
 	return nil
+}
+
+// isDir asserts there is a directory at path
+func isDir(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fi.Mode().IsDir()
 }
