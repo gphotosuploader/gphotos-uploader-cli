@@ -137,14 +137,12 @@ func (c Config) validateJobs(fs afero.Fs) error {
 }
 
 func (c Config) validateSecretsBackendType() error {
-	if c.SecretsBackendType != "auto" &&
-		c.SecretsBackendType != "secret-service" &&
-		c.SecretsBackendType != "keychain" &&
-		c.SecretsBackendType != "kwallet" &&
-		c.SecretsBackendType != "file" {
-		return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
+	switch c.SecretsBackendType {
+	case "auto", "secret-service", "keychain", "kwallet", "file":
+		return nil
+
 	}
-	return nil
+	return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
 }
 
 func (c Config) ensureSourceFolderAbsolutePaths() error {
