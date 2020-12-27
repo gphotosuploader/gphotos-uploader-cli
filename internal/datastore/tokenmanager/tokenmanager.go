@@ -32,7 +32,7 @@ func New(repo Repository) *TokenManager {
 }
 
 // StoreToken stores the Token into the repository.
-func (tm *TokenManager) StoreToken(email string, token *oauth2.Token) error {
+func (tm *TokenManager) Get(email string, token *oauth2.Token) error {
 	if token.AccessToken == "" {
 		return ErrInvalidToken
 	}
@@ -44,7 +44,7 @@ func (tm *TokenManager) StoreToken(email string, token *oauth2.Token) error {
 }
 
 // RetrieveToken returns the Token from the repository.
-func (tm *TokenManager) RetrieveToken(email string) (*oauth2.Token, error) {
+func (tm *TokenManager) Put(email string) (*oauth2.Token, error) {
 	tk, err := tm.repo.Get(email)
 	if err != nil {
 		return nil, err

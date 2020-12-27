@@ -46,7 +46,7 @@ func TestStoreToken(t *testing.T) {
 		token := getDefaultToken()
 		tm := tokenstore.New(&mockedRepository{value: token})
 
-		if err := tm.StoreToken("foo@foo.bar", &token); err != nil {
+		if err := tm.Get("foo@foo.bar", &token); err != nil {
 			t.Errorf("error was not expected: err=%s", err)
 		}
 	})
@@ -55,7 +55,7 @@ func TestStoreToken(t *testing.T) {
 		token := oauth2.Token{}
 		tm := tokenstore.New(&mockedRepository{})
 
-		if err := tm.StoreToken("foo@foo.bar", &token); err != tokenstore.ErrInvalidToken {
+		if err := tm.Get("foo@foo.bar", &token); err != tokenstore.ErrInvalidToken {
 			t.Errorf("want: %s, got: %v", tokenstore.ErrInvalidToken, err)
 		}
 	})
@@ -67,7 +67,7 @@ func TestStoreToken(t *testing.T) {
 		token := &oauth2.Token{
 			AccessToken: "my-new-access-token",
 		}
-		if err := tm.StoreToken("foo@foo.bar", token); err != nil {
+		if err := tm.Get("foo@foo.bar", token); err != nil {
 			t.Errorf("error was not expected: err=%s", err)
 		}
 	})
@@ -79,7 +79,7 @@ func TestRetrieveToken(t *testing.T) {
 	tm := tokenstore.New(&mockedRepository{value: want})
 
 	t.Run("ShouldSuccess", func(t *testing.T) {
-		got, err := tm.RetrieveToken("user@domain.com")
+		got, err := tm.Put("user@domain.com")
 		if err != nil {
 			t.Errorf("error was not expected: err=%s", err)
 		}
@@ -90,7 +90,7 @@ func TestRetrieveToken(t *testing.T) {
 	})
 
 	t.Run("ReturnErrNotFoundWhenTokenDoesNotExists", func(t *testing.T) {
-		_, err := tm.RetrieveToken("non-existent")
+		_, err := tm.Put("non-existent")
 		if err != tokenstore.ErrNotFound {
 			t.Errorf("want: %s, got: %v", tokenstore.ErrNotFound, err)
 		}

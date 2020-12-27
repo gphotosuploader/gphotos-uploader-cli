@@ -1,4 +1,4 @@
-package tokenstore
+package tokenmanager
 
 import (
 	"fmt"
@@ -66,8 +66,8 @@ func TestKeyringRepository_Get(t *testing.T) {
 
 	t.Run("ReturnErrNotFoundWhenTokenDoesNotExists", func(t *testing.T) {
 		_, err := repo.Get("non-existent")
-		if err != ErrNotFound {
-			t.Errorf("want: %s, got: %v", ErrNotFound, err)
+		if err != ErrTokenNotFound {
+			t.Errorf("want: %s, got: %v", ErrTokenNotFound, err)
 		}
 	})
 }
