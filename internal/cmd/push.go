@@ -8,14 +8,11 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
@@ -48,11 +45,6 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.FromFile(Os, cmd.CfgDir)
-	if err != nil {
-		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
-	}
-
 	cli, err := app.Start(Os, cmd.CfgDir)
 	if err != nil {
 		return err
@@ -65,12 +57,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		cli.Logger.Info("Running in dry run mode. No changes will be made.")
 	}
 
-	// get OAuth2 Configuration with our App credentials
-	oauth2Config := oauth2.Config{
-		ClientID:     cfg.APIAppCredentials.ClientID,
-		ClientSecret: cfg.APIAppCredentials.ClientSecret,
-		Endpoint:     photos.Endpoint,
-		Scopes:       photos.Scopes,
+	// get a Google Photos client for the specified account.
+	ctx := context.Background()
+	client, err := cli.NewOAuth2Client(ctx)
+	if err != nil {
+		return err
 	}
 
 	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
@@ -80,7 +71,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	// launch all folder upload jobs
 	var totalItems int
-	for _, config := range cfg.Jobs {
+	for _, config := range cli.Config.Jobs {
 		srcFolder, err := filesystem.AbsolutePath(config.SourceFolder)
 		if err != nil {
 			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", config.SourceFolder, err)
@@ -106,18 +97,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 		cli.Logger.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
 
-		// get a Google Photos client for the specified account.
-		ctx := context.Background()
-		c, err := cli.NewOAuth2Client(ctx, oauth2Config, config.Account)
+		u, err := resumable.NewResumableUploader(client, cli.UploadSessionTracker)
 		if err != nil {
 			return err
 		}
-
-		u, err := resumable.NewResumableUploader(c, cli.UploadSessionTracker)
-		if err != nil {
-			return err
-		}
-		photosService, err := gphotos.NewClient(c, gphotos.WithUploader(u))
+		photosService, err := gphotos.NewClient(client, gphotos.WithUploader(u))
 		if err != nil {
 			return err
 		}

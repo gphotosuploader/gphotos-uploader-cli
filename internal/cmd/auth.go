@@ -4,11 +4,9 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
 )
 
 // InitCmd holds the required data for the init cmd
@@ -39,17 +37,9 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	// get OAuth2 Configuration with our App credentials
-	oauth2Config := oauth2.Config{
-		ClientID:     cli.Config.APIAppCredentials.ClientID,
-		ClientSecret: cli.Config.APIAppCredentials.ClientSecret,
-		Endpoint:     photos.Endpoint,
-		Scopes:       photos.Scopes,
-	}
-
 	ctx := context.Background()
 
-	if _, err := cli.NewOAuth2Client(ctx, oauth2Config, cli.Config.Account); err != nil {
+	if _, err := cli.NewOAuth2Client(ctx); err != nil {
 		cli.Logger.Failf("Failed authentication for account: %s", cli.Config.Account)
 		cli.Logger.Debugf("Authentication error: err=%s", err)
 		return err
