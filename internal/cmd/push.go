@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
@@ -12,7 +10,6 @@ import (
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filesystem"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
@@ -73,13 +70,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	// launch all folder upload jobs
 	var totalItems int
 	for _, config := range cli.Config.Jobs {
-		srcFolder, err := filesystem.AbsolutePath(config.SourceFolder)
-		if err != nil {
-			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", config.SourceFolder, err)
-		}
-		if !isDir(srcFolder) {
-			return fmt.Errorf("invalid source folder. SourceFolder=%s", srcFolder)
-		}
+		srcFolder := config.SourceFolder
 
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
@@ -147,13 +138,4 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
 	return nil
-}
-
-// isDir asserts there is a directory at path
-func isDir(path string) bool {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return fi.Mode().IsDir()
 }
