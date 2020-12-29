@@ -134,13 +134,13 @@ func TestRelativePath(t *testing.T) {
 
 func getScanFolderResult(includePatterns []string, excludePatterns []string) (map[string]bool, error) {
 	ft := &mock.FileTracker{
-		CacheAsAlreadyUploadedFn: func(path string) error {
+		PutFn: func(path string) error {
 			return nil
 		},
-		IsAlreadyUploadedFn: func(path string) (bool, error) {
-			return false, nil
+		ExistFn: func(path string) bool {
+			return false
 		},
-		RemoveAsAlreadyUploadedFn: func(path string) error {
+		DeleteFn: func(path string) error {
 			return nil
 		},
 	}

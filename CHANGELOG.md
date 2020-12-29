@@ -4,15 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
-> This is a **major upgrade** and it has some **non-backwards compatible changes**
+> This is a **major upgrade**, so it has some **non-backwards compatible changes**
 ### Added
 - Configuration validation. The cli validates the configuration data at starting time.
-- Information messages to bring more context by default. ([#260][i260]) 
+- Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
+- Some parts of the code has been refactored to make cleaner code and increase testability.
 - `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
-- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.1`. It's more performant. ([#259][i259])
+- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.1`. It improves performance. ([#259][i259])
 ### Removed
-- Multiple Google Photos account support has been removed. You can use multiple configuration files instead. ([#231][i231]) 
+- Multiple Google Photos account support has been removed. You can use multiple configuration files in the same application folder. ([#231][i231]) 
 
 [i260]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/260
 [i259]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/259
