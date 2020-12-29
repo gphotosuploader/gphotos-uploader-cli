@@ -1,43 +1,52 @@
 package filetracker
 
-import "github.com/syndtr/goleveldb/leveldb"
+import (
+	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
+)
 
-type LevelDBRepository struct {
-	db *leveldb.DB
+// DB represents a LevelDB database.
+type DB interface {
+	Get(key []byte, ro *opt.ReadOptions) ([]byte, error)
+	Put(key []byte, item []byte, wo *opt.WriteOptions) error
+	Delete(key []byte, wo *opt.WriteOptions) error
+	Close() error
 }
 
-// NewLevelDBRepository creates a repository using LevelDB.
-func NewLevelDBRepository(db *leveldb.DB) *LevelDBRepository {
-	return &LevelDBRepository{db: db}
+// LevelDBRepository implements a Repository using LevelDB.
+type LevelDBRepository struct {
+	DB DB
+}
+
+// NewLevelDBRepository creates a repository using LevelDB package.
+func NewLevelDBRepository(filename string) (*LevelDBRepository, error) {
+	ft, err := leveldb.OpenFile(filename, nil)
+	return &LevelDBRepository{
+		DB: ft,
+	}, err
 }
 
 // Get returns the item specified by key. It returns ErrItemNotFound if the
 // DB does not contains the key.
-func (r *LevelDBRepository) Get(key string) (TrackedFile, error) {
-	val, err := r.db.Get([]byte(key), nil)
-	if err == leveldb.ErrNotFound {
-		return TrackedFile{}, ErrItemNotFound
-	}
+func (r LevelDBRepository) Get(key string) (TrackedFile, error) {
+	val, err := r.DB.Get([]byte(key), nil)
 	if err != nil {
-		return TrackedFile{}, err
+		return TrackedFile{}, ErrItemNotFound
 	}
 	return NewTrackedFile(string(val)), nil
 }
 
 // Put stores the item under key.
-func (r *LevelDBRepository) Put(key string, item TrackedFile) error {
-	return r.db.Put([]byte(key), []byte(item.value), nil)
+func (r LevelDBRepository) Put(key string, item TrackedFile) error {
+	return r.DB.Put([]byte(key), []byte(item.value), nil)
 }
 
 // Delete removes the item specified by key.
-func (r *LevelDBRepository) Delete(key string) error {
-	if err := r.db.Delete([]byte(key), nil); err != nil {
-		return err
-	}
-	return nil
+func (r LevelDBRepository) Delete(key string) error {
+	return r.DB.Delete([]byte(key), nil)
 }
 
 // Close closes the DB.
-func (r *LevelDBRepository) Close() error {
-	return r.db.Close()
+func (r LevelDBRepository) Close() error {
+	return r.DB.Close()
 }

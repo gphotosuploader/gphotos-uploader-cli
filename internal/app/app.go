@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/afero"
-	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
@@ -146,11 +145,11 @@ func (app App) startServices() error {
 }
 
 func (app App) defaultFileTracker() (*filetracker.FileTracker, error) {
-	ft, err := leveldb.OpenFile(filepath.Join(app.appDir, "uploads.db"), nil)
+	repo, err := filetracker.NewLevelDBRepository(filepath.Join(app.appDir, "uploads.db"))
 	if err != nil {
 		return nil, err
 	}
-	return filetracker.New(filetracker.NewLevelDBRepository(ft)), nil
+	return filetracker.New(repo), nil
 }
 
 func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
