@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestAskForAuthCodeInTerminal(t *testing.T)  {
-	testCases := []struct{
-		name string
-		input string
+func TestAskForAuthCodeInTerminal(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         string
 		isErrExpected bool
-	} {
+	}{
 		{"Should success", "foo", false},
 		{"Should fail if code is empty", "", true},
 	}
