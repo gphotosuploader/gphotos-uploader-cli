@@ -2,8 +2,8 @@ package completeduploads
 
 import (
 	"fmt"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
+	"os"
+	"time"
 )
 
 // Service represents the repository where uploaded objects are tracked
@@ -43,7 +43,7 @@ func (s *Service) IsAlreadyUploaded(filePath string) (bool, error) {
 	// check stored last modified time with the current one to see if the
 	// file has been modified
 	if cacheMtime != 0 {
-		fileMtime, err := filesystem.GetMTime(filePath)
+		fileMtime, err := getMTime(filePath)
 		if err != nil {
 			return false, err
 		}
@@ -84,4 +84,14 @@ func (s *Service) CacheAsAlreadyUploaded(filePath string) error {
 // RemoveAsAlreadyUploaded removes a file previously marked as uploaded
 func (s *Service) RemoveAsAlreadyUploaded(filePath string) error {
 	return s.repo.Delete(filePath)
+}
+
+// getMTime returns the Last Modified time from the file
+func getMTime(path string) (mtime time.Time, err error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+	mtime = fi.ModTime()
+	return
 }

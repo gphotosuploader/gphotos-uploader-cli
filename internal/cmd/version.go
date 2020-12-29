@@ -23,7 +23,7 @@ var (
 	version = "v0.0.0" // git tag, output of $(git describe --tags --always --dirty)
 )
 
-type VersionCmd struct {}
+type VersionCmd struct{}
 
 func NewVersionCmd() *cobra.Command {
 	cmd := &VersionCmd{}
