@@ -9,7 +9,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/completeduploads"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
@@ -145,12 +145,12 @@ func (app App) startServices() error {
 	return nil
 }
 
-func (app App) defaultFileTracker() (*completeduploads.Service, error) {
+func (app App) defaultFileTracker() (*filetracker.FileTracker, error) {
 	ft, err := leveldb.OpenFile(filepath.Join(app.appDir, "uploads.db"), nil)
 	if err != nil {
 		return nil, err
 	}
-	return completeduploads.NewService(completeduploads.NewLevelDBRepository(ft)), nil
+	return filetracker.New(filetracker.NewLevelDBRepository(ft)), nil
 }
 
 func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
@@ -174,9 +174,9 @@ func (app App) emptyDir(path string) error {
 
 // FileTracker represents a service to track file already uploaded.
 type FileTracker interface {
-	CacheAsAlreadyUploaded(filePath string) error
-	IsAlreadyUploaded(filePath string) (bool, error)
-	RemoveAsAlreadyUploaded(filePath string) error
+	Put(file string) error
+	Exist(file string) bool
+	Delete(file string) error
 	Close() error
 }
 
