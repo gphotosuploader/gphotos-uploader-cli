@@ -43,7 +43,8 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cli, err := app.Start(Os, cmd.CfgDir)
+	ctx := context.Background()
+	cli, err := app.Start(ctx, cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -55,23 +56,16 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		cli.Logger.Info("Running in dry run mode. No changes will be made.")
 	}
 
-	// get a Google Photos client for the specified account.
-	ctx := context.Background()
-	client, err := cli.NewOAuth2Client(ctx)
-	if err != nil {
-		return err
-	}
-
 	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
 	uploadQueue.Start()
 	defer uploadQueue.Stop()
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
-	u, err := resumable.NewResumableUploader(client, cli.UploadSessionTracker)
+	u, err := resumable.NewResumableUploader(cli.Client, cli.UploadSessionTracker)
 	if err != nil {
 		return err
 	}
-	photosService, err := gphotos.NewClient(client, gphotos.WithUploader(u))
+	photosService, err := gphotos.NewClient(cli.Client, gphotos.WithUploader(u))
 	if err != nil {
 		return err
 	}

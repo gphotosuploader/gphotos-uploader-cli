@@ -1,7 +1,9 @@
 package app
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"path/filepath"
 
 	"github.com/spf13/afero"
@@ -28,6 +30,9 @@ type App struct {
 	// UploadSessionTracker tracks uploads sessions to implement resumable uploads.
 	UploadSessionTracker UploadSessionTracker
 
+	// Client is the HTTP client after authentication.
+	Client *http.Client
+
 	Logger log.Logger
 
 	// fs points to the file system.
@@ -42,13 +47,13 @@ type App struct {
 }
 
 // Start initializes the application with the services defined by a given configuration.
-func Start(fs afero.Fs, path string) (*App, error) {
+func Start(ctx context.Context, path string) (*App, error) {
 	var err error
 
 	app := &App{
 		appDir: path,
 		Logger: log.GetInstance(),
-		fs:     fs,
+		fs:     afero.NewOsFs(),
 	}
 
 	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
@@ -58,6 +63,11 @@ func Start(fs afero.Fs, path string) (*App, error) {
 	}
 
 	if err := app.startServices(); err != nil {
+		return nil, err
+	}
+
+	app.Client, err = app.NewOAuth2Client(ctx)
+	if err != nil {
 		return nil, err
 	}
 
