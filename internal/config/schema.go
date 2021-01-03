@@ -1,57 +1,31 @@
 package config
 
-// Config represents the content of configuration file.
-// It defines the schema for Marshal and Unmarshal the data of the configuration file.
+// Config represents the application settings.
 type Config struct {
-	// APIAppCredentials represents Google Photos API credentials for OAuth.
-	APIAppCredentials APIAppCredentials `json:"APIAppCredentials"`
-
-	// Account is the Google Photos account to work with.
-	Account string `json:"Account"`
-
-	// SecretsBackendType is the type of backend to store secrets.
-	SecretsBackendType string `json:"SecretsBackendType"`
-
-	// Jobs are the source folders to work with.
-	Jobs []FolderUploadJob `json:"Jobs"`
+	ConfigPath         string
+	SecretsBackendType string
+	APIAppCredentials  APIAppCredentials
+	Jobs               []FolderUploadJob
 }
 
-// APIAppCredentials represents Google Photos API credentials for OAuth.
+// APIAppCredentials represents Google Photos API credentials for OAuth
 type APIAppCredentials struct {
-	// ClientID is the app identifier generated on the Google API console.
-	ClientID string `json:"ClientID"`
-	// ClientSecret is the secret key generated on the Google API console.
-	ClientSecret string `json:"ClientSecret"`
+	ClientID     string
+	ClientSecret string
 }
 
 // FolderUploadJob represents configuration for a folder to be uploaded
 type FolderUploadJob struct {
-	// DEPRECATED: Account is deprecated, use Config.Account instead.
-	Account string `json:"-"`
-
-	// SourceFolder is the folder containing the objects to be uploaded.
-	SourceFolder string `json:"SourceFolder"`
-
-	// MakeAlbums is the configuration to create albums on Google Photos.
-	MakeAlbums MakeAlbums `json:"MakeAlbums"`
-
-	// DeleteAfterUpload if it is true, the app will remove files after upload them.
-	DeleteAfterUpload bool `json:"DeleteAfterUpload"`
-
-	// IncludePatterns are the patterns to include files to work with.
-	IncludePatterns []string `json:"IncludePatterns"`
-
-	// ExcludePatterns are the patterns to exclude files.
-	ExcludePatterns []string `json:"ExcludePatterns"`
+	Account           string
+	SourceFolder      string
+	MakeAlbums        MakeAlbums
+	DeleteAfterUpload bool
+	IncludePatterns   []string
+	ExcludePatterns   []string
 }
 
-// MakeAlbums represents configuration about how to create Albums path Google Photos
+// MakeAlbums represents configuration about how to create Albums in Google Photos
 type MakeAlbums struct {
-	// Enabled enables or disables album creation.
-	Enabled bool `json:"Enabled"`
-
-	// Use defines the name of the albums.
-	// `folderPath`: Album name is based on full folder path.
-	// `folderName`: Album name is the folder name.
-	Use string `json:"Use"`
+	Enabled bool
+	Use     string
 }

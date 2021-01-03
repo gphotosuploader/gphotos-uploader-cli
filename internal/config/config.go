@@ -1,212 +1,196 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
+	"os"
+	"path"
 	"path/filepath"
 
-	"github.com/hjson/hjson-go"
-	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/afero"
+	"github.com/client9/xson/hjson"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/utils/filesystem"
 )
 
-// ParseError denotes failing to parse configuration file.
-type ParseError struct {
-	err error
+const (
+	// DefaultConfigFilename is the default config file name to use
+	DefaultConfigFilename = "config.hjson"
+)
+
+// defaultSettings() returns a *Config with the default settings of the application.
+func defaultSettings() *Config {
+	var c Config
+	c.SecretsBackendType = "auto"
+	c.APIAppCredentials = APIAppCredentials{
+		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
+		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+	}
+	c.Jobs = make([]FolderUploadJob, 0)
+	job := FolderUploadJob{
+		Account:      "youremail@gmail.com",
+		SourceFolder: "~/folder/to/upload",
+		MakeAlbums: MakeAlbums{
+			Enabled: true,
+			Use:     "folderName",
+		},
+		DeleteAfterUpload: false,
+	}
+	c.Jobs = append(c.Jobs, job)
+	return &c
 }
 
-// Error returns the formatted configuration error.
-func (e ParseError) Error() string {
-	return fmt.Sprintf("parsing config: %s", e.err.Error())
-}
-
-// Create returns the configuration data after creating file with default settings.
-func Create(fs afero.Fs, filename string) (*Config, error) {
+// NewConfig returns a *Config with the default settings of the application.
+func NewConfig(dir string) *Config {
 	cfg := defaultSettings()
-	if err := cfg.writeFile(fs, filename); err != nil {
-		return nil, err
+	absPath, err := filesystem.AbsolutePath(dir)
+	if err != nil {
+		absPath = dir
 	}
-	return &cfg, nil
+	cfg.ConfigPath = absPath
+
+	return cfg
 }
 
-// FromFile returns the configuration data read from the specified file.
-// FromFile returns a ParseError{} if the configuration validation fails.
-func FromFile(fs afero.Fs, filename string) (*Config, error) {
-	cfg, err := readFile(fs, filename)
-	if err != nil {
-		return nil, ParseError{err}
+func (c *Config) Validate() error {
+	if len(c.Jobs) < 1 {
+		return fmt.Errorf("no Jobs has been supplied")
 	}
-	if err := cfg.validate(fs); err != nil {
-		return cfg, ParseError{err}
+
+	for i := range c.Jobs {
+		item := &c.Jobs[i] // we do that way to modify original object while iterating.
+		srcFolder, err := filesystem.AbsolutePath(item.SourceFolder)
+		if err != nil {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s, err=%s", item.SourceFolder, err)
+		}
+		item.SourceFolder = srcFolder
+		if !filesystem.IsDir(item.SourceFolder) {
+			return fmt.Errorf("invalid source folder. SourceFolder=%s", item.SourceFolder)
+		}
+	}
+
+	return nil
+}
+
+// CompletedUploadsDBDir returns the path of the folder where completed uploads are tracked.
+func (c *Config) CompletedUploadsDBDir() string {
+	return path.Join(c.ConfigPath, "uploads.db")
+}
+
+// ResumableUploadsDBDir returns the path of the folder where upload URLs are tracked.
+func (c *Config) ResumableUploadsDBDir() string {
+	return path.Join(c.ConfigPath, "resumable_uploads.db")
+}
+
+// ConfigFile return the path of the configuration file.
+func (c *Config) ConfigFile() string {
+	return path.Join(c.ConfigPath, DefaultConfigFilename)
+}
+
+// KeyringDir returns the path of the folder where keyring will be stored.
+// This is only used if 'SecretsBackendType=file'
+func (c *Config) KeyringDir() string {
+	return c.ConfigPath
+}
+
+// String returns a string representation of the Config object
+func (c *Config) String() string {
+	configTemplate := `
+{
+  SecretsBackendType: %s,
+  APIAppCredentials: {
+    ClientID:     "%s",
+    ClientSecret: "%s",
+  }
+  jobs: [
+    {
+      account: %s
+      sourceFolder: %s
+      makeAlbums: {
+        enabled: %t
+        use: %s
+      }
+      deleteAfterUpload: %t
+      includePatterns: []
+	  excludePatterns: []
+    }
+  ]
+}`
+	return fmt.Sprintf(configTemplate,
+		c.SecretsBackendType,
+		c.APIAppCredentials.ClientID,
+		c.APIAppCredentials.ClientSecret,
+		c.Jobs[0].Account,
+		c.Jobs[0].SourceFolder,
+		c.Jobs[0].MakeAlbums.Enabled,
+		c.Jobs[0].MakeAlbums.Use,
+		c.Jobs[0].DeleteAfterUpload)
+}
+
+func (c *Config) WriteToFile() error {
+	fh, err := os.Create(c.ConfigFile())
+	if err != nil {
+		return err
+	}
+	defer fh.Close()
+
+	_, err = fh.WriteString(c.String())
+	if err != nil {
+		return fmt.Errorf("failed to write configuration: file=%s, err=%v", c.ConfigFile(), err)
+	}
+
+	return fh.Sync()
+}
+
+// LoadConfigFromFile reads configuration from the specified directory.
+// It reads a HJSON file (given by config.ConfigFile() func) and decodes it.
+func LoadConfigFromFile(dir string) (*Config, error) {
+	cfg := NewConfig(dir)
+
+	data, err := ioutil.ReadFile(cfg.ConfigFile())
+	if err != nil {
+		return nil, fmt.Errorf("failed to read configuration: file=%s, err=%v", cfg.ConfigFile(), err)
+	}
+
+	if err := hjson.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to decode configuration data: err=%v", err)
 	}
 
 	return cfg, nil
 }
 
-// Exists checks the existence of the configuration file
-func Exists(fs afero.Fs, filename string) bool {
-	filename = normalizePath(filename)
-	if _, err := fs.Stat(filename); err != nil {
+// LoadConfigAndValidate reads configuration from the specified directory and validate it.
+func LoadConfigAndValidate(dir string) (*Config, error) {
+	cfg, err := LoadConfigFromFile(dir)
+	if err != nil {
+		return cfg, fmt.Errorf("could't read configuration: file=%s, err=%s", dir, err)
+	}
+	if err = cfg.Validate(); err != nil {
+		return cfg, fmt.Errorf("invalid configuration: file=%s, err=%s", cfg.ConfigFile(), err)
+	}
+	return cfg, nil
+}
+
+// InitConfigFile creates a config file with default settings.
+func InitConfigFile(dir string) error {
+	cfg := NewConfig(dir)
+
+	if err := filesystem.EmptyOrCreateDir(cfg.ConfigPath); err != nil {
+		return fmt.Errorf("failed to create config directory: path=%s, err=%v", cfg.ConfigPath, err)
+	}
+
+	return cfg.WriteToFile()
+}
+
+// ConfigExists checks if a gphotos-uplaoder-cli configuration exists at a certain path
+func ConfigExists(path string) bool {
+	cfgFile, err := filesystem.AbsolutePath(filepath.Join(path, DefaultConfigFilename))
+	if err != nil {
 		return false
 	}
-	return true
-}
 
-// validate validates the current configuration.
-func (c Config) validate(fs afero.Fs) error {
-	if err := c.validateSecretsBackendType(); err != nil {
-		return err
-	}
-	if err := c.validateAPIAppCredentials(); err != nil {
-		return err
-	}
-	if err := c.validateAccount(); err != nil {
-		return err
-	}
-	if err := c.validateJobs(fs); err != nil {
-		return err
-	}
-	return nil
-}
-
-// writeFile writes the configuration data to a file named by filename.
-// If the file does not exist, writeFile creates it;
-// otherwise writeFile truncates it before writing.
-func (c Config) writeFile(fs afero.Fs, filename string) error {
-	b, err := hjson.MarshalWithOptions(c, hjson.DefaultOptions())
-	if err != nil {
-		return err
-
-	}
-	return afero.WriteFile(fs, filename, b, 0600)
-}
-
-// readFile loads the configuration data reading the file named by filename.
-func readFile(fs afero.Fs, filename string) (*Config, error) {
-	b, err := afero.ReadFile(fs, filename)
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(cfgFile); err == nil {
+		return true
 	}
 
-	config := Config{}
-	if err := unmarshalReader(bytes.NewReader(b), &config); err != nil {
-		return nil, err
-	}
-
-	// convert all path to absolute paths.
-	if err := config.ensureSourceFolderAbsolutePaths(); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
-
-func (c Config) validateAPIAppCredentials() error {
-	if c.APIAppCredentials.ClientID == "" || c.APIAppCredentials.ClientSecret == "" {
-		return errors.New("config: APIAppCredentials are invalid")
-	}
-	return nil
-}
-
-func (c Config) validateAccount() error {
-	if c.Account == "" {
-		return errors.New("config: Account could not be empty")
-	}
-	return nil
-}
-
-func (c Config) validateJobs(fs afero.Fs) error {
-	if len(c.Jobs) < 1 {
-		return errors.New("config: At least one Job must be configured")
-	}
-
-	for _, job := range c.Jobs {
-		exist, err := afero.DirExists(fs, job.SourceFolder)
-		if err != nil || !exist {
-			return fmt.Errorf("config: The provided folder '%s' could not be used, err=%s", job.SourceFolder, err)
-		}
-		if job.MakeAlbums.Enabled &&
-			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
-			return errors.New("config: The provided MakeAlbums option is invalid")
-		}
-	}
-	return nil
-}
-
-func (c Config) validateSecretsBackendType() error {
-	switch c.SecretsBackendType {
-	case "auto", "secret-service", "keychain", "kwallet", "file":
-		return nil
-
-	}
-	return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
-}
-
-func (c Config) ensureSourceFolderAbsolutePaths() error {
-	for i := range c.Jobs {
-		item := &c.Jobs[i] // we do that way to modify original object while iterating.
-		src, err := homedir.Expand(item.SourceFolder)
-		if err != nil {
-			return ParseError{err}
-		}
-		item.SourceFolder = normalizePath(src)
-	}
-	return nil
-}
-
-// unmarshalReader unmarshal HJSON data.
-func unmarshalReader(in io.Reader, c interface{}) error {
-	buf := new(bytes.Buffer)
-	_, _ = buf.ReadFrom(in)
-
-	b, err := hjsonToJson(buf.Bytes())
-	if err != nil {
-		return err
-	}
-
-	// unmarshal
-	return json.Unmarshal(b, c)
-}
-
-// hjsonToJson converts dta from HJSON to JSON format.
-func hjsonToJson(in []byte) ([]byte, error) {
-	var raw map[string]interface{}
-	if err := hjson.Unmarshal(in, &raw); err != nil {
-		return nil, err
-	}
-
-	// convert to JSON
-	return json.Marshal(raw)
-}
-
-// defaultSettings() returns a *Config with the default settings of the application.
-func defaultSettings() Config {
-	return Config{
-		SecretsBackendType: "auto",
-		APIAppCredentials: APIAppCredentials{
-			ClientID:     "YOUR_APP_CLIENT_ID",
-			ClientSecret: "YOUR_APP_CLIENT_SECRET",
-		},
-		Account: "YOUR_GOOGLE_PHOTOS_ACCOUNT",
-		Jobs: []FolderUploadJob{
-			{
-				SourceFolder: "YOUR_FOLDER_PATH",
-				MakeAlbums: MakeAlbums{
-					Enabled: true,
-					Use:     "folderName",
-				},
-				DeleteAfterUpload: false,
-			},
-		},
-	}
-}
-
-func normalizePath(path string) string {
-	if absPath, err := filepath.Abs(path); err == nil {
-		return absPath
-	}
-	return filepath.Clean(path)
+	return false
 }

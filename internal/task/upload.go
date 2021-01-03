@@ -40,7 +40,7 @@ func (job *EnqueuedUpload) Process() error {
 	}
 
 	// Mark the file as uploaded in the FileTracker.
-	if err := job.FileTracker.Put(job.Path); err != nil {
+	if err := job.FileTracker.CacheAsAlreadyUploaded(job.Path); err != nil {
 		job.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", job.Path, err)
 	}
 
