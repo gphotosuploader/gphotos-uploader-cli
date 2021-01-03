@@ -45,7 +45,10 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 		}
 
 		// check completed uploads db for previous uploads
-		if job.FileTracker.Exist(fp) {
+		isAlreadyUploaded, err := job.FileTracker.IsAlreadyUploaded(fp)
+		if err != nil {
+			logger.Error(err)
+		} else if isAlreadyUploaded {
 			logger.Debugf("Already uploaded: %s: skipping file...", fp)
 			return nil
 		}

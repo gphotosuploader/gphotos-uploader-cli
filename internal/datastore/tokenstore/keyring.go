@@ -1,4 +1,4 @@
-package tokenmanager
+package tokenstore
 
 import (
 	"encoding/json"
@@ -75,7 +75,7 @@ func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 
 	item, err := r.store.Get(email)
 	if err != nil {
-		return nullToken, ErrTokenNotFound
+		return nullToken, ErrNotFound
 	}
 
 	var token oauth2.Token
