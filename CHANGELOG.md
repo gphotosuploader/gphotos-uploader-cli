@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.0.1
+### Changed
+- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.0.1`.
+### Fixed
+- Media item creation was failing when Google Photos was reporting errors on media creation. ([#262][i262])
+
+[i262]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/262
+
 ## 2.0.0
 > This is a **major upgrade** and it has some **non-backwards compatible changes**:
 > - `includePatterns` and `excludePatterns` configuration options has changed.
