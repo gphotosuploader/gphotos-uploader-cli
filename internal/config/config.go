@@ -106,31 +106,34 @@ func readFile(fs afero.Fs, filename string) (*Config, error) {
 
 func (c Config) validateAPIAppCredentials() error {
 	if c.APIAppCredentials.ClientID == "" || c.APIAppCredentials.ClientSecret == "" {
-		return errors.New("config: APIAppCredentials are invalid")
+		return errors.New("option APIAppCredentials are invalid")
 	}
 	return nil
 }
 
 func (c Config) validateAccount() error {
 	if c.Account == "" {
-		return errors.New("config: Account could not be empty")
+		return errors.New("option Account could not be empty")
 	}
 	return nil
 }
 
 func (c Config) validateJobs(fs afero.Fs) error {
 	if len(c.Jobs) < 1 {
-		return errors.New("config: At least one Job must be configured")
+		return errors.New("at least one Job must be configured")
 	}
 
 	for _, job := range c.Jobs {
 		exist, err := afero.DirExists(fs, job.SourceFolder)
-		if err != nil || !exist {
-			return fmt.Errorf("config: The provided folder '%s' could not be used, err=%s", job.SourceFolder, err)
+		if err != nil {
+			return fmt.Errorf("option SourceFolder '%s' is invalid, err=%s", job.SourceFolder, err)
+		}
+		if !exist {
+			return fmt.Errorf("option SourceFolder '%s' does not exist", job.SourceFolder)
 		}
 		if job.MakeAlbums.Enabled &&
 			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
-			return errors.New("config: The provided MakeAlbums option is invalid")
+			return fmt.Errorf("option MakeAlbums is invalid, '%s", job.MakeAlbums.Use)
 		}
 	}
 	return nil
@@ -142,7 +145,7 @@ func (c Config) validateSecretsBackendType() error {
 		return nil
 
 	}
-	return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
+	return fmt.Errorf("option SecretsBackendType is invalid, '%s'", c.SecretsBackendType)
 }
 
 func (c Config) ensureSourceFolderAbsolutePaths() error {
