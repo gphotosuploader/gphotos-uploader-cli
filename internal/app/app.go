@@ -55,7 +55,7 @@ func Start(fs afero.Fs, path string) (*App, error) {
 	app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
 	app.Config, err = config.FromFile(app.fs, app.configFilename())
 	if err != nil {
-		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.configFilename(), err)
+		return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
 	}
 
 	if err := app.startServices(); err != nil {

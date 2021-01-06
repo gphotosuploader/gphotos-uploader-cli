@@ -13,16 +13,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// ParseError denotes failing to parse configuration file.
-type ParseError struct {
-	err error
-}
-
-// Error returns the formatted configuration error.
-func (e ParseError) Error() string {
-	return fmt.Sprintf("parsing config: %s", e.err.Error())
-}
-
 // Create returns the configuration data after creating file with default settings.
 func Create(fs afero.Fs, filename string) (*Config, error) {
 	cfg := defaultSettings()
@@ -37,10 +27,10 @@ func Create(fs afero.Fs, filename string) (*Config, error) {
 func FromFile(fs afero.Fs, filename string) (*Config, error) {
 	cfg, err := readFile(fs, filename)
 	if err != nil {
-		return nil, ParseError{err}
+		return nil, err
 	}
 	if err := cfg.validate(fs); err != nil {
-		return cfg, ParseError{err}
+		return cfg, err
 	}
 
 	return cfg, nil
@@ -129,7 +119,7 @@ func (c Config) validateJobs(fs afero.Fs) error {
 			return fmt.Errorf("option SourceFolder '%s' is invalid, err=%s", job.SourceFolder, err)
 		}
 		if !exist {
-			return fmt.Errorf("option SourceFolder '%s' does not exist", job.SourceFolder)
+			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
 		if job.MakeAlbums.Enabled &&
 			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
@@ -153,7 +143,7 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item := &c.Jobs[i] // we do that way to modify original object while iterating.
 		src, err := homedir.Expand(item.SourceFolder)
 		if err != nil {
-			return ParseError{err}
+			return err
 		}
 		item.SourceFolder = normalizePath(src)
 	}
