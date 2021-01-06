@@ -65,8 +65,11 @@ github.com/google/martian v2.1.0+incompatible/go.mod h1:9I4somxYTbIHy5NJKHRl3wXi
 github.com/google/pprof v0.0.0-20181206194817-3ea8567a2e57/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
+github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/gphotosuploader/google-photos-api-client-go/v2 v2.0.0 h1:PVpPJY3qI5BM5qmpXvxh/LTaLWqF+ADhhRkXtQ3staM=
 github.com/gphotosuploader/google-photos-api-client-go/v2 v2.0.0/go.mod h1:n1wY5x2BPm9iQRNzluk4t1wse+WYg6QXnxs2ZwSUpNI=
+github.com/gphotosuploader/google-photos-api-client-go/v2 v2.1.2 h1:54EZJ0UvGcETW48eRNajngBmmaoxYIPrJFrmfoLyAZo=
+github.com/gphotosuploader/google-photos-api-client-go/v2 v2.1.2/go.mod h1:R03L88wB1c+j62OToxh/Rew2TvZPTjxs164nH5CVC1E=
 github.com/gphotosuploader/googlemirror v0.5.0 h1:9a9CCUnAFo3qHp7U/epmdTiOvAzXCkVq5AQLo8PWBns=
 github.com/gphotosuploader/googlemirror v0.5.0/go.mod h1:L6A+2KW6d/OwjZ5QH2fGXJXsOtR115tj9w+YxdyjfUI=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c h1:6rhixN/i8ZofjG1Y75iExal34USq5p+wiN1tpie8IrU=

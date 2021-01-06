@@ -185,7 +185,7 @@ func hjsonToJson(in []byte) ([]byte, error) {
 // defaultSettings() returns a *Config with the default settings of the application.
 func defaultSettings() Config {
 	return Config{
-		SecretsBackendType: "auto",
+		SecretsBackendType: "file",
 		APIAppCredentials: APIAppCredentials{
 			ClientID:     "YOUR_APP_CLIENT_ID",
 			ClientSecret: "YOUR_APP_CLIENT_SECRET",
