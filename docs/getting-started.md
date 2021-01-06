@@ -7,14 +7,32 @@ Here are the steps for each of them:
 
 ### Install the pre-compiled binary
 
-**homebrew tap** (only on macOS for now):
+#### homebrew tap (only on macOS for now):
 ```bash
 $ brew install gphotosuploader/tap/gphotos-uploader-cli
 ```
 
-**manually**
+#### manually
 
 Download the pre-compiled binaries from the [releases page](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest) and copy to the desired location.
+
+For Linux:
+```bash
+$ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
+| grep browser_download_url \
+| awk '{ print $2 }' \
+| tr -d \" \
+| grep linux); wget --quiet -O - $LOCATION | tar -zxf -
+```
+
+For macOS:
+```bash
+$ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
+| grep browser_download_url \
+| awk '{ print $2 }' \
+| tr -d \" \
+| grep darwin); wget --quiet -O - $LOCATION | tar -zxf -
+```
 
 ### Compiling from source
 
