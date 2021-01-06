@@ -13,9 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
 - Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.2`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
+### Fixed
+- '~' is not expanded when reading file. ([#268][i268])
 ### Removed
 - Multiple Google Photos account support has been removed. You can use multiple configuration files in the same application folder. ([#231][i231]) 
 
+[i268]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/268
 [i260]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/260
 [i259]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/259
 [i231]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/231

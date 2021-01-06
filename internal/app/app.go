@@ -42,6 +42,7 @@ type App struct {
 }
 
 // Start initializes the application with the services defined by a given configuration.
+// The provided path is the expanded and absolute path to the application data folder.
 func Start(fs afero.Fs, path string) (*App, error) {
 	var err error
 
@@ -51,7 +52,7 @@ func Start(fs afero.Fs, path string) (*App, error) {
 		fs:     fs,
 	}
 
-	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
+	app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
 	app.Config, err = config.FromFile(app.fs, app.configFilename())
 	if err != nil {
 		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.configFilename(), err)
@@ -65,6 +66,7 @@ func Start(fs afero.Fs, path string) (*App, error) {
 }
 
 // Start initializes the application without reading the configuration.
+// The provided path is the expanded and absolute path to the application data folder.
 func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 	app := &App{
 		appDir: path,
@@ -72,7 +74,7 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 		fs:     fs,
 	}
 
-	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
+	app.Logger.Infof("Using application data at '%s'.", app.appDir)
 
 	return app, nil
 }
