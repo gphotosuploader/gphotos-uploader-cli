@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Changed
+- Bump `golangci-lint` from `1.30.0` to `1.34.1`.
+
 ## 2.0.1
 ### Changed
 - Bump `google-photos-api-client-go` from `v2.0.0` to `v2.0.1`.
