@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Changed
 - Some parts of the code has been refactored to make cleaner code and increase testability.
 - `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
-- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.1`. It improves performance. ([#259][i259])
+- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.2`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
 ### Removed
 - Multiple Google Photos account support has been removed. You can use multiple configuration files in the same application folder. ([#231][i231]) 

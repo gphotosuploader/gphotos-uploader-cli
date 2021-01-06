@@ -66,11 +66,15 @@ func Start(fs afero.Fs, path string) (*App, error) {
 
 // Start initializes the application without reading the configuration.
 func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
-	return &App{
+	app := &App{
 		appDir: path,
 		Logger: log.GetInstance(),
 		fs:     fs,
-	}, nil
+	}
+
+	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
+
+	return app, nil
 }
 
 // Stop stops the application releasing all service resources.
