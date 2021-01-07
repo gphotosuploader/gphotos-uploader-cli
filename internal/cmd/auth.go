@@ -40,11 +40,10 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 
 	if _, err := cli.NewOAuth2Client(ctx); err != nil {
-		cli.Logger.Failf("Failed authentication for account: %s", cli.Config.Account)
-		cli.Logger.Debugf("Authentication error: err=%s", err)
+		cli.Logger.Failf("Failed authentication for account '%s': %s", cli.Config.Account, err)
 		return err
 	}
-	cli.Logger.Donef("Successful authentication for account: %s", cli.Config.Account)
+	cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
 
 	return nil
 }
