@@ -105,7 +105,6 @@ func promptFn(pr passwordReader) func(string) (string, error) {
 			return key, nil
 		}
 		fmt.Print("Enter the passphrase to open the token store: ")
-		fmt.Println()
 		return pr.ReadPassword()
 	}
 }
@@ -115,5 +114,6 @@ type stdInPasswordReader struct{}
 
 func (pr *stdInPasswordReader) ReadPassword() (string, error) {
 	pwd, err := terminal.ReadPassword(syscall.Stdin)
+	fmt.Println()
 	return string(pwd), err
 }

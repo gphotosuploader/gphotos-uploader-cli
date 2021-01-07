@@ -61,7 +61,7 @@ func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 		}
 	}
 
-	app.Logger.Infof("Token expiration: %s", token.Expiry.String())
+	app.Logger.Infof("Token is valid, expires at %s", token.Expiry.String())
 
 	if err := app.TokenManager.Put(account, token); err != nil {
 		return nil, fmt.Errorf("failed storing token: %s", err)
