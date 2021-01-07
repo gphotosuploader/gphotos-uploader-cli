@@ -45,6 +45,26 @@ func Exists(fs afero.Fs, filename string) bool {
 	return true
 }
 
+// SafePrint returns the configuration, removing sensible fields.
+func (c Config) SafePrint() string {
+	printableConfig := struct {
+		APIAppCredentials APIAppCredentials
+		Account string
+		SecretsBackendType string
+		Jobs []FolderUploadJob
+	}{
+		APIAppCredentials: APIAppCredentials{
+			ClientID:     c.APIAppCredentials.ClientID,
+			ClientSecret: "REMOVED",
+		},
+		Account: c.Account,
+		SecretsBackendType: c.SecretsBackendType,
+		Jobs: c.Jobs,
+	}
+	b, _ := json.Marshal(printableConfig)
+	return fmt.Sprint(string(b))
+}
+
 // validate validates the current configuration.
 func (c Config) validate(fs afero.Fs) error {
 	if err := c.validateSecretsBackendType(); err != nil {

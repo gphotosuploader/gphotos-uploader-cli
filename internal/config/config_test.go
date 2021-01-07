@@ -89,6 +89,30 @@ func TestFromFile(t *testing.T) {
 	}
 }
 
+func TestConfig_SafePrint(t *testing.T) {
+	testCases := []struct {
+		name          string
+		path          string
+		want          string
+	}{
+		{"Should success", "testdata/valid-config/config.hjson", `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"youremail@domain.com","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"/home/paco/src/gphotos-uploader-cli/internal/config/testdata/valid-config","MakeAlbums":{"Enabled":true,"Use":"folderName"},"DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := afero.OsFs{}
+			cfg, err := config.FromFile(fs, tc.path)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if tc.want != cfg.SafePrint() {
+				t.Errorf("want: %s, got: %s", tc.want, cfg.SafePrint())
+			}
+		})
+	}
+}
+
 func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
 	if path == "" {
 		return

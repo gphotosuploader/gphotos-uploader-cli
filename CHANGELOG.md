@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## Unreleased
 > This is a **major upgrade**, so it has some **non-backwards compatible changes**
 ### Added
+- Configuration, wo/ sensible data, is printed when debug is enabled. ([#270][i270]) 
 - Configuration validation. The cli validates the configuration data at starting time.
 - Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
@@ -18,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Removed
 - Multiple Google Photos account support has been removed. You can use multiple configuration files in the same application folder. ([#231][i231]) 
 
+[i270]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/270
 [i268]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/268
 [i260]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/260
 [i259]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/259

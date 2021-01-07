@@ -58,6 +58,8 @@ func Start(fs afero.Fs, path string) (*App, error) {
 		return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
 	}
 
+	app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
+
 	if err := app.startServices(); err != nil {
 		return nil, err
 	}
