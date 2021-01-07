@@ -30,7 +30,7 @@ var (
 // NewOAuth2Client will get (from Token Manager) or create the token.
 func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 	account := app.Config.Account
-	app.Logger.Debugf("Getting OAuth token for '%s'", account)
+	app.Logger.Infof("Getting OAuth token for '%s'", account)
 
 	token, err := app.TokenManager.Get(account)
 	if err != nil {
@@ -46,14 +46,14 @@ func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 
 	switch {
 	case token == nil:
-		app.Logger.Info("Getting OAuth2 token from prompt...")
+		app.Logger.Debug("Getting OAuth2 token from prompt...")
 		token, err = getOfflineOAuth2Token(ctx, oauth2Config)
 		if err != nil {
 			return nil, fmt.Errorf("unable to get token: %s", err)
 		}
 
 	case !token.Valid():
-		app.Logger.Info("Token has been expired, refreshing it...")
+		app.Logger.Debug("Token has been expired, refreshing it...")
 		token, err = oauth2Config.TokenSource(ctx, token).Token()
 		if err != nil {
 			app.Logger.Errorf("Unable to refresh the token, err: %s", err)
@@ -61,10 +61,10 @@ func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 		}
 	}
 
-	app.Logger.Infof("Token is valid, expires at %s", token.Expiry.String())
+	app.Logger.Donef("Token is valid, expires at %s", token.Expiry.String())
 
 	if err := app.TokenManager.Put(account, token); err != nil {
-		return nil, fmt.Errorf("failed storing token: %s", err)
+		app.Logger.Debugf("Failed to store token into token manager: %s", err)
 	}
 
 	client := oauth2Config.Client(ctx, token)
