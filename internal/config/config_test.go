@@ -66,7 +66,7 @@ func TestFromFile(t *testing.T) {
 		{"Should success", "testdata/valid-config/config.hjson", "youremail@domain.com", false},
 		{"Should fail if dir does not exist", "testdata/non-existent/config.hjson", "", true},
 		{"Should fail if Account is invalid", "testdata/invalid-config/Account.hjson", "", true},
-		{"Should fail if SourceFolder is invalid", "testdata/invalid-config/SourceFolder.hjson", "", true},
+		{"Should fail if SourceFolder does not exist", "testdata/invalid-config/SourceFolder.hjson", "", true},
 		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/SecretsBackendType.hjson", "", true},
 		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/AppAPICredentials.hjson", "", true},
 		{"Should fail if MakeAlbums is invalid", "testdata/invalid-config/MakeAlbums.hjson", "", true},
@@ -77,12 +77,43 @@ func TestFromFile(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			fs := afero.OsFs{}
 			got, err := config.FromFile(fs, tc.path)
+			if err != nil {
+				t.Log(err)
+			}
 			assertExpectedError(t, tc.isErrExpected, err)
 
 			if !tc.isErrExpected && (got.Account != tc.want) {
 				t.Errorf("want: %s, got: %s", tc.want, got.Account)
 			}
 		})
+	}
+}
+
+func TestConfig_SafePrint(t *testing.T) {
+	cfg := config.Config{
+		APIAppCredentials: config.APIAppCredentials{
+			ClientID:     "client-id",
+			ClientSecret: "client-secret",
+		},
+		Account:            "account",
+		SecretsBackendType: "auto",
+		Jobs: []config.FolderUploadJob{
+			{
+				SourceFolder: "foo",
+				MakeAlbums: config.MakeAlbums{
+					Enabled: true,
+					Use:     "folderPath",
+				},
+				DeleteAfterUpload: false,
+				IncludePatterns:   []string{},
+				ExcludePatterns:   []string{},
+			},
+		},
+	}
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","MakeAlbums":{"Enabled":true,"Use":"folderPath"},"DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
+
+	if want != cfg.SafePrint() {
+		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())
 	}
 }
 

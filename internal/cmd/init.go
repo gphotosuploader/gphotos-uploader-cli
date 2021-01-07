@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
@@ -14,7 +16,7 @@ type InitCmd struct {
 	*flags.GlobalFlags
 
 	// command flags
-	Reconfigure bool
+	Force bool
 }
 
 func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
@@ -28,7 +30,7 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 		RunE:  cmd.Run,
 	}
 
-	initCmd.Flags().BoolVar(&cmd.Reconfigure, "force", false, "Overwrite existing configuration")
+	initCmd.Flags().BoolVar(&cmd.Force, "force", false, "Overwrite existing configuration")
 
 	return initCmd
 }
@@ -39,10 +41,11 @@ func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if exist := cli.AppDataDirExists(); exist && !cmd.Reconfigure {
-		log.Infof("Application data already exists. If you proceed, %s", ansi.Color("ALL THE APPLICATION DATA WILL BE DELETED!", "white+b"))
-		log.Infof("Use `%s` flag to proceed and recreate the application data", ansi.Color("--force", "white+b"))
-		return nil
+	if exist := cli.AppDataDirExists(); exist && !cmd.Force {
+		log.Infof("Application data already exists. Use `%s` flag to proceed. %s",
+			ansi.Color("--force", "white+b"),
+			ansi.Color("ALL THE APPLICATION DATA WILL BE DELETED!", "white+b"))
+		return fmt.Errorf("application data already exists at %s", cmd.CfgDir)
 	}
 
 	filename, err := cli.CreateAppDataDir()
@@ -52,7 +55,7 @@ func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	log.Done("Application data dir created successfully.")
-	log.Infof("\r         \nPlease edit: \n- `%s` to add you configuration.\n",
+	log.Infof("\r         \nPlease edit: \n- `%s` to add your configuration.\n",
 		ansi.Color(filename, "cyan+b"),
 	)
 

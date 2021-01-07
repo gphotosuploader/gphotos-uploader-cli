@@ -47,6 +47,7 @@ type App struct {
 }
 
 // Start initializes the application with the services defined by a given configuration.
+// The provided path is the expanded and absolute path to the application data folder.
 func Start(ctx context.Context, path string) (*App, error) {
 	var err error
 
@@ -56,11 +57,13 @@ func Start(ctx context.Context, path string) (*App, error) {
 		fs:     afero.NewOsFs(),
 	}
 
-	app.Logger.Debugf("Reading configuration from '%s'", app.configFilename())
+	app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
 	app.Config, err = config.FromFile(app.fs, app.configFilename())
 	if err != nil {
-		return nil, fmt.Errorf("please review your configuration: file=%s, err=%s", app.configFilename(), err)
+		return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
 	}
+
+	app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
 
 	if err := app.startServices(); err != nil {
 		return nil, err
@@ -75,16 +78,21 @@ func Start(ctx context.Context, path string) (*App, error) {
 }
 
 // Start initializes the application without reading the configuration.
+// The provided path is the expanded and absolute path to the application data folder.
 func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
-	return &App{
+	app := &App{
 		appDir: path,
 		Logger: log.GetInstance(),
 		fs:     fs,
-	}, nil
+	}
+
+	app.Logger.Infof("Using application data at '%s'.", app.appDir)
+
+	return app, nil
 }
 
 // Stop stops the application releasing all service resources.
-func (app *App) Stop() error {
+func (app App) Stop() error {
 	// Close already uploaded file tracker
 	app.Logger.Debug("Shutting down File Tracker service...")
 	if err := app.FileTracker.Close(); err != nil {
@@ -134,7 +142,7 @@ func (app App) configFilename() string {
 	return filepath.Join(app.appDir, DefaultConfigFilename)
 }
 
-func (app App) startServices() error {
+func (app *App) startServices() error {
 	var err error
 	app.FileTracker, err = app.defaultFileTracker()
 	if err != nil {

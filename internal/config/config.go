@@ -13,16 +13,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// ParseError denotes failing to parse configuration file.
-type ParseError struct {
-	err error
-}
-
-// Error returns the formatted configuration error.
-func (e ParseError) Error() string {
-	return fmt.Sprintf("parsing config: %s", e.err.Error())
-}
-
 // Create returns the configuration data after creating file with default settings.
 func Create(fs afero.Fs, filename string) (*Config, error) {
 	cfg := defaultSettings()
@@ -37,10 +27,10 @@ func Create(fs afero.Fs, filename string) (*Config, error) {
 func FromFile(fs afero.Fs, filename string) (*Config, error) {
 	cfg, err := readFile(fs, filename)
 	if err != nil {
-		return nil, ParseError{err}
+		return nil, err
 	}
 	if err := cfg.validate(fs); err != nil {
-		return cfg, ParseError{err}
+		return cfg, err
 	}
 
 	return cfg, nil
@@ -53,6 +43,26 @@ func Exists(fs afero.Fs, filename string) bool {
 		return false
 	}
 	return true
+}
+
+// SafePrint returns the configuration, removing sensible fields.
+func (c Config) SafePrint() string {
+	printableConfig := struct {
+		APIAppCredentials APIAppCredentials
+		Account string
+		SecretsBackendType string
+		Jobs []FolderUploadJob
+	}{
+		APIAppCredentials: APIAppCredentials{
+			ClientID:     c.APIAppCredentials.ClientID,
+			ClientSecret: "REMOVED",
+		},
+		Account: c.Account,
+		SecretsBackendType: c.SecretsBackendType,
+		Jobs: c.Jobs,
+	}
+	b, _ := json.Marshal(printableConfig)
+	return fmt.Sprint(string(b))
 }
 
 // validate validates the current configuration.
@@ -106,31 +116,34 @@ func readFile(fs afero.Fs, filename string) (*Config, error) {
 
 func (c Config) validateAPIAppCredentials() error {
 	if c.APIAppCredentials.ClientID == "" || c.APIAppCredentials.ClientSecret == "" {
-		return errors.New("config: APIAppCredentials are invalid")
+		return errors.New("option APIAppCredentials are invalid")
 	}
 	return nil
 }
 
 func (c Config) validateAccount() error {
 	if c.Account == "" {
-		return errors.New("config: Account could not be empty")
+		return errors.New("option Account could not be empty")
 	}
 	return nil
 }
 
 func (c Config) validateJobs(fs afero.Fs) error {
 	if len(c.Jobs) < 1 {
-		return errors.New("config: At least one Job must be configured")
+		return errors.New("at least one Job must be configured")
 	}
 
 	for _, job := range c.Jobs {
 		exist, err := afero.DirExists(fs, job.SourceFolder)
-		if err != nil || !exist {
-			return fmt.Errorf("config: The provided folder '%s' could not be used, err=%s", job.SourceFolder, err)
+		if err != nil {
+			return fmt.Errorf("option SourceFolder '%s' is invalid, err=%s", job.SourceFolder, err)
+		}
+		if !exist {
+			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
 		if job.MakeAlbums.Enabled &&
 			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
-			return errors.New("config: The provided MakeAlbums option is invalid")
+			return fmt.Errorf("option MakeAlbums is invalid, '%s", job.MakeAlbums.Use)
 		}
 	}
 	return nil
@@ -142,7 +155,7 @@ func (c Config) validateSecretsBackendType() error {
 		return nil
 
 	}
-	return fmt.Errorf("config: SecretsBackendType is invalid, %s", c.SecretsBackendType)
+	return fmt.Errorf("option SecretsBackendType is invalid, '%s'", c.SecretsBackendType)
 }
 
 func (c Config) ensureSourceFolderAbsolutePaths() error {
@@ -150,7 +163,7 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item := &c.Jobs[i] // we do that way to modify original object while iterating.
 		src, err := homedir.Expand(item.SourceFolder)
 		if err != nil {
-			return ParseError{err}
+			return err
 		}
 		item.SourceFolder = normalizePath(src)
 	}
@@ -185,7 +198,7 @@ func hjsonToJson(in []byte) ([]byte, error) {
 // defaultSettings() returns a *Config with the default settings of the application.
 func defaultSettings() Config {
 	return Config{
-		SecretsBackendType: "auto",
+		SecretsBackendType: "file",
 		APIAppCredentials: APIAppCredentials{
 			ClientID:     "YOUR_APP_CLIENT_ID",
 			ClientSecret: "YOUR_APP_CLIENT_SECRET",

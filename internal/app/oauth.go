@@ -28,9 +28,9 @@ var (
 
 // NewOAuth2Client returns a HTTP client authenticated in Google Photos.
 // NewOAuth2Client will get (from Token Manager) or create the token.
-func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
+func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 	account := app.Config.Account
-	app.Logger.Debugf("Getting OAuth token for %s", account)
+	app.Logger.Debugf("Getting OAuth token for '%s'", account)
 
 	token, err := app.TokenManager.Get(account)
 	if err != nil {
@@ -46,11 +46,10 @@ func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 
 	switch {
 	case token == nil:
-		app.Logger.Debug("Getting OAuth2 token from prompt...")
+		app.Logger.Info("Getting OAuth2 token from prompt...")
 		token, err = getOfflineOAuth2Token(ctx, oauth2Config)
 		if err != nil {
-			app.Logger.Error("Unable to get token from OAuth2 service")
-			return nil, fmt.Errorf("unable to get a token, err: %s", err)
+			return nil, fmt.Errorf("unable to get token: %s", err)
 		}
 
 	case !token.Valid():
@@ -62,7 +61,7 @@ func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 		}
 	}
 
-	app.Logger.Infof("Token expiration: %s", token.Expiry.String())
+	app.Logger.Infof("Token is valid, expires at %s", token.Expiry.String())
 
 	if err := app.TokenManager.Put(account, token); err != nil {
 		return nil, fmt.Errorf("failed storing token: %s", err)

@@ -16,12 +16,11 @@ func TestNewInitCmd(t *testing.T) {
 		name          string
 		input         string
 		args          []string
-		force         bool
 		isErrExpected bool
 	}{
-		{"Should success", "", []string{}, false, false},
-		{"Should fail if input exists", "/foo", []string{}, false, false},
-		{"Should success if input exists and force is set", "/foo", []string{"--force"}, false, false},
+		{"Should success", "", []string{}, false},
+		{"Should fail if input exists", "/foo", []string{}, true},
+		{"Should success if input exists and force is set", "/foo", []string{"--force"}, false},
 	}
 
 	t.Cleanup(func() {
