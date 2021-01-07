@@ -28,9 +28,9 @@ var (
 
 // NewOAuth2Client returns a HTTP client authenticated in Google Photos.
 // NewOAuth2Client will get (from Token Manager) or create the token.
-func (app *App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
+func (app App) NewOAuth2Client(ctx context.Context) (*http.Client, error) {
 	account := app.Config.Account
-	app.Logger.Debugf("Getting OAuth token for %s", account)
+	app.Logger.Debugf("Getting OAuth token for '%s'.", account)
 
 	token, err := app.TokenManager.Get(account)
 	if err != nil {

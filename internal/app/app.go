@@ -82,7 +82,7 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 }
 
 // Stop stops the application releasing all service resources.
-func (app *App) Stop() error {
+func (app App) Stop() error {
 	// Close already uploaded file tracker
 	app.Logger.Debug("Shutting down File Tracker service...")
 	if err := app.FileTracker.Close(); err != nil {
@@ -132,7 +132,7 @@ func (app App) configFilename() string {
 	return filepath.Join(app.appDir, DefaultConfigFilename)
 }
 
-func (app App) startServices() error {
+func (app *App) startServices() error {
 	var err error
 	app.FileTracker, err = app.defaultFileTracker()
 	if err != nil {
