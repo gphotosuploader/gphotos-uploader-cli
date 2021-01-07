@@ -31,13 +31,17 @@ var rootCmd = &cobra.Command{
 		}
 		return nil
 	},
-	Long: `This application allows you to upload your pictures and videos to Google Photos. You can upload folders to several Google Photos accounts and organize them in albums.
+	Long: `
+    This application allows you to upload pictures and videos to Google Photos. 
+    You can upload folders to your Google Photos account and organize them in albums automatically.
 
     Get started by running the init command to configure your settings:
     $ gphotos-uploader-cli init
 
     once it's configured, start uploading your files:
-    $ gphotos-uploader-cli push`,
+    $ gphotos-uploader-cli push
+
+    You can visit https://gphotosuploader.github.io/gphotos-uploader-cli for more information.`,
 }
 
 var globalFlags *flags.GlobalFlags
