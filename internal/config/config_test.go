@@ -90,26 +90,30 @@ func TestFromFile(t *testing.T) {
 }
 
 func TestConfig_SafePrint(t *testing.T) {
-	testCases := []struct {
-		name          string
-		path          string
-		want          string
-	}{
-		{"Should success", "testdata/valid-config/config.hjson", `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"youremail@domain.com","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"/home/paco/src/gphotos-uploader-cli/internal/config/testdata/valid-config","MakeAlbums":{"Enabled":true,"Use":"folderName"},"DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`},
+	cfg := config.Config{
+		APIAppCredentials: config.APIAppCredentials{
+			ClientID:     "client-id",
+			ClientSecret: "client-secret",
+		},
+		Account:            "account",
+		SecretsBackendType: "auto",
+		Jobs: []config.FolderUploadJob{
+			{
+				SourceFolder: "foo",
+				MakeAlbums: config.MakeAlbums{
+					Enabled: true,
+					Use:     "folderPath",
+				},
+				DeleteAfterUpload: false,
+				IncludePatterns:   []string{},
+				ExcludePatterns:   []string{},
+			},
+		},
 	}
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","MakeAlbums":{"Enabled":true,"Use":"folderPath"},"DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			fs := afero.OsFs{}
-			cfg, err := config.FromFile(fs, tc.path)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if tc.want != cfg.SafePrint() {
-				t.Errorf("want: %s, got: %s", tc.want, cfg.SafePrint())
-			}
-		})
+	if want != cfg.SafePrint() {
+		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())
 	}
 }
 
