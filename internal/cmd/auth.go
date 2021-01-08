@@ -29,7 +29,8 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cli, err := app.Start(Os, cmd.CfgDir)
+	ctx := context.Background()
+	cli, err := app.Start(ctx, cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -37,13 +38,6 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	ctx := context.Background()
-
-	if _, err := cli.NewOAuth2Client(ctx); err != nil {
-		cli.Logger.Failf("Failed authentication for account '%s': %s", cli.Config.Account, err)
-		return err
-	}
 	cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
-
 	return nil
 }

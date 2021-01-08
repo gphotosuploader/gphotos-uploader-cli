@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/99designs/keyring"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"golang.org/x/oauth2"
 )
 
@@ -113,7 +113,7 @@ func promptFn(pr passwordReader) func(string) (string, error) {
 type stdInPasswordReader struct{}
 
 func (pr *stdInPasswordReader) ReadPassword() (string, error) {
-	pwd, err := terminal.ReadPassword(syscall.Stdin)
+	pwd, err := term.ReadPassword(syscall.Stdin)
 	fmt.Println()
 	return string(pwd), err
 }
