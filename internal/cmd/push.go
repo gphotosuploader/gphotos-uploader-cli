@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
@@ -12,6 +13,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
@@ -53,20 +55,12 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	if cmd.DryRunMode {
-		cli.Logger.Info("Running in dry run mode. No changes will be made.")
-	}
-
 	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
 	uploadQueue.Start()
 	defer uploadQueue.Stop()
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
-	u, err := resumable.NewResumableUploader(cli.Client, cli.UploadSessionTracker, resumable.WithLogger(cli.Logger))
-	if err != nil {
-		return err
-	}
-	photosService, err := gphotos.NewClient(cli.Client, gphotos.WithUploader(u))
+	photosService, err := newPhotosService(cli.Client, cli.UploadSessionTracker, cli.Logger)
 	if err != nil {
 		return err
 	}
@@ -89,6 +83,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		itemsToUpload, err := folder.ScanFolder(cli.Logger)
 		if err != nil {
 			cli.Logger.Fatalf("Failed to process location '%s': %s", config.SourceFolder, err)
+			continue
 		}
 
 		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", len(itemsToUpload), config.SourceFolder)
@@ -99,6 +94,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			return nil
 		}
 
+		// Get items to be uploaded by album name, this reduce a lot the calls to Google Photos API to get albums ID.
 		itemsByAlbum := make(map[string][]string)
 		for _, i := range itemsToUpload {
 			itemsByAlbum[i.AlbumName] = append(itemsByAlbum[i.AlbumName], i.Path)
@@ -127,32 +123,42 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if totalItems > 0 {
-		bar := progressbar.NewOptions(totalItems,
-			progressbar.OptionFullWidth(),
-			progressbar.OptionSetDescription("Uploading files..."),
-			progressbar.OptionSetPredictTime(false),
-			progressbar.OptionShowCount(),
-			)
-
-		// get responses from the enqueued jobs
-		var uploadedItems int
-		for i := 0; i < totalItems; i++ {
-			r := <-uploadQueue.ChanJobResults()
-
-			_ = bar.Add(1)
-
-			if r.Err != nil {
-				cli.Logger.Failf("Error processing %s", r.ID)
-			} else {
-				uploadedItems++
-				cli.Logger.Debugf("Successfully processing %s", r.ID)
-			}
-		}
-
-		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
+	if totalItems == 0 {
+		return nil
 	}
+
+	bar := progressbar.NewOptions(totalItems,
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetDescription("Uploading files..."),
+		progressbar.OptionSetPredictTime(false),
+		progressbar.OptionShowCount(),
+	)
+
+	// get responses from the enqueued jobs
+	var uploadedItems int
+	for i := 0; i < totalItems; i++ {
+		r := <-uploadQueue.ChanJobResults()
+
+		_ = bar.Add(1)
+
+		if r.Err != nil {
+			cli.Logger.Failf("Error processing %s", r.ID)
+		} else {
+			uploadedItems++
+			cli.Logger.Debugf("Successfully processing %s", r.ID)
+		}
+	}
+
+	cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil
+}
+
+func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTracker, logger log.Logger) (*gphotos.Client, error) {
+	u, err := resumable.NewResumableUploader(client, sessionTracker, resumable.WithLogger(logger))
+	if err != nil {
+		return nil, err
+	}
+	return gphotos.NewClient(client, gphotos.WithUploader(u))
 }
 
 // getOrCreateAlbum returns the created (or existent) album in PhotosService.
