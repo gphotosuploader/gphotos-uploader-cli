@@ -14,15 +14,16 @@ require (
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mattn/go-colorable v0.1.2 // indirect
-	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pierrec/xxHash v0.1.5
+	github.com/schollz/progressbar/v3 v3.7.3
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.1.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	github.com/syndtr/goleveldb v1.0.0
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sys v0.0.0-20210105210732-16f7687f5001 // indirect
+	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
 )

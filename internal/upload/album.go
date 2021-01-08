@@ -12,11 +12,11 @@ func (job *UploadFolderJob) albumName(path string) string {
 		return ""
 	}
 
-	// AlbumName name can be customized using `MakeAlbums.use` configuration option.
+	// AlbumID name can be customized using `MakeAlbums.use` configuration option.
 	return albumNameUsingTemplate(path, job.CreateAlbumBasedOn)
 }
 
-// albumNameUsingTemplate calculate the AlbumName name for a given Path based on full folder Path (folderPath)
+// albumNameUsingTemplate calculate the AlbumID name for a given Path based on full folder Path (folderPath)
 // or folder name (folderName).
 func albumNameUsingTemplate(path, template string) string {
 	switch template {
@@ -28,7 +28,7 @@ func albumNameUsingTemplate(path, template string) string {
 	return ""
 }
 
-// albumNameUsingFolderPath returns an AlbumName name using the full Path of the given folder.
+// albumNameUsingFolderPath returns an AlbumID name using the full Path of the given folder.
 func albumNameUsingFolderPath(path string) string {
 	p := filepath.Dir(path)
 	if p == "." {
@@ -44,7 +44,7 @@ func albumNameUsingFolderPath(path string) string {
 	return p
 }
 
-// albumNameUsingFolderName returns an AlbumName name using the name of the given folder.
+// albumNameUsingFolderName returns an AlbumID name using the name of the given folder.
 func albumNameUsingFolderName(path string) string {
 	p := filepath.Dir(path)
 	if p == "." {

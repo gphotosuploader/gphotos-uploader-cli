@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## Unreleased
 > This is a **major upgrade**, so it has some **non-backwards compatible changes**
 ### Added
+- **Progress bar** when uploading files.
 - Configuration, wo/ sensible data, is printed when debug is enabled. ([#270][i270]) 
 - Configuration validation. The cli validates the configuration data at starting time.
 - Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
+- **Reduced the number of calls to the API when uploading files**. It's using less than 50% of calls than before.
+- Move to `golang.org/x/term` from `golang.org/x/crypto/ssh/terminal`, due to deprecation.
 - Some parts of the code has been refactored to make cleaner code and increase testability.
 - `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
 - Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.2`. It improves performance. ([#259][i259])

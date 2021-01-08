@@ -6,6 +6,7 @@ import (
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
@@ -61,7 +62,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	defer uploadQueue.Stop()
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
-	u, err := resumable.NewResumableUploader(cli.Client, cli.UploadSessionTracker)
+	u, err := resumable.NewResumableUploader(cli.Client, cli.UploadSessionTracker, resumable.WithLogger(cli.Logger))
 	if err != nil {
 		return err
 	}
@@ -87,49 +88,88 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		// get UploadItem{} to be uploaded to Google Photos.
 		itemsToUpload, err := folder.ScanFolder(cli.Logger)
 		if err != nil {
-			cli.Logger.Fatalf("Failed to scan folder %s: %v", config.SourceFolder, err)
+			cli.Logger.Fatalf("Failed to process location '%s': %s", config.SourceFolder, err)
 		}
 
-		cli.Logger.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
+		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", len(itemsToUpload), config.SourceFolder)
 
-		// enqueue files to be uploaded. The workers will receive it via channel.
-		totalItems += len(itemsToUpload)
+		// If dry-run-mode, stop here.
+		if cmd.DryRunMode {
+			cli.Logger.Info("Running in dry run mode. No changes has been made.")
+			return nil
+		}
+
+		itemsByAlbum := make(map[string][]string)
 		for _, i := range itemsToUpload {
-			if cmd.DryRunMode {
-				uploadQueue.Submit(&task.NoOpJob{})
-			} else {
+			itemsByAlbum[i.AlbumName] = append(itemsByAlbum[i.AlbumName], i.Path)
+		}
+
+		for albumName, files := range itemsByAlbum {
+			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumName)
+			if err != nil {
+				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
+				continue
+			}
+			for _, file := range files {
+				// enqueue files to be uploaded. The workers will receive it via channel.
+				totalItems++
 				uploadQueue.Submit(&task.EnqueuedUpload{
 					Context:     ctx,
-					Albums:      photosService.Albums,
 					Uploads:     photosService,
 					FileTracker: cli.FileTracker,
 					Logger:      cli.Logger,
 
-					Path:            i.Path,
-					AlbumName:       i.AlbumName,
+					Path:            file,
+					AlbumID:         albumId,
 					DeleteOnSuccess: config.DeleteAfterUpload,
 				})
 			}
 		}
 	}
 
-	// get responses from the enqueued jobs
-	var uploadedItems int
-	for i := 0; i < totalItems; i++ {
-		r := <-uploadQueue.ChanJobResults()
+	if totalItems > 0 {
+		bar := progressbar.NewOptions(totalItems,
+			progressbar.OptionFullWidth(),
+			progressbar.OptionSetDescription("Uploading files..."),
+			progressbar.OptionSetPredictTime(false),
+			progressbar.OptionShowCount(),
+			)
 
-		if r.Err != nil {
-			cli.Logger.Failf("Error processing %s", r.ID)
-		} else {
-			uploadedItems++
-			cli.Logger.Debugf("Successfully processing %s", r.ID)
+		// get responses from the enqueued jobs
+		var uploadedItems int
+		for i := 0; i < totalItems; i++ {
+			r := <-uploadQueue.ChanJobResults()
+
+			_ = bar.Add(1)
+
+			if r.Err != nil {
+				cli.Logger.Failf("Error processing %s", r.ID)
+			} else {
+				uploadedItems++
+				cli.Logger.Debugf("Successfully processing %s", r.ID)
+			}
 		}
-	}
 
-	if cmd.DryRunMode {
-		cli.Logger.Info("Running in dry run mode. No changes has been made.")
-	} else {
 		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
 	return nil
+}
+
+// getOrCreateAlbum returns the created (or existent) album in PhotosService.
+func getOrCreateAlbum(ctx context.Context, service task.AlbumsService, title string) (string, error) {
+	// Returns if empty to avoid a PhotosService call.
+	if title == "" {
+		return "", nil
+	}
+
+	if album, err := service.GetByTitle(ctx, title); err == nil {
+		return album.ID, nil
+	}
+
+	album, err := service.Create(ctx, title)
+	if err != nil {
+		return "", err
+	}
+
+	return album.ID, nil
 }
