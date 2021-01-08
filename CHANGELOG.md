@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Move to `golang.org/x/term` from `golang.org/x/crypto/ssh/terminal`, due to deprecation.
 - Some parts of the code has been refactored to make cleaner code and increase testability.
 - `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
-- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.2`. It improves performance. ([#259][i259])
+- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.3`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
 ### Fixed
 - '~' is not expanded when reading file. ([#268][i268])
