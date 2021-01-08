@@ -4,10 +4,9 @@ package upload
 type UploadFolderJob struct {
 	FileTracker FileTracker
 
-	SourceFolder       string
-	CreateAlbum        bool
-	CreateAlbumBasedOn string
-	Filter             FileFilterer
+	SourceFolder string
+	CreateAlbums string
+	Filter       FileFilterer
 }
 
 // FileTracker represents a service to track already uploaded files.

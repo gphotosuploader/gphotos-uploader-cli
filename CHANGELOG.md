@@ -11,12 +11,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Configuration validation. The cli validates the configuration data at starting time.
 - Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
+- `Jobs.MakeAlbums` configuration setting has changed to `Jobs.CreateAlbums`. Valid values are "Off", "folderName" and "folderPath".
 - **Reduced the number of calls to the API when uploading files**. It's using less than 50% of calls than before.
 - Move to `golang.org/x/term` from `golang.org/x/crypto/ssh/terminal`, due to deprecation.
 - Some parts of the code has been refactored to make cleaner code and increase testability.
-- `Account` configuration setting has been changed. `Jobs.Account` is `Account` now. Multiple Google Photos accounts are not supported. ([#231][i231]) 
+- `Jobs.Account` configuration setting has been changed to `Account`. Multiple Google Photos accounts are not supported. ([#231][i231]) 
 - Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.3`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
+### Deprecated
+- `Jobs.MakeAlbums` configuration setting. Use `Jobs.CreateAlbums` instead.  See [configuration documentation][idocumentation].
+- `Jobs.Account` configuration setting. Use `Account` instead. See [configuration documentation][idocumentation].
 ### Fixed
 - '~' is not expanded when reading file. ([#268][i268])
 ### Removed

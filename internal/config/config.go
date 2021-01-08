@@ -141,9 +141,8 @@ func (c Config) validateJobs(fs afero.Fs) error {
 		if !exist {
 			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
-		if job.MakeAlbums.Enabled &&
-			(job.MakeAlbums.Use != "folderPath" && job.MakeAlbums.Use != "folderName") {
-			return fmt.Errorf("option MakeAlbums is invalid, '%s", job.MakeAlbums.Use)
+		if !isValidCreateAlbums(job.CreateAlbums) {
+			return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
 		}
 	}
 	return nil
@@ -168,6 +167,16 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item.SourceFolder = normalizePath(src)
 	}
 	return nil
+}
+
+// isValidCreateAlbums checks if the value is a valid CreateAlbums option.
+func isValidCreateAlbums(value string) bool {
+	switch value {
+	case "Off", "folderPath", "folderName":
+		return true
+	default:
+	}
+	return false
 }
 
 // unmarshalReader unmarshal HJSON data.
@@ -207,10 +216,7 @@ func defaultSettings() Config {
 		Jobs: []FolderUploadJob{
 			{
 				SourceFolder: "YOUR_FOLDER_PATH",
-				MakeAlbums: MakeAlbums{
-					Enabled: true,
-					Use:     "folderName",
-				},
+				CreateAlbums: "folderName",
 				DeleteAfterUpload: false,
 			},
 		},

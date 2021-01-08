@@ -10,11 +10,7 @@
   [
     {
       SourceFolder: ./testdata/non-existent
-      MakeAlbums:
-      {
-        Enabled: true
-        Use: folderName
-      }
+      CreateAlbums: folderName
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

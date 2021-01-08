@@ -147,8 +147,7 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 	u := upload.UploadFolderJob{
 		FileTracker:        ft,
 		SourceFolder:       "testdata",
-		CreateAlbum:        false,
-		CreateAlbumBasedOn: "",
+		CreateAlbums:       "Off",
 		Filter:             filter.New(includePatterns, excludePatterns),
 	}
 
