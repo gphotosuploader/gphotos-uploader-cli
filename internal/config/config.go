@@ -179,10 +179,12 @@ func isValidCreateAlbums(value string) bool {
 	return false
 }
 
-// unmarshalReader unmarshal HJSON data.
+// unmarshalReader unmarshal HJSON data into the provided interface.
 func unmarshalReader(in io.Reader, c interface{}) error {
 	buf := new(bytes.Buffer)
-	_, _ = buf.ReadFrom(in)
+	if _, err := buf.ReadFrom(in); err != nil {
+		return err
+	}
 
 	b, err := hjsonToJson(buf.Bytes())
 	if err != nil {
@@ -193,7 +195,7 @@ func unmarshalReader(in io.Reader, c interface{}) error {
 	return json.Unmarshal(b, c)
 }
 
-// hjsonToJson converts dta from HJSON to JSON format.
+// hjsonToJson converts data from HJSON to JSON format.
 func hjsonToJson(in []byte) ([]byte, error) {
 	var raw map[string]interface{}
 	if err := hjson.Unmarshal(in, &raw); err != nil {
