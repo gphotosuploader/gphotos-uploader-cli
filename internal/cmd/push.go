@@ -73,10 +73,9 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
-			SourceFolder:       srcFolder,
-			CreateAlbum:        config.MakeAlbums.Enabled,
-			CreateAlbumBasedOn: config.MakeAlbums.Use,
-			Filter:             filter.New(config.IncludePatterns, config.ExcludePatterns),
+			SourceFolder: srcFolder,
+			CreateAlbums: config.CreateAlbums,
+			Filter:       filter.New(config.IncludePatterns, config.ExcludePatterns),
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.
@@ -148,6 +147,8 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			cli.Logger.Debugf("Successfully processing %s", r.ID)
 		}
 	}
+
+	_ = bar.Finish()
 
 	cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil

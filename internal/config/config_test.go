@@ -69,7 +69,7 @@ func TestFromFile(t *testing.T) {
 		{"Should fail if SourceFolder does not exist", "testdata/invalid-config/SourceFolder.hjson", "", true},
 		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/SecretsBackendType.hjson", "", true},
 		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/AppAPICredentials.hjson", "", true},
-		{"Should fail if MakeAlbums is invalid", "testdata/invalid-config/MakeAlbums.hjson", "", true},
+		{"Should fail if CreateAlbums is invalid", "testdata/invalid-config/CreateAlbums.hjson", "", true},
 		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
 	}
 
@@ -100,17 +100,14 @@ func TestConfig_SafePrint(t *testing.T) {
 		Jobs: []config.FolderUploadJob{
 			{
 				SourceFolder: "foo",
-				MakeAlbums: config.MakeAlbums{
-					Enabled: true,
-					Use:     "folderPath",
-				},
+				CreateAlbums: "folderPath",
 				DeleteAfterUpload: false,
 				IncludePatterns:   []string{},
 				ExcludePatterns:   []string{},
 			},
 		},
 	}
-	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","MakeAlbums":{"Enabled":true,"Use":"folderPath"},"DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
 
 	if want != cfg.SafePrint() {
 		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())

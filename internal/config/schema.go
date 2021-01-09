@@ -32,8 +32,15 @@ type FolderUploadJob struct {
 	// SourceFolder is the folder containing the objects to be uploaded.
 	SourceFolder string `json:"SourceFolder"`
 
-	// MakeAlbums is the configuration to create albums on Google Photos.
-	MakeAlbums MakeAlbums `json:"MakeAlbums"`
+	// CreateAlbums is the parameter to create albums on Google Photos.
+	// Valid options are:
+	// Off: Disable album creation (default).
+	// folderPath: Creates album with the name based on full folder path.
+	// folderName: Creates album with the name based on the folder name.
+	CreateAlbums string `json:"CreateAlbums,omitempty"`
+
+	// DEPRECATED: MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead.
+	MakeAlbums MakeAlbums `json:"-"`
 
 	// DeleteAfterUpload if it is true, the app will remove files after upload them.
 	DeleteAfterUpload bool `json:"DeleteAfterUpload"`
@@ -45,13 +52,11 @@ type FolderUploadJob struct {
 	ExcludePatterns []string `json:"ExcludePatterns"`
 }
 
-// MakeAlbums represents configuration about how to create Albums path Google Photos
+// DEPRECATED: MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead
 type MakeAlbums struct {
-	// Enabled enables or disables album creation.
-	Enabled bool `json:"Enabled"`
+	// DEPRECATED: Enabled is deprecated, use Config.Jobs.CreateAlbums instead.
+	Enabled bool `json:"-"`
 
-	// Use defines the name of the albums.
-	// `folderPath`: Album name is based on full folder path.
-	// `folderName`: Album name is the folder name.
-	Use string `json:"Use"`
+	// DEPRECATED: Use is deprecated, use Config.Jobs.CreateAlbums instead.
+	Use string `json:"-"`
 }

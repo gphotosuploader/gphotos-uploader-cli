@@ -5,27 +5,19 @@ import (
 	"strings"
 )
 
-// albumName returns Album name based on a path.
-// If configuration option `MakeAlbum.enabled` is false, it returns empty string.
+// albumName returns Album name based on the configured parameter.
+// If configuration option is "Off" or "", it returns empty string.
 func (job *UploadFolderJob) albumName(path string) string {
-	if !job.CreateAlbum {
+	switch job.CreateAlbums {
+	case "Off":
 		return ""
-	}
-
-	// AlbumID name can be customized using `MakeAlbums.use` configuration option.
-	return albumNameUsingTemplate(path, job.CreateAlbumBasedOn)
-}
-
-// albumNameUsingTemplate calculate the AlbumID name for a given Path based on full folder Path (folderPath)
-// or folder name (folderName).
-func albumNameUsingTemplate(path, template string) string {
-	switch template {
 	case "folderPath":
 		return albumNameUsingFolderPath(path)
 	case "folderName":
 		return albumNameUsingFolderName(path)
+	default:
+		panic("invalid CreateAlbums parameter")
 	}
-	return ""
 }
 
 // albumNameUsingFolderPath returns an AlbumID name using the full Path of the given folder.
