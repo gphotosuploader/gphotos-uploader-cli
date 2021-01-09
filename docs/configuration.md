@@ -8,26 +8,44 @@ Example configuration file:
 
 ```hjson
 {
-  SecretsBackendType: file,
-  APIAppCredentials: {
-    ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-    ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
+  APIAppCredentials:
+  {
+    ClientID: YOUR_APP_CLIENT_ID
+    ClientSecret: YOUR_APP_CLIENT_SECRET
   }
-  jobs: [
+  Account: YOUR_GOOGLE_PHOTOS_ACCOUNT
+  SecretsBackendType: file
+  Jobs:
+  [
     {
-      account: youremail@gmail.com
-      sourceFolder: ~/folder/to/upload
-      makeAlbums: {
-        enabled: true
-        use: folderName
-      }
-      deleteAfterUpload: false
-      includePatterns: [ "**/*.jpg", "**/*.png" ]
-      excludePatterns: [ "**/ScreenShot*" ]
+      SourceFolder: YOUR_FOLDER_PATH
+      CreateAlbums: Off
+      DeleteAfterUpload: false
+      IncludePatterns: [ "**/*.jpg", "**/*.png" ]
+      ExcludePatterns: [ "**/ScreenShot*" ]
     }
   ]
 }
 ```
+
+## APIAppCredentials <!-- {docsify-ignore} -->
+
+Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and involves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
+
+Before you can use `gphotos-uploader-cli`, you must enable the Photos Library API and request an OAuth 2.0 Client ID.
+
+1. Make sure you're logged in into the Google Account where your photos should be uploaded to.
+1. Start by [creating a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (example: _Google Photos Uploader_).
+1. Enable the [Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com) by clicking the <kbd>ENABLE</kbd> button.
+1. Configure the [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
+1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Other** as the application type and give it a name (example: _gphotos-uploader-cli_).
+1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
+1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
+
+## Account
+(For versions >= v3.0.0)
+It's the Google Account identity (e-mail address) where the files are going to be uploaded.
+
 ### SecretsBackendType <!-- {docsify-ignore} -->
 This option allows you to choose which backend will be used for secrets storage. You set `auto` to allow the application decide which one will be used given your environment.
 
@@ -62,54 +80,52 @@ var backendOrder = []BackendType{
 }
 ```
 
-## APIAppCredentials <!-- {docsify-ignore} -->
-
-Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and involves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
-
-Before you can use `gphotos-uploader-cli`, you must enable the Photos Library API and request an OAuth 2.0 Client ID.
-
-1. Make sure you're logged in into the Google Account where your photos should be uploaded to.
-1. Start by [creating a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (example: _Google Photos Uploader_).
-1. Enable the [Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com) by clicking the <kbd>ENABLE</kbd> button.
-1. Configure the [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
-1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Other** as the application type and give it a name (example: _gphotos-uploader-cli_).
-1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
-1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
-
-## jobs <!-- {docsify-ignore} -->
+## Jobs <!-- {docsify-ignore} -->
 List of folders to upload and upload options for each folder.
 
-### account
-Needs to be unique. It's the Google Account identity (e-mail address) where the files of this job are going to be uploaded.
+### Account - DEPRECATED
+(For versions < v3.0.0)
 
-### sourceFolder
-The folder to upload from.
-Must be an absolute path. Can expand the home folder tilde shorthand.
+It's the Google Account identity (e-mail address) where the files are going to be uploaded.
+
+### SourceFolder
+The folder to upload from. Must be an absolute path. Can expand the home folder tilde shorthand `~`.
 > The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
-### makeAlbums
-If `makeAlbums.enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `makeAlbums.use`. The `sourceFolder` is not taking into account, only child folders will be.
+### CreateAlbums
+(For versions >= v3.0.0)
+
+It controls how uploaded files will be organized into albums in Google Photos.
+
+There are three options:
+* `Off` will not create any album.
+* `folderName` will use the name of the folder, where the item is uploaded from, to set the album name.
+* `folderPath` will use the full path of the folder, where the item is uploaded from, to set the album name.
+
+```
+# Given SouceFolder: /foo
+# and file: /foo/bar/xyz/file.jpg
+
+CreateAlbums: folderName
+# album name would be: xyz
+
+CreateAlbums: folderPath
+# album name would be: bar_xyz
+```
+
+### MakeAlbums - DEPRECATED
+(For versions < v3.0.0)
+
+If `MakeAlbums.Enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `MakeAlbums.Use`. 
 
 Available options are:
+* `folderName` will use the name of the item's containing folder as album name.
+* `folderPath` will use the full path of the item's containing folder as album name.
 
-* `folderName`: It will use the name of the item's containing folder as Album name.
-* `folderPath`: It will use the full path of the  item's containing folder as Album name.
-
-```
-# Given souceFolder: /foo
-# for file: /foo/bar/xyz/file.jpg
-
-use: folderName
-# album name: xyz
-
-use: folderPath
-# album name: bar_xyz
-```
-
-### deleteAfterUpload
+### DeleteAfterUpload
 (Only for versions >= v0.6.0)
 
-If set to true, media will be deleted from local disk after upload. 
+If set to true, media will be deleted from local disk after completing the upload. 
 
 ## Including and Excluding files
 You can include and exclude files by specifying the `includePatterns` and `excludePatterns` options. You can add one or more patterns separated by commas `,`. These patterns are always applied to `sourceFolder`.
@@ -120,7 +136,7 @@ includePatterns: [ "**/*.jpg", "**/*.png" ]
 excludePatterns: [ "**/ScreenShot*" ]
 ```
 
-Another example excluding an specific directory (and folders inside it):
+Another example excluding a specific directory (and folders inside it):
 ```
 includePatterns: [ "_ALL_FILES_" ]
 excludePatterns: [ "**/Temp/**" ]
