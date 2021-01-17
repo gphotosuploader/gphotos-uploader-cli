@@ -21,13 +21,12 @@ type UploadsService interface {
 
 type EnqueuedUpload struct {
 	Context     context.Context
-	Albums      AlbumsService
 	Uploads     UploadsService
 	FileTracker upload.FileTracker
 	Logger      log.Logger
 
 	Path            string
-	AlbumName       string
+	AlbumID         string
 	DeleteOnSuccess bool
 }
 
@@ -35,12 +34,12 @@ func (job *EnqueuedUpload) Process() error {
 	item := upload.NewFileItem(job.Path)
 
 	// Upload the file and add it to PhotosService.
-	if err := job.addMediaToAlbum(item); err != nil {
+	if err := job.addMediaToAlbum(job.AlbumID, item); err != nil {
 		return err
 	}
 
 	// Mark the file as uploaded in the FileTracker.
-	if err := job.FileTracker.CacheAsAlreadyUploaded(job.Path); err != nil {
+	if err := job.FileTracker.Put(job.Path); err != nil {
 		job.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", job.Path, err)
 	}
 
@@ -61,28 +60,9 @@ func (job *EnqueuedUpload) removeIfItWasRequested(item upload.FileItem) error {
 	return nil
 }
 
-func (job *EnqueuedUpload) addMediaToAlbum(item upload.FileItem) error {
-	// Get the album
-	album, err := job.getOrCreateAlbum()
-	if err != nil {
-		return err
-	}
-	if _, err = job.Uploads.UploadFileToAlbum(job.Context, album.ID, item.Path); err != nil {
+func (job *EnqueuedUpload) addMediaToAlbum(album string, item upload.FileItem) error {
+	if _, err := job.Uploads.UploadFileToAlbum(job.Context, album, item.Path); err != nil {
 		return err
 	}
 	return nil
-}
-
-// getOrCreateAlbum returns the created (or existent) album in PhotosService.
-func (job *EnqueuedUpload) getOrCreateAlbum() (*albums.Album, error) {
-	// Returns if empty to avoid a PhotosService call.
-	if job.AlbumName == "" {
-		return &albums.Album{}, nil
-	}
-
-	if album, err := job.Albums.GetByTitle(job.Context, job.AlbumName); err == nil {
-		return album, nil
-	}
-
-	return job.Albums.Create(job.Context, job.AlbumName)
 }

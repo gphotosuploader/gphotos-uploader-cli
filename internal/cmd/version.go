@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +21,7 @@ var (
 	version = "v0.0.0" // git tag, output of $(git describe --tags --always --dirty)
 )
 
-type VersionCmd struct {}
+type VersionCmd struct{}
 
 func NewVersionCmd() *cobra.Command {
 	cmd := &VersionCmd{}
@@ -31,13 +29,12 @@ func NewVersionCmd() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Prints current version",
-		RunE:  cmd.Run,
+		Run:  cmd.Run,
 	}
 
 	return versionCmd
 }
 
-func (cmd *VersionCmd) Run(command *cobra.Command, args []string) error {
-	_, err := fmt.Printf("gphotos-uploader-cli %s", version)
-	return err
+func (cmd *VersionCmd) Run(command *cobra.Command, args []string) {
+	command.Printf("gphotos-uploader-cli %s\n", version)
 }

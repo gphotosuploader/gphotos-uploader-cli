@@ -1,7 +1,26 @@
-package cmd
+package cmd_test
 
-func ExampleVersionCmd_Run() {
-	cmd := &VersionCmd{}
-	_ = cmd.Run(nil, nil)
-	// Output: gphotos-uploader-cli v0.0.0
+import (
+	"bytes"
+	"io/ioutil"
+	"testing"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
+)
+
+func TestNewVersionCmd(t *testing.T) {
+	c := cmd.NewVersionCmd()
+	b := bytes.NewBufferString("")
+	c.SetOut(b)
+	if err := c.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	got, err := ioutil.ReadAll(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "gphotos-uploader-cli v0.0.0\n"
+	if want != string(got) {
+		t.Fatalf("want: %s, got: %s", want, string(got))
+	}
 }

@@ -4,8 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+> This is a **major upgrade**, so it has some **non-backwards compatible changes**
+### Added
+- **Progress bar** when uploading files.
+- Configuration, wo/ sensible data, is printed when debug is enabled. ([#270][i270]) 
+- Configuration validation. The cli validates the configuration data at starting time.
+- Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
+- `Jobs.MakeAlbums` configuration setting has changed to `Jobs.CreateAlbums`. Valid values are "Off", "folderName" and "folderPath".
+- **Reduced the number of calls to the API when uploading files**. It's using less than 50% of calls than before.
+- Move to `golang.org/x/term` from `golang.org/x/crypto/ssh/terminal`, due to deprecation.
+- Some parts of the code has been refactored to make cleaner code and increase testability.
+- `Jobs.Account` configuration setting has been changed to `Account`. Multiple Google Photos accounts are not supported. ([#231][i231]) 
+- Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.3`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
+### Deprecated
+- `Jobs.MakeAlbums` configuration setting. Use `Jobs.CreateAlbums` instead.  See [configuration documentation][idocumentation].
+- `Jobs.Account` configuration setting. Use `Account` instead. See [configuration documentation][idocumentation].
+### Fixed
+- '~' is not expanded when reading file. ([#268][i268])
+### Removed
+- Multiple Google Photos account support has been removed. You can use multiple configuration files in the same application folder. ([#231][i231]) 
+
+[i270]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/270
+[i268]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/268
+[i260]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/260
+[i259]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/259
+[i231]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/231
 
 ## 2.0.1
 ### Changed
@@ -16,15 +41,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 [i262]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/262
 
 ## 2.0.0
-> This is a **major upgrade** and it has some **non-backwards compatible changes**:
-> - `includePatterns` and `excludePatterns` configuration options has changed.
+> This is a **major upgrade**, and it has some **non-backwards compatible changes**:
+> - `includePatterns` & `excludePatterns` configuration options has changed.
 > - `includePatterns` has a new default (`_IMAGE_EXTENSIONS_`).
 > - `uploadVideos` configuration option has been removed.
 ### Added
 - Two new tagged patterns has been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249])
 - Retries management. It's implementing exponential back-off with a maximum of 4 retries by default.  ([#253][i253]) 
 ### Changed
-- `includePatterns` and `excludePatterns` configuration options has changed. It's using a new format, please review de [configuration documentation](.docs/configuration.md).
+- `includePatterns` & `excludePatterns` configuration options has changed. It's using a new format, please review de [configuration documentation][idocumentation].
 - By default, if `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used. ([#249][i249])  
 - Bump `google-photos-api-client-go` from `v2.0.0-beta-1` to `v2.0.0`.
 ### Fixed
@@ -118,7 +143,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 1.0.2
 ### Fixed
-- Fix issue that hung the application when the `results` queue was full. This happened every time that the number of files to upload was higher than 10x number of concurrent processes. ([#167][i167])
+- Fix issue that hung the application when the `results` queue was full. This happened every time the number of files to upload was higher than 10x number of concurrent processes. ([#167][i167])
 
 [i167]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/167
 
@@ -129,9 +154,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 [i125]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/125
 
 ## 1.0.0
-> This is a **major upgrade** and it has several **non-backwards compatible changes**. See more details below.
+> This is a **major upgrade**, and it has several **non-backwards compatible changes**. See more details below.
 ### Added
-- New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation](.docs/configuration.md#makeAlbums). ([#150][i150])
+- New option for Album creation: `use: folderPath` will use the full folder path as Album name. See [config documentation][idocumentation]. ([#150][i150])
 - New flags to control CLI verbosity: `--silent` suppress all logs except Fatal ones, `--debug` enable a lot of verbosity to logs.
 - [CONTRIBUTING](CONTRIBUTING.md) guide line has been added.
 - New Logger package to improve log readability.
@@ -142,7 +167,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - [README](README.md) has been updated fixing some typos.
 ### Deprecated
 - Once Go 1.13 has been published, previous Go 1.11 support is deprecated. This project will maintain compatibility with the last two major versions published.
-- Configuration parameter `uploadVideos` has been deprecated in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation](.docs/configuration.md) for details.
+- Configuration parameter `uploadVideos` has been deprecated in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation][idocumentation] for details.
 ### Fixed
 - Fix issue uploading photos without the correct file name. ([#158][i158])
 - Fix issue uploading photos multiple times and ignoring others. ([#160][i160])
@@ -215,7 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.6.0
 ### Added
-- `deleteAfterUpload` option has been reactivated, it was removed on v0.4.0. If you use this option in [config file](.docs/configuration.md) files will be deleted from local repository after being uploaded to Google Photos. (#25)
+- `deleteAfterUpload` option has been reactivated, it was removed on v0.4.0. If you use this option in [config file][idocumentation] files will be deleted from local repository after being uploaded to Google Photos. (#25)
 ### Changed
 - This repository has transferred to [GPhotos Uploaders organization](https://github.com/gphotosuploader), so all imports has been updated to the new organization's URL.
 ### Removed
@@ -238,11 +263,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.4.0
 ### Added
-- Add two configuration options to include (`includePatterns`) and exclude (`excludePatterns`) files to be uploaded. See [configuration documentation](.docs/configuration.md) for details.
+- Add two configuration options to include (`includePatterns`) and exclude (`excludePatterns`) files to be uploaded. See [configuration documentation][idocumentation] for details.
 
 ### Changed
 - Reduce memory footprint simplifying objects overhead
-- Configuration parameter `uploadVideos` is now using `includePatterns` and `excludePatterns` instead of detecting video format. **ATTENTION:** This option **will be deprecated** in the future in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation](.docs/configuration.md) for details.
+- Configuration parameter `uploadVideos` is now using `includePatterns` and `excludePatterns` instead of detecting video format. **ATTENTION:** This option **will be deprecated** in the future in favor of `_ALL_VIDEO_FILES_` tagged pattern. See [configuration documentation][idocumentation] for details.
 
 ### Fixed
 - Fix folder path typo on secrets backend storage
@@ -259,7 +284,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Update `github.com/gphotosuploader/googlemirror` to v0.3.2
 
 ### Fixed
-- Update [configuration documentation](.docs/configuration.md) to add `SecretsBackendType` (#83)
+- Update [configuration documentation][idocumentation] to add `SecretsBackendType` (#83)
 - Typo on [README](README.md)
 
 ## 0.3.1
@@ -310,3 +335,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - [goreleaser](https://goreleaser.com/) will be on charge of publishing [binaries](https://github.com/gphotosuploader/gphotos-uploader-cli/releases) after new release is done
 
+[idocumentation]: https://gphotosuploader.github.io/gphotos-uploader-cli/

@@ -1,0 +1,19 @@
+{
+  APIAppCredentials:
+  {
+    ClientID: client-id
+    ClientSecret: client-secret
+  }
+  Account: youremail@domain.com
+  SecretsBackendType: auto
+  Jobs:
+  [
+    {
+      SourceFolder: ./testdata/non-existent
+      CreateAlbums: folderName
+      DeleteAfterUpload: false
+      IncludePatterns: []
+      ExcludePatterns: []
+    }
+  ]
+}

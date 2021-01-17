@@ -1,288 +1,146 @@
 package config_test
 
 import (
-	"fmt"
-	"os"
-	"path"
 	"path/filepath"
 	"testing"
-	"time"
 
-	"github.com/Flaque/filet"
+	"github.com/spf13/afero"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 )
 
-func TestInitConfig(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-
-	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(dir)
-		if err != nil {
-			t.Errorf("could not create init config file: %v", err)
-		}
-	})
-	defer func() {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
-		}
-	}()
-}
-
-func TestInitAndLoadConfig(t *testing.T) {
-	// init config folder
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-
-	t.Run("TestInitConfigFile", func(t *testing.T) {
-		err := config.InitConfigFile(dir)
-		if err != nil {
-			t.Errorf("could not create init config file: %v", err)
-		}
-	})
-	defer func() {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
-		}
-	}()
-
-	// prepare expected configuration
-	want := createTestConfiguration()
-
-	t.Run("TestLoadConfigFile", func(t *testing.T) {
-		// test load config file
-		got, err := config.LoadConfigFromFile(dir)
-		if err != nil {
-			t.Errorf("could not load config file, got an error: %v", err)
-		}
-
-		// check that both configuration are equal
-		if got.APIAppCredentials != want.APIAppCredentials {
-			t.Errorf("APIAppCredentials are not equal: expected %v, got %v", want.APIAppCredentials, got.APIAppCredentials)
-		}
-
-		if len(got.Jobs) != len(want.Jobs) {
-			t.Errorf("Jobs are not equal: expected %d jobs, got %d jobs", len(want.Jobs), len(got.Jobs))
-		}
-	})
-}
-
-func TestLoadConfigWithNonExistentFile(t *testing.T) {
-	// init config folder
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-	err := os.RemoveAll(dir)
-	if err != nil {
-		t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
-	}
-
-	_, err = config.LoadConfigFromFile(dir)
-	if err == nil {
-		t.Error("an error loading a non existent file was expected")
-	}
-}
-
-func TestConfig_CompletedUploadsDBDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-	c := config.NewConfig(dir)
-
-	want := path.Join(dir, "uploads.db")
-	got := c.CompletedUploadsDBDir()
-
-	if got != want {
-		t.Errorf("Testing get completed uploads DB dir: expected: %s, got %s", want, got)
-	}
-
-}
-
-func TestConfig_ResumableUploadsDBDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-	c := config.NewConfig(dir)
-
-	want := path.Join(dir, "resumable_uploads.db")
-	got := c.ResumableUploadsDBDir()
-
-	if got != want {
-		t.Errorf("Testing get resumable uploads DB dir: expected: %s, got %s", want, got)
-	}
-
-}
-
-func TestConfig_KeyringDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-config.%d", time.Now().UnixNano()))
-	c := config.NewConfig(dir)
-
-	want := dir
-	got := c.KeyringDir()
-
-	if got != want {
-		t.Errorf("Testing get keyring dir: expected: %s, got %s", want, got)
-	}
-}
-
-func TestConfig_Validate(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-test.%d", time.Now().UnixNano()))
-	err := os.MkdirAll(dir, os.ModePerm)
-	if err != nil {
-		t.Errorf("no error was expected at this point: err=%s", err)
-	}
-	defer func() {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			t.Errorf("could not remove test config file (dir: %s): %v", dir, err)
-		}
-	}()
-
-	t.Run("TestValidateConfigWithValidSettings", func(t *testing.T) {
-		c := createTestConfiguration()
-		c.Jobs[0].SourceFolder = dir
-		got := c.Validate()
-		if got != nil {
-			t.Errorf("config is not validated. That was not expected: err=%v", got)
-		}
-	})
-
-	t.Run("TestValidateConfigWithInvalidSourceFolder", func(t *testing.T) {
-		c := createTestConfiguration()
-		got := c.Validate()
-		if got == nil {
-			t.Errorf("config is validated. That was not expected: err=%v", got)
-		}
-	})
-
-	t.Run("TestValidateConfigWithoutJobs", func(t *testing.T) {
-		c := createTestConfiguration()
-		c.Jobs = make([]config.FolderUploadJob, 0)
-		got := c.Validate()
-		if got == nil {
-			t.Errorf("config is validated. That was not expected: err=%v", got)
-		}
-	})
-}
-
-func createTestConfiguration() *config.Config {
-	c := &config.Config{}
-	c.SecretsBackendType = "auto"
-	c.APIAppCredentials = config.APIAppCredentials{
-		ClientID:     "20637643488-1hvg8ev08r4tc16ca7j9oj3686lcf0el.apps.googleusercontent.com",
-		ClientSecret: "0JyfLYw0kyDcJO-pGg5-rW_P",
-	}
-	c.Jobs = make([]config.FolderUploadJob, 0)
-	job := config.FolderUploadJob{
-		Account:      "youremail@gmail.com",
-		SourceFolder: "~/folder/to/upload",
-		MakeAlbums: config.MakeAlbums{
-			Enabled: true,
-			Use:     "folderName",
-		},
-		DeleteAfterUpload: false,
-	}
-	c.Jobs = append(c.Jobs, job)
-	return c
-}
-
-func TestConfigExists(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-test.%d", time.Now().UnixNano()))
-	if err := os.RemoveAll(dir); err != nil {
-		t.Fatalf("no error was expected at this point: err=%s", err)
-	}
-
-	t.Run("TestNonExistingConfiguration", func(t *testing.T) {
-		if config.ConfigExists(dir) {
-			t.Errorf("config file exists. That was not expected: dir=%s", dir)
-		}
-	})
-
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		t.Fatalf("no error was expected at this point: err=%s", err)
-	}
-	defer func() {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatalf("could not remove test config folder: path=%s err=%s", dir, err)
-		}
-	}()
-
-	cfgFile := filepath.Join(dir, "config.hjson")
-	fh, err := os.Create(cfgFile)
-	if err != nil {
-		t.Fatalf("failed to create config: file=%s, err=%v", cfgFile, err)
-	}
-	defer func() {
-		if err := fh.Close(); err != nil {
-			t.Fatal(err)
-		}
-	}()
-
-	if _, err = fh.WriteString("testTest"); err != nil {
-		t.Fatalf("failed to write configuration: file=%s, err=%v", cfgFile, err)
-	}
-
-	t.Run("TestExistingConfiguration", func(t *testing.T) {
-		if !config.ConfigExists(dir) {
-			t.Errorf("config file doesn't exist. That was not expected: dir=%s", dir)
-		}
-	})
-}
-
-func TestLoadConfigAndValidate(t *testing.T) {
-	defer filet.CleanUp(t)
-
-	want := struct {
-		cfgDir    string
-		srcFolder string
+func TestCreate(t *testing.T) {
+	testCases := []struct {
+		name          string
+		preCreate     string
+		path          string
+		isErrExpected bool
 	}{
-		cfgDir:    filet.TmpDir(t, ""),
-		srcFolder: filet.TmpDir(t, ""),
+		{"Should success", "", "/home/foo/SourceFolder.hjson", false},
+		{"Should success w/ existing dir", "/home/bar/SourceFolder.hjson", "/home/bar/SourceFolder.hjson", false},
 	}
 
-	t.Run("WithValidSourceFolder", func(t *testing.T) {
-		// prepare a valid config file
-		cfg := createTestConfiguration()
-		cfg.Jobs[0].SourceFolder = want.srcFolder
-		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
-			t.Fatal(err)
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := afero.NewMemMapFs()
+			createTestConfigurationFile(t, fs, tc.preCreate)
 
-		got, err := config.LoadConfigAndValidate(want.cfgDir)
-		if err != nil {
-			t.Errorf("failed to load and validate config file: err=%v", err)
-		}
+			_, err := config.Create(fs, tc.path)
+			assertExpectedError(t, tc.isErrExpected, err)
 
-		if got.Jobs[0].SourceFolder != want.srcFolder {
-			t.Errorf("failed: want=%s, got=%s", want.srcFolder, got.Jobs[0].SourceFolder)
-		}
-	})
-	t.Run("WithInvalidSourceFolder", func(t *testing.T) {
-		// prepare a valid config file
-		cfg := createTestConfiguration()
-		cfg.Jobs[0].SourceFolder = want.srcFolder
-		if err := os.RemoveAll(want.srcFolder); err != nil {
-			t.Fatalf("could not remove test source folder: err=%v", err)
-		}
-		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
-			t.Fatal(err)
-		}
+			if !tc.isErrExpected {
+				assertFileExistence(t, fs, tc.path)
+			}
+		})
+	}
+}
 
-		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
-			t.Errorf("failed: invalid configuration was expected")
-		}
-	})
-	t.Run("WithNonExistentConfig", func(t *testing.T) {
-		// prepare a valid config file
-		cfg := createTestConfiguration()
-		cfg.Jobs[0].SourceFolder = want.srcFolder
-		cfg.ConfigPath = want.cfgDir
-		if err := cfg.WriteToFile(); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.RemoveAll(want.cfgDir); err != nil {
-			t.Fatalf("could not remove config folder: err=%v", err)
-		}
+func TestExists(t *testing.T) {
+	testCases := []struct {
+		name string
+		path string
+		want bool
+	}{
+		{"Should return true if exist", "testdata/valid-config/config.hjson", true},
+		{"Should return false if not exist", "testdata/non-existent/config.hjson", false},
+	}
 
-		if _, err := config.LoadConfigAndValidate(want.cfgDir); err == nil {
-			t.Errorf("failed: invalid configuration was expected")
-		}
-	})
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := afero.OsFs{}
+			got := config.Exists(fs, tc.path)
+			if tc.want != got {
+				t.Errorf("configuration file does not exist, path: %s", tc.path)
+			}
+		})
+	}
+}
+
+func TestFromFile(t *testing.T) {
+	testCases := []struct {
+		name          string
+		path          string
+		want          string
+		isErrExpected bool
+	}{
+		{"Should success", "testdata/valid-config/config.hjson", "youremail@domain.com", false},
+		{"Should fail if dir does not exist", "testdata/non-existent/config.hjson", "", true},
+		{"Should fail if Account is invalid", "testdata/invalid-config/Account.hjson", "", true},
+		{"Should fail if SourceFolder does not exist", "testdata/invalid-config/SourceFolder.hjson", "", true},
+		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/SecretsBackendType.hjson", "", true},
+		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/AppAPICredentials.hjson", "", true},
+		{"Should fail if CreateAlbums is invalid", "testdata/invalid-config/CreateAlbums.hjson", "", true},
+		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := afero.OsFs{}
+			got, err := config.FromFile(fs, tc.path)
+			if err != nil {
+				t.Log(err)
+			}
+			assertExpectedError(t, tc.isErrExpected, err)
+
+			if !tc.isErrExpected && (got.Account != tc.want) {
+				t.Errorf("want: %s, got: %s", tc.want, got.Account)
+			}
+		})
+	}
+}
+
+func TestConfig_SafePrint(t *testing.T) {
+	cfg := config.Config{
+		APIAppCredentials: config.APIAppCredentials{
+			ClientID:     "client-id",
+			ClientSecret: "client-secret",
+		},
+		Account:            "account",
+		SecretsBackendType: "auto",
+		Jobs: []config.FolderUploadJob{
+			{
+				SourceFolder: "foo",
+				CreateAlbums: "folderPath",
+				DeleteAfterUpload: false,
+				IncludePatterns:   []string{},
+				ExcludePatterns:   []string{},
+			},
+		},
+	}
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
+
+	if want != cfg.SafePrint() {
+		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())
+	}
+}
+
+func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
+	if path == "" {
+		return
+	}
+	if err := fs.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatalf("creating test dir, err: %s", err)
+	}
+	if err := afero.WriteFile(fs, path, []byte("my"), 0600); err != nil {
+		t.Fatalf("creating test configuration file, err: %s", err)
+	}
+}
+
+func assertExpectedError(t *testing.T, errExpected bool, err error) {
+	if errExpected && err == nil {
+		t.Fatalf("error was expected, but not produced")
+	}
+	if !errExpected && err != nil {
+		t.Fatalf("error was not expected, err: %s", err)
+	}
+}
+
+func assertFileExistence(t *testing.T, fs afero.Fs, path string) {
+	exist, err := afero.Exists(fs, path)
+	if err != nil {
+		t.Fatalf("checking file existence, err: %s", err)
+	}
+	if !exist {
+		t.Errorf("file expected, but it does not exist")
+	}
 }

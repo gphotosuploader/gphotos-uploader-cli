@@ -29,7 +29,7 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 		// If a directory is excluded, skip it!
 		if fi.IsDir() {
 			if job.Filter.IsExcluded(relativePath) {
-				logger.Infof("Not allowed by config: %s: skipping directory...", fp)
+				logger.Debugf("Skipping excluded directory '%s'.", fp)
 				return filepath.SkipDir
 			}
 			return nil
@@ -40,20 +40,17 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 		// then set up of includePatterns and excludePatterns.
 
 		if !job.Filter.IsAllowed(relativePath) {
-			logger.Infof("Not allowed by config: %s: skipping file...", fp)
+			logger.Debugf("Skipping excluded file '%s'.", fp)
 			return nil
 		}
 
 		// check completed uploads db for previous uploads
-		isAlreadyUploaded, err := job.FileTracker.IsAlreadyUploaded(fp)
-		if err != nil {
-			logger.Error(err)
-		} else if isAlreadyUploaded {
-			logger.Debugf("Already uploaded: %s: skipping file...", fp)
+		if job.FileTracker.Exist(fp) {
+			logger.Debugf("Skipping already uploaded file '%s'.", fp)
 			return nil
 		}
 
-		logger.Infof("File '%s' will be uploaded to album '%s'.", fp, job.albumName(relativePath))
+		logger.Debugf("Upload file '%s' to album '%s'.", fp, job.albumName(relativePath))
 
 		// set file upload Options depending on folder upload Options
 		*reqs = append(*reqs, FileItem{

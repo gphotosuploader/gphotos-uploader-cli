@@ -2,19 +2,18 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/photos"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
@@ -47,12 +46,8 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 }
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	cfg, err := config.LoadConfigAndValidate(cmd.CfgDir)
-	if err != nil {
-		return fmt.Errorf("please review your configuration or run 'gphotos-uploader-cli init': file=%s, err=%s", cmd.CfgDir, err)
-	}
-
-	cli, err := app.Start(cfg)
+	ctx := context.Background()
+	cli, err := app.Start(ctx, cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -60,84 +55,90 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	if cmd.DryRunMode {
-		cli.Logger.Info("Running in dry run mode. No changes will be made.")
-	}
-
-	// get OAuth2 Configuration with our App credentials
-	oauth2Config := oauth2.Config{
-		ClientID:     cfg.APIAppCredentials.ClientID,
-		ClientSecret: cfg.APIAppCredentials.ClientSecret,
-		Endpoint:     photos.Endpoint,
-		Scopes:       photos.Scopes,
-	}
-
 	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
 	uploadQueue.Start()
 	defer uploadQueue.Stop()
 	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
 
+	photosService, err := newPhotosService(cli.Client, cli.UploadSessionTracker, cli.Logger)
+	if err != nil {
+		return err
+	}
+
 	// launch all folder upload jobs
 	var totalItems int
-	for _, config := range cfg.Jobs {
+	for _, config := range cli.Config.Jobs {
+		srcFolder := config.SourceFolder
+
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
-			SourceFolder:       config.SourceFolder,
-			CreateAlbum:        config.MakeAlbums.Enabled,
-			CreateAlbumBasedOn: config.MakeAlbums.Use,
-			Filter:             filter.New(config.IncludePatterns, config.ExcludePatterns),
+			SourceFolder: srcFolder,
+			CreateAlbums: config.CreateAlbums,
+			Filter:       filter.New(config.IncludePatterns, config.ExcludePatterns),
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.
 		itemsToUpload, err := folder.ScanFolder(cli.Logger)
 		if err != nil {
-			cli.Logger.Fatalf("Failed to scan folder %s: %v", config.SourceFolder, err)
+			cli.Logger.Fatalf("Failed to process location '%s': %s", config.SourceFolder, err)
+			continue
 		}
 
-		cli.Logger.Infof("%d files pending to be uploaded in folder '%s'.", len(itemsToUpload), config.SourceFolder)
+		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", len(itemsToUpload), config.SourceFolder)
 
-		// get a Google Photos client for the specified account.
-		ctx := context.Background()
-		c, err := cli.NewOAuth2Client(ctx, oauth2Config, config.Account)
-		if err != nil {
-			return err
+		// If dry-run-mode, stop here.
+		if cmd.DryRunMode {
+			cli.Logger.Info("Running in dry run mode. No changes has been made.")
+			return nil
 		}
 
-		u, err := resumable.NewResumableUploader(c, cli.UploadTracker)
-		if err != nil {
-			return err
-		}
-		photosService, err := gphotos.NewClient(c, gphotos.WithUploader(u))
-		if err != nil {
-			return err
-		}
-
-		// enqueue files to be uploaded. The workers will receive it via channel.
-		totalItems += len(itemsToUpload)
+		// Get items to be uploaded by album name, this reduce a lot the calls to Google Photos API to get albums ID.
+		itemsByAlbum := make(map[string][]string)
 		for _, i := range itemsToUpload {
-			if cmd.DryRunMode {
-				uploadQueue.Submit(&task.NoOpJob{})
-			} else {
+			itemsByAlbum[i.AlbumName] = append(itemsByAlbum[i.AlbumName], i.Path)
+		}
+
+		for albumName, files := range itemsByAlbum {
+			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumName)
+			if err != nil {
+				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
+				continue
+			}
+			for _, file := range files {
+				// enqueue files to be uploaded. The workers will receive it via channel.
+				totalItems++
 				uploadQueue.Submit(&task.EnqueuedUpload{
 					Context:     ctx,
-					Albums:      photosService.Albums,
 					Uploads:     photosService,
 					FileTracker: cli.FileTracker,
 					Logger:      cli.Logger,
 
-					Path:            i.Path,
-					AlbumName:       i.AlbumName,
+					Path:            file,
+					AlbumID:         albumId,
 					DeleteOnSuccess: config.DeleteAfterUpload,
 				})
 			}
 		}
 	}
 
+	if totalItems == 0 {
+		return nil
+	}
+
+	bar := progressbar.NewOptions(totalItems,
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetDescription("Uploading files..."),
+		progressbar.OptionSetPredictTime(false),
+		progressbar.OptionShowCount(),
+	)
+
 	// get responses from the enqueued jobs
 	var uploadedItems int
 	for i := 0; i < totalItems; i++ {
 		r := <-uploadQueue.ChanJobResults()
+
+		_ = bar.Add(1)
 
 		if r.Err != nil {
 			cli.Logger.Failf("Error processing %s", r.ID)
@@ -147,10 +148,35 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if cmd.DryRunMode {
-		cli.Logger.Info("Running in dry run mode. No changes has been made.")
-	} else {
-		cli.Logger.Infof("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
-	}
+	_ = bar.Finish()
+
+	cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil
+}
+
+func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTracker, logger log.Logger) (*gphotos.Client, error) {
+	u, err := resumable.NewResumableUploader(client, sessionTracker, resumable.WithLogger(logger))
+	if err != nil {
+		return nil, err
+	}
+	return gphotos.NewClient(client, gphotos.WithUploader(u))
+}
+
+// getOrCreateAlbum returns the created (or existent) album in PhotosService.
+func getOrCreateAlbum(ctx context.Context, service task.AlbumsService, title string) (string, error) {
+	// Returns if empty to avoid a PhotosService call.
+	if title == "" {
+		return "", nil
+	}
+
+	if album, err := service.GetByTitle(ctx, title); err == nil {
+		return album.ID, nil
+	}
+
+	album, err := service.Create(ctx, title)
+	if err != nil {
+		return "", err
+	}
+
+	return album.ID, nil
 }

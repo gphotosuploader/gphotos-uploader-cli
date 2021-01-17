@@ -1,4 +1,4 @@
-package tokenstore
+package tokenmanager
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/99designs/keyring"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"golang.org/x/oauth2"
 )
 
@@ -75,7 +75,7 @@ func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 
 	item, err := r.store.Get(email)
 	if err != nil {
-		return nullToken, ErrNotFound
+		return nullToken, ErrTokenNotFound
 	}
 
 	var token oauth2.Token
@@ -105,7 +105,6 @@ func promptFn(pr passwordReader) func(string) (string, error) {
 			return key, nil
 		}
 		fmt.Print("Enter the passphrase to open the token store: ")
-		fmt.Println()
 		return pr.ReadPassword()
 	}
 }
@@ -114,6 +113,7 @@ func promptFn(pr passwordReader) func(string) (string, error) {
 type stdInPasswordReader struct{}
 
 func (pr *stdInPasswordReader) ReadPassword() (string, error) {
-	pwd, err := terminal.ReadPassword(syscall.Stdin)
+	pwd, err := term.ReadPassword(syscall.Stdin)
+	fmt.Println()
 	return string(pwd), err
 }

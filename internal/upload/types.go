@@ -4,17 +4,16 @@ package upload
 type UploadFolderJob struct {
 	FileTracker FileTracker
 
-	SourceFolder       string
-	CreateAlbum        bool
-	CreateAlbumBasedOn string
-	Filter             FileFilterer
+	SourceFolder string
+	CreateAlbums string
+	Filter       FileFilterer
 }
 
 // FileTracker represents a service to track already uploaded files.
 type FileTracker interface {
-	CacheAsAlreadyUploaded(filePath string) error
-	IsAlreadyUploaded(filePath string) (bool, error)
-	RemoveAsAlreadyUploaded(filePath string) error
+	Put(file string) error
+	Exist(file string) bool
+	Delete(file string) error
 }
 
 // FileFilterer represents a way to implement include/exclude files filtering.

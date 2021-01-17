@@ -1,0 +1,10 @@
+{
+  APIAppCredentials:
+  {
+    ClientID: client-id
+    ClientSecret: client-secret
+  }
+  Account: youremail@domain.com
+  SecretsBackendType: auto
+  Jobs: []
+}

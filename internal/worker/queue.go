@@ -90,7 +90,7 @@ func (q *JobQueue) dispatch() {
 	q.dispatcherStopped.Add(1)
 	for {
 		select {
-		case job := <-q.internalQueue:     // We got something in on our queue
+		case job := <-q.internalQueue: // We got something in on our queue
 			workerChannel := <-q.readyPool // Check out an available worker
 			workerChannel <- job           // Send the request to the channel
 		case <-q.quit:
