@@ -171,11 +171,9 @@ Class      | Meaning
 There are some common patterns that has been tagged, you can use them to simplify your configuration.
 
 * `_ALL_FILES_`: Matches all files, is the same as using `**`. 
-* `_IMAGE_EXTENSIONS_`: Matches [Google Photos supported image file types](https://support.google.com/googleone/answer/6193313).
-* `_RAW_EXTENSIONS_`: Matches [Google Photos supported RAW file types](https://support.google.com/googleone/answer/6193313).
-* `_ALL_VIDEO_FILES_`: Matches all video file extensions supported by Google Photos.
-> Supported video extensions are sourced by [Google Photos support](https://support.google.com/googleone/answer/6193313) and it includes:
-> .mpg, .mod, .mmv, .tod, .wmv, .asf, .avi, .divx, .mov, .m4v, .3gp, .3g2, .mp4, .m2t, .m2ts, .mts, and .mkv files.
+* `_IMAGE_EXTENSIONS_`: Matches [Google Photos supported image file types](https://support.google.com/googleone/answer/6193313) and it includes: `jpg, jpeg, png, webp, gif` file extensions case in-sensitively.
+* `_RAW_EXTENSIONS_`: Matches [Google Photos supported RAW file types](https://support.google.com/googleone/answer/6193313) and it includes `arw, srf, sr2, crw, cr2, cr3, dng, nef, nrw, orf, raf, raw, rw2` file extensions case in-sensitively.
+* `_ALL_VIDEO_FILES_`: Matches [Google Photos supported video file types](https://support.google.com/googleone/answer/6193313) and it includes `mpg, mod, mmv, tod, wmv, asf, avi, divx, mov, m4v, 3gp, 3g2, mp4, m2t, m2ts, mts, mkv` file extensions case in-sensitively.
 
 ## Environment variables
 
