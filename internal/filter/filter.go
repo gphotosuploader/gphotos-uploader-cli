@@ -4,33 +4,33 @@ import (
 	"fmt"
 )
 
-// Filter is a file filter based on include and exclude patterns.
+// Filter is a file filter based on allowed and excluded patterns.
 type Filter struct {
-	includePatterns []string
-	excludePatterns []string
+	allowedList  []string
+	excludedList []string
 }
 
-// New returns an initialized Filter struct. If includePatterns is empty, _IMAGE_EXTENSIONS_ tagged pattern is used instead.
-func New(includePatterns []string, excludePatterns []string) *Filter {
-	includePatterns = translatePatterns(includePatterns)
-	if len(includePatterns) == 0 {
-		includePatterns = patternDictionary["_IMAGE_EXTENSIONS_"]
+// New returns an initialized Filter struct. If allowedList is empty, _IMAGE_EXTENSIONS_ tagged pattern is used instead.
+func New(allowedList []string, excludedList []string) *Filter {
+	allowedList = translatePatterns(allowedList)
+	if len(allowedList) == 0 {
+		allowedList = patternDictionary["_IMAGE_EXTENSIONS_"]
 	}
 
 	f := Filter{
-		includePatterns: includePatterns,
-		excludePatterns: translatePatterns(excludePatterns),
+		allowedList:  allowedList,
+		excludedList: translatePatterns(excludedList),
 	}
 
 	return &f
 }
 
-// Validate returns error if includePatterns or excludePatterns are not valid.
+// Validate returns error if allowedList or excludedList are not valid.
 func (f *Filter) Validate() error {
-	if err := validatePatterns(f.includePatterns); err != nil {
+	if err := validatePatterns(f.allowedList); err != nil {
 		return fmt.Errorf("include patterns are invalid: %w", err)
 	}
-	if err := validatePatterns(f.excludePatterns); err != nil {
+	if err := validatePatterns(f.excludedList); err != nil {
 		return fmt.Errorf("exclude patterns are invalid: %w", err)
 	}
 	return nil
@@ -42,7 +42,7 @@ func (f *Filter) Validate() error {
 //   - item is not in the exclude pattern
 func (f *Filter) IsAllowed(fp string) bool {
 	// patterns should be validated before, so no need to check error.
-	matched, _ := matchAnyPattern(f.includePatterns, fp)
+	matched, _ := matchAnyPattern(f.allowedList, fp)
 	return matched && !f.IsExcluded(fp)
 }
 
@@ -50,6 +50,6 @@ func (f *Filter) IsAllowed(fp string) bool {
 // It's useful for skipping directories that match with an exclusion.
 func (f *Filter) IsExcluded(fp string) bool {
 	// patterns should be validated before, so no need to check error.
-	matched, _ := matchAnyPattern(f.excludePatterns, fp)
+	matched, _ := matchAnyPattern(f.excludedList, fp)
 	return matched
 }
