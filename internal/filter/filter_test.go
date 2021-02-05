@@ -42,6 +42,9 @@ func TestFilter_AllowDefaultFiles(t *testing.T) {
 		{"testdata/SampleVideo.mp4", false},
 		{"testdata/ScreenShotJPG.jpg", true},
 		{"testdata/ScreenShotPNG.png", true},
+		{"testdata/SampleJPGImage.JPG", true},
+		{"testdata/SamplePNGImage.PNG", true},
+		{"testdata/SampleSVGImage.SVG", false},
 	}
 
 	t.Run("ByUsingEmptyPatterns", func(t *testing.T) {
@@ -97,6 +100,9 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 		{"testdata/SampleVideo.mp4", true},
 		{"testdata/ScreenShotJPG.jpg", true},
 		{"testdata/ScreenShotPNG.png", true},
+		{"testdata/SampleJPGImage.JPG", true},
+		{"testdata/SamplePNGImage.PNG", true},
+		{"testdata/SampleSVGImage.SVG", true},
 	}
 
 	t.Run("ByUsingWildCardPattern", func(t *testing.T) {

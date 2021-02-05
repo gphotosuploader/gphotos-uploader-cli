@@ -14,8 +14,8 @@ type Filter struct {
 // It validates the patterns in allowedList and excludedList, returning error if they are not valid.
 func New(allowedList []string, excludedList []string) (*Filter, error) {
 	f := Filter{
-		allowedList:  translatePatterns(allowedList),
-		excludedList: translatePatterns(excludedList),
+		allowedList:  translatePatternList(allowedList),
+		excludedList: translatePatternList(excludedList),
 	}
 
 	if len(f.allowedList) == 0 {
@@ -35,7 +35,7 @@ func New(allowedList []string, excludedList []string) (*Filter, error) {
 //   - item is not in the exclude pattern
 func (f Filter) IsAllowed(fp string) bool {
 	// patterns should be validated before, so no need to check error.
-	matched, _ := matchAnyPattern(f.allowedList, fp)
+	matched, _ := match(f.allowedList, fp)
 	return matched && !f.IsExcluded(fp)
 }
 
@@ -43,16 +43,16 @@ func (f Filter) IsAllowed(fp string) bool {
 // It's useful for skipping directories that match with an exclusion.
 func (f Filter) IsExcluded(fp string) bool {
 	// patterns should be validated before, so no need to check error.
-	matched, _ := matchAnyPattern(f.excludedList, fp)
+	matched, _ := match(f.excludedList, fp)
 	return matched
 }
 
 // validate returns error if allowedList or excludedList are not valid.
 func (f Filter) validate() error {
-	if err := validatePatterns(f.allowedList); err != nil {
+	if err := validatePatternList(f.allowedList); err != nil {
 		return fmt.Errorf("include patterns are invalid: %w", err)
 	}
-	if err := validatePatterns(f.excludedList); err != nil {
+	if err := validatePatternList(f.excludedList); err != nil {
 		return fmt.Errorf("exclude patterns are invalid: %w", err)
 	}
 	return nil
