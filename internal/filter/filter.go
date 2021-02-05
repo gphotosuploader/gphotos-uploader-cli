@@ -11,22 +11,26 @@ type Filter struct {
 }
 
 // New returns an initialized Filter struct. If allowedList is empty, _IMAGE_EXTENSIONS_ tagged pattern is used instead.
-func New(allowedList []string, excludedList []string) *Filter {
-	allowedList = translatePatterns(allowedList)
-	if len(allowedList) == 0 {
-		allowedList = patternDictionary["_IMAGE_EXTENSIONS_"]
-	}
-
+// It validates the patterns in allowedList and excludedList, returning error if they are not valid.
+func New(allowedList []string, excludedList []string) (*Filter, error) {
 	f := Filter{
-		allowedList:  allowedList,
+		allowedList:  translatePatterns(allowedList),
 		excludedList: translatePatterns(excludedList),
 	}
 
-	return &f
+	if len(f.allowedList) == 0 {
+		f.allowedList = patternDictionary["_IMAGE_EXTENSIONS_"]
+	}
+
+	if err := f.Validate(); err != nil {
+		return nil, err
+	}
+
+	return &f, nil
 }
 
 // Validate returns error if allowedList or excludedList are not valid.
-func (f *Filter) Validate() error {
+func (f Filter) Validate() error {
 	if err := validatePatterns(f.allowedList); err != nil {
 		return fmt.Errorf("include patterns are invalid: %w", err)
 	}
@@ -40,7 +44,7 @@ func (f *Filter) Validate() error {
 // That means:
 //   - item is in the include pattern
 //   - item is not in the exclude pattern
-func (f *Filter) IsAllowed(fp string) bool {
+func (f Filter) IsAllowed(fp string) bool {
 	// patterns should be validated before, so no need to check error.
 	matched, _ := matchAnyPattern(f.allowedList, fp)
 	return matched && !f.IsExcluded(fp)
@@ -48,7 +52,7 @@ func (f *Filter) IsAllowed(fp string) bool {
 
 // IsExcluded return if an item should be excluded.
 // It's useful for skipping directories that match with an exclusion.
-func (f *Filter) IsExcluded(fp string) bool {
+func (f Filter) IsExcluded(fp string) bool {
 	// patterns should be validated before, so no need to check error.
 	matched, _ := matchAnyPattern(f.excludedList, fp)
 	return matched
