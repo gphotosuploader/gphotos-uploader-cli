@@ -22,22 +22,11 @@ func New(allowedList []string, excludedList []string) (*Filter, error) {
 		f.allowedList = patternDictionary["_IMAGE_EXTENSIONS_"]
 	}
 
-	if err := f.Validate(); err != nil {
+	if err := f.validate(); err != nil {
 		return nil, err
 	}
 
 	return &f, nil
-}
-
-// Validate returns error if allowedList or excludedList are not valid.
-func (f Filter) Validate() error {
-	if err := validatePatterns(f.allowedList); err != nil {
-		return fmt.Errorf("include patterns are invalid: %w", err)
-	}
-	if err := validatePatterns(f.excludedList); err != nil {
-		return fmt.Errorf("exclude patterns are invalid: %w", err)
-	}
-	return nil
 }
 
 // IsAllowed returns if an item is allowed.
@@ -56,4 +45,15 @@ func (f Filter) IsExcluded(fp string) bool {
 	// patterns should be validated before, so no need to check error.
 	matched, _ := matchAnyPattern(f.excludedList, fp)
 	return matched
+}
+
+// validate returns error if allowedList or excludedList are not valid.
+func (f Filter) validate() error {
+	if err := validatePatterns(f.allowedList); err != nil {
+		return fmt.Errorf("include patterns are invalid: %w", err)
+	}
+	if err := validatePatterns(f.excludedList); err != nil {
+		return fmt.Errorf("exclude patterns are invalid: %w", err)
+	}
+	return nil
 }

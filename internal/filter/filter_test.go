@@ -6,22 +6,22 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 )
 
-func TestFilter_Validate(t *testing.T) {
+func TestNew(t *testing.T) {
 	testCases := []struct {
-		name            string
-		includePatterns []string
-		excludePatterns []string
-		errExpected     bool
+		name         string
+		allowedList  []string
+		excludedList []string
+		errExpected  bool
 	}{
-		{name: "empty patterns", includePatterns: []string{""}, excludePatterns: []string{""}, errExpected: false},
-		{name: "valid patterns", includePatterns: []string{"**"}, excludePatterns: []string{"**/*.png"}, errExpected: false},
-		{name: "invalid includePattern", includePatterns: []string{"[]a]"}, excludePatterns: []string{""}, errExpected: true},
-		{name: "invalid excludePattern", includePatterns: []string{""}, excludePatterns: []string{"[]a]"}, errExpected: true},
+		{name: "empty patterns", allowedList: []string{""}, excludedList: []string{""}, errExpected: false},
+		{name: "valid patterns", allowedList: []string{"**"}, excludedList: []string{"**/*.png"}, errExpected: false},
+		{name: "invalid allowed list", allowedList: []string{"[]a]"}, excludedList: []string{""}, errExpected: true},
+		{name: "invalid excluded list", allowedList: []string{""}, excludedList: []string{"[]a]"}, errExpected: true},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := filter.New(tc.includePatterns, tc.excludePatterns)
+			_, err := filter.New(tc.allowedList, tc.excludedList)
 			if err != nil && !tc.errExpected {
 				t.Errorf("error was not expected, got: %v", err)
 			}
