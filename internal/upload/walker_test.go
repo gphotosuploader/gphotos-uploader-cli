@@ -145,10 +145,8 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 			return nil
 		},
 	}
-	filterFiles, err := filter.New(includePatterns, excludePatterns)
-	if err != nil {
-		return results, err
-	}
+	filterFiles := filter.MustCompile(includePatterns, excludePatterns)
+
 	u := upload.UploadFolderJob{
 		FileTracker:        ft,
 		SourceFolder:       "testdata",

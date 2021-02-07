@@ -6,7 +6,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 )
 
-func TestNew(t *testing.T) {
+func TestCompile(t *testing.T) {
 	testCases := []struct {
 		name         string
 		allowedList  []string
@@ -21,9 +21,40 @@ func TestNew(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := filter.New(tc.allowedList, tc.excludedList)
+			_, err := filter.Compile(tc.allowedList, tc.excludedList)
 			if err != nil && !tc.errExpected {
 				t.Errorf("error was not expected, got: %v", err)
+			}
+		})
+	}
+}
+
+func TestMustCompile(t *testing.T) {
+	testCases := []struct {
+		name          string
+		allowedList   []string
+		excludedList  []string
+		panicExpected bool
+	}{
+		{name: "empty patterns", allowedList: []string{""}, excludedList: []string{""}, panicExpected: false},
+		{name: "valid patterns", allowedList: []string{"**"}, excludedList: []string{"**/*.png"}, panicExpected: false},
+		{name: "invalid allowed list", allowedList: []string{"[]a]"}, excludedList: []string{""}, panicExpected: true},
+		{name: "invalid excluded list", allowedList: []string{""}, excludedList: []string{"[]a]"}, panicExpected: true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					if !tc.panicExpected {
+						t.Error("panic was not expected but the function panic")
+					}
+				}
+			}()
+
+			_ = filter.MustCompile(tc.allowedList, tc.excludedList)
+			if tc.panicExpected {
+				t.Error("panic was expected but the function doesn't panic")
 			}
 		})
 	}
@@ -48,7 +79,7 @@ func TestFilter_AllowDefaultFiles(t *testing.T) {
 	}
 
 	t.Run("ByUsingEmptyPatterns", func(t *testing.T) {
-		f, err := filter.New([]string{""}, []string{""})
+		f, err := filter.Compile([]string{""}, []string{""})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -61,7 +92,7 @@ func TestFilter_AllowDefaultFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingRepeatedEmptyPatterns", func(t *testing.T) {
-		f, err := filter.New([]string{"", "", ""}, []string{"", "", ""})
+		f, err := filter.Compile([]string{"", "", ""}, []string{"", "", ""})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -74,7 +105,7 @@ func TestFilter_AllowDefaultFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"_IMAGE_EXTENSIONS_"}, []string{""})
+		f, err := filter.Compile([]string{"_IMAGE_EXTENSIONS_"}, []string{""})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -106,7 +137,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	}
 
 	t.Run("ByUsingWildCardPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"**"}, []string{""})
+		f, err := filter.Compile([]string{"**"}, []string{""})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -119,7 +150,7 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"_ALL_FILES_"}, []string{""})
+		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{""})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -149,7 +180,7 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
-	f, err := filter.New([]string{"**/*.png"}, []string{""})
+	f, err := filter.Compile([]string{"**/*.png"}, []string{""})
 	if err != nil {
 		t.Fatalf("error was not expected at this point: %v", err)
 	}
@@ -179,7 +210,7 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 		{"testdata/folder/SamplePNGImage.png", true},
 	}
 
-	f, err := filter.New([]string{"**/*.png", "**/*.jpg"}, []string{""})
+	f, err := filter.Compile([]string{"**/*.png", "**/*.jpg"}, []string{""})
 	if err != nil {
 		t.Fatalf("error was not expected at this point: %v", err)
 	}
@@ -207,7 +238,7 @@ func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", false},
 	}
 
-	f, err := filter.New([]string{"**/Sample*"}, []string{"**/*.mp3", "**/*.txt", "**/*.mp4"})
+	f, err := filter.Compile([]string{"**/Sample*"}, []string{"**/*.mp3", "**/*.txt", "**/*.mp4"})
 	if err != nil {
 		t.Fatalf("error was not expected at this point: %v", err)
 	}
@@ -236,7 +267,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 	}
 
 	t.Run("ByUsingWildcardPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"**"}, []string{"**"})
+		f, err := filter.Compile([]string{"**"}, []string{"**"})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -249,7 +280,7 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"_ALL_FILES_"}, []string{"_ALL_FILES_"})
+		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"_ALL_FILES_"})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -278,7 +309,7 @@ func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 		{"testdata/ScreenShotPNG.png", false},
 	}
 
-	f, err := filter.New([]string{"_ALL_FILES_"}, []string{"**/ScreenShot*"})
+	f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"**/ScreenShot*"})
 	if err != nil {
 		t.Fatalf("error was not expected at this point: %v", err)
 	}
@@ -307,7 +338,7 @@ func TestFilter_DisallowVideos(t *testing.T) {
 	}
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
-		f, err := filter.New([]string{"_ALL_FILES_"}, []string{"_ALL_VIDEO_FILES_"})
+		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"_ALL_VIDEO_FILES_"})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}
@@ -334,7 +365,7 @@ func TestFilter_IncludingPNGExceptAFolder(t *testing.T) {
 		{"testdata/folder2/SamplePNGImage.png", true},
 	}
 
-	f, err := filter.New([]string{"**/*.png"}, []string{"*/folder1/*"})
+	f, err := filter.Compile([]string{"**/*.png"}, []string{"*/folder1/*"})
 	if err != nil {
 		t.Fatalf("error was not expected at this point: %v", err)
 	}
@@ -361,7 +392,7 @@ func TestFilter_ExcludingAFolder(t *testing.T) {
 	}
 
 	t.Run("ExcludingFolder1", func(t *testing.T) {
-		f, err := filter.New([]string{""}, []string{"**/folder1/*"})
+		f, err := filter.Compile([]string{""}, []string{"**/folder1/*"})
 		if err != nil {
 			t.Fatalf("error was not expected at this point: %v", err)
 		}

@@ -70,7 +70,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	for _, config := range cli.Config.Jobs {
 		srcFolder := config.SourceFolder
 
-		filterFiles, err := filter.New(config.IncludePatterns, config.ExcludePatterns)
+		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
 		if err != nil {
 			return err
 		}
