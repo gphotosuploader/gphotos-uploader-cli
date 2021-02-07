@@ -170,6 +170,8 @@ Class      | Meaning
 #### Tagged patterns
 There are some common patterns that has been tagged, you can use them to simplify your configuration.
 
+> Tagged patterns matches file extensions case insensitively.
+
 * `_ALL_FILES_`: Matches all files, is the same as using `**`. 
 * `_IMAGE_EXTENSIONS_`: Matches [Google Photos supported image file types](https://support.google.com/googleone/answer/6193313) and it includes: `jpg, jpeg, png, webp, gif` file extensions case in-sensitively.
 * `_RAW_EXTENSIONS_`: Matches [Google Photos supported RAW file types](https://support.google.com/googleone/answer/6193313) and it includes `arw, srf, sr2, crw, cr2, cr3, dng, nef, nrw, orf, raf, raw, rw2` file extensions case in-sensitively.
