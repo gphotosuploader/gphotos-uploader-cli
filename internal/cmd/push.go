@@ -70,12 +70,17 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	for _, config := range cli.Config.Jobs {
 		srcFolder := config.SourceFolder
 
+		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
+		if err != nil {
+			return err
+		}
+
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
 			SourceFolder: srcFolder,
 			CreateAlbums: config.CreateAlbums,
-			Filter:       filter.New(config.IncludePatterns, config.ExcludePatterns),
+			Filter:       filterFiles,
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.

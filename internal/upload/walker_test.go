@@ -133,6 +133,7 @@ func TestRelativePath(t *testing.T) {
 }
 
 func getScanFolderResult(includePatterns []string, excludePatterns []string) (map[string]bool, error) {
+	var results = map[string]bool{}
 	ft := &mock.FileTracker{
 		PutFn: func(path string) error {
 			return nil
@@ -144,11 +145,13 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 			return nil
 		},
 	}
+	filterFiles := filter.MustCompile(includePatterns, excludePatterns)
+
 	u := upload.UploadFolderJob{
 		FileTracker:        ft,
 		SourceFolder:       "testdata",
 		CreateAlbums:       "Off",
-		Filter:             filter.New(includePatterns, excludePatterns),
+		Filter:             filterFiles,
 	}
 
 	foundItems, err := u.ScanFolder(&mock.Logger{})
@@ -156,7 +159,6 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 		return nil, err
 	}
 
-	var results = map[string]bool{}
 	for _, i := range foundItems {
 		results[i.Path] = true
 	}

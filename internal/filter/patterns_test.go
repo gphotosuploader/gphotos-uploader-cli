@@ -5,28 +5,6 @@ import (
 	"testing"
 )
 
-func Test_TranslatePatterns(t *testing.T) {
-	testCases := []struct {
-		name  string
-		input []string
-		want  []string
-	}{
-		{name: "_ALL_FILES_", input: []string{"_ALL_FILES_"}, want: []string{"**"}},
-		{name: "_ALL_VIDEO_FILES_", input: []string{"_ALL_VIDEO_FILES_"}, want: []string{"**/*.mpg", "**/*.mod", "**/*.mmv", "**/*.tod", "**/*.wmv", "**/*.asf", "**/*.avi", "**/*.divx", "**/*.mov", "**/*.m4v", "**/*.3gp", "**/*.3g2", "**/*.mp4", "**/*.m2t", "**/*.m2ts", "**/*.mts", "**/*.mkv"}},
-		{name: "Without Tagged Pattern", input: []string{"**/*.png"}, want: []string{"**/*.png"}},
-		{name: "Tagged & Not Tagged Patterns", input: []string{"**/*.png", "_ALL_VIDEO_FILES_"}, want: []string{"**/*.png", "**/*.mpg", "**/*.mod", "**/*.mmv", "**/*.tod", "**/*.wmv", "**/*.asf", "**/*.avi", "**/*.divx", "**/*.mov", "**/*.m4v", "**/*.3gp", "**/*.3g2", "**/*.mp4", "**/*.m2t", "**/*.m2ts", "**/*.mts", "**/*.mkv"}},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := translatePatterns(tc.input)
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Errorf("want: %#v, got: %#v", tc.want, got)
-			}
-		})
-	}
-}
-
 func Test_DeleteEmpty(t *testing.T) {
 	testCases := []struct {
 		name  string
@@ -69,7 +47,7 @@ func Test_ValidatePatterns(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := validatePatterns(tc.input)
+			got := validatePatternList(tc.input)
 			if got != nil && !tc.errExpected {
 				t.Errorf("error was not expected, got: %v", got)
 			}
@@ -77,7 +55,7 @@ func Test_ValidatePatterns(t *testing.T) {
 	}
 }
 
-func Test_MatchAnyPattern(t *testing.T) {
+func Test_Match(t *testing.T) {
 	testCases := []struct {
 		name        string
 		patterns    []string
@@ -92,7 +70,7 @@ func Test_MatchAnyPattern(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := matchAnyPattern(tc.patterns, tc.input)
+			got, err := match(tc.patterns, tc.input)
 			if tc.shouldMatch != got || (err != nil && !tc.errExpected) {
 				t.Errorf("want: %v, got: %v, err: %v", tc.shouldMatch, got, err)
 			}

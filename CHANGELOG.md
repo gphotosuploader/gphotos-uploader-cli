@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.0.1
+### Fixed
+- Tagged extension matches with uppercase file extensions.  ([#283][i283])
+
+[i283]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/283
+
 ## 3.0.0
 > This is a **major upgrade**, so it has some **non-backwards compatible changes**
 ### Added
