@@ -99,8 +99,8 @@ It controls how uploaded files will be organized into albums in Google Photos.
 
 There are three options:
 * `Off` will not create any album.
-* `folderName` will use the name of the folder, where the item is uploaded from, to set the album name.
-* `folderPath` will use the full path of the folder, where the item is uploaded from, to set the album name.
+* `folderName` will use the name of the folder (within `SourceFolder`), where the item is uploaded from, to set the album name.
+* `folderPath` will use the full path of the folder (relative to `SourceFolder`), where the item is uploaded from, to set the album name.
 
 ```
 # Given SouceFolder: /foo
