@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.1.0
+### Added
+- Removes retry when Google Photos requests quota limit has been reached. ([#290][i290])
+- Removes retry when Google Photos requests quota limit has been reached. ([#248][i248])
+
+[i290]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/290
+[i248]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/248
+
 ## 3.0.1
 ### Fixed
 - Tagged extension matches with uppercase file extensions.  ([#283][i283])
