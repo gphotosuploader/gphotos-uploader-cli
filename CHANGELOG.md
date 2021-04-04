@@ -7,7 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - Removes retry when Google Photos requests quota limit has been reached. ([#290][i290])
 - Removes retry when Google Photos requests quota limit has been reached. ([#248][i248])
+### Fixed
+- Not possible to enter a passphrase - panic: crypto/hmac: hash generation function does not produce unique values ([#294][i294])
 
+[i294]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/294
 [i290]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/290
 [i248]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/248
 
