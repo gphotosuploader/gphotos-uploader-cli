@@ -7,8 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - Removes retry when Google Photos requests quota limit has been reached. ([#290][i290])
 - Removes retry when Google Photos requests quota limit has been reached. ([#248][i248])
+- Add support for `go v1.16`.
+- Bump `golangci-lint` to `v1.39.0`. 
 ### Fixed
 - Not possible to enter a passphrase - panic: crypto/hmac: hash generation function does not produce unique values ([#294][i294])
+### Removed
+- Remove support for `go v.1.14`. 
 
 [i294]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/294
 [i290]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/290
