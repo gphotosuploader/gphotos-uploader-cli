@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.1.1
+### Fixed
+- Keychain backend not working on macOS. Thanks to [@mlangenberg](https://github.com/mlangenberg) ([#302][i302])
+
+[i302]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/302
+
 ## 3.1.0
 ### Added
 - Removes retry when Google Photos requests quota limit has been reached. ([#290][i290])
