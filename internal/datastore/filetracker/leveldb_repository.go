@@ -38,7 +38,7 @@ func (r LevelDBRepository) Get(key string) (TrackedFile, error) {
 
 // Put stores the item under key.
 func (r LevelDBRepository) Put(key string, item TrackedFile) error {
-	return r.DB.Put([]byte(key), []byte(item.value), nil)
+	return r.DB.Put([]byte(key), []byte(item.String()), nil)
 }
 
 // Delete removes the item specified by key.

@@ -65,7 +65,7 @@ func (ft FileTracker) Exist(file string) bool {
 	}
 
 	// checks if the file is the same (equal value)
-	if item.Hash() == hash {
+	if item.Hash == hash {
 		return true
 	}
 
