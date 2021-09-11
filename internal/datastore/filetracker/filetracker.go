@@ -93,6 +93,13 @@ func (ft FileTracker) Exist(file string) bool {
 	// checks if the file is the same (equal value)
 	if item.Hash == hash {
 		ft.logger.Debugf("File hash has not changed for '%s'.", file)
+
+		// updates file marker with mtime to speed up comparison on next run
+		item.ModTime = fileInfo.ModTime()
+		if err = ft.repo.Put(file, item); err != nil {
+			ft.logger.Debugf("Error updating marker for '%s' with modification time (%s).", file, err)
+		}
+
 		return true
 	}
 
