@@ -2,6 +2,9 @@ package filetracker
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
 var (
@@ -16,6 +19,8 @@ type FileTracker struct {
 	// Hasher allows to change the way that hashes are calculated. Uses xxHash32Hasher{} by default.
 	// Useful for testing.
 	Hasher Hasher
+
+	logger log.Logger
 }
 
 // Hasher is a Hasher to get the value of the file.
@@ -37,16 +42,26 @@ func New(r Repository) *FileTracker {
 	return &FileTracker{
 		repo:   r,
 		Hasher: xxHash32Hasher{},
+		logger: log.GetInstance(),
 	}
 }
 
 // Put marks a file as already uploaded to prevent re-uploads.
 func (ft FileTracker) Put(file string) error {
+	fileInfo, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+
 	hash, err := ft.Hasher.Hash(file)
 	if err != nil {
 		return err
 	}
-	item := NewTrackedFile(hash)
+	item := TrackedFile{
+		ModTime: fileInfo.ModTime(),
+		Hash: hash,
+	}
+
 	return ft.repo.Put(file, item)
 }
 
@@ -59,6 +74,17 @@ func (ft FileTracker) Exist(file string) bool {
 		return false
 	}
 
+	fileInfo, err := os.Stat(file)
+	if err != nil {
+		ft.logger.Debugf("Error retrieving file info for '%s' (%s).", file, err)
+		return false
+	}
+
+	if item.ModTime.Equal(fileInfo.ModTime()) {
+		ft.logger.Debugf("File modification time has not changed for '%s'.", file)
+		return true
+	}
+
 	hash, err := ft.Hasher.Hash(file)
 	if err != nil {
 		return false
@@ -66,6 +92,7 @@ func (ft FileTracker) Exist(file string) bool {
 
 	// checks if the file is the same (equal value)
 	if item.Hash == hash {
+		ft.logger.Debugf("File hash has not changed for '%s'.", file)
 		return true
 	}
 
