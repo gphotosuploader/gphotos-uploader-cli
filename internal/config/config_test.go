@@ -99,8 +99,8 @@ func TestConfig_SafePrint(t *testing.T) {
 		SecretsBackendType: "auto",
 		Jobs: []config.FolderUploadJob{
 			{
-				SourceFolder: "foo",
-				CreateAlbums: "folderPath",
+				SourceFolder:      "foo",
+				CreateAlbums:      "folderPath",
 				DeleteAfterUpload: false,
 				IncludePatterns:   []string{},
 				ExcludePatterns:   []string{},

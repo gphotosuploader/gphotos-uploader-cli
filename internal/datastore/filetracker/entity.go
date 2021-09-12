@@ -1,15 +1,15 @@
 package filetracker
 
 import (
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 )
 
 // TrackedFile represents a tracked file in the repository.
 type TrackedFile struct {
 	ModTime time.Time
-	Hash string
+	Hash    string
 }
 
 // NewTrackedFile returns a TrackedFile with the specified values
@@ -30,7 +30,7 @@ func NewTrackedFile(value string) TrackedFile {
 	}
 
 	return TrackedFile{
-		Hash: hash,
+		Hash:    hash,
 		ModTime: modTime,
 	}
 }

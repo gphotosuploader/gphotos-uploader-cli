@@ -59,7 +59,7 @@ func (ft FileTracker) Put(file string) error {
 	}
 	item := TrackedFile{
 		ModTime: fileInfo.ModTime(),
-		Hash: hash,
+		Hash:    hash,
 	}
 
 	return ft.repo.Put(file, item)

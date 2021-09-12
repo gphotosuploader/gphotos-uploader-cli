@@ -148,10 +148,10 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 	filterFiles := filter.MustCompile(includePatterns, excludePatterns)
 
 	u := upload.UploadFolderJob{
-		FileTracker:        ft,
-		SourceFolder:       "testdata",
-		CreateAlbums:       "Off",
-		Filter:             filterFiles,
+		FileTracker:  ft,
+		SourceFolder: "testdata",
+		CreateAlbums: "Off",
+		Filter:       filterFiles,
 	}
 
 	foundItems, err := u.ScanFolder(&mock.Logger{})
