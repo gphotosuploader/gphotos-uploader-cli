@@ -9,7 +9,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 )
 
-// InitCmd holds the required data for the init cmd
+// AuthCmd holds the required data for the init cmd
 type AuthCmd struct {
 	*flags.GlobalFlags
 }
