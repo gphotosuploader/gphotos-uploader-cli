@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.2.0
+### Changed
+- Reduce the cost of tracking already uploaded files by bringing back file last modification time check ([#306][i306])
+
+[i306]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/306
+
 ## 3.1.1
 ### Fixed
 - Keychain backend not working on macOS. Thanks to [@mlangenberg](https://github.com/mlangenberg) ([#302][i302])
