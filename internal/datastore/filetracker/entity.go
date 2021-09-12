@@ -2,30 +2,43 @@ package filetracker
 
 import (
 	"strings"
+	"time"
+	"strconv"
 )
 
 // TrackedFile represents a tracked file in the repository.
 type TrackedFile struct {
-	value string
+	ModTime time.Time
+	Hash string
 }
 
 // NewTrackedFile returns a TrackedFile with the specified values
 func NewTrackedFile(value string) TrackedFile {
+	parts := strings.SplitN(value, "|", 2)
+
+	modTime := time.Time{}
+	hash := ""
+
+	if len(parts) == 2 {
+		unixTime, err := strconv.ParseInt(parts[0], 10, 64)
+		if err == nil {
+			modTime = time.Unix(0, unixTime)
+		}
+		hash = parts[1]
+	} else {
+		hash = parts[0]
+	}
+
 	return TrackedFile{
-		value: value,
+		Hash: hash,
+		ModTime: modTime,
 	}
 }
 
-// Hash returns the value value stored in the repository.
-func (f TrackedFile) Hash() string {
-	parts := strings.SplitN(f.value, "|", 2)
-
-	// Previously, the value in the repository was mTime + "|" + value.
-	// We decided to not use mTime in favor of the hashes. To maintain the
-	// backwards compatibility, if the repository has two parts, we return
-	// the second one.
-	if len(parts) == 2 {
-		return parts[1]
+func (tf TrackedFile) String() string {
+	if tf.ModTime.IsZero() {
+		return tf.Hash
+	} else {
+		return strconv.FormatInt(tf.ModTime.UnixNano(), 10) + "|" + tf.Hash
 	}
-	return parts[0]
 }
