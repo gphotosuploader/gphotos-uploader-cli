@@ -2,9 +2,9 @@ package filetracker_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
-	"time"
 )
 
 func TestTrackedFile_Hash(t *testing.T) {
@@ -30,9 +30,9 @@ func TestTrackedFile_Hash(t *testing.T) {
 
 func TestTrackedFile_ModTime(t *testing.T) {
 	testCases := []struct {
-		name string
+		name  string
 		input string
-		want time.Time
+		want  time.Time
 	}{
 		{"Should return zero time value", "123456789", time.Time{}},
 		{"Should return time value", "1631350013816466000|123456789", time.Unix(0, 1631350013816466000)},
@@ -51,9 +51,9 @@ func TestTrackedFile_ModTime(t *testing.T) {
 
 func TestTrackedFile_String(t *testing.T) {
 	testCases := []struct {
-		name string
+		name  string
 		input string
-		want string
+		want  string
 	}{
 		{"Should return the hash", "123456789", "123456789"},
 		{"Should return mtime and hash", "1631350013816466000|123456789", "1631350013816466000|123456789"},

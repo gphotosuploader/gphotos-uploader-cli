@@ -68,6 +68,7 @@ func NewJobQueue(maxWorkers int, logger log.Logger) *JobQueue {
 	}
 }
 
+// ChanJobResults returns the channel where the Job give the results
 func (q *JobQueue) ChanJobResults() chan JobResult {
 	return q.jobResults
 }

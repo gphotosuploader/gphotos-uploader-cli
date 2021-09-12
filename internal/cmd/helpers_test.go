@@ -2,7 +2,7 @@ package cmd_test
 
 import "testing"
 
-func assertExpectedError(t *testing.T, errExpected bool, err error, ) {
+func assertExpectedError(t *testing.T, errExpected bool, err error) {
 	if errExpected && err == nil {
 		t.Fatalf("error was expected, but not produced")
 	}

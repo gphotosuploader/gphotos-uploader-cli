@@ -77,7 +77,7 @@ func Start(ctx context.Context, path string) (*App, error) {
 	return app, nil
 }
 
-// Start initializes the application without reading the configuration.
+// StartWithoutConfig initializes the application without reading the configuration.
 // The provided path is the expanded and absolute path to the application data folder.
 func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 	app := &App{

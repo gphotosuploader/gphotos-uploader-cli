@@ -39,7 +39,8 @@ type FolderUploadJob struct {
 	// folderName: Creates album with the name based on the folder name.
 	CreateAlbums string `json:"CreateAlbums,omitempty"`
 
-	// DEPRECATED: MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead.
+	// MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead.
+	// DEPRECATED
 	MakeAlbums MakeAlbums `json:"-"`
 
 	// DeleteAfterUpload if it is true, the app will remove files after upload them.
@@ -52,11 +53,14 @@ type FolderUploadJob struct {
 	ExcludePatterns []string `json:"ExcludePatterns"`
 }
 
-// DEPRECATED: MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead
+// MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead
+// DEPRECATED
 type MakeAlbums struct {
-	// DEPRECATED: Enabled is deprecated, use Config.Jobs.CreateAlbums instead.
+	// Enabled is deprecated, use Config.Jobs.CreateAlbums instead.
+	// DEPRECATED
 	Enabled bool `json:"-"`
 
-	// DEPRECATED: Use is deprecated, use Config.Jobs.CreateAlbums instead.
+	// Use is deprecated, use Config.Jobs.CreateAlbums instead.
+	// DEPRECATED
 	Use string `json:"-"`
 }

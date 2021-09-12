@@ -48,18 +48,18 @@ func Exists(fs afero.Fs, filename string) bool {
 // SafePrint returns the configuration, removing sensible fields.
 func (c Config) SafePrint() string {
 	printableConfig := struct {
-		APIAppCredentials APIAppCredentials
-		Account string
+		APIAppCredentials  APIAppCredentials
+		Account            string
 		SecretsBackendType string
-		Jobs []FolderUploadJob
+		Jobs               []FolderUploadJob
 	}{
 		APIAppCredentials: APIAppCredentials{
 			ClientID:     c.APIAppCredentials.ClientID,
 			ClientSecret: "REMOVED",
 		},
-		Account: c.Account,
+		Account:            c.Account,
 		SecretsBackendType: c.SecretsBackendType,
-		Jobs: c.Jobs,
+		Jobs:               c.Jobs,
 	}
 	b, _ := json.Marshal(printableConfig)
 	return fmt.Sprint(string(b))
@@ -217,8 +217,8 @@ func defaultSettings() Config {
 		Account: "YOUR_GOOGLE_PHOTOS_ACCOUNT",
 		Jobs: []FolderUploadJob{
 			{
-				SourceFolder: "YOUR_FOLDER_PATH",
-				CreateAlbums: "folderName",
+				SourceFolder:      "YOUR_FOLDER_PATH",
+				CreateAlbums:      "folderName",
 				DeleteAfterUpload: false,
 			},
 		},

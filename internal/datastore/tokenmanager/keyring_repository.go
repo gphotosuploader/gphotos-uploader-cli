@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/99designs/keyring"
-	"golang.org/x/term"
 	"golang.org/x/oauth2"
+	"golang.org/x/term"
 )
 
 // KeyringRepository represents a repository provided by different secrets
