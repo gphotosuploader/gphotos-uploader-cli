@@ -66,7 +66,11 @@ func (ft FileTracker) Put(file string) error {
 }
 
 // Exist checks if the file was already uploaded.
-// Exist compares the value of the file against the repository.
+// Exist compares the last modification time of the file against the one in the repository.
+// Last time modification comparison tries to reduce the number of times where the hash comparison
+// is needed.
+// In case that last modification time has changed (or it doesn't exist - retro compatibility),
+// it compares a hash of the content of the file against the one in the repository.
 func (ft FileTracker) Exist(file string) bool {
 	// Get returns ErrItemNotFound if the repo does not contains the key.
 	item, err := ft.repo.Get(file)
