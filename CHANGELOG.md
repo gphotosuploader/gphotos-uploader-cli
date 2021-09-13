@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.2.1
+### Added
+- Support for the latest published Go version. This project will maintain compatibility with the latest two major versions published.
+### Deprecated
+- Once Go 1.17 has been published, previous Go 1.15 support is deprecated.
+
 ## 3.2.0
 ### Changed
 - Reduce the cost of tracking already uploaded files by bringing back file last modification time check ([#306][i306])

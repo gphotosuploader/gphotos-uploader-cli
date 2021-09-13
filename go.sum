@@ -33,11 +33,9 @@ github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222 h1:ivxAxcE9py2x
 github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222/go.mod h1:PgrCjL2+FgkITqxQI+erRTONtAv4JkpOzun5ozKW/Jg=
 github.com/facebookgo/testname v0.0.0-20150612200628-5443337c3a12 h1:pKeuUgeuL6jk/FpxSr0ZVL1XEiOmrcWBvB2rKXu0mMI=
 github.com/facebookgo/testname v0.0.0-20150612200628-5443337c3a12/go.mod h1:IYed2VYeQcs7JTN6KiVXjaz6Rv/Qz092Wjc6o5bCJ9I=
-github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/gadelkareem/cachita v0.2.1 h1:l0UtGP+91Ux+eMEoBgPFtDDTRoR1mwc8OAvHMAu8Pn0=
 github.com/gadelkareem/cachita v0.2.1/go.mod h1:xxh2RDZCXnVZQM7A/txZFFyEf3DHX+VWZ+Qgg/WOWVI=
-github.com/garyburd/redigo v1.6.0 h1:0VruCpn7yAIIu7pWVClQC8wxCJEcG3nyzpMSHKi1PQc=
 github.com/garyburd/redigo v1.6.0/go.mod h1:NR3MbYisc3/PwhQ00EMzDiPmrwpPxAn5GI05/YaO1SY=
 github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 h1:ZpnhV/YsD2/4cESfV5+Hoeu/iUR3ruzNvZ+yQfO03a0=
 github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2/go.mod h1:bBOAhwG1umN6/6ZUMtDFBMQR8jRg9O75tm9K00oMsK4=
@@ -109,7 +107,6 @@ github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/Qd
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mediocregopher/mediocre-go-lib v0.0.0-20181029021733-cb65787f37ed h1:3dQJqqDouawQgl3gBE1PNHKFkJYGEuFb1DbSlaxdosE=
 github.com/mediocregopher/mediocre-go-lib v0.0.0-20181029021733-cb65787f37ed/go.mod h1:dSsfyI2zABAdhcbvkXqgxOxrCsbYeHCPgrZkku60dSg=
-github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9 h1:ViNuGS149jgnttqhc6XQNPwdupEMBXqCx9wtlW7P3sA=
 github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9/go.mod h1:fLRUbhbSd5Px2yKUaGYYPltlyxi1guJz1vCmo1RQL50=
 github.com/mediocregopher/radix/v3 v3.2.0 h1:/Js1JYSq3K34PHTciEm2BDSV0pZZcnKiBXqhN0gPSGk=
 github.com/mediocregopher/radix/v3 v3.2.0/go.mod h1:baVzIVpQ8FpvCE6s+XbkoLkBRRI6k/e/HcSNhJDdFjk=
