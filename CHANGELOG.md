@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Support for the latest published Go version. This project will maintain compatibility with the latest two major versions published.
 ### Deprecated
 - Once Go 1.17 has been published, previous Go 1.15 support is deprecated.
+### Fixed
+- Using environment var `GPHOTOS_CLI_TOKENSTORE_KEY`, it was not possible to set an empty key. Now, it is.
 
 ## 3.2.0
 ### Changed
