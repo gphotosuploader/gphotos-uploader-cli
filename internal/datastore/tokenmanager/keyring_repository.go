@@ -101,7 +101,7 @@ type passwordReader interface {
 // It will read it from an environment var if is set, or read from the terminal otherwise.
 func promptFn(pr passwordReader) func(string) (string, error) {
 	return func(_ string) (string, error) {
-		if key := os.Getenv("GPHOTOS_CLI_TOKENSTORE_KEY"); len(key) > 0 {
+		if key, ok := os.LookupEnv("GPHOTOS_CLI_TOKENSTORE_KEY"); ok {
 			return key, nil
 		}
 		fmt.Print("Enter the passphrase to open the token store: ")
