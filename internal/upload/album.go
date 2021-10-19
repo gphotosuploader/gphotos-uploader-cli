@@ -16,7 +16,7 @@ func (job *UploadFolderJob) albumName(path string) string {
 	case "folderName":
 		return albumNameUsingFolderName(path)
 	default:
-		panic("invalid CreateAlbums parameter")
+		return job.CreateAlbums
 	}
 }
 

@@ -30,6 +30,12 @@ func TestAlbumName(t *testing.T) {
 			in:           "/foo/bar/file.jpg",
 			want:         "foo_bar",
 		},
+		{
+			name:         "createAlbum_With_customName",
+			createAlbums: "MyAlbum",
+			in:           "/foo/bar/file.jpg",
+			want:         "MyAlbum",
+		},
 	}
 
 	for _, tt := range testData {

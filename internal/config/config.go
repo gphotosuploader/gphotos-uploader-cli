@@ -141,9 +141,6 @@ func (c Config) validateJobs(fs afero.Fs) error {
 		if !exist {
 			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
-		if !isValidCreateAlbums(job.CreateAlbums) {
-			return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
-		}
 	}
 	return nil
 }
@@ -167,16 +164,6 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item.SourceFolder = normalizePath(src)
 	}
 	return nil
-}
-
-// isValidCreateAlbums checks if the value is a valid CreateAlbums option.
-func isValidCreateAlbums(value string) bool {
-	switch value {
-	case "Off", "folderPath", "folderName":
-		return true
-	default:
-	}
-	return false
 }
 
 // unmarshalReader unmarshal HJSON data into the provided interface.
