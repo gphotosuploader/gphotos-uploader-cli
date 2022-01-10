@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 3.3.0
 ### Changed
-- Files are sorted before being uploaded. This will only affect to then files uploaded to empty albums. ([#301][i301])
+- Files are sorted before being uploaded. This will only be true for the files uploaded to an empty albums. ([#301][i301])
 
 [i301]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/301
  
