@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.3.0
+### Changed
+- Files are sorted before being uploaded. This will only affect to then files uploaded to empty albums. ([#301][i301])
+
+[i301]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/301
+ 
 ## 3.2.1
 ### Added
 - Support for the latest published Go version. This project will maintain compatibility with the latest two major versions published.

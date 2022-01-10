@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"net/http"
+	"sort"
 	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
@@ -110,6 +111,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
 				continue
 			}
+			sort.Strings(files)
 			for _, file := range files {
 				// enqueue files to be uploaded. The workers will receive it via channel.
 				totalItems++
