@@ -3,6 +3,7 @@ env:
   - GO111MODULE=on
 before:
   hooks:
+    - go mod tidy
     - go mod download
 builds:
   - goos:
@@ -10,7 +11,7 @@ builds:
       - linux
     goarch:
       - amd64
-    ldflags: -s -w {{ .Env.RELEASE_VERSION_TAG }}
+    ldflags: -s -w -X=github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd.version={{ .Version }}
 checksum:
   name_template: 'checksums.txt'
 brews:
