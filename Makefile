@@ -15,7 +15,6 @@ BINARY := gphotos-uploader-cli
 TMP_DIR ?= .tmp
 COVERAGE_FILE := $(TMP_DIR)/coverage.txt
 COVERAGE_HTML_FILE := $(TMP_DIR)/coverage.html
-GORELEASER := $(TMP_DIR)/goreleaser
 GOLANGCI := $(TMP_DIR)/golangci-lint
 GOLANGCI_VERSION := 1.42.1
 
@@ -56,7 +55,7 @@ build: ## Build the app
 .PHONY: clean
 clean: ## Clean all built artifacts
 	@echo "--> Cleaning all built artifacts..."
-	@rm -f $(GOLANGCI) $(GORELEASER) $(COVERAGE_FILE) $(COVERAGE_HTML_FILE)
+	@rm -f $(GOLANGCI) $(COVERAGE_FILE) $(COVERAGE_HTML_FILE)
 	@rm -rf dist
 	@go clean
 	@go mod tidy -v
@@ -66,11 +65,6 @@ $(GOLANGCI):
 	@mkdir -p $(dir $(GOLANGCI))
 	@curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(dir $(GOLANGCI)) v$(GOLANGCI_VERSION)
 
-$(GORELEASER):
-	@echo "--> Installing goreleaser..."
-	@mkdir -p $(dir $(GORELEASER))
-	@curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh -s -- -b $(dir $(GORELEASER))
-
 .PHONY: lint
 lint: $(GOLANGCI) ## Run linter
 	@echo "--> Running linter golangci v$(GOLANGCI_VERSION)..."
@@ -78,11 +72,6 @@ lint: $(GOLANGCI) ## Run linter
 
 .PHONY: ci
 ci: lint test cover build ## Run all the tests and code checks
-
-.PHONY: release
-release: $(GORELEASER) ## Release a new version using goreleaser (only CI)
-	@echo "--> Releasing $(BINARY) $(VERSION) (build: $(BUILD))..."
-	@RELEASE_VERSION_TAG="$(RELEASE_VERSION_FLAGS)" $(GORELEASER) release
 
 .PHONY: version
 version: ## Show current version
