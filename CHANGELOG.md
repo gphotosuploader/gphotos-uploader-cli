@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Removed
+- Command `release` in the Makefile. We are using [goreleaser GitHub action](https://github.com/goreleaser/goreleaser-action) now.
+
 ## 3.3.0
 ### Changed
 - Files are sorted before being uploaded. This will only be true for the files uploaded to an empty albums. ([#301][i301])
