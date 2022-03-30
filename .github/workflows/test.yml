@@ -1,6 +1,9 @@
-on: [push, pull_request]
-
 name: Test, build and coverage
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
 jobs:
   test-matrix:
     strategy:

@@ -1,11 +1,13 @@
 name: Linter code
 on:
   push:
-    tags:
-      - v*
     branches:
-      - master
+      - 'main'
+    paths:
+      - '**.go'
   pull_request:
+    paths:
+      - '**.go'
 jobs:
   golangci:
     name: Linter code
