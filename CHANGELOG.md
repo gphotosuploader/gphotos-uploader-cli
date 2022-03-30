@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added
+- Support for the latest published Go version (1.18). This project will maintain compatibility with the latest two major versions published.
+### Changed
+- Dependency has been updated, so potential bugs has been fixed.
+### Deprecated
+- Once Go 1.18 has been published, previous Go 1.16 support is deprecated.
 ### Removed
 - Command `release` in the Makefile. We are using [goreleaser GitHub action](https://github.com/goreleaser/goreleaser-action) now.
 

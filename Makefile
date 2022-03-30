@@ -16,7 +16,7 @@ TMP_DIR ?= .tmp
 COVERAGE_FILE := $(TMP_DIR)/coverage.txt
 COVERAGE_HTML_FILE := $(TMP_DIR)/coverage.html
 GOLANGCI := $(TMP_DIR)/golangci-lint
-GOLANGCI_VERSION := 1.42.1
+GOLANGCI_VERSION := 1.45
 
 # set how to open files based on OS and ARCH.
 UNAME_OS := $(shell uname -s)
