@@ -16,6 +16,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hjson/hjson-go v3.1.0+incompatible
+	github.com/int128/oauth2cli v1.14.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mediocregopher/radix/v3 v3.8.0 // indirect
@@ -31,6 +32,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	google.golang.org/api v0.74.0 // indirect
