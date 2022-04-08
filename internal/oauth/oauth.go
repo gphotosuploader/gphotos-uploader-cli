@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -17,6 +18,8 @@ var (
 
 	// PhotosLibraryScope is Google Photos OAuth2 scope.
 	PhotosLibraryScope = "https://www.googleapis.com/auth/photoslibrary"
+
+	ErrTokenIsNil = errors.New("OAuth 2.0 token is nil")
 )
 
 // Config represents a config for the OAuth 2.0 flow.
@@ -33,22 +36,21 @@ type Config struct {
 }
 
 // GetToken refresh the provided token or create a new OAuth 2.0 token if the provided one is nil.
-func GetToken(ctx context.Context, config *Config, token *oauth2.Token) (*oauth2.Token, error) {
+func GetToken(ctx context.Context, config *Config) (*oauth2.Token, error) {
 	if err := config.validateAndSetDefaults(); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 
-	if token == nil {
-		config.Logf("Getting OAuth2 token from web...")
-		return config.getTokenFromWeb(ctx)
+	return config.getTokenFromWeb(ctx)
+}
+
+// RefreshToken refresh the provided token if needed.
+func RefreshToken(ctx context.Context, config *Config, token *oauth2.Token) (*oauth2.Token, error) {
+	if err := config.validateAndSetDefaults(); err != nil {
+		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 
-	if !token.Valid() {
-		config.Logf("Token has been expired, refreshing it...")
-		return config.refreshToken(ctx, token)
-	}
-
-	return token, nil
+	return config.refreshToken(ctx, token)
 }
 
 // Client returns an authenticated client using the specified token.
@@ -114,5 +116,13 @@ func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 
 // refreshToken refresh the OAuth 2.0 token.
 func (c *Config) refreshToken(ctx context.Context, token *oauth2.Token) (*oauth2.Token, error) {
+	if token == nil {
+		return nil, ErrTokenIsNil
+	}
+
+	if token.Valid() {
+		return token, nil
+	}
+
 	return c.oAuth2Config.TokenSource(ctx, token).Token()
 }

@@ -19,8 +19,8 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 	authCmd := &cobra.Command{
 		Use:   "auth",
-		Short: "Authenticate with Google Photos to refresh tokens",
-		Long:  `Force authentication against Google Photos to refresh tokens.`,
+		Short: "Authenticate account with Google Photos to get OAuth 2.0 token",
+		Long:  `Force authentication against Google Photos to get OAuth 2.0 token.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}
@@ -30,7 +30,7 @@ func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	cli, err := app.Start(ctx, cmd.CfgDir)
+	cli, err := app.StartServices(ctx, cmd.CfgDir)
 	if err != nil {
 		return err
 	}
@@ -38,6 +38,10 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
-	return nil
+	_, err = cli.AuthenticateFromWeb(ctx)
+	if err == nil {
+		cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
+	}
+
+	return err
 }

@@ -49,6 +49,22 @@ type App struct {
 // Start initializes the application with the services defined by a given configuration.
 // The provided path is the expanded and absolute path to the application data folder.
 func Start(ctx context.Context, path string) (*App, error) {
+	app, err := StartServices(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	app.Client, err = app.AuthenticateFromToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
+}
+
+// StartServices initializes the services defined by a given configuration.
+// The provided path is the expanded and absolute path to the application data folder.
+func StartServices(ctx context.Context, path string) (*App, error) {
 	var err error
 
 	app := &App{
@@ -66,11 +82,6 @@ func Start(ctx context.Context, path string) (*App, error) {
 	app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
 
 	if err := app.startServices(); err != nil {
-		return nil, err
-	}
-
-	app.Client, err = app.NewOAuth2Client(ctx)
-	if err != nil {
 		return nil, err
 	}
 
