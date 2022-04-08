@@ -62,44 +62,30 @@ $ gphotos-uploader-cli init
 
 You must review the [documentation](configuration.md) to specify your **Google Photos API credentials**, `APIAppCredentials`. You should tune your `jobs` configuration also.
 
-## Run
-Once it's configured you can start uploading files in this way:
+## Authentication
+Once it's configured you new to authenticate your CLI against Google Photos:
 ```bash 
-$ gphotos-uploader-cli push
+$ gphotos-uploader-cli auth
 ```
 
-### First time run
-The first time you run `gphotos-uploader-cli`, after setting your configuration ([Google Photos API credentials](configuration.md#APIAppCredentials)), few manual steps are needed:
+Few manual steps are needed:
 
 1. You should get an output like this one:
 
-```
-Visit the following URL in your browser:
-https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=...
+![Run gphotos-uploader-cli auth](images/run_gphotos_uploader_cli_with_auth.jpeg)
 
-After completing the authorization flow, enter the authorization code here:
-```
+2. Open a browser and point to the previous URL. Select the account to authenticate the CLI with (the same you configured in the config file). You will see something like this:
 
-2. Open a browser and point to the previous URL. Select the account where you wan to upload your files (the same you configured in the config file). You will see something like this:
+![Google asking for Google account](images/select_google_account.jpeg) 
 
-![Google asking for Google Photos API credentials](images/ask_Google_Photos_API_credentials.png) 
+3. After that, you should confirm that you trust on `gphotos-uploader-cli` to access to your Google Photos account, click on **Allow**:
 
-3. After that, you should confirm that you trust on `gphotos-uploader-cli` to access to your Google Photos account, click on **Go to gphotos-uploader**:
+![Google ask you to verify gphotos-upload-cli](images/allow_gphotos_uploader_cli_to_access.jpeg)
 
-![Google ask you to verify gphotos-upload-cli](images/ask_for_application_verification.png)
+4. A page with a code is shown in your browser, copy this code and go back to the terminal.
 
-4. Finally Google will ask you to confirm permission Google Photos account:
+![Browser's steps are complete](images/you_can_close_the_browser.jpeg)
 
-![Google ask permission to your Google Photos account](images/ask_for_permission.png)
+5. Go back to your terminal window. The authentication process is complete.
 
-5. A page with a code is shown in your browser, copy this code and go back to the terminal.
-
-![Final confirmation, all was good](images/final_confirmation.png)
-
-6. Paste the previous code in your terminal to complete the process.
-
-```
-After completing the authorization flow, enter the authorization code here: 4/4QFPtCv11dN3a-hVYhHkMryZe5g
-```
-
-All auth configuration is in place.
+![Authentication is complete](images/authentication_is_complete.jpeg)

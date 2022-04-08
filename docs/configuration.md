@@ -38,7 +38,7 @@ Before you can use `gphotos-uploader-cli`, you must enable the Photos Library AP
 1. Start by [creating a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (example: _Google Photos Uploader_).
 1. Enable the [Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com) by clicking the <kbd>ENABLE</kbd> button.
 1. Configure the [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
-1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Other** as the application type and give it a name (example: _gphotos-uploader-cli_).
+1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Desktop app** as the application type and give it a name (example: _gphotos-uploader-cli_).
 1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
 1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
 
