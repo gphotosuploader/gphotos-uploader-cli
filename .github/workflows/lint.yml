@@ -13,16 +13,18 @@ jobs:
     name: Linter code
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '~1.19'
+      - uses: actions/checkout@v3
       - name: Cache Go modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Run linter
-        uses: golangci/golangci-lint-action@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.45
+          version: v1.50.1
