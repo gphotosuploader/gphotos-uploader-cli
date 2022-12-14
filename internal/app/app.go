@@ -122,7 +122,7 @@ func (app App) Stop() error {
 		return err
 	}
 
-	app.Logger.Debug("All services has been shut down successfully")
+	app.Logger.Debug("All services have been shut down successfully")
 	return nil
 }
 

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"net/http"
+	"regexp"
 	"sort"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
+	"google.golang.org/api/googleapi"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
@@ -18,6 +20,10 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
+)
+
+var (
+	requestQuotaErrorRe = regexp.MustCompile(`Quota exceeded for quota metric 'All requests' and limit 'All requests per day'`)
 )
 
 // PushCmd holds the required data for the push cmd
@@ -148,7 +154,14 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = bar.Add(1)
 
 		if r.Err != nil {
-			cli.Logger.Failf("Error processing %s", r.ID)
+			if googleApiErr, ok := r.Err.(*googleapi.Error); ok {
+				if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
+					cli.Logger.Failf("returning 'quota exceeded' error")
+					return r.Err
+				}
+			} else {
+				cli.Logger.Failf("Error processing %s", r.ID)
+			}
 		} else {
 			uploadedItems++
 			cli.Logger.Debugf("Successfully processing %s", r.ID)
