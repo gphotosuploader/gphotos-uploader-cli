@@ -6,8 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## 3.5.0
 ### Added
 - Support for the latest published Go version (1.19). This project will maintain compatibility with the latest two major versions published.
+### Fix
+- Exit if daily API quota is exceeded.  Thanks to [@mlbright](https://github.com/mlbright) ([#341][i341])
 ### Removed
 - Once Go 1.19 has been published, previous Go 1.17 support is deprecated.
+
+[i341]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/341
 
 ## 3.4.0
 ### Changed
