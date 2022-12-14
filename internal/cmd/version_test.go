@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
@@ -15,7 +15,7 @@ func TestNewVersionCmd(t *testing.T) {
 	if err := c.Execute(); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ioutil.ReadAll(b)
+	got, err := io.ReadAll(b)
 	if err != nil {
 		t.Fatal(err)
 	}

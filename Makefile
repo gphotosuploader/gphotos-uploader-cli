@@ -16,7 +16,7 @@ TMP_DIR ?= .tmp
 COVERAGE_FILE := $(TMP_DIR)/coverage.txt
 COVERAGE_HTML_FILE := $(TMP_DIR)/coverage.html
 GOLANGCI := $(TMP_DIR)/golangci-lint
-GOLANGCI_VERSION := 1.45
+GOLANGCI_VERSION := 1.50.1
 
 # set how to open files based on OS and ARCH.
 UNAME_OS := $(shell uname -s)
@@ -63,7 +63,7 @@ clean: ## Clean all built artifacts
 $(GOLANGCI):
 	@echo "--> Installing golangci v$(GOLANGCI_VERSION)..."
 	@mkdir -p $(dir $(GOLANGCI))
-	@curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(dir $(GOLANGCI)) v$(GOLANGCI_VERSION)
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh  | sh -s -- -b $(dir $(GOLANGCI)) v$(GOLANGCI_VERSION)
 
 .PHONY: lint
 lint: $(GOLANGCI) ## Run linter

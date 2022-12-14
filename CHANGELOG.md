@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.5.0
+### Added
+- Support for the latest published Go version (1.19). This project will maintain compatibility with the latest two major versions published.
+### Removed
+- Once Go 1.19 has been published, previous Go 1.17 support is deprecated.
+
 ## 3.4.0
 ### Changed
 - The command `auth` initiates the [Google authentication to get an OAuth 2.0 token](https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started?id=authentication). **It should be used the first time that the CLI is configured**. See [documentation](https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started?id=authentication).

@@ -8,7 +8,7 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/hjson/hjson-go"
+	"github.com/hjson/hjson-go/v4"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/afero"
 )
