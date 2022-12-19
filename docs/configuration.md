@@ -184,5 +184,5 @@ There are some common patterns that has been tagged, you can use them to simplif
 This variable is used to read the token store key for opening the secrets storage. It works when `SecretsBackendType: file` and it is intended to be used by headless runners.
 
 ```bash
-$ GPHOTOS_CLI_TOKENSTORE_KEY=my-super-secret gphotos-uploader-cli push
+GPHOTOS_CLI_TOKENSTORE_KEY=my-super-secret gphotos-uploader-cli push
 ```

@@ -9,7 +9,7 @@ Here are the steps for each of them:
 
 #### homebrew tap (only on macOS for now):
 ```bash
-$ brew install gphotosuploader/tap/gphotos-uploader-cli
+brew install gphotosuploader/tap/gphotos-uploader-cli
 ```
 
 #### manually
@@ -18,7 +18,7 @@ Download the pre-compiled binaries from the [releases page](https://github.com/g
 
 For Linux:
 ```bash
-$ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
+LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
 | grep browser_download_url \
 | awk '{ print $2 }' \
 | tr -d \" \
@@ -27,7 +27,7 @@ $ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-upload
 
 For macOS:
 ```bash
-$ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
+LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-uploader-cli/releases/latest \
 | grep browser_download_url \
 | awk '{ print $2 }' \
 | tr -d \" \
@@ -41,21 +41,21 @@ $ LOCATION=$(curl -s https://api.github.com/repos/gphotosuploader/gphotos-upload
 You can compile the source code in your system.
 
 ```bash
-$ git clone https://github.com/gphotosuploader/gphotos-uploader-cli
-$ cd gphotos-uploader-cli
-$ make build
+git clone https://github.com/gphotosuploader/gphotos-uploader-cli \
+&& cd gphotos-uploader-cli \
+&& make build
 ```
 
 Or you can use `go get` if you prefer it:
 
 ```bash
-$ go get github.com/gphotosuploader/gphotos-uploader-cli
+go get github.com/gphotosuploader/gphotos-uploader-cli
 ```
 
 ## Configure
 First initialize the config file using this command:
 ```bash
-$ gphotos-uploader-cli init
+gphotos-uploader-cli init
 ```
 
 > Default configuration folder is `~/.gphotos-uploader-cli` but you can specify your own folder using `--config /my/config/dir`. Configuration is kept in the `config.hjson` file inside this folder.
@@ -65,7 +65,7 @@ You must review the [documentation](configuration.md) to specify your **Google P
 ## Authentication
 Once it's configured you new to authenticate your CLI against Google Photos:
 ```bash 
-$ gphotos-uploader-cli auth
+gphotos-uploader-cli auth
 ```
 
 Few manual steps are needed:
@@ -73,6 +73,13 @@ Few manual steps are needed:
 1. You should get an output like this one:
 
 ![Run gphotos-uploader-cli auth](images/run_gphotos_uploader_cli_with_auth.jpeg)
+
+!> **Reaching the `localhost` in headless environments:** Even that the CLI is not intended to be used in headless setups, several users have confirmed that it's possible to set it up. You can forward one port from your real host to the remote host, In order to connect to the remote host, create an SSH tunnel to the remote machine:
+
+```bash
+# Only for headless setups
+ssh -L 37551:localhost:37551 myremotehost
+```
 
 2. Open a browser and point to the previous URL. Select the account to authenticate the CLI with (the same you configured in the config file). You will see something like this:
 
