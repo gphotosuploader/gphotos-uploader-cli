@@ -56,9 +56,7 @@ Available options for secrets backend are:
 "secret-service"    For gnome-keyring support
 "keychain"          For OS X keychain support
 "kwallet"           For KDE Secrets Manager support
-"wincred"           For Windows credentials support
 "file"              For encrypted file support - needs interaction to supply a symetric encryption key
-"pass"              For Password Store support - needs user interaction to supply a GPG pass key
 ```
 
 Most of the times `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
@@ -67,15 +65,12 @@ Most of the times `auto` is the proper one. The application will try to use the 
 // This order makes sure the OS-specific backends
 // are picked over the more generic backends.
 var backendOrder = []BackendType{
-	// Windows
-	WinCredBackend,
 	// MacOS
 	KeychainBackend,
 	// Linux
 	SecretServiceBackend,
 	KWalletBackend,
 	// General
-	PassBackend,
 	FileBackend,
 }
 ```
