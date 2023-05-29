@@ -3,10 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.5.1
+### Added
+- Support for the latest published Go version (1.20). This project will maintain compatibility with the latest two major versions published.
+
+### Fixed
+- Restrict allowed SecretsBackendTypes to the ones supported by the CLI. ([#347][i347])
+
+### Removed
+- Support for previous Go version (1.18).
+
+[i347]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/347
+
 ## 3.5.0
 ### Added
 - Support for the latest published Go version (1.19). This project will maintain compatibility with the latest two major versions published.
-### Fix
+### Fixed
 - Exit if daily API quota is exceeded.  Thanks to [@mlbright](https://github.com/mlbright) ([#341][i341])
 ### Removed
 - Once Go 1.19 has been published, previous Go 1.17 support is deprecated.
