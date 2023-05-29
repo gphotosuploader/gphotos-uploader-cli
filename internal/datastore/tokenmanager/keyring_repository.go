@@ -26,25 +26,36 @@ func defaultConfig(keyringDir string) keyring.Config {
 		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
 		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
 		FileDir:              keyringDir,
+		AllowedBackends:      supportedBackendTypes,
 	}
 }
 
-// NewKeyringRepository creates a new repository
-// backend could be used to select which backed will be used. If it's empty
-// the library will select the most suitable depending OS.
-//
-// All currently supported secure storage backends:
+// The `99designs/keyring` package supports several secure storage backends,
+// but this CLI have implemented just some of them:
 //
 //	SecretServiceBackend BackendType = "secret-service"
 //	KeychainBackend      BackendType = "keychain"
 //	KWalletBackend       BackendType = "kwallet"
-//	WinCredBackend       BackendType = "wincred"
 //	FileBackend          BackendType = "file"
-//	PassBackend          BackendType = "pass"
+var supportedBackendTypes = []keyring.BackendType{
+	// MacOS
+	keyring.KeychainBackend,
+	// Linux
+	keyring.SecretServiceBackend,
+	keyring.KWalletBackend,
+	// General
+	keyring.FileBackend,
+}
+
+// NewKeyringRepository creates a new repository
+// backend could be used to select which backed will be used. If it's empty or auto
+// the library will select the most suitable depending OS.
 func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyringDir string) (*KeyringRepository, error) {
 	keyringConfig := defaultConfig(keyringDir)
 	if backend != "" && backend != "auto" {
-		keyringConfig.AllowedBackends = append(keyringConfig.AllowedBackends, keyring.BackendType(backend))
+		keyringConfig.AllowedBackends = []keyring.BackendType{
+			keyring.BackendType(backend),
+		}
 	}
 	if promptFunc != nil {
 		keyringConfig.FilePasswordFunc = *promptFunc
