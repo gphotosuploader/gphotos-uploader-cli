@@ -8,7 +8,6 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -160,7 +159,7 @@ func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTrack
 }
 
 // getOrCreateAlbum returns the created (or existent) album in PhotosService.
-func getOrCreateAlbum(ctx context.Context, service task.AlbumsService, title string) (string, error) {
+func getOrCreateAlbum(ctx context.Context, service gphotos.AlbumsService, title string) (string, error) {
 	// Returns if empty to avoid a PhotosService call.
 	if title == "" {
 		return "", nil
