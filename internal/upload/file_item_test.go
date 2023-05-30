@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -130,6 +131,48 @@ func TestFileItem_Remove(t *testing.T) {
 			t.Errorf("TestCase(%s), error was expected, but not happened", tc.name)
 		case !tc.errExpected && err != nil:
 			t.Errorf("TestCase(%s), error was not expected: err=%s", tc.name, err)
+		}
+	}
+}
+
+func TestFileItem_GroupByAlbum(t *testing.T) {
+	items := []FileItem{
+		{Path: "file1.jpg", AlbumName: "Album 1"},
+		{Path: "file2.jpg", AlbumName: "Album 2"},
+		{Path: "file3.jpg", AlbumName: "Album 1"},
+		{Path: "file4.jpg", AlbumName: "Album 2"},
+		{Path: "file5.jpg", AlbumName: "Album 3"},
+	}
+
+	expectedGroups := map[string][]FileItem{
+		"Album 1": {
+			{Path: "file1.jpg", AlbumName: "Album 1"},
+			{Path: "file3.jpg", AlbumName: "Album 1"},
+		},
+		"Album 2": {
+			{Path: "file2.jpg", AlbumName: "Album 2"},
+			{Path: "file4.jpg", AlbumName: "Album 2"},
+		},
+		"Album 3": {
+			{Path: "file5.jpg", AlbumName: "Album 3"},
+		},
+	}
+
+	groupedItems := GroupByAlbum(items)
+
+	if len(groupedItems) != len(expectedGroups) {
+		t.Errorf("Unexpected number of groups. Expected: %d, Got: %d", len(expectedGroups), len(groupedItems))
+	}
+
+	for albumName, expectedItems := range expectedGroups {
+		actualItems, ok := groupedItems[albumName]
+		if !ok {
+			t.Errorf("Expected group '%s' not found", albumName)
+			continue
+		}
+
+		if !reflect.DeepEqual(actualItems, expectedItems) {
+			t.Errorf("Mismatched items for group '%s'. Expected: %v, Got: %v", albumName, expectedItems, actualItems)
 		}
 	}
 }

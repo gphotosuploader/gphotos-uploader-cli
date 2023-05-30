@@ -46,6 +46,18 @@ func TestAlbumName(t *testing.T) {
 	}
 }
 
+func TestAlbumNameWithInvalidParameter(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("A Panic was expected but not reached.")
+		}
+	}()
+	job := UploadFolderJob{
+		CreateAlbums: "FooBar",
+	}
+	_ = job.albumName("/foo/bar/file.jpg")
+}
+
 func TestAlbumNameUsingFolderPath(t *testing.T) {
 	var testData = []struct {
 		in  string

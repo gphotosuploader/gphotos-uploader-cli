@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.0.0
+### Changed
+- Updated most of the dependencies to more stable versions.
+
+### Removed
+- Support for multiple concurrent workers. The bandwidth to upload items is shared, so we are not expecting any performance problem.
+- Removed DEPRECATED configuration parameters from previous versions.
+
 ## 3.5.1
 ### Added
 - Support for the latest published Go version (1.20). This project will maintain compatibility with the latest two major versions published.
