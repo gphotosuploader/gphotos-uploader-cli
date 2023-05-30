@@ -2,24 +2,19 @@ package cmd
 
 import (
 	"context"
-	"net/http"
-	"regexp"
-	"sort"
-	"time"
-
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
-	"github.com/schollz/progressbar/v3"
-	"github.com/spf13/cobra"
-	"google.golang.org/api/googleapi"
-
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
+	"github.com/schollz/progressbar/v3"
+	"github.com/spf13/cobra"
+	"google.golang.org/api/googleapi"
+	"net/http"
+	"regexp"
 )
 
 var (
@@ -31,8 +26,7 @@ type PushCmd struct {
 	*flags.GlobalFlags
 
 	// command flags
-	NumberOfWorkers int
-	DryRunMode      bool
+	DryRunMode bool
 }
 
 func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
@@ -46,7 +40,6 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 		RunE:  cmd.Run,
 	}
 
-	pushCmd.Flags().IntVar(&cmd.NumberOfWorkers, "workers", 1, "Number of workers")
 	pushCmd.Flags().BoolVar(&cmd.DryRunMode, "dry-run", false, "Dry run mode")
 
 	return pushCmd
@@ -62,20 +55,18 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
-	uploadQueue.Start()
-	defer uploadQueue.Stop()
-	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
-
 	photosService, err := newPhotosService(cli.Client, cli.UploadSessionTracker, cli.Logger)
 	if err != nil {
 		return err
 	}
 
+	if cmd.DryRunMode {
+		cli.Logger.Info("[DRY-RUN] Running in dry run mode. No changes will be made.")
+	}
+
 	// launch all folder upload jobs
-	var totalItems int
 	for _, config := range cli.Config.Jobs {
-		srcFolder := config.SourceFolder
+		sourceFolder := config.SourceFolder
 
 		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
 		if err != nil {
@@ -85,7 +76,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
-			SourceFolder: srcFolder,
+			SourceFolder: sourceFolder,
 			CreateAlbums: config.CreateAlbums,
 			Filter:       filterFiles,
 		}
@@ -97,80 +88,66 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", len(itemsToUpload), config.SourceFolder)
+		totalItems := len(itemsToUpload)
+		var uploadedItems int
 
-		// If dry-run-mode, stop here.
-		if cmd.DryRunMode {
-			cli.Logger.Info("Running in dry run mode. No changes has been made.")
-			return nil
-		}
+		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, config.SourceFolder)
 
-		// Get items to be uploaded by album name, this reduce a lot the calls to Google Photos API to get albums ID.
-		itemsByAlbum := make(map[string][]string)
-		for _, i := range itemsToUpload {
-			itemsByAlbum[i.AlbumName] = append(itemsByAlbum[i.AlbumName], i.Path)
-		}
+		bar := progressbar.NewOptions(totalItems,
+			progressbar.OptionFullWidth(),
+			progressbar.OptionSetDescription("Uploading files..."),
+			progressbar.OptionSetPredictTime(false),
+			progressbar.OptionShowCount(),
+			progressbar.OptionSetVisibility(!cmd.Debug),
+		)
 
-		for albumName, files := range itemsByAlbum {
+		itemsGroupedByAlbum := upload.GroupByAlbum(itemsToUpload)
+		for albumName, files := range itemsGroupedByAlbum {
 			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumName)
 			if err != nil {
 				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
 				continue
 			}
-			sort.Strings(files)
+
 			for _, file := range files {
-				// enqueue files to be uploaded. The workers will receive it via channel.
-				totalItems++
-				uploadQueue.Submit(&task.EnqueuedUpload{
-					Context:     ctx,
-					Uploads:     photosService,
-					FileTracker: cli.FileTracker,
-					Logger:      cli.Logger,
+				cli.Logger.Debugf("Processing (%d/%d): %s", uploadedItems+1, totalItems, file)
 
-					Path:            file,
-					AlbumID:         albumId,
-					DeleteOnSuccess: config.DeleteAfterUpload,
-				})
-			}
-		}
-	}
+				if !cmd.DryRunMode {
+					// Upload the file and add it to PhotosService.
+					_, err := photosService.UploadFileToAlbum(ctx, albumId, file.Path)
+					if err != nil {
+						if googleApiErr, ok := err.(*googleapi.Error); ok {
+							if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
+								cli.Logger.Failf("returning 'quota exceeded' error")
+								return err
+							}
+						} else {
+							cli.Logger.Failf("Error processing %s", file)
+							continue
+						}
+					}
 
-	if totalItems == 0 {
-		return nil
-	}
+					// Mark the file as uploaded in the FileTracker.
+					if err := cli.FileTracker.Put(file.Path); err != nil {
+						cli.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", file, err)
+					}
 
-	bar := progressbar.NewOptions(totalItems,
-		progressbar.OptionFullWidth(),
-		progressbar.OptionSetDescription("Uploading files..."),
-		progressbar.OptionSetPredictTime(false),
-		progressbar.OptionShowCount(),
-	)
-
-	// get responses from the enqueued jobs
-	var uploadedItems int
-	for i := 0; i < totalItems; i++ {
-		r := <-uploadQueue.ChanJobResults()
-
-		_ = bar.Add(1)
-
-		if r.Err != nil {
-			if googleApiErr, ok := r.Err.(*googleapi.Error); ok {
-				if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
-					cli.Logger.Failf("returning 'quota exceeded' error")
-					return r.Err
+					if config.DeleteAfterUpload {
+						if err := file.Remove(); err != nil {
+							cli.Logger.Errorf("Deletion request failed: file=%s, err=%v", file, err)
+						}
+					}
 				}
-			} else {
-				cli.Logger.Failf("Error processing %s", r.ID)
+
+				_ = bar.Add(1)
+				uploadedItems++
 			}
-		} else {
-			uploadedItems++
-			cli.Logger.Debugf("Successfully processing %s", r.ID)
 		}
+
+		_ = bar.Finish()
+
+		cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
-
-	_ = bar.Finish()
-
-	cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil
 }
 
