@@ -1,5 +1,25 @@
 # Upgrading notes
 
+## Upgrading To 4.x from 3.x
+
+### Data folders
+There are some changes inside the [configuration folder](https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started?id=configure) (usually `~/.gphotos-uploader-cli`):
+
+- The folder `uploads.db` **MUST be renamed** to `uploaded_files`.
+- The folder `resumable_uploads.db` **MUST be renamed** to `ongoing_uploads`.
+- The token files, named as email address, **MUST be moved** under the `tokens` folder.
+
+The content of the configuration folder (e.g `~/.gphotos-uploader-cli`) should be:
+
+```
+-rw-------  config.hjson
+drwx------  ongoing_uploads
+drwx------  tokens
+drwx------  uploaded_files
+```
+
+> **ATTENTION**: If you don't follow the process above, all the information regarding the previous version will not be kept.
+
 ## Upgrading To 3.x from 2.x
 
 ### Configuration settings

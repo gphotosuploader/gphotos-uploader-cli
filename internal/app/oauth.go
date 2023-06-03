@@ -10,7 +10,7 @@ import (
 
 // AuthenticateFromToken returns an HTTP client authenticated in Google Photos.
 // AuthenticateFromToken will use the token from the Token Manage.
-func (app App) AuthenticateFromToken(ctx context.Context) (*http.Client, error) {
+func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error) {
 	account := app.Config.Account
 	app.Logger.Infof("Authenticating using token for '%s'", account)
 
