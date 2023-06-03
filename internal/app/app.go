@@ -103,7 +103,7 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 }
 
 // Stop stops the application releasing all service resources.
-func (app App) Stop() error {
+func (app *App) Stop() error {
 	// Close already uploaded file tracker
 	app.Logger.Debug("Shutting down File Tracker service...")
 	if err := app.FileTracker.Close(); err != nil {
@@ -128,7 +128,7 @@ func (app App) Stop() error {
 
 // CreateAppDataDir return the filename after creating the application directory and the configuration file with defaults.
 // CreateAppDataDir destroys previous application directory.
-func (app App) CreateAppDataDir() (string, error) {
+func (app *App) CreateAppDataDir() (string, error) {
 	if err := app.emptyDir(app.appDir); err != nil {
 		return "", err
 	}
@@ -141,7 +141,7 @@ func (app App) CreateAppDataDir() (string, error) {
 }
 
 // AppDataDirExists return true if the application data dir exists.
-func (app App) AppDataDirExists() bool {
+func (app *App) AppDataDirExists() bool {
 	exist, err := afero.Exists(app.fs, app.configFilename())
 	if err != nil {
 		return false
@@ -149,7 +149,7 @@ func (app App) AppDataDirExists() bool {
 	return exist
 }
 
-func (app App) configFilename() string {
+func (app *App) configFilename() string {
 	return filepath.Join(app.appDir, DefaultConfigFilename)
 }
 
@@ -173,7 +173,7 @@ func (app *App) startServices() error {
 	return nil
 }
 
-func (app App) defaultFileTracker() (*filetracker.FileTracker, error) {
+func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
 	repo, err := filetracker.NewLevelDBRepository(filepath.Join(app.appDir, "uploads.db"))
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (app App) defaultFileTracker() (*filetracker.FileTracker, error) {
 	return filetracker.New(repo), nil
 }
 
-func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
+func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
 	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, app.appDir)
 	if err != nil {
 		return nil, err
@@ -189,11 +189,11 @@ func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManag
 	return tokenmanager.New(kr), nil
 }
 
-func (app App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
+func (app *App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
 	return leveldbstore.NewStore(filepath.Join(app.appDir, "resumable_uploads.db"))
 }
 
-func (app App) emptyDir(path string) error {
+func (app *App) emptyDir(path string) error {
 	if err := app.fs.RemoveAll(path); err != nil {
 		return err
 	}
