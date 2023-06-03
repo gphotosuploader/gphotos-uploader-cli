@@ -6,12 +6,10 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '**.yml'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '**.yml'
 jobs:
   test-matrix:
     strategy:
