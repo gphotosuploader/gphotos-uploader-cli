@@ -174,7 +174,8 @@ func (app *App) startServices() error {
 }
 
 func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
-	repo, err := filetracker.NewLevelDBRepository(filepath.Join(app.appDir, "uploads.db"))
+	fileTrackerFolder := filepath.Join(app.appDir, "uploaded_files")
+	repo, err := filetracker.NewLevelDBRepository(fileTrackerFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +183,8 @@ func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
 }
 
 func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
-	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, app.appDir)
+	tokensFolder := filepath.Join(app.appDir, "tokens")
+	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, tokensFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +192,8 @@ func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenMana
 }
 
 func (app *App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
-	return leveldbstore.NewStore(filepath.Join(app.appDir, "resumable_uploads.db"))
+	ongoingUploadsTrackerFolder := filepath.Join(app.appDir, "ongoing_uploads")
+	return leveldbstore.NewStore(ongoingUploadsTrackerFolder)
 }
 
 func (app *App) emptyDir(path string) error {
