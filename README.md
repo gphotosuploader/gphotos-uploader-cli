@@ -1,4 +1,4 @@
-![logo](.docs/_media/gphotos-uploader-cli-logo.png)
+![logo](docs/images/gphotos-uploader-cli-logo.png)
 
 Command line tool to mass upload media folders to your Google Photos account.
 
