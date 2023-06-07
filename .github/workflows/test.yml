@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - '*.x'
   pull_request:
 jobs:
   test-matrix:
