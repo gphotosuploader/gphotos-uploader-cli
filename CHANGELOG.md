@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## Unreleased
 ### Changed
-- Bump `golangci-lint` from `1.30.0` to `1.34.1`.
+- Bump `golangci-lint` from `1.30.0` to `1.34.1`.ff
 
 ## 2.0.1
 ### Changed
