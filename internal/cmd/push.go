@@ -2,22 +2,21 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/albums"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/patrickmn/go-cache"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"google.golang.org/api/googleapi"
 	"net/http"
 	"regexp"
 	"time"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 )
 
 var (
@@ -62,20 +61,27 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	cli.Logger.Info("[DEV] This is a development version. Please be warned that it's not ready for production")
 
-	// TODO: We are going to use a map in memory to keep the Album's collection, so we could skip
-	// using CachedAlbums in the Google Photos service.
 	photosService, err := newPhotosService(cli.Client, cli.UploadSessionTracker, cli.Logger)
 	if err != nil {
 		return err
 	}
 
-	// Get all the albums from Google Photos (our new cache)
-	albumCache, err := photosService.Albums.List(ctx)
+	// Get all the albums from Google Photos
+	cli.Logger.Debug("Getting all albums from Google Photos")
+	allAlbums, err := photosService.Albums.List(ctx)
 	if err != nil {
 		return err
 	}
 
-	cli.Logger.Infof("Found & cached %d albums.", len(albumCache))
+	// Transform an array into map using Album.Title as key
+	albumMap := make(map[string]cache.Item)
+	for _, album := range allAlbums {
+		albumMap[album.Title] = cache.Item{Object: album}
+	}
+
+	albumCache := cache.NewFrom(cache.NoExpiration, cache.NoExpiration, albumMap)
+
+	cli.Logger.Infof("Found & cached %d albums.", albumCache.ItemCount())
 
 	// launch all folder upload jobs
 	for _, config := range cli.Config.Jobs {
@@ -115,7 +121,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		)
 
 		for _, item := range itemsToUpload {
-			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumCache, item.AlbumName)
+			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumCache, item.AlbumName, cli.Logger)
 			if err != nil {
 				cli.Logger.Failf("Unable to create album '%s': %s", item.AlbumName, err)
 				continue
@@ -170,31 +176,20 @@ func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTrack
 	return gphotos.NewClient(client, gphotos.WithUploader(u))
 }
 
-func getAlbumFromCollection(collection []albums.Album, title string) (albumId string, err error) {
-	for _, album := range collection {
-		if album.Title == title {
-			return album.ID, nil
-		}
-	}
-	return "", errors.New("album not found")
-}
-
-func getOrCreateAlbum(ctx context.Context, service gphotos.AlbumsService, albumsCache []albums.Album, title string) (string, error) {
-	// Returns if empty to avoid a PhotosService call.
-	if title == "" {
-		return "", nil
+func getOrCreateAlbum(ctx context.Context, service gphotos.AlbumsService, albumsCache *cache.Cache, title string, logger log.Logger) (string, error) {
+	if album, found := albumsCache.Get(title); found {
+		log.Debugf("Getting album from cache: %s", title)
+		return album.(albums.Album).ID, nil
 	}
 
-	if albumId, err := getAlbumFromCollection(albumsCache, title); err == nil {
-		return albumId, nil
-	}
+	log.Debugf("Creating new album: %s", title)
 
 	album, err := service.Create(ctx, title)
 	if err != nil {
 		return "", err
 	}
 
-	albumsCache = append(albumsCache, *album)
+	albumsCache.Set(album.Title, album, cache.DefaultExpiration)
 
 	return album.ID, nil
 }
