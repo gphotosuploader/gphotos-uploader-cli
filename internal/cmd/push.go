@@ -67,7 +67,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	// Get all the albums from Google Photos
-	cli.Logger.Debug("Getting all albums from Google Photos")
+	cli.Logger.Debug("Getting all albums from Google Photos...")
 	allAlbums, err := photosService.Albums.List(ctx)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 				continue
 			}
 
-			cli.Logger.Debugf("Processing (%d/%d): %s", uploadedItems+1, totalItems, item)
+			cli.Logger.Debugf("Processing (%d/%d): %s...", uploadedItems+1, totalItems, item)
 
 			if !cmd.DryRunMode {
 				// Upload the file and add it to PhotosService.
@@ -189,7 +189,7 @@ func getOrCreateAlbum(ctx context.Context, service gphotos.AlbumsService, albums
 		return "", err
 	}
 
-	albumsCache.Set(album.Title, album, cache.DefaultExpiration)
+	albumsCache.SetDefault(album.Title, *album)
 
 	return album.ID, nil
 }
