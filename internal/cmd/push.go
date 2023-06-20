@@ -2,24 +2,21 @@ package cmd
 
 import (
 	"context"
-	"net/http"
-	"regexp"
-	"sort"
-	"time"
-
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
+	"github.com/gphotosuploader/google-photos-api-client-go/v2/albums"
 	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
-	"github.com/schollz/progressbar/v3"
-	"github.com/spf13/cobra"
-	"google.golang.org/api/googleapi"
-
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/task"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/worker"
+	"github.com/patrickmn/go-cache"
+	"github.com/schollz/progressbar/v3"
+	"github.com/spf13/cobra"
+	"google.golang.org/api/googleapi"
+	"net/http"
+	"regexp"
+	"time"
 )
 
 var (
@@ -62,20 +59,33 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	uploadQueue := worker.NewJobQueue(cmd.NumberOfWorkers, cli.Logger)
-	uploadQueue.Start()
-	defer uploadQueue.Stop()
-	time.Sleep(1 * time.Second) // sleeps to avoid log messages colliding with output.
+	cli.Logger.Info("[DEV] This is a development version. Please be warned that it's not ready for production")
 
 	photosService, err := newPhotosService(cli.Client, cli.UploadSessionTracker, cli.Logger)
 	if err != nil {
 		return err
 	}
 
+	// Get all the albums from Google Photos
+	cli.Logger.Debug("Getting all albums from Google Photos...")
+	allAlbums, err := photosService.Albums.List(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Transform an array into map using Album.Title as key
+	albumMap := make(map[string]cache.Item)
+	for _, album := range allAlbums {
+		albumMap[album.Title] = cache.Item{Object: album}
+	}
+
+	albumCache := cache.NewFrom(cache.NoExpiration, cache.NoExpiration, albumMap)
+
+	cli.Logger.Infof("Found & cached %d albums.", albumCache.ItemCount())
+
 	// launch all folder upload jobs
-	var totalItems int
 	for _, config := range cli.Config.Jobs {
-		srcFolder := config.SourceFolder
+		sourceFolder := config.SourceFolder
 
 		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
 		if err != nil {
@@ -85,7 +95,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		folder := upload.UploadFolderJob{
 			FileTracker: cli.FileTracker,
 
-			SourceFolder: srcFolder,
+			SourceFolder: sourceFolder,
 			CreateAlbums: config.CreateAlbums,
 			Filter:       filterFiles,
 		}
@@ -97,80 +107,64 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", len(itemsToUpload), config.SourceFolder)
+		totalItems := len(itemsToUpload)
+		var uploadedItems int
 
-		// If dry-run-mode, stop here.
-		if cmd.DryRunMode {
-			cli.Logger.Info("Running in dry run mode. No changes has been made.")
-			return nil
-		}
+		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, config.SourceFolder)
 
-		// Get items to be uploaded by album name, this reduce a lot the calls to Google Photos API to get albums ID.
-		itemsByAlbum := make(map[string][]string)
-		for _, i := range itemsToUpload {
-			itemsByAlbum[i.AlbumName] = append(itemsByAlbum[i.AlbumName], i.Path)
-		}
+		bar := progressbar.NewOptions(totalItems,
+			progressbar.OptionFullWidth(),
+			progressbar.OptionSetDescription("Uploading files..."),
+			progressbar.OptionSetPredictTime(false),
+			progressbar.OptionShowCount(),
+			progressbar.OptionSetVisibility(!cmd.Debug),
+		)
 
-		for albumName, files := range itemsByAlbum {
-			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumName)
+		for _, item := range itemsToUpload {
+			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumCache, item.AlbumName, cli.Logger)
 			if err != nil {
-				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
+				cli.Logger.Failf("Unable to create album '%s': %s", item.AlbumName, err)
 				continue
 			}
-			sort.Strings(files)
-			for _, file := range files {
-				// enqueue files to be uploaded. The workers will receive it via channel.
-				totalItems++
-				uploadQueue.Submit(&task.EnqueuedUpload{
-					Context:     ctx,
-					Uploads:     photosService,
-					FileTracker: cli.FileTracker,
-					Logger:      cli.Logger,
 
-					Path:            file,
-					AlbumID:         albumId,
-					DeleteOnSuccess: config.DeleteAfterUpload,
-				})
-			}
-		}
-	}
+			cli.Logger.Debugf("Processing (%d/%d): %s...", uploadedItems+1, totalItems, item)
 
-	if totalItems == 0 {
-		return nil
-	}
-
-	bar := progressbar.NewOptions(totalItems,
-		progressbar.OptionFullWidth(),
-		progressbar.OptionSetDescription("Uploading files..."),
-		progressbar.OptionSetPredictTime(false),
-		progressbar.OptionShowCount(),
-	)
-
-	// get responses from the enqueued jobs
-	var uploadedItems int
-	for i := 0; i < totalItems; i++ {
-		r := <-uploadQueue.ChanJobResults()
-
-		_ = bar.Add(1)
-
-		if r.Err != nil {
-			if googleApiErr, ok := r.Err.(*googleapi.Error); ok {
-				if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
-					cli.Logger.Failf("returning 'quota exceeded' error")
-					return r.Err
+			if !cmd.DryRunMode {
+				// Upload the file and add it to PhotosService.
+				_, err := photosService.UploadFileToAlbum(ctx, albumId, item.Path)
+				if err != nil {
+					if googleApiErr, ok := err.(*googleapi.Error); ok {
+						if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
+							cli.Logger.Failf("Daily quota exceeded: waiting 12h until quota is recovered")
+							time.Sleep(12 * time.Hour)
+							continue
+						}
+					} else {
+						cli.Logger.Failf("Error processing %s", item)
+						continue
+					}
 				}
-			} else {
-				cli.Logger.Failf("Error processing %s", r.ID)
+
+				// Mark the file as uploaded in the FileTracker.
+				if err := cli.FileTracker.Put(item.Path); err != nil {
+					cli.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", item, err)
+				}
+
+				if config.DeleteAfterUpload {
+					if err := item.Remove(); err != nil {
+						cli.Logger.Errorf("Deletion request failed: file=%s, err=%v", item, err)
+					}
+				}
 			}
-		} else {
+
+			_ = bar.Add(1)
 			uploadedItems++
-			cli.Logger.Debugf("Successfully processing %s", r.ID)
 		}
+
+		_ = bar.Finish()
+
+		cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
-
-	_ = bar.Finish()
-
-	cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	return nil
 }
 
@@ -182,21 +176,20 @@ func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTrack
 	return gphotos.NewClient(client, gphotos.WithUploader(u))
 }
 
-// getOrCreateAlbum returns the created (or existent) album in PhotosService.
-func getOrCreateAlbum(ctx context.Context, service task.AlbumsService, title string) (string, error) {
-	// Returns if empty to avoid a PhotosService call.
-	if title == "" {
-		return "", nil
+func getOrCreateAlbum(ctx context.Context, service gphotos.AlbumsService, albumsCache *cache.Cache, title string, logger log.Logger) (string, error) {
+	if album, found := albumsCache.Get(title); found {
+		log.Debugf("Getting album from cache: %s", title)
+		return album.(albums.Album).ID, nil
 	}
 
-	if album, err := service.GetByTitle(ctx, title); err == nil {
-		return album.ID, nil
-	}
+	log.Debugf("Creating new album: %s", title)
 
 	album, err := service.Create(ctx, title)
 	if err != nil {
 		return "", err
 	}
+
+	albumsCache.SetDefault(album.Title, *album)
 
 	return album.ID, nil
 }
