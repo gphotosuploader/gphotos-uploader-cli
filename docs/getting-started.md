@@ -63,7 +63,7 @@ gphotos-uploader-cli init
 You must review the [documentation](configuration.md) to specify your **Google Photos API credentials**, `APIAppCredentials`. You should tune your `jobs` configuration also.
 
 ## Authentication
-Once it's configured you new to authenticate your CLI against Google Photos:
+Once it's configured you need to authenticate your CLI against Google Photos:
 ```bash 
 gphotos-uploader-cli auth
 ```
