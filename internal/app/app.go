@@ -11,8 +11,8 @@ import (
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/upload_tracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -112,9 +112,7 @@ func (app *App) Stop() error {
 
 	// Close upload session tracker
 	app.Logger.Debug("Shutting down Upload Tracker service...")
-	if err := app.UploadSessionTracker.Close(); err != nil {
-		return err
-	}
+	app.UploadSessionTracker.Close()
 
 	// Close token manager
 	app.Logger.Debug("Shutting down Token Manager service...")
@@ -191,9 +189,9 @@ func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenMana
 	return tokenmanager.New(kr), nil
 }
 
-func (app *App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
+func (app *App) defaultUploadsSessionTracker() (*upload_tracker.LevelDBStore, error) {
 	ongoingUploadsTrackerFolder := filepath.Join(app.appDir, "ongoing_uploads")
-	return leveldbstore.NewStore(ongoingUploadsTrackerFolder)
+	return upload_tracker.NewStore(ongoingUploadsTrackerFolder)
 }
 
 func (app *App) emptyDir(path string) error {
@@ -219,9 +217,11 @@ type TokenManager interface {
 }
 
 // UploadSessionTracker represents a service to keep resumable upload sessions.
+//
+// See [gphotosuploader/google-photos-api-client-go] Store interface.
 type UploadSessionTracker interface {
-	Get(fingerprint string) []byte
-	Set(fingerprint string, url []byte)
+	Get(fingerprint string) (string, bool)
+	Set(fingerprint string, url string)
 	Delete(fingerprint string)
-	Close() error
+	Close()
 }

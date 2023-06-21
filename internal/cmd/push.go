@@ -2,22 +2,17 @@ package cmd
 
 import (
 	"context"
-	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
-	"github.com/gphotosuploader/google-photos-api-client-go/v2/uploader/resumable"
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
+	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
+	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
-	"google.golang.org/api/googleapi"
 	"net/http"
-	"regexp"
-)
-
-var (
-	requestQuotaErrorRe = regexp.MustCompile(`Quota exceeded for quota metric 'All requests' and limit 'All requests per day'`)
 )
 
 // PushCmd holds the required data for the push cmd
@@ -60,7 +55,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.DryRunMode {
-		cli.Logger.Info("[DRY-RUN] Running in dry run mode. No changes will be made.")
+		cli.Logger.Info("[DRY-RUN] Running in dry run mode. No file will be uploaded.")
 	}
 
 	// launch all folder upload jobs
@@ -113,17 +108,18 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 				if !cmd.DryRunMode {
 					// Upload the file and add it to PhotosService.
-					_, err := photosService.UploadFileToAlbum(ctx, albumId, file.Path)
+					_, err := photosService.UploadToAlbum(ctx, albumId, file.Path)
+
+					// Check if the Google Photos daily quota has been exceeded.
+					var e *gphotos.ErrDailyQuotaExceeded
+					if errors.As(err, &e) {
+						cli.Logger.Failf("returning 'quota exceeded' error")
+						return err
+					}
+
 					if err != nil {
-						if googleApiErr, ok := err.(*googleapi.Error); ok {
-							if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
-								cli.Logger.Failf("returning 'quota exceeded' error")
-								return err
-							}
-						} else {
-							cli.Logger.Failf("Error processing %s", file)
-							continue
-						}
+						cli.Logger.Failf("Error processing %s: %s", file, err)
+						continue
 					}
 
 					// Mark the file as uploaded in the FileTracker.
@@ -151,11 +147,22 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 }
 
 func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTracker, logger log.Logger) (*gphotos.Client, error) {
-	u, err := resumable.NewResumableUploader(client, sessionTracker, resumable.WithLogger(logger))
+	u, err := uploader.NewResumableUploader(client)
 	if err != nil {
 		return nil, err
 	}
-	return gphotos.NewClient(client, gphotos.WithUploader(u))
+	u.Store = sessionTracker
+	u.Logger = logger
+
+	photos, err := gphotos.NewClient(client)
+	if err != nil {
+		return nil, err
+	}
+
+	// Use the resumable uploader to allow large file uploading.
+	photos.Uploader = u
+
+	return photos, nil
 }
 
 // getOrCreateAlbum returns the created (or existent) album in PhotosService.
