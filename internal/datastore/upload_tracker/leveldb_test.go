@@ -6,12 +6,17 @@ import (
 	"testing"
 )
 
+func RemoveDB(path string) {
+	_ = os.RemoveAll(path)
+}
+
 func TestNewStore(t *testing.T) {
 	t.Run("Should success when folder is writable", func(t *testing.T) {
 		name, err := os.MkdirTemp(os.TempDir(), "upload_tracker")
 		if err != nil {
 			t.Fatalf("error was not expected at this time: %v", err)
 		}
+		defer RemoveDB(name)
 
 		store, err := upload_tracker.NewStore(name)
 		if err != nil {
@@ -37,6 +42,7 @@ func TestLevelDBStore_GetSet(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error was not expected at this time: %v", err)
 		}
+		defer RemoveDB(name)
 
 		store, err := upload_tracker.NewStore(name)
 		if err != nil {
@@ -58,6 +64,7 @@ func TestLevelDBStore_GetSet(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error was not expected at this time: %v", err)
 		}
+		defer RemoveDB(name)
 
 		store, err := upload_tracker.NewStore(name)
 		if err != nil {
@@ -79,6 +86,7 @@ func TestLevelDBStore_Delete(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error was not expected at this time: %v", err)
 		}
+		defer RemoveDB(name)
 
 		store, err := upload_tracker.NewStore(name)
 		if err != nil {
