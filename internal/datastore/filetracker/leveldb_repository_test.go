@@ -1,7 +1,7 @@
 package filetracker_test
 
 import (
-	filetracker2 "github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"testing"
 
 	"github.com/syndtr/goleveldb/leveldb/opt"
@@ -17,7 +17,7 @@ func TestLevelDBRepository_Get(t *testing.T) {
 		{"Should fail", ShouldMakeRepoFail, false},
 	}
 
-	repo := filetracker2.LevelDBRepository{
+	repo := filetracker.LevelDBRepository{
 		DB: &mockedDB{},
 	}
 
@@ -32,16 +32,16 @@ func TestLevelDBRepository_Get(t *testing.T) {
 }
 
 func TestLevelDBRepository_Put(t *testing.T) {
-	repo := filetracker2.LevelDBRepository{
+	repo := filetracker.LevelDBRepository{
 		DB: mockedDB{},
 	}
-	if err := repo.Put("foo", filetracker2.TrackedFile{}); err != nil {
+	if err := repo.Put("foo", filetracker.TrackedFile{}); err != nil {
 		t.Errorf("error was not expected, err: %s", err)
 	}
 }
 
 func TestLevelDBRepository_Delete(t *testing.T) {
-	repo := filetracker2.LevelDBRepository{
+	repo := filetracker.LevelDBRepository{
 		DB: mockedDB{},
 	}
 	if err := repo.Delete("foo"); err != nil {
@@ -50,7 +50,7 @@ func TestLevelDBRepository_Delete(t *testing.T) {
 }
 
 func TestLevelDBRepository_Close(t *testing.T) {
-	repo := filetracker2.LevelDBRepository{
+	repo := filetracker.LevelDBRepository{
 		DB: mockedDB{},
 	}
 	if err := repo.Close(); err != nil {

@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	filetracker2 "github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"net/http"
 	"path/filepath"
 
@@ -171,13 +171,13 @@ func (app *App) startServices() error {
 	return nil
 }
 
-func (app *App) defaultFileTracker() (*filetracker2.FileTracker, error) {
+func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
 	fileTrackerFolder := filepath.Join(app.appDir, "uploaded_files")
-	repo, err := filetracker2.NewLevelDBRepository(fileTrackerFolder)
+	repo, err := filetracker.NewLevelDBRepository(fileTrackerFolder)
 	if err != nil {
 		return nil, err
 	}
-	return filetracker2.New(repo), nil
+	return filetracker.New(repo), nil
 }
 
 func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {

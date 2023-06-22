@@ -1,7 +1,7 @@
 package filetracker_test
 
 import (
-	"github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"testing"
 )
 
