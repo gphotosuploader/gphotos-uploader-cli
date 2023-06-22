@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"net/http"
 	"path/filepath"
 
@@ -10,7 +11,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/upload_tracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
@@ -203,9 +203,9 @@ func (app *App) emptyDir(path string) error {
 
 // FileTracker represents a service to track file already uploaded.
 type FileTracker interface {
-	Put(file string) error
-	Exist(file string) bool
-	Delete(file string) error
+	MarkAsUploaded(file string) error
+	IsUploaded(file string) bool
+	UnmarkAsUploaded(file string) error
 	Close() error
 }
 

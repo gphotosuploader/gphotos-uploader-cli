@@ -2,9 +2,8 @@ package filetracker_test
 
 import (
 	"errors"
-	"testing"
-
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
+	"testing"
 )
 
 const (
@@ -18,7 +17,7 @@ var (
 	ErrTestError = errors.New("error")
 )
 
-func TestFileTracker_Put(t *testing.T) {
+func TestFileTracker_MarkAsUploaded(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         string
@@ -34,13 +33,13 @@ func TestFileTracker_Put(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ft.Put(tc.input)
+			err := ft.MarkAsUploaded(tc.input)
 			assertExpectedError(t, tc.isErrExpected, err)
 		})
 	}
 }
 
-func TestFileTracker_Exist(t *testing.T) {
+func TestFileTracker_IsUploaded(t *testing.T) {
 	testCases := []struct {
 		name  string
 		input string
@@ -58,7 +57,7 @@ func TestFileTracker_Exist(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := ft.Exist(tc.input)
+			got := ft.IsUploaded(tc.input)
 			if tc.want != got {
 				t.Errorf("want: %t, got: %t", tc.want, got)
 			}
@@ -66,7 +65,7 @@ func TestFileTracker_Exist(t *testing.T) {
 	}
 }
 
-func TestFileTracker_Delete(t *testing.T) {
+func TestFileTracker_UnmarkAsUploaded(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         string
@@ -80,7 +79,7 @@ func TestFileTracker_Delete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ft.Delete(tc.input)
+			err := ft.UnmarkAsUploaded(tc.input)
 			assertExpectedError(t, tc.isErrExpected, err)
 		})
 	}
@@ -109,12 +108,12 @@ type mockedRepository struct {
 	valueInRepo filetracker.TrackedFile
 }
 
-func (m mockedRepository) Get(key string) (filetracker.TrackedFile, error) {
+func (m mockedRepository) Get(key string) (filetracker.TrackedFile, bool) {
 	switch key {
 	case ShouldMakeRepoFail:
-		return filetracker.TrackedFile{}, ErrTestError
+		return filetracker.TrackedFile{}, false
 	default:
-		return m.valueInRepo, nil
+		return m.valueInRepo, true
 	}
 }
 

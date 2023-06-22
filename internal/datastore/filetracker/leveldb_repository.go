@@ -13,7 +13,7 @@ type DB interface {
 	Close() error
 }
 
-// LevelDBRepository implements a Repository using LevelDB.
+// LevelDBRepository implements a FileRepository using LevelDB.
 type LevelDBRepository struct {
 	DB DB
 }
@@ -28,12 +28,12 @@ func NewLevelDBRepository(filename string) (*LevelDBRepository, error) {
 
 // Get returns the item specified by key. It returns ErrItemNotFound if the
 // DB does not contains the key.
-func (r LevelDBRepository) Get(key string) (TrackedFile, error) {
+func (r LevelDBRepository) Get(key string) (TrackedFile, bool) {
 	val, err := r.DB.Get([]byte(key), nil)
 	if err != nil {
-		return TrackedFile{}, ErrItemNotFound
+		return TrackedFile{}, false
 	}
-	return NewTrackedFile(string(val)), nil
+	return NewTrackedFile(string(val)), true
 }
 
 // Put stores the item under key.

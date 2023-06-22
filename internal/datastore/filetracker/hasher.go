@@ -8,11 +8,11 @@ import (
 	"github.com/pierrec/xxHash/xxHash32"
 )
 
-// xxHash32Hasher implements a Hasher using xxHash32 package.
-type xxHash32Hasher struct{}
+// XXHash32Hasher implements a Hasher using xxHash32 package.
+type XXHash32Hasher struct{}
 
 // Hash returns the xxHash32 of the file specified by filename.
-func (h xxHash32Hasher) Hash(filename string) (string, error) {
+func (h XXHash32Hasher) Hash(filename string) (string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return "", err

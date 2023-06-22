@@ -1,21 +1,20 @@
 package filetracker_test
 
 import (
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"testing"
 
 	"github.com/syndtr/goleveldb/leveldb/opt"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 )
 
 func TestLevelDBRepository_Get(t *testing.T) {
 	testCases := []struct {
-		name          string
-		input         string
-		isErrExpected bool
+		name  string
+		input string
+		found bool
 	}{
-		{"Should success", ShouldSuccess, false},
-		{"Should fail", ShouldMakeRepoFail, true},
+		{"Should success", ShouldSuccess, true},
+		{"Should fail", ShouldMakeRepoFail, false},
 	}
 
 	repo := filetracker.LevelDBRepository{
@@ -24,8 +23,10 @@ func TestLevelDBRepository_Get(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := repo.Get(tc.input)
-			assertExpectedError(t, tc.isErrExpected, err)
+			_, found := repo.Get(tc.input)
+			if tc.found != found {
+				t.Errorf("want: %t, got: %t", tc.found, found)
+			}
 		})
 	}
 }

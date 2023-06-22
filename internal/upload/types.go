@@ -11,9 +11,9 @@ type UploadFolderJob struct {
 
 // FileTracker represents a service to track already uploaded files.
 type FileTracker interface {
-	Put(file string) error
-	Exist(file string) bool
-	Delete(file string) error
+	MarkAsUploaded(file string) error
+	IsUploaded(file string) bool
+	UnmarkAsUploaded(file string) error
 }
 
 // FileFilterer represents a way to implement include/exclude files filtering.
