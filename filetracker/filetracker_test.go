@@ -2,9 +2,8 @@ package filetracker_test
 
 import (
 	"errors"
+	filetracker2 "github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
 	"testing"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 )
 
 const (
@@ -18,7 +17,7 @@ var (
 	ErrTestError = errors.New("error")
 )
 
-func TestFileTracker_Put(t *testing.T) {
+func TestFileTracker_MarkAsUploaded(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         string
@@ -29,18 +28,18 @@ func TestFileTracker_Put(t *testing.T) {
 		{"Should fail if Hasher fails", ShouldMakeHashFail, true},
 	}
 
-	ft := filetracker.New(&mockedRepository{})
+	ft := filetracker2.New(&mockedRepository{})
 	ft.Hasher = &mockedHasher{"test-file-hash"}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ft.Put(tc.input)
+			err := ft.MarkAsUploaded(tc.input)
 			assertExpectedError(t, tc.isErrExpected, err)
 		})
 	}
 }
 
-func TestFileTracker_Exist(t *testing.T) {
+func TestFileTracker_IsUploaded(t *testing.T) {
 	testCases := []struct {
 		name  string
 		input string
@@ -51,14 +50,14 @@ func TestFileTracker_Exist(t *testing.T) {
 		{"Should return false if Hasher fails", ShouldMakeHashFail, false},
 	}
 
-	ft := filetracker.New(&mockedRepository{
-		valueInRepo: filetracker.NewTrackedFile("test-file-hash"),
+	ft := filetracker2.New(&mockedRepository{
+		valueInRepo: filetracker2.NewTrackedFile("test-file-hash"),
 	})
 	ft.Hasher = &mockedHasher{"test-file-hash"}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := ft.Exist(tc.input)
+			got := ft.IsUploaded(tc.input)
 			if tc.want != got {
 				t.Errorf("want: %t, got: %t", tc.want, got)
 			}
@@ -66,7 +65,7 @@ func TestFileTracker_Exist(t *testing.T) {
 	}
 }
 
-func TestFileTracker_Delete(t *testing.T) {
+func TestFileTracker_UnmarkAsUploaded(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         string
@@ -76,11 +75,11 @@ func TestFileTracker_Delete(t *testing.T) {
 		{"Should success", ShouldMakeRepoFail, true},
 	}
 
-	ft := filetracker.New(&mockedRepository{})
+	ft := filetracker2.New(&mockedRepository{})
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ft.Delete(tc.input)
+			err := ft.UnmarkAsUploaded(tc.input)
 			assertExpectedError(t, tc.isErrExpected, err)
 		})
 	}
@@ -95,7 +94,7 @@ func TestFileTracker_Close(t *testing.T) {
 		{"Should success", ShouldSuccess, false},
 	}
 
-	ft := filetracker.New(&mockedRepository{})
+	ft := filetracker2.New(&mockedRepository{})
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -106,19 +105,19 @@ func TestFileTracker_Close(t *testing.T) {
 }
 
 type mockedRepository struct {
-	valueInRepo filetracker.TrackedFile
+	valueInRepo filetracker2.TrackedFile
 }
 
-func (m mockedRepository) Get(key string) (filetracker.TrackedFile, error) {
+func (m mockedRepository) Get(key string) (filetracker2.TrackedFile, bool) {
 	switch key {
 	case ShouldMakeRepoFail:
-		return filetracker.TrackedFile{}, ErrTestError
+		return filetracker2.TrackedFile{}, false
 	default:
-		return m.valueInRepo, nil
+		return m.valueInRepo, true
 	}
 }
 
-func (m mockedRepository) Put(key string, item filetracker.TrackedFile) error {
+func (m mockedRepository) Put(key string, item filetracker2.TrackedFile) error {
 	if key == ShouldMakeRepoFail {
 		return ErrTestError
 	}

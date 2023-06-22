@@ -1,46 +1,47 @@
 package filetracker_test
 
 import (
+	filetracker2 "github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
 	"testing"
 
 	"github.com/syndtr/goleveldb/leveldb/opt"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 )
 
 func TestLevelDBRepository_Get(t *testing.T) {
 	testCases := []struct {
-		name          string
-		input         string
-		isErrExpected bool
+		name  string
+		input string
+		found bool
 	}{
-		{"Should success", ShouldSuccess, false},
-		{"Should fail", ShouldMakeRepoFail, true},
+		{"Should success", ShouldSuccess, true},
+		{"Should fail", ShouldMakeRepoFail, false},
 	}
 
-	repo := filetracker.LevelDBRepository{
+	repo := filetracker2.LevelDBRepository{
 		DB: &mockedDB{},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := repo.Get(tc.input)
-			assertExpectedError(t, tc.isErrExpected, err)
+			_, found := repo.Get(tc.input)
+			if tc.found != found {
+				t.Errorf("want: %t, got: %t", tc.found, found)
+			}
 		})
 	}
 }
 
 func TestLevelDBRepository_Put(t *testing.T) {
-	repo := filetracker.LevelDBRepository{
+	repo := filetracker2.LevelDBRepository{
 		DB: mockedDB{},
 	}
-	if err := repo.Put("foo", filetracker.TrackedFile{}); err != nil {
+	if err := repo.Put("foo", filetracker2.TrackedFile{}); err != nil {
 		t.Errorf("error was not expected, err: %s", err)
 	}
 }
 
 func TestLevelDBRepository_Delete(t *testing.T) {
-	repo := filetracker.LevelDBRepository{
+	repo := filetracker2.LevelDBRepository{
 		DB: mockedDB{},
 	}
 	if err := repo.Delete("foo"); err != nil {
@@ -49,7 +50,7 @@ func TestLevelDBRepository_Delete(t *testing.T) {
 }
 
 func TestLevelDBRepository_Close(t *testing.T) {
-	repo := filetracker.LevelDBRepository{
+	repo := filetracker2.LevelDBRepository{
 		DB: mockedDB{},
 	}
 	if err := repo.Close(); err != nil {

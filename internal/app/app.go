@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	filetracker2 "github.com/gphotosuploader/gphotos-uploader-cli/filetracker"
 	"net/http"
 	"path/filepath"
 
@@ -10,7 +11,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/upload_tracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
@@ -171,13 +171,13 @@ func (app *App) startServices() error {
 	return nil
 }
 
-func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
+func (app *App) defaultFileTracker() (*filetracker2.FileTracker, error) {
 	fileTrackerFolder := filepath.Join(app.appDir, "uploaded_files")
-	repo, err := filetracker.NewLevelDBRepository(fileTrackerFolder)
+	repo, err := filetracker2.NewLevelDBRepository(fileTrackerFolder)
 	if err != nil {
 		return nil, err
 	}
-	return filetracker.New(repo), nil
+	return filetracker2.New(repo), nil
 }
 
 func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
@@ -203,9 +203,9 @@ func (app *App) emptyDir(path string) error {
 
 // FileTracker represents a service to track file already uploaded.
 type FileTracker interface {
-	Put(file string) error
-	Exist(file string) bool
-	Delete(file string) error
+	MarkAsUploaded(file string) error
+	IsUploaded(file string) bool
+	UnmarkAsUploaded(file string) error
 	Close() error
 }
 

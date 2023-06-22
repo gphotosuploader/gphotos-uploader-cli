@@ -123,7 +123,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 					}
 
 					// Mark the file as uploaded in the FileTracker.
-					if err := cli.FileTracker.Put(file.Path); err != nil {
+					if err := cli.FileTracker.MarkAsUploaded(file.Path); err != nil {
 						cli.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", file, err)
 					}
 
