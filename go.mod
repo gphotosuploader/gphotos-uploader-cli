@@ -6,7 +6,6 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
-	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.0-rc.1
 	github.com/hjson/hjson-go/v4 v4.3.0
 	github.com/int128/oauth2cli v1.14.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
@@ -38,6 +37,7 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.0 // indirect
 	github.com/gphotosuploader/googlemirror v0.5.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -53,8 +53,10 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	google.golang.org/api v0.125.0 // indirect
+	google.golang.org/api v0.128.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
+
+replace github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.0 => ../google-photos-api-client-go
