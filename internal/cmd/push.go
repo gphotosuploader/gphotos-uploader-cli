@@ -28,8 +28,8 @@ func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 	pushCmd := &cobra.Command{
 		Use:   "push",
-		Short: "Push local files to Google Photos service",
-		Long:  `Scan configured folders in the configuration and push all new object to Google Photos service.`,
+		Short: "Upload local folders to Google Photos",
+		Long:  `Scan configured folders in the configuration and upload all new object to Google Photos.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}

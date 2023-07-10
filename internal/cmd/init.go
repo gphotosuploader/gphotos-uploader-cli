@@ -24,8 +24,8 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initializes the configuration",
-		Long:  `Initializes a new configuration with defaults.`,
+		Short: "Initialize the configuration",
+		Long:  `Initialize a new configuration with defaults.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}

@@ -28,7 +28,7 @@ func NewVersionCmd() *cobra.Command {
 
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Prints current version",
+		Short: "Print the current version",
 		Run:   cmd.Run,
 	}
 
