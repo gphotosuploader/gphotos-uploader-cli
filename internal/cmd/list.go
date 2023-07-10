@@ -8,14 +8,15 @@ import (
 func NewListCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "list",
-		Short: "List resources",
+		Short: "List albums or media items in Google Photos",
 		Run: func(cobraCmd *cobra.Command, args []string) {
-			cobraCmd.PrintErrln("Error: must also specify a resource like albums")
+			cobraCmd.PrintErrln("Error: must also specify albums or media-items")
 			cobraCmd.Usage()
 		},
 	}
 
 	command.AddCommand(NewCmdListAlbums(globalFlags))
+	command.AddCommand(NewCmdListMediaItems(globalFlags))
 
 	return command
 }

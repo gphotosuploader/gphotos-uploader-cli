@@ -109,11 +109,20 @@ func (o *ListAlbumsOptions) Run(cobraCmd *cobra.Command, args []string) error {
 
 	bar.Close()
 
-	cli.Logger.Debugf("Printing album list for %d albums.", len(albumsList))
+	cli.Logger.Debugf("Printing album list... (%d items)", len(albumsList))
 
-	o.printAsTable(albumsList, cobraCmd.OutOrStdout())
+	o.printAlbumsList(albumsList, cobraCmd.OutOrStdout())
 
 	return nil
+}
+
+func (o *ListAlbumsOptions) printAlbumsList(a []albums.Album, writer io.Writer) {
+	if len(a) == 0 {
+		fmt.Fprintln(writer, "No albums were found!")
+		return
+	}
+
+	o.printAsTable(a, writer)
 }
 
 func (o *ListAlbumsOptions) printAsTable(a []albums.Album, writer io.Writer) {
