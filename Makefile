@@ -9,7 +9,7 @@ LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := main.go
-BINARY := gphotos-uploader-cli
+BINARY := gphotos-cli
 
 # Temporary files to be used, you can changed it calling `make TMP_DIR=/tmp`
 TMP_DIR ?= .tmp

@@ -15,10 +15,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:           "gphotos-uploader-cli",
+	Use:           "gphotos-cli",
 	SilenceUsage:  true,
 	SilenceErrors: true,
-	Short:         "Welcome to `gphotos-uploader-cli` a Google Photos uploader!",
+	Short:         "Welcome to `gphotos-cli` a Google Photos CLI!",
 	PersistentPreRunE: func(cobraCmd *cobra.Command, args []string) error {
 		if globalFlags.Silent && globalFlags.Debug {
 			return fmt.Errorf("%s and %s cannot be specified at the same time", ansi.Color("--silent", "white+b"), ansi.Color("--debug", "white+b"))
@@ -32,16 +32,21 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	Long: `
-    This application allows you to upload pictures and videos to Google Photos. 
-    You can upload folders to your Google Photos account and organize them in albums automatically.
+Google Photos CLI
 
-    Get started by running the init command to configure your settings:
-    $ gphotos-uploader-cli init
+This CLI application allows you to upload pictures and videos to Google Photos. You can upload folders to your Google Photos account and organize them in albums automatically. Additionally, you can list albums and media items already uploaded to Google Photos.
 
-    once it's configured, start uploading your files:
-    $ gphotos-uploader-cli push
+To get started, initialize your settings by running the following command:
+$ gphotos-cli init
 
-    You can visit https://gphotosuploader.github.io/gphotos-uploader-cli for more information.`,
+Once configured, you can uploading your files with this command:
+$ gphotos-cli push
+
+Or you can list your albums in Google Photos by running:
+$ gphotos-cli list albums
+
+For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-cli.
+`,
 }
 
 var globalFlags *flags.GlobalFlags
