@@ -5,36 +5,35 @@ import (
 )
 
 // Base version information.
-//
-// This is the fallback data used when version information from git is not
-// provided via go ldflags. It provides an approximation of the application
-// version for adhoc builds (e.g. `go build`) that cannot get the version
-// information from git
-//
-// If you are looking at these fields in the git tree, they look strange. They
-// are modified on the fly by the build process.
-//
-// We use semantic version (see https://semver.org/ for more information). When
-// releasing a new version, Makefile updates this file to reflect the new
-// version; a git-annotated tag is used to set this version
+// We use semantic version (see https://semver.org/ for more information).
 var (
+	// When releasing a new version, Makefile updates this file to reflect the new
+	// version; a git-annotated tag is used to set this version.
 	version = "v0.0.0" // git tag, output of $(git describe --tags --always --dirty)
+
+	// This is the fallback data used when version information from git is not
+	// provided via go ldflags. It provides an approximation of the application
+	// version for adhoc builds (e.g. `go build`) that cannot get the version
+	// information from git
+	defaultVersionString = "0.0.0-git"
 )
 
-type VersionCmd struct{}
-
 func NewCommand() *cobra.Command {
-	cmd := &VersionCmd{}
-
-	versionCmd := &cobra.Command{
+	versionCommand := &cobra.Command{
 		Use:   "version",
-		Short: "Print the current version",
-		Run:   cmd.Run,
+		Short: "Shows version number of gphotos-cli.",
+		Long:  "Shows the version number of Arduino CLI which is installed on your system.",
+		Args:  cobra.NoArgs,
+		Run:   runVersionCommand,
 	}
 
-	return versionCmd
+	return versionCommand
 }
 
-func (cmd *VersionCmd) Run(command *cobra.Command, args []string) {
-	command.Printf("gphotos-cli %s\n", version)
+func runVersionCommand(cmd *cobra.Command, args []string) {
+	//if version == "" {
+	//    version = defaultVersionString
+	//}
+
+	cmd.Printf("gphotos-cli %s\n", version)
 }
