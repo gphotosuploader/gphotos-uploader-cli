@@ -93,7 +93,7 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 		progressbar.OptionClearOnFinish(),
 	)
 
-	bar.Add(len(mediaItemsList))
+	_ = bar.Add(len(mediaItemsList))
 
 	// Iterate until all pages are got
 	for nextPageToken != "" {
@@ -110,7 +110,7 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 		// Append current page media items to the final media items list
 		mediaItemsList = append(mediaItemsList, response...)
 
-		bar.Add(len(response))
+		_ = bar.Add(len(response))
 	}
 
 	bar.Close()

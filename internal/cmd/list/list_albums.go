@@ -80,7 +80,7 @@ func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) e
 		progressbar.OptionClearOnFinish(),
 	)
 
-	bar.Add(len(albumsList))
+	_ = bar.Add(len(albumsList))
 
 	// Iterate until all pages are got
 	for nextPageToken != "" {
@@ -99,7 +99,7 @@ func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) e
 		// Append current page albums to the final albums list
 		albumsList = append(albumsList, response...)
 
-		bar.Add(len(response))
+		_ = bar.Add(len(response))
 	}
 
 	bar.Close()
