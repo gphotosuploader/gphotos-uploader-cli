@@ -1,7 +1,7 @@
 package list
 
 import (
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 	"github.com/spf13/cobra"
 )
 

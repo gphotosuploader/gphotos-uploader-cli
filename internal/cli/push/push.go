@@ -5,7 +5,7 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"

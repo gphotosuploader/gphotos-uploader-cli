@@ -2,7 +2,7 @@ package version_test
 
 import (
 	"bytes"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/version"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
 	"io"
 	"testing"
 )
