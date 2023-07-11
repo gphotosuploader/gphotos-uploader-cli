@@ -19,7 +19,7 @@ func TestNewVersionCmd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "gphotos-uploader-cli v0.0.0\n"
+	want := "gphotos-cli v0.0.0\n"
 	if want != string(got) {
 		t.Fatalf("want: %s, got: %s", want, string(got))
 	}
