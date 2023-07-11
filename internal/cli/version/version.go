@@ -21,8 +21,8 @@ var (
 func NewCommand() *cobra.Command {
 	versionCommand := &cobra.Command{
 		Use:   "version",
-		Short: "Shows version number of gphotos-cli.",
-		Long:  "Shows the version number of Arduino CLI which is installed on your system.",
+		Short: "Shows version number.",
+		Long:  "Shows the version number of Google Photos CLI which is installed on your system.",
 		Args:  cobra.NoArgs,
 		Run:   runVersionCommand,
 	}
