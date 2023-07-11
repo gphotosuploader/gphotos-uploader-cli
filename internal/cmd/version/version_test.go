@@ -1,15 +1,14 @@
-package cmd_test
+package version_test
 
 import (
 	"bytes"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/version"
 	"io"
 	"testing"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
 )
 
-func TestNewVersionCmd(t *testing.T) {
-	c := cmd.NewVersionCmd()
+func TestNewCommand(t *testing.T) {
+	c := version.NewCommand()
 	b := bytes.NewBufferString("")
 	c.SetOut(b)
 	if err := c.Execute(); err != nil {

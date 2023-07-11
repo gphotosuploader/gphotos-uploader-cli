@@ -1,4 +1,4 @@
-package cmd
+package list
 
 import (
 	"context"
@@ -13,26 +13,21 @@ import (
 	"text/tabwriter"
 )
 
-// ListAlbumsOptions contains the input to the 'list albums' command.
-type ListAlbumsOptions struct {
+// ListAlbumsCommandOptions contains the input to the 'list albums' command.
+type ListAlbumsCommandOptions struct {
 	*flags.GlobalFlags
 
 	NoHeaders  bool
 	NoProgress bool
 }
 
-// NewListAlbumsOptions returns a ListAlbumsOptions with defaults.
-func NewListAlbumsOptions(globalFlags *flags.GlobalFlags) *ListAlbumsOptions {
-	return &ListAlbumsOptions{
+func initAlbumsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
+	o := &ListAlbumsCommandOptions{
 		GlobalFlags: globalFlags,
 
 		NoHeaders:  false,
 		NoProgress: false,
 	}
-}
-
-func NewCmdListAlbums(globalFlags *flags.GlobalFlags) *cobra.Command {
-	o := NewListAlbumsOptions(globalFlags)
 
 	command := &cobra.Command{
 		Use:   "albums",
@@ -48,7 +43,7 @@ func NewCmdListAlbums(globalFlags *flags.GlobalFlags) *cobra.Command {
 	return command
 }
 
-func (o *ListAlbumsOptions) Run(cobraCmd *cobra.Command, args []string) error {
+func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	cli, err := app.Start(ctx, o.CfgDir)
 	if err != nil {
@@ -116,7 +111,7 @@ func (o *ListAlbumsOptions) Run(cobraCmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *ListAlbumsOptions) printAlbumsList(a []albums.Album, writer io.Writer) {
+func (o *ListAlbumsCommandOptions) printAlbumsList(a []albums.Album, writer io.Writer) {
 	if len(a) == 0 {
 		fmt.Fprintln(writer, "No albums were found!")
 		return
@@ -125,7 +120,7 @@ func (o *ListAlbumsOptions) printAlbumsList(a []albums.Album, writer io.Writer) 
 	o.printAsTable(a, writer)
 }
 
-func (o *ListAlbumsOptions) printAsTable(a []albums.Album, writer io.Writer) {
+func (o *ListAlbumsCommandOptions) printAsTable(a []albums.Album, writer io.Writer) {
 	w := tabwriter.NewWriter(writer, 0, 0, 1, ' ', 0)
 
 	if !o.NoHeaders {

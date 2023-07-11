@@ -1,4 +1,4 @@
-package cmd
+package version
 
 import (
 	"github.com/spf13/cobra"
@@ -23,7 +23,7 @@ var (
 
 type VersionCmd struct{}
 
-func NewVersionCmd() *cobra.Command {
+func NewCommand() *cobra.Command {
 	cmd := &VersionCmd{}
 
 	versionCmd := &cobra.Command{

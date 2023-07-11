@@ -1,4 +1,4 @@
-package cmd
+package auth
 
 import (
 	"context"
@@ -14,7 +14,7 @@ type AuthCmd struct {
 	*flags.GlobalFlags
 }
 
-func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
+func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 	cmd := &AuthCmd{GlobalFlags: globalFlags}
 
 	authCmd := &cobra.Command{

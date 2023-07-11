@@ -1,4 +1,4 @@
-package cmd
+package list
 
 import (
 	"context"
@@ -13,8 +13,8 @@ import (
 	"text/tabwriter"
 )
 
-// ListMediaItemsOptions contains the input to the 'list media' command.
-type ListMediaItemsOptions struct {
+// ListMediaItemsCommandOptions contains the input to the 'list media' command.
+type ListMediaItemsCommandOptions struct {
 	*flags.GlobalFlags
 
 	NoHeaders  bool
@@ -23,9 +23,8 @@ type ListMediaItemsOptions struct {
 	AlbumID string
 }
 
-// NewListMediaItemsOptions returns a ListMediaItemsOptions with defaults.
-func NewListMediaItemsOptions(globalFlags *flags.GlobalFlags) *ListMediaItemsOptions {
-	return &ListMediaItemsOptions{
+func initMediaItemsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
+	o := &ListMediaItemsCommandOptions{
 		GlobalFlags: globalFlags,
 
 		NoHeaders:  false,
@@ -33,10 +32,6 @@ func NewListMediaItemsOptions(globalFlags *flags.GlobalFlags) *ListMediaItemsOpt
 
 		AlbumID: "",
 	}
-}
-
-func NewCmdListMediaItems(globalFlags *flags.GlobalFlags) *cobra.Command {
-	o := NewListMediaItemsOptions(globalFlags)
 
 	command := &cobra.Command{
 		Use:   "media-items",
@@ -53,7 +48,7 @@ func NewCmdListMediaItems(globalFlags *flags.GlobalFlags) *cobra.Command {
 	return command
 }
 
-func (o *ListMediaItemsOptions) Run(cobraCmd *cobra.Command, args []string) error {
+func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	cli, err := app.Start(ctx, o.CfgDir)
 	if err != nil {
@@ -127,7 +122,7 @@ func (o *ListMediaItemsOptions) Run(cobraCmd *cobra.Command, args []string) erro
 	return nil
 }
 
-func (o *ListMediaItemsOptions) printMediaItemsList(mi []media_items.MediaItem, writer io.Writer) {
+func (o *ListMediaItemsCommandOptions) printMediaItemsList(mi []media_items.MediaItem, writer io.Writer) {
 	if o.AlbumID != "" {
 		fmt.Fprintf(writer, "Listing media items for album ID: %s\n", o.AlbumID)
 	}
@@ -140,7 +135,7 @@ func (o *ListMediaItemsOptions) printMediaItemsList(mi []media_items.MediaItem, 
 	o.printAsTable(mi, writer)
 }
 
-func (o *ListMediaItemsOptions) printAsTable(mi []media_items.MediaItem, writer io.Writer) {
+func (o *ListMediaItemsCommandOptions) printAsTable(mi []media_items.MediaItem, writer io.Writer) {
 	w := tabwriter.NewWriter(writer, 0, 0, 1, ' ', 0)
 
 	if !o.NoHeaders {

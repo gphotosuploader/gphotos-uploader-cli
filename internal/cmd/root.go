@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/auth"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/list"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/push"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/version"
 	"os"
 
 	"github.com/mgutz/ansi"
@@ -71,12 +75,12 @@ func init() {
 	globalFlags = flags.SetGlobalFlags(persistentFlags)
 
 	// Add main commands
-	rootCmd.AddCommand(NewVersionCmd())
+	rootCmd.AddCommand(version.NewCommand())
 	rootCmd.AddCommand(NewInitCmd(globalFlags))
-	rootCmd.AddCommand(NewPushCmd(globalFlags))
-	rootCmd.AddCommand(NewAuthCmd(globalFlags))
+	rootCmd.AddCommand(push.NewCommand(globalFlags))
+	rootCmd.AddCommand(auth.NewCommand(globalFlags))
 
-	rootCmd.AddCommand(NewListCmd(globalFlags))
+	rootCmd.AddCommand(list.NewCommand(globalFlags))
 }
 
 // GetRoot returns the root command

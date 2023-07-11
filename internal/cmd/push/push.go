@@ -1,4 +1,4 @@
-package cmd
+package push
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type PushCmd struct {
 	DryRunMode bool
 }
 
-func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
+func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 	cmd := &PushCmd{GlobalFlags: globalFlags}
 
 	pushCmd := &cobra.Command{
