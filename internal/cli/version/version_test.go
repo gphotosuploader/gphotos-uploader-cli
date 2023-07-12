@@ -18,7 +18,7 @@ func TestNewCommand(t *testing.T) {
 	actual := new(bytes.Buffer)
 	versionCommand := version.NewCommand()
 	versionCommand.SetOut(actual)
-	versionCommand.Execute()
+	_ = versionCommand.Execute()
 
 	expected := "fooBarCommand Version: fooBarVersion\n"
 

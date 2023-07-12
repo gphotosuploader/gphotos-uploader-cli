@@ -18,4 +18,5 @@ func TestBuildInjectedInfo(t *testing.T) {
 	info := NewInfo()
 	require.Equal(t, goldenInfo.Application, info.Application)
 	require.Equal(t, goldenInfo.VersionString, info.VersionString)
+	require.Equal(t, "gphotos-cli Version: 0.0.0-test.preview", info.String())
 }
