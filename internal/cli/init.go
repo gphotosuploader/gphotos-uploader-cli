@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -24,8 +24,8 @@ func NewInitCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initializes the configuration",
-		Long:  `Initializes a new configuration with defaults.`,
+		Short: "Initialize the configuration",
+		Long:  `Initialize a new configuration with defaults.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}

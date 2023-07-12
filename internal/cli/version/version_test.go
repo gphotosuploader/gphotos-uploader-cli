@@ -1,15 +1,14 @@
-package cmd_test
+package version_test
 
 import (
 	"bytes"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
 	"io"
 	"testing"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
 )
 
-func TestNewVersionCmd(t *testing.T) {
-	c := cmd.NewVersionCmd()
+func TestNewCommand(t *testing.T) {
+	c := version.NewCommand()
 	b := bytes.NewBufferString("")
 	c.SetOut(b)
 	if err := c.Execute(); err != nil {
@@ -19,7 +18,7 @@ func TestNewVersionCmd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "gphotos-uploader-cli v0.0.0\n"
+	want := "gphotos-cli Version: 0.0.0-git\n"
 	if want != string(got) {
 		t.Fatalf("want: %s, got: %s", want, string(got))
 	}

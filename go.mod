@@ -6,7 +6,7 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
-	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.0-rc.1
+	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.1
 	github.com/hjson/hjson-go/v4 v4.3.0
 	github.com/int128/oauth2cli v1.14.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
@@ -20,9 +20,9 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/syndtr/goleveldb v1.0.0
-	golang.org/x/oauth2 v0.8.0
-	golang.org/x/sync v0.2.0
-	golang.org/x/term v0.8.0
+	golang.org/x/oauth2 v0.9.0
+	golang.org/x/sync v0.3.0
+	golang.org/x/term v0.10.0
 )
 
 require (
@@ -50,11 +50,11 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
-	google.golang.org/api v0.125.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
+	google.golang.org/api v0.130.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

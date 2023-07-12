@@ -1,11 +1,11 @@
-package cmd
+package push
 
 import (
 	"context"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
@@ -23,13 +23,13 @@ type PushCmd struct {
 	DryRunMode bool
 }
 
-func NewPushCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
+func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 	cmd := &PushCmd{GlobalFlags: globalFlags}
 
 	pushCmd := &cobra.Command{
 		Use:   "push",
-		Short: "Push local files to Google Photos service",
-		Long:  `Scan configured folders in the configuration and push all new object to Google Photos service.`,
+		Short: "Upload local folders to Google Photos",
+		Long:  `Scan configured folders in the configuration and upload all new object to Google Photos.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}

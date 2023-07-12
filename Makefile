@@ -2,14 +2,14 @@
 VERSION ?= $(shell git describe --tags --always --dirty)
 
 # Use linker flags to provide version/build settings to the target
-VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd
-RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION)
+VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/version
+RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.versionString=$(VERSION)
 LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
 
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := main.go
-BINARY := gphotos-uploader-cli
+BINARY := gphotos-cli
 
 # Temporary files to be used, you can changed it calling `make TMP_DIR=/tmp`
 TMP_DIR ?= .tmp
