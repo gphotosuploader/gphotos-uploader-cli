@@ -18,7 +18,7 @@ func TestNewCommand(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "gphotos-cli 0.0.0-git\n"
+	want := "gphotos-cli Version: 0.0.0-git\n"
 	if want != string(got) {
 		t.Fatalf("want: %s, got: %s", want, string(got))
 	}
