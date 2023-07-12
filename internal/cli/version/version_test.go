@@ -3,23 +3,24 @@ package version_test
 import (
 	"bytes"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
-	"io"
+	versioninfo "github.com/gphotosuploader/gphotos-uploader-cli/version"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestNewCommand(t *testing.T) {
-	c := version.NewCommand()
-	b := bytes.NewBufferString("")
-	c.SetOut(b)
-	if err := c.Execute(); err != nil {
-		t.Fatal(err)
+	// Prepare a know version without depending on the build info.
+	versioninfo.VersionInfo = &versioninfo.Info{
+		Application:   "fooBarCommand",
+		VersionString: "fooBarVersion",
 	}
-	got, err := io.ReadAll(b)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := "gphotos-cli Version: 0.0.0-git\n"
-	if want != string(got) {
-		t.Fatalf("want: %s, got: %s", want, string(got))
-	}
+
+	actual := new(bytes.Buffer)
+	versionCommand := version.NewCommand()
+	versionCommand.SetOut(actual)
+	versionCommand.Execute()
+
+	expected := "fooBarCommand Version: fooBarVersion\n"
+
+	assert.Equal(t, expected, actual.String())
 }

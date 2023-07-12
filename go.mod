@@ -19,6 +19,7 @@ require (
 	github.com/spf13/afero v1.9.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/oauth2 v0.9.0
 	golang.org/x/sync v0.3.0
@@ -30,6 +31,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
@@ -49,6 +51,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
@@ -57,4 +60,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
