@@ -106,10 +106,7 @@ func getIncludedFilesByScanFolder(includePatterns []string, excludePatterns []st
 			return nil
 		},
 		IsUploadedFn: func(path string) bool {
-			if strings.Contains(path, "AlreadyUploaded") {
-				return true
-			}
-			return false
+			return strings.Contains(path, "AlreadyUploaded")
 		},
 		UnmarkAsUploadedFn: func(path string) error {
 			return nil
