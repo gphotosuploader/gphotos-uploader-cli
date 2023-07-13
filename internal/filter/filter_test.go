@@ -1,6 +1,8 @@
 package filter_test
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
@@ -22,8 +24,10 @@ func TestCompile(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := filter.Compile(tc.allowedList, tc.excludedList)
-			if err != nil && !tc.errExpected {
-				t.Errorf("error was not expected, got: %v", err)
+			if tc.errExpected {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
 		})
 	}
@@ -80,40 +84,31 @@ func TestFilter_AllowDefaultFiles(t *testing.T) {
 
 	t.Run("ByUsingEmptyPatterns", func(t *testing.T) {
 		f, err := filter.Compile([]string{""}, []string{""})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
 	t.Run("ByUsingRepeatedEmptyPatterns", func(t *testing.T) {
 		f, err := filter.Compile([]string{"", "", ""}, []string{"", "", ""})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"_IMAGE_EXTENSIONS_"}, []string{""})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 }
@@ -138,27 +133,21 @@ func TestFilter_AllowAllFiles(t *testing.T) {
 
 	t.Run("ByUsingWildCardPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"**"}, []string{""})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{""})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 }
@@ -181,14 +170,11 @@ func TestFilter_AllowPNGFiles(t *testing.T) {
 	}
 
 	f, err := filter.Compile([]string{"**/*.png"}, []string{""})
-	if err != nil {
-		t.Fatalf("error was not expected at this point: %v", err)
-	}
+
+	require.NoError(t, err)
+
 	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
+		assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 	}
 
 }
@@ -211,16 +197,11 @@ func TestFilter_AllowPNGAndJPGFiles(t *testing.T) {
 	}
 
 	f, err := filter.Compile([]string{"**/*.png", "**/*.jpg"}, []string{""})
-	if err != nil {
-		t.Fatalf("error was not expected at this point: %v", err)
-	}
-	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
-	}
+	require.NoError(t, err)
 
+	for _, tc := range testCases {
+		assert.Equal(t, tc.out, f.IsAllowed(tc.file))
+	}
 }
 
 func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
@@ -239,16 +220,11 @@ func TestFilter_AllowImageFilesStartingWithSample(t *testing.T) {
 	}
 
 	f, err := filter.Compile([]string{"**/Sample*"}, []string{"**/*.mp3", "**/*.txt", "**/*.mp4"})
-	if err != nil {
-		t.Fatalf("error was not expected at this point: %v", err)
-	}
-	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
-	}
+	require.NoError(t, err)
 
+	for _, tc := range testCases {
+		assert.Equal(t, tc.out, f.IsAllowed(tc.file))
+	}
 }
 
 func TestFilter_DisallowAllFiles(t *testing.T) {
@@ -268,27 +244,19 @@ func TestFilter_DisallowAllFiles(t *testing.T) {
 
 	t.Run("ByUsingWildcardPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"**"}, []string{"**"})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"_ALL_FILES_"})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
@@ -310,16 +278,11 @@ func TestFilter_DisallowFilesStartingWithScreenShot(t *testing.T) {
 	}
 
 	f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"**/ScreenShot*"})
-	if err != nil {
-		t.Fatalf("error was not expected at this point: %v", err)
-	}
-	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
-	}
+	require.NoError(t, err)
 
+	for _, tc := range testCases {
+		assert.Equal(t, tc.out, f.IsAllowed(tc.file))
+	}
 }
 
 func TestFilter_DisallowVideos(t *testing.T) {
@@ -339,14 +302,10 @@ func TestFilter_DisallowVideos(t *testing.T) {
 
 	t.Run("ByUsingTaggedPattern", func(t *testing.T) {
 		f, err := filter.Compile([]string{"_ALL_FILES_"}, []string{"_ALL_VIDEO_FILES_"})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsAllowed(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsAllowed(tc.file))
 		}
 	})
 
@@ -366,16 +325,11 @@ func TestFilter_IncludingPNGExceptAFolder(t *testing.T) {
 	}
 
 	f, err := filter.Compile([]string{"**/*.png"}, []string{"*/folder1/*"})
-	if err != nil {
-		t.Fatalf("error was not expected at this point: %v", err)
-	}
-	for _, tc := range testCases {
-		got := f.IsAllowed(tc.file)
-		if tc.out != got {
-			t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-		}
-	}
+	require.NoError(t, err)
 
+	for _, tc := range testCases {
+		assert.Equal(t, tc.out, f.IsAllowed(tc.file))
+	}
 }
 
 func TestFilter_ExcludingAFolder(t *testing.T) {
@@ -393,14 +347,10 @@ func TestFilter_ExcludingAFolder(t *testing.T) {
 
 	t.Run("ExcludingFolder1", func(t *testing.T) {
 		f, err := filter.Compile([]string{""}, []string{"**/folder1/*"})
-		if err != nil {
-			t.Fatalf("error was not expected at this point: %v", err)
-		}
+		require.NoError(t, err)
+
 		for _, tc := range testCases {
-			got := f.IsExcluded(tc.file)
-			if tc.out != got {
-				t.Errorf("Filter result was not expected: file=%s, want %t, got %t", tc.file, tc.out, got)
-			}
+			assert.Equal(t, tc.out, f.IsExcluded(tc.file))
 		}
 	})
 
