@@ -2,13 +2,10 @@ package tokenmanager
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
-	"syscall"
-
 	"github.com/99designs/keyring"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"golang.org/x/oauth2"
-	"golang.org/x/term"
+	"os"
 )
 
 // KeyringRepository represents a repository provided by different secrets
@@ -19,12 +16,12 @@ type KeyringRepository struct {
 
 // defaultConfig returns the default configuration from the keyring package.
 func defaultConfig(keyringDir string) keyring.Config {
-	const serviceName = "gPhotosUploader"
+	const serviceName = "GooglePhotosCLI"
 	return keyring.Config{
 		ServiceName:          serviceName,
 		KeychainName:         serviceName,
-		KeychainPasswordFunc: promptFn(&stdInPasswordReader{}),
-		FilePasswordFunc:     promptFn(&stdInPasswordReader{}),
+		KeychainPasswordFunc: getPassphraseFromEnvOrUserInputFn(),
+		FilePasswordFunc:     getPassphraseFromEnvOrUserInputFn(),
 		FileDir:              keyringDir,
 		AllowedBackends:      supportedBackendTypes,
 	}
@@ -48,8 +45,8 @@ var supportedBackendTypes = []keyring.BackendType{
 }
 
 // NewKeyringRepository creates a new repository
-// backend could be used to select which backed will be used. If it's empty or auto
-// the library will select the most suitable depending OS.
+// backend could be used to select which backed will be used. If it's empty or auto,
+// the library will select the most suitable depending on OS.
 func NewKeyringRepository(backend string, promptFunc *keyring.PromptFunc, keyringDir string) (*KeyringRepository, error) {
 	keyringConfig := defaultConfig(keyringDir)
 	if backend != "" && backend != "auto" {
@@ -80,7 +77,7 @@ func (r *KeyringRepository) Set(email string, token *oauth2.Token) error {
 	})
 }
 
-// getToken returns the specified token from the repository.
+// Get returns the specified token from the repository.
 func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 	var nullToken = &oauth2.Token{}
 
@@ -99,32 +96,19 @@ func (r *KeyringRepository) Get(email string) (*oauth2.Token, error) {
 
 // Close closes the keyring repository.
 func (r *KeyringRepository) Close() error {
-	// in this particular implementation we don't need to do anything.
+	// in this particular implementation, we don't need to do anything.
 	return nil
 }
 
-// passwordReader represents a function to read a password.
-type passwordReader interface {
-	ReadPassword() (string, error)
-}
-
-// promptFn returns the key to open the keyring.
-// It will read it from an environment var if is set, or read from the terminal otherwise.
-func promptFn(pr passwordReader) func(string) (string, error) {
+// getPassphraseFromEnvOrUserInputFn returns the key to open the keyring.
+// It will read it from an environment var if it's set, or read from the terminal otherwise.
+func getPassphraseFromEnvOrUserInputFn() func(string) (string, error) {
 	return func(_ string) (string, error) {
+		// TODO: Use the configuration package to gather this env var.
 		if key, ok := os.LookupEnv("GPHOTOS_CLI_TOKENSTORE_KEY"); ok {
 			return key, nil
 		}
-		fmt.Print("Enter the passphrase to open the token store: ")
-		return pr.ReadPassword()
+
+		return feedback.InputUserField("Enter the passphrase to open the token store: ", true)
 	}
-}
-
-// stdInPasswordReader reads a password from the stdin.
-type stdInPasswordReader struct{}
-
-func (pr *stdInPasswordReader) ReadPassword() (string, error) {
-	pwd, err := term.ReadPassword(syscall.Stdin)
-	fmt.Println()
-	return string(pwd), err
 }

@@ -6,11 +6,11 @@ import (
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/pkg/errors"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"net/http"
 )
@@ -87,13 +87,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, config.SourceFolder)
 
-		bar := progressbar.NewOptions(totalItems,
-			progressbar.OptionFullWidth(),
-			progressbar.OptionSetDescription("Uploading files..."),
-			progressbar.OptionSetPredictTime(false),
-			progressbar.OptionShowCount(),
-			progressbar.OptionSetVisibility(!cmd.Debug),
-		)
+		bar := feedback.NewTaskProgressBar("Uploading files...", totalItems, !cmd.Debug)
 
 		itemsGroupedByAlbum := upload.GroupByAlbum(itemsToUpload)
 		for albumName, files := range itemsGroupedByAlbum {
@@ -134,12 +128,12 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 					}
 				}
 
-				_ = bar.Add(1)
+				bar.Add(1)
 				uploadedItems++
 			}
 		}
 
-		_ = bar.Finish()
+		bar.Finish()
 
 		cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
