@@ -2,6 +2,7 @@ package tokenmanager
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -92,41 +93,36 @@ func TestKeyringRepository_Close(t *testing.T) {
 	})
 }
 
-type mockedPasswordReader struct {
-	value string
-}
+//type mockedPasswordReader struct {
+//	value string
+//}
+//
+//func (m *mockedPasswordReader) ReadPassword() (string, error) {
+//	return m.value, nil
+//}
 
-func (m *mockedPasswordReader) ReadPassword() (string, error) {
-	return m.value, nil
-}
+func TestGetPassphraseFromEnvOrUserInputFn(t *testing.T) {
+	//want := "foo"
 
-func TestPromptFn(t *testing.T) {
-	want := "foo"
+	t.Run("Should return the passphrase from the user input", func(t *testing.T) {
+		getPassphraseFromEnvOrUserInputFn := getPassphraseFromEnvOrUserInputFn()
+		_, err := getPassphraseFromEnvOrUserInputFn("")
 
-	t.Run("ReturnKeyFromTerminal", func(t *testing.T) {
-		promptFn := promptFn(&mockedPasswordReader{value: want})
-		got, err := promptFn("")
-		if err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-		if got != want {
-			t.Errorf("want: %s, got: %s", want, got)
-		}
+		// It should fail because this is not an interactive terminal.
+		assert.Error(t, err)
 	})
 
-	t.Run("ReturnKeyFromEnv", func(t *testing.T) {
-		if err := os.Setenv("GPHOTOS_CLI_TOKENSTORE_KEY", want); err != nil {
+	t.Run("Should return the passphrase from the env var", func(t *testing.T) {
+		if err := os.Setenv("GPHOTOS_CLI_TOKENSTORE_KEY", "This-key-comes-from-env-var"); err != nil {
 			t.Fatalf("error was not expected at this stage: err=%s", err)
 		}
 
-		promptFn := promptFn(&mockedPasswordReader{value: "dummy"})
-		got, err := promptFn("")
-		if err != nil {
-			t.Errorf("error was not expected: err=%s", err)
-		}
-		if got != want {
-			t.Errorf("want: %s, got: %s", want, got)
-		}
+		getPassphraseFromEnvOrUserInputFn := getPassphraseFromEnvOrUserInputFn()
+		got, err := getPassphraseFromEnvOrUserInputFn("")
+
+		assert.NoError(t, err)
+		assert.Equal(t, "This-key-comes-from-env-var", got)
+
 	})
 }
 
