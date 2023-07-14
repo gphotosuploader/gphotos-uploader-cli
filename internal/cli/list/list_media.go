@@ -7,7 +7,7 @@ import (
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/media_items"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
-	"github.com/schollz/progressbar/v3"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/spf13/cobra"
 	"io"
 	"text/tabwriter"
@@ -85,15 +85,9 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 	// The progress bar is not shown when using '--no-progress' flag or in '--debug' mode.
 	showProgressBar := !o.Debug && !o.NoProgress
 
-	bar := progressbar.NewOptions(-1,
-		progressbar.OptionSetWriter(cobraCmd.OutOrStdout()),
-		progressbar.OptionSetVisibility(showProgressBar),
-		progressbar.OptionSetDescription("Getting media items from Google Photos..."),
-		progressbar.OptionShowCount(),
-		progressbar.OptionClearOnFinish(),
-	)
+	bar := feedback.NewTaskProgressBar("Getting media items from Google Photos...", -1, showProgressBar)
 
-	_ = bar.Add(len(mediaItemsList))
+	bar.Add(len(mediaItemsList))
 
 	// Iterate until all pages are got
 	for nextPageToken != "" {
@@ -110,10 +104,10 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 		// Append current page media items to the final media items list
 		mediaItemsList = append(mediaItemsList, response...)
 
-		_ = bar.Add(len(response))
+		bar.Add(len(response))
 	}
 
-	bar.Close()
+	bar.Finish()
 
 	cli.Logger.Debugf("Printing media items list... (%d items)", len(mediaItemsList))
 
