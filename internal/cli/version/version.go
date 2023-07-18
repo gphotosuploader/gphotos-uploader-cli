@@ -18,7 +18,7 @@ func NewCommand() *cobra.Command {
 	return versionCommand
 }
 
-func runVersionCommand(cmd *cobra.Command, args []string) {
+func runVersionCommand(_ *cobra.Command, _ []string) {
 	info := version.VersionInfo
 
 	feedback.PrintResult(info)
