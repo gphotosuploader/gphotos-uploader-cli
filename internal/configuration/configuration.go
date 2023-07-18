@@ -51,8 +51,8 @@ func Init(configFile string) *viper.Viper {
 
 // BindFlags creates all the flags binding between the cobra Command and the instance of viper.
 func BindFlags(cmd *cobra.Command, settings *viper.Viper) {
-	settings.BindPFlag("logging.level", cmd.Flag("log-level"))
-	settings.BindPFlag("output.no_color", cmd.Flag("no-color"))
+	_ = settings.BindPFlag("logging.level", cmd.Flag("log-level"))
+	_ = settings.BindPFlag("output.no_color", cmd.Flag("no-color"))
 }
 
 // getDefaultGooglePhotosCLIDataDir returns the full path to the default gphotos-cli folder.

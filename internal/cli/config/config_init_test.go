@@ -1,14 +1,5 @@
 package config_test
 
-import (
-	"path/filepath"
-	"testing"
-
-	"github.com/spf13/afero"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-)
-
 //func TestNewInitCmd(t *testing.T) {
 //	testCases := []struct {
 //		name          string
@@ -39,15 +30,15 @@ import (
 //	}
 //}
 
-func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
-	if path == "" {
-		return
-	}
-	if err := fs.MkdirAll(path, 0700); err != nil {
-		t.Fatalf("creating test dir, err: %s", err)
-	}
-	filename := filepath.Join(path, app.DefaultConfigFilename)
-	if err := afero.WriteFile(fs, filename, []byte("my"), 0600); err != nil {
-		t.Fatalf("creating test configuration file, err: %s", err)
-	}
-}
+//func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
+//	if path == "" {
+//		return
+//	}
+//	if err := fs.MkdirAll(path, 0700); err != nil {
+//		t.Fatalf("creating test dir, err: %s", err)
+//	}
+//	filename := filepath.Join(path, app.DefaultConfigFilename)
+//	if err := afero.WriteFile(fs, filename, []byte("my"), 0600); err != nil {
+//		t.Fatalf("creating test configuration file, err: %s", err)
+//	}
+//}

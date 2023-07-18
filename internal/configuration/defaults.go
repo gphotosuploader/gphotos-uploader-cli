@@ -25,5 +25,5 @@ func SetDefaults(settings *viper.Viper) {
 	settings.AutomaticEnv()
 
 	// Bind env aliases to keep backward compatibility
-	settings.BindEnv("directories.Data", "GPHOTOS_CLI_DATA_DIR")
+	_ = settings.BindEnv("directories.Data", "GPHOTOS_CLI_DATA_DIR")
 }
