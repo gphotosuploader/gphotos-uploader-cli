@@ -6,7 +6,7 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/media_items"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/spf13/cobra"
 	"io"
@@ -15,18 +15,14 @@ import (
 
 // ListMediaItemsCommandOptions contains the input to the 'list media' command.
 type ListMediaItemsCommandOptions struct {
-	*flags.GlobalFlags
-
 	NoHeaders  bool
 	NoProgress bool
 
 	AlbumID string
 }
 
-func initMediaItemsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
+func initMediaItemsCommand() *cobra.Command {
 	o := &ListMediaItemsCommandOptions{
-		GlobalFlags: globalFlags,
-
 		NoHeaders:  false,
 		NoProgress: false,
 
@@ -50,7 +46,7 @@ func initMediaItemsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	cli, err := app.Start(ctx, o.CfgDir)
+	cli, err := app.Start(ctx, configuration.Settings.GetString("directories.data"))
 	if err != nil {
 		return err
 	}
@@ -82,8 +78,8 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 		return err
 	}
 
-	// The progress bar is not shown when using '--no-progress' flag or in '--debug' mode.
-	showProgressBar := !o.Debug && !o.NoProgress
+	// The progress bar is not shown when using '--no-progress' flag.
+	showProgressBar := !o.NoProgress
 
 	bar := feedback.NewTaskProgressBar("Getting media items from Google Photos...", -1, showProgressBar)
 

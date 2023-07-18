@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"os"
 
@@ -9,10 +9,9 @@ import (
 )
 
 func main() {
+	configuration.Settings = configuration.Init(configuration.FindConfigFileInArgs(os.Args))
 	gphotosCmd := cli.NewCommand()
 	if err := gphotosCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error ocurred: %s", err)
-		os.Exit(int(feedback.ErrGeneric))
+		feedback.FatalError(err, feedback.ErrGeneric)
 	}
-	os.Exit(int(feedback.Success))
 }

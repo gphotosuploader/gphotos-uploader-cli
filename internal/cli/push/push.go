@@ -5,7 +5,7 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
@@ -17,14 +17,12 @@ import (
 
 // PushCmd holds the required data for the push cmd
 type PushCmd struct {
-	*flags.GlobalFlags
-
 	// command flags
 	DryRunMode bool
 }
 
-func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
-	cmd := &PushCmd{GlobalFlags: globalFlags}
+func NewCommand() *cobra.Command {
+	cmd := &PushCmd{}
 
 	pushCmd := &cobra.Command{
 		Use:   "push",
@@ -41,7 +39,7 @@ func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	cli, err := app.Start(ctx, cmd.CfgDir)
+	cli, err := app.Start(ctx, configuration.Settings.GetString("directories.data"))
 	if err != nil {
 		return err
 	}
@@ -87,7 +85,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, config.SourceFolder)
 
-		bar := feedback.NewTaskProgressBar("Uploading files...", totalItems, !cmd.Debug)
+		bar := feedback.NewTaskProgressBar("Uploading files...", totalItems, true)
 
 		itemsGroupedByAlbum := upload.GroupByAlbum(itemsToUpload)
 		for albumName, files := range itemsGroupedByAlbum {

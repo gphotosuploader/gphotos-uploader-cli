@@ -2,16 +2,22 @@ package cli
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/auth"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/list"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/push"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
-	"github.com/mgutz/ansi"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
+	versioninfo "github.com/gphotosuploader/gphotos-uploader-cli/version"
+	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+	"io"
+	"os"
+	"strings"
 )
 
 var (
@@ -31,7 +37,9 @@ $ gphotos-cli list albums
 
 For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-cli.
 `
-	globalFlags *flags.GlobalFlags
+
+	verbose    bool
+	configFile string
 
 	// Os points to the (real) file system.
 	// Useful for testing.
@@ -40,12 +48,12 @@ For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-
 
 // NewCommand creates a new gphotosCLI command root
 func NewCommand() *cobra.Command {
-	// ArduinoCli is the root command
+	// gphotosCLI is the root command
 	gphotosCLI := &cobra.Command{
-		Use:               "gphotos-cli",
-		Short:             "Google Photos CLI.",
-		Long:              longCommandDescription,
-		PersistentPreRunE: preRun,
+		Use:              "gphotos-cli",
+		Short:            "Google Photos CLI.",
+		Long:             longCommandDescription,
+		PersistentPreRun: preRun,
 	}
 
 	createCliCommandTree(gphotosCLI)
@@ -55,44 +63,81 @@ func NewCommand() *cobra.Command {
 
 // this is here only for testing
 func createCliCommandTree(cmd *cobra.Command) {
-	persistentFlags := cmd.PersistentFlags()
-	globalFlags = flags.SetGlobalFlags(persistentFlags)
-
 	// Add main commands
 	cmd.AddCommand(version.NewCommand())
-	cmd.AddCommand(NewInitCmd(globalFlags))
-	cmd.AddCommand(push.NewCommand(globalFlags))
-	cmd.AddCommand(auth.NewCommand(globalFlags))
-	cmd.AddCommand(list.NewCommand(globalFlags))
+	cmd.AddCommand(config.NewCommand())
+	cmd.AddCommand(push.NewCommand())
+	cmd.AddCommand(auth.NewCommand())
+	cmd.AddCommand(list.NewCommand())
 
-	// TODO: Set flags here instead of passing globalFlags to all commands.
-	// See: https://github.com/arduino/arduino-cli/blob/master/internal/cli/cli.go
-	//
-	//cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Print the logs on the standard output.")
-	//validLogLevels := []string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}
-	//cmd.PersistentFlags().String("log-level", "", fmt.Sprintf("Messages with this level and above will be logged. Valid levels are: %s", strings.Join(validLogLevels, ", ")))
-	//cmd.RegisterFlagCompletionFunc("log-level", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	//    return validLogLevels, cobra.ShellCompDirectiveDefault
-	//})
-	//cmd.PersistentFlags().String("log-file", "", "Path to the file where logs will be written.")
-	//validLogFormats := []string{"text", "json"}
-	//cmd.PersistentFlags().String("log-format", "", fmt.Sprintf("The output format for the logs, can be: %s", strings.Join(validLogFormats, ", ")))
-	//cmd.RegisterFlagCompletionFunc("log-format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	//    return validLogFormats, cobra.ShellCompDirectiveDefault
-	//})
-	//cmd.PersistentFlags().StringVar(&configFile, "config-file", "", "The custom config file (if not specified the default will be used).")
-	//cmd.PersistentFlags().Bool("no-color", false, "Disable colored output.")
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Print the logs on the standard output.")
+
+	validLogLevels := []string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}
+	cmd.PersistentFlags().String("log-level", "", fmt.Sprintf("Messages with this level and above will be logged. Valid levels are: %s", strings.Join(validLogLevels, ", ")))
+
+	cmd.PersistentFlags().StringVar(&configFile, "config-file", "", "The custom config file (if not specified the default will be used).")
+	cmd.PersistentFlags().Bool("no-color", false, "Disable colored output.")
+	configuration.BindFlags(cmd, configuration.Settings)
 }
 
-func preRun(cobraCmd *cobra.Command, args []string) error {
-	if globalFlags.Silent && globalFlags.Debug {
-		return fmt.Errorf("%s and %s cannot be specified at the same time", ansi.Color("--silent", "white+b"), ansi.Color("--debug", "white+b"))
+func preRun(cobraCmd *cobra.Command, args []string) {
+	configFile := configuration.Settings.ConfigFileUsed()
+
+	// https://no-color.org/
+	color.NoColor = configuration.Settings.GetBool("output.no_color") || os.Getenv("NO_COLOR") != ""
+
+	// Set default feedback output to colorable
+	feedback.SetOut(colorable.NewColorableStdout())
+	feedback.SetErr(colorable.NewColorableStderr())
+
+	//
+	// Prepare logging
+	//
+
+	// decide whether we should log to stdout
+	if verbose {
+		// if we print on stdout, do it in full colors
+		logrus.SetOutput(colorable.NewColorableStdout())
+		logrus.SetFormatter(&logrus.TextFormatter{
+			ForceColors:   true,
+			DisableColors: color.NoColor,
+		})
+	} else {
+		logrus.SetOutput(io.Discard)
 	}
-	if globalFlags.Silent {
-		log.GetInstance().SetLevel(logrus.FatalLevel)
+
+	// configure logging filter
+	if lvl, found := toLogLevel(configuration.Settings.GetString("logging.level")); !found {
+		feedback.Fatal(fmt.Sprintf("Invalid option for --log-level: %s", configuration.Settings.GetString("logging.level")), feedback.ErrBadArgument)
+	} else {
+		logrus.SetLevel(lvl)
 	}
-	if globalFlags.Debug {
-		log.GetInstance().SetLevel(logrus.DebugLevel)
+
+	//
+	// Print some status info and check command is consistent
+	//
+
+	if configFile != "" {
+		logrus.Infof("Using config file: %s", configFile)
+	} else {
+		logrus.Info("Config file not found, using default values")
 	}
-	return nil
+
+	logrus.Info(versioninfo.VersionInfo.Application + " version " + versioninfo.VersionInfo.VersionString)
+}
+
+// convert the string passed to the `--log-level` option to the corresponding
+// logrus formal level.
+func toLogLevel(s string) (t logrus.Level, found bool) {
+	t, found = map[string]logrus.Level{
+		"trace": logrus.TraceLevel,
+		"debug": logrus.DebugLevel,
+		"info":  logrus.InfoLevel,
+		"warn":  logrus.WarnLevel,
+		"error": logrus.ErrorLevel,
+		"fatal": logrus.FatalLevel,
+		"panic": logrus.PanicLevel,
+	}[s]
+
+	return
 }

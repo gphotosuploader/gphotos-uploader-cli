@@ -6,7 +6,7 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/albums"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/spf13/cobra"
 	"io"
@@ -15,16 +15,12 @@ import (
 
 // ListAlbumsCommandOptions contains the input to the 'list albums' command.
 type ListAlbumsCommandOptions struct {
-	*flags.GlobalFlags
-
 	NoHeaders  bool
 	NoProgress bool
 }
 
-func initAlbumsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
+func initAlbumsCommand() *cobra.Command {
 	o := &ListAlbumsCommandOptions{
-		GlobalFlags: globalFlags,
-
 		NoHeaders:  false,
 		NoProgress: false,
 	}
@@ -45,7 +41,7 @@ func initAlbumsCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	cli, err := app.Start(ctx, o.CfgDir)
+	cli, err := app.Start(ctx, configuration.Settings.GetString("directories.data"))
 	if err != nil {
 		return err
 	}
@@ -70,7 +66,7 @@ func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) e
 	}
 
 	// The progress bar is not shown when using '--no-progress' flag or in '--debug' mode.
-	showProgressBar := !o.Debug && !o.NoProgress
+	showProgressBar := !o.NoProgress
 
 	bar := feedback.NewTaskProgressBar("Getting albums from Google Photos...", -1, showProgressBar)
 

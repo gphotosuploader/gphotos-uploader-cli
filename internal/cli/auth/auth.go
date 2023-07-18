@@ -2,20 +2,19 @@ package auth
 
 import (
 	"context"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 
 	"github.com/spf13/cobra"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 )
 
 // AuthCmd holds the required data for the init cmd
 type AuthCmd struct {
-	*flags.GlobalFlags
 }
 
-func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
-	cmd := &AuthCmd{GlobalFlags: globalFlags}
+func NewCommand() *cobra.Command {
+	cmd := &AuthCmd{}
 
 	authCmd := &cobra.Command{
 		Use:   "auth",
@@ -30,7 +29,7 @@ func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 
 func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	cli, err := app.StartServices(ctx, cmd.CfgDir)
+	cli, err := app.StartServices(ctx, configuration.Settings.GetString("directories.data"))
 	if err != nil {
 		return err
 	}
