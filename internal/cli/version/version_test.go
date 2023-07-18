@@ -3,6 +3,7 @@ package version_test
 import (
 	"bytes"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	versioninfo "github.com/gphotosuploader/gphotos-uploader-cli/version"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -16,8 +17,9 @@ func TestNewCommand(t *testing.T) {
 	}
 
 	actual := new(bytes.Buffer)
+	feedback.SetOut(actual)
 	versionCommand := version.NewCommand()
-	versionCommand.SetOut(actual)
+
 	_ = versionCommand.Execute()
 
 	expected := "fooBarCommand Version: fooBarVersion\n"

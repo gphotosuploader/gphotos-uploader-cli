@@ -1,6 +1,7 @@
 package version
 
 import (
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/gphotosuploader/gphotos-uploader-cli/version"
 	"github.com/spf13/cobra"
 )
@@ -20,5 +21,5 @@ func NewCommand() *cobra.Command {
 func runVersionCommand(cmd *cobra.Command, args []string) {
 	info := version.VersionInfo
 
-	cmd.Println(info)
+	feedback.PrintResult(info)
 }
