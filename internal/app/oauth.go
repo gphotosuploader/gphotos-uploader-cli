@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"net/http"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/oauth"
@@ -11,7 +12,7 @@ import (
 // AuthenticateFromToken returns an HTTP client authenticated in Google Photos.
 // AuthenticateFromToken will use the token from the Token Manage.
 func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error) {
-	account := app.Config.Account
+	account := configuration.Settings.GetString("auth.account")
 	app.Logger.Infof("Authenticating using token for '%s'", account)
 
 	token, err := app.TokenManager.Get(account)
@@ -20,8 +21,8 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 	}
 
 	cfg := &oauth.Config{
-		ClientID:     app.Config.APIAppCredentials.ClientID,
-		ClientSecret: app.Config.APIAppCredentials.ClientSecret,
+		ClientID:     configuration.Settings.GetString("auth.client_id"),
+		ClientSecret: configuration.Settings.GetString("auth.client_secret"),
 		Logf:         app.Logger.Debugf,
 	}
 
@@ -42,12 +43,12 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 // AuthenticateFromWeb returns an HTTP client authenticated in Google Photos.
 // AuthenticateFromWeb will create a new token after completing the OAuth 2.0 flow.
 func (app *App) AuthenticateFromWeb(ctx context.Context) (*http.Client, error) {
-	account := app.Config.Account
+	account := configuration.Settings.GetString("auth.account")
 	app.Logger.Infof("Getting authentication token for '%s'", account)
 
 	cfg := &oauth.Config{
-		ClientID:     app.Config.APIAppCredentials.ClientID,
-		ClientSecret: app.Config.APIAppCredentials.ClientSecret,
+		ClientID:     configuration.Settings.GetString("auth.client_id"),
+		ClientSecret: configuration.Settings.GetString("auth.client_secret"),
 		Logf:         app.Logger.Debugf,
 	}
 

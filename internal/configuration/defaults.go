@@ -17,6 +17,9 @@ func SetDefaults(settings *viper.Viper) {
 	settings.SetDefault("output.no_color", false)
 
 	// auth settings
+	settings.SetDefault("auth.account", "YOUR_GOOGLE_PHOTOS_ACCOUNT")
+	settings.SetDefault("auth.client_id", "YOUR_APP_CLIENT_ID")
+	settings.SetDefault("auth.client_secret", "YOUR_APP_CLIENT_SECRET")
 	settings.SetDefault("auth.secrets_type", "auto")
 
 	// Bind env vars

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"net/http"
 	"path/filepath"
@@ -41,9 +42,6 @@ type App struct {
 
 	// appDir is the directory application directory.
 	appDir string
-
-	// Config keeps the application configuration.
-	Config *config.Config
 }
 
 // Start initializes the application with the services defined by a given configuration.
@@ -65,7 +63,7 @@ func Start(ctx context.Context, path string) (*App, error) {
 // StartServices initializes the services defined by a given configuration.
 // The provided path is the expanded and absolute path to the application data folder.
 func StartServices(ctx context.Context, path string) (*App, error) {
-	var err error
+	//var err error
 
 	app := &App{
 		appDir: path,
@@ -73,13 +71,13 @@ func StartServices(ctx context.Context, path string) (*App, error) {
 		fs:     afero.NewOsFs(),
 	}
 
-	app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
-	app.Config, err = config.FromFile(app.fs, app.configFilename())
-	if err != nil {
-		return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
-	}
-
-	app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
+	//app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
+	//app.Config, err = config.FromFile(app.fs, app.configFilename())
+	//if err != nil {
+	//	return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
+	//}
+	//
+	//app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
 
 	if err := app.startServices(); err != nil {
 		return nil, err
@@ -158,10 +156,11 @@ func (app *App) startServices() error {
 		app.Logger.Errorf("File tracker could not be started, err: %s", err)
 		return fmt.Errorf("file tracker could not be started, err: %s", err)
 	}
-	app.TokenManager, err = app.defaultTokenManager(app.Config.SecretsBackendType)
+	secretsManagerType := configuration.Settings.GetString("auth.secrets_type")
+	app.TokenManager, err = app.defaultTokenManager(secretsManagerType)
 	if err != nil {
 		app.Logger.Errorf("Token manager could not be started, err: %s", err)
-		return fmt.Errorf("token manager could not be started, type:%s, err: %s", app.Config.SecretsBackendType, err)
+		return fmt.Errorf("token manager could not be started, type:%s, err: %s", secretsManagerType, err)
 	}
 	app.UploadSessionTracker, err = app.defaultUploadsSessionTracker()
 	if err != nil {

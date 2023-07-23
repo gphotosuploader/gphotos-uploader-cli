@@ -39,7 +39,7 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	_, err = cli.AuthenticateFromWeb(ctx)
 	if err == nil {
-		cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
+		cli.Logger.Donef("Successful authentication for account '%s'", configuration.Settings.GetString("auth.account"))
 	}
 
 	return err

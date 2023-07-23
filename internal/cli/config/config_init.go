@@ -3,61 +3,79 @@ package config
 import (
 	"fmt"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
-	"github.com/spf13/afero"
-
-	"github.com/mgutz/ansi"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
+	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
-// InitCmd holds the required data for the init cmd
-type InitCmd struct {
-	// command flags
-	Force bool
+// InitCommandOptions holds the required data for the `config init` command.
+type InitCommandOptions struct {
+	Overwrite bool
+	DestDir   string
 }
 
-func NewCommand() *cobra.Command {
-	cmd := &InitCmd{}
+const defaultFileName = "config.toml"
+
+func initInitCommand() *cobra.Command {
+	o := &InitCommandOptions{}
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize the configuration",
-		Long:  `Initialize a new configuration with defaults.`,
+		Short: "Writes current configuration to a configuration file.",
+		Long:  `Creates or updates the configuration file in the data directory or custom directory with the current configuration settings.`,
 		Args:  cobra.NoArgs,
-		RunE:  cmd.Run,
+		Run:   o.Run,
 	}
 
-	initCmd.Flags().BoolVar(&cmd.Force, "force", false, "Overwrite existing configuration")
+	initCmd.Flags().BoolVar(&o.Overwrite, "overwrite", false, "Overwrite existing configuration file.")
+	initCmd.Flags().StringVar(&o.DestDir, "dest-dir", "", "Sets where to save the configuration file.")
 
 	return initCmd
 }
 
-func (cmd *InitCmd) Run(cobraCmd *cobra.Command, args []string) error {
-	// TODO: It should use the os.Afero started in the cli.go
-	cli, err := app.StartWithoutConfig(afero.NewOsFs(), configuration.Settings.GetString("directories.data"))
+func (o *InitCommandOptions) Run(cobraCmd *cobra.Command, _ []string) {
+	logrus.Info("Executing `gphotos-cli config init`")
+
+	if o.DestDir == "" {
+		o.DestDir = configuration.Settings.GetString("directories.Data")
+	}
+
+	absPath, err := filepath.Abs(o.DestDir)
 	if err != nil {
-		return err
+		errMsg := fmt.Sprintf("Cannot find absolute path: %v", err)
+		feedback.Fatal(errMsg, feedback.ErrGeneric)
+	}
+	configFileAbsPath := filepath.Join(absPath, defaultFileName)
+
+	if !o.Overwrite && checkFileExists(configFileAbsPath) {
+		feedback.Fatal("Config file already exists, use --overwrite to discard the existing one.", feedback.ErrGeneric)
 	}
 
-	if exist := cli.AppDataDirExists(); exist && !cmd.Force {
-		log.Infof("Application data already exists. Use `%s` flag to proceed. %s",
-			ansi.Color("--force", "white+b"),
-			ansi.Color("ALL THE APPLICATION DATA WILL BE DELETED!", "white+b"))
-		return fmt.Errorf("application data already exists at %s", configuration.Settings.GetString("directories.data"))
+	logrus.Infof("Writing config file to: %s", absPath)
+
+	if err := os.MkdirAll(absPath, os.FileMode(0755)); err != nil {
+		errMsg := fmt.Sprintf("Cannot create config file directory: %v", err)
+		feedback.Fatal(errMsg, feedback.ErrGeneric)
 	}
 
-	filename, err := cli.CreateAppDataDir()
-	if err != nil {
-		log.Failf("Unable to create application data dir, err: %s", err)
-		return err
+	newSettings := viper.New()
+	configuration.SetDefaults(newSettings)
+	configuration.BindFlags(cobraCmd, newSettings)
+
+	if err := newSettings.WriteConfigAs(configFileAbsPath); err != nil {
+		errMsg := fmt.Sprintf("Cannot create config file: %v", err)
+		feedback.Fatal(errMsg, feedback.ErrGeneric)
 	}
 
-	log.Done("Application data dir created successfully.")
-	log.Infof("\r         \nPlease edit: \n- `%s` to add your configuration.\n",
-		ansi.Color(filename, "cyan+b"),
-	)
+	msg := fmt.Sprintf("Config file written to: %s", configFileAbsPath)
+	logrus.Info(msg)
+	feedback.Print(msg)
+}
 
-	return nil
+func checkFileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
 }

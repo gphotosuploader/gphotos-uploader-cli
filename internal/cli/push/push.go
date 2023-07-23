@@ -5,6 +5,7 @@ import (
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
@@ -57,10 +58,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	// launch all folder upload jobs
-	for _, config := range cli.Config.Jobs {
-		sourceFolder := config.SourceFolder
+	jobs := configuration.Settings.Get("jobs").([]config.FolderUploadJob)
+	for _, job := range jobs {
+		sourceFolder := job.SourceFolder
 
-		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
+		filterFiles, err := filter.Compile(job.IncludePatterns, job.ExcludePatterns)
 		if err != nil {
 			return err
 		}
@@ -69,21 +71,21 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			FileTracker: cli.FileTracker,
 
 			SourceFolder: sourceFolder,
-			CreateAlbums: config.CreateAlbums,
+			CreateAlbums: job.CreateAlbums,
 			Filter:       filterFiles,
 		}
 
 		// get UploadItem{} to be uploaded to Google Photos.
 		itemsToUpload, err := folder.ScanFolder(cli.Logger)
 		if err != nil {
-			cli.Logger.Fatalf("Failed to process location '%s': %s", config.SourceFolder, err)
+			cli.Logger.Fatalf("Failed to process location '%s': %s", job.SourceFolder, err)
 			continue
 		}
 
 		totalItems := len(itemsToUpload)
 		var uploadedItems int
 
-		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, config.SourceFolder)
+		cli.Logger.Infof("Found %d items to be uploaded processing location '%s'.", totalItems, job.SourceFolder)
 
 		bar := feedback.NewTaskProgressBar("Uploading files...", totalItems, true)
 
@@ -119,7 +121,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 						cli.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", file, err)
 					}
 
-					if config.DeleteAfterUpload {
+					if job.DeleteAfterUpload {
 						if err := file.Remove(); err != nil {
 							cli.Logger.Errorf("Deletion request failed: file=%s, err=%v", file, err)
 						}
