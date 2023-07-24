@@ -9,23 +9,22 @@ import (
 	"testing"
 )
 
-func TestNewCommand(t *testing.T) {
+func TestNewVersionCommand(t *testing.T) {
 	// Prepare a known version without depending on the build info.
 	versioninfo.VersionInfo = &versioninfo.Info{
 		Application:   "fooBarCommand",
 		VersionString: "fooBarVersion",
 	}
+	expected := "fooBarCommand Version: fooBarVersion\n"
 
 	actual := new(bytes.Buffer)
-
 	configuration.Settings = configuration.Init("")
 	rootCommand := cli.NewCommand()
 	rootCommand.SetOut(actual)
 	rootCommand.SetArgs([]string{"version"})
 
-	_ = rootCommand.Execute()
+	err := rootCommand.Execute()
 
-	expected := "fooBarCommand Version: fooBarVersion\n"
-
+	assert.NoError(t, err)
 	assert.Equal(t, expected, actual.String())
 }
