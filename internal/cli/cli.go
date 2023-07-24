@@ -11,7 +11,6 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	versioninfo "github.com/gphotosuploader/gphotos-uploader-cli/version"
-	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -87,8 +86,8 @@ func preRun(cobraCmd *cobra.Command, args []string) {
 	color.NoColor = configuration.Settings.GetBool("output.no_color") || os.Getenv("NO_COLOR") != ""
 
 	// Set default feedback output to colorable
-	feedback.SetOut(colorable.NewColorableStdout())
-	feedback.SetErr(colorable.NewColorableStderr())
+	feedback.SetOut(cobraCmd.OutOrStdout())
+	feedback.SetErr(cobraCmd.ErrOrStderr())
 
 	//
 	// Prepare logging
@@ -97,7 +96,7 @@ func preRun(cobraCmd *cobra.Command, args []string) {
 	// decide whether we should log to stdout
 	if verbose {
 		// if we print on stdout, do it in full colors
-		logrus.SetOutput(colorable.NewColorableStdout())
+		logrus.SetOutput(cobraCmd.OutOrStdout())
 		logrus.SetFormatter(&logrus.TextFormatter{
 			ForceColors:   true,
 			DisableColors: color.NoColor,
