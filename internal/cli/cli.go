@@ -40,13 +40,13 @@ For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-
 	verbose    bool
 	configFile string
 
-	// Os points to the (real) file system.
+	// Fs points to the (real) file system.
 	// Useful for testing.
-	Os = afero.NewOsFs()
+	Fs = afero.NewOsFs()
 )
 
-// NewCommand creates a new gphotosCLI command root
-func NewCommand() *cobra.Command {
+// New creates a new gphotosCLI command root
+func New() *cobra.Command {
 	// gphotosCLI is the root command
 	gphotosCLI := &cobra.Command{
 		Use:              "gphotos-cli",
@@ -63,7 +63,7 @@ func NewCommand() *cobra.Command {
 // this is here only for testing
 func createCliCommandTree(cmd *cobra.Command) {
 	// Add main commands
-	cmd.AddCommand(version.NewCommand())
+	cmd.AddCommand(version.NewVersionCommand())
 	cmd.AddCommand(config.NewCommand())
 	cmd.AddCommand(push.NewCommand())
 	cmd.AddCommand(auth.NewCommand())

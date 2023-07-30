@@ -11,8 +11,8 @@ func NewCommand() *cobra.Command {
 		Short: "Configuration commands.",
 	}
 
-	configCommand.AddCommand(initDumpCommand())
-	configCommand.AddCommand(initInitCommand())
+	configCommand.AddCommand(newConfigDumpCommand())
+	configCommand.AddCommand(newConfigInitCommand())
 
 	return configCommand
 }

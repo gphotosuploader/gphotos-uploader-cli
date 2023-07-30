@@ -19,7 +19,7 @@ func NewCommand() *cobra.Command {
 	authCmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Authenticate account with Google Photos to get OAuth 2.0 token",
-		Long:  `Force authentication against Google Photos to get OAuth 2.0 token.`,
+		Long:  `Overwrite authentication against Google Photos to get OAuth 2.0 token.`,
 		Args:  cobra.NoArgs,
 		RunE:  cmd.Run,
 	}

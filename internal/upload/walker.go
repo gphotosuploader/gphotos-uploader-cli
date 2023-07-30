@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,7 +30,7 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 		// If a directory is excluded, skip it!
 		if fi.IsDir() {
 			if job.Filter.IsExcluded(relativePath) {
-				logger.Debugf("Skipping excluded directory '%s'.", fp)
+				logrus.Debugf("Skipping excluded directory '%s'.", fp)
 				return filepath.SkipDir
 			}
 			return nil
@@ -40,17 +41,17 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 		// then set up of includePatterns and excludePatterns.
 
 		if !job.Filter.IsAllowed(relativePath) {
-			logger.Debugf("Skipping excluded file '%s'.", fp)
+			logrus.Debugf("Skipping excluded file '%s'.", fp)
 			return nil
 		}
 
 		// check completed uploads db for previous uploads
 		if job.FileTracker.IsUploaded(fp) {
-			logger.Debugf("Skipping already uploaded file '%s'.", fp)
+			logrus.Debugf("Skipping already uploaded file '%s'.", fp)
 			return nil
 		}
 
-		logger.Debugf("Upload file '%s' to album '%s'.", fp, job.albumName(relativePath))
+		logrus.Debugf("Upload file '%s' to album '%s'.", fp, job.albumName(relativePath))
 
 		// set file upload Options depending on folder upload Options
 		*reqs = append(*reqs, FileItem{

@@ -27,7 +27,7 @@ func Init(configFile string) *viper.Viper {
 		settings.SetConfigName(strings.TrimSuffix(filepath.Base(configFile), filepath.Ext(configFile)))
 		settings.AddConfigPath(filepath.Dir(configFile))
 	} else {
-		configDir := settings.GetString("directories.Data")
+		configDir := settings.GetString("directories.data")
 		// Get the default data path if none was provided
 		if configDir == "" {
 			configDir = getDefaultGooglePhotosCLIDataDir()

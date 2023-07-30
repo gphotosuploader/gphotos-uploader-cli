@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/oauth"
@@ -13,7 +14,7 @@ import (
 // AuthenticateFromToken will use the token from the Token Manage.
 func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error) {
 	account := configuration.Settings.GetString("auth.account")
-	app.Logger.Infof("Authenticating using token for '%s'", account)
+	logrus.Infof("Authenticating using token for '%s'", account)
 
 	token, err := app.TokenManager.Get(account)
 	if err != nil {
@@ -31,10 +32,10 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 		return nil, err
 	}
 
-	app.Logger.Donef("Token is valid, expires at %s", token.Expiry)
+	logrus.Infof("Token is valid, expires at %s", token.Expiry)
 
 	if err := app.TokenManager.Put(account, token); err != nil {
-		app.Logger.Debugf("Failed to store token into token manager: %s", err)
+		logrus.Debugf("Failed to store token into token manager: %s", err)
 	}
 
 	return oauth.Client(ctx, cfg, token)
@@ -44,12 +45,12 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 // AuthenticateFromWeb will create a new token after completing the OAuth 2.0 flow.
 func (app *App) AuthenticateFromWeb(ctx context.Context) (*http.Client, error) {
 	account := configuration.Settings.GetString("auth.account")
-	app.Logger.Infof("Getting authentication token for '%s'", account)
+	logrus.Infof("Getting authentication token for '%s'", account)
 
 	cfg := &oauth.Config{
 		ClientID:     configuration.Settings.GetString("auth.client_id"),
 		ClientSecret: configuration.Settings.GetString("auth.client_secret"),
-		Logf:         app.Logger.Debugf,
+		Logf:         logrus.Debugf,
 	}
 
 	token, err := oauth.GetToken(ctx, cfg)
@@ -57,10 +58,10 @@ func (app *App) AuthenticateFromWeb(ctx context.Context) (*http.Client, error) {
 		return nil, err
 	}
 
-	app.Logger.Donef("Token obtained, expires at %s", token.Expiry)
+	logrus.Infof("Token obtained, expires at %s", token.Expiry)
 
 	if err := app.TokenManager.Put(account, token); err != nil {
-		app.Logger.Debugf("Failed to store token into token manager: %s", err)
+		logrus.Debugf("Failed to store token into token manager: %s", err)
 	}
 
 	return oauth.Client(ctx, cfg, token)

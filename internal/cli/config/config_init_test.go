@@ -7,25 +7,32 @@ package config_test
 //		args          []string
 //		isErrExpected bool
 //	}{
-//		{"Should success", "", []string{}, false},
-//		{"Should fail if input exists", "/foo", []string{}, true},
-//		{"Should success if input exists and force is set", "/foo", []string{"--force"}, false},
+//		{"Should success", "", []string{"config", "init", "--overwrite"}, false},
+//		{"Should fail if input exists", "/foo", []string{"config", "init"}, true},
+//		{"Should success if input exists and force is set", "/foo", []string{"config", "init", "--overwrite"}, false},
 //	}
-//
-//	t.Cleanup(func() {
-//		cli.Os = afero.NewOsFs()
-//	})
 //
 //	for _, tc := range testCases {
 //		t.Run(tc.name, func(t *testing.T) {
 //			cli.Os = afero.NewMemMapFs()
-//			createTestConfigurationFile(t, cli.Os, tc.input)
+//			//createTestConfigurationFile(t, cli.Os, tc.input)
 //
-//			c := cli.NewCommand()
-//			c.SetArgs(tc.args)
+//			actual := new(bytes.Buffer)
+//			configuration.Settings = configuration.Init("")
+//			configuration.Settings.SetFs(afero.NewMemMapFs())
+//			rootCommand := cli.New()
+//			//rootCommand.SetOut(actual)
+//			//rootCommand.SetErr(actual)
+//			rootCommand.SetArgs(tc.args)
 //
-//			err := c.Execute()
-//			assertExpectedError(t, tc.isErrExpected, err)
+//			err := rootCommand.Execute()
+//			if tc.isErrExpected {
+//				assert.Error(t, err)
+//			} else {
+//				assert.NoError(t, err)
+//			}
+//
+//			assert.Equal(t, "hola", actual.String())
 //		})
 //	}
 //}

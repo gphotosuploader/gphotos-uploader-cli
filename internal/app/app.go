@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/configuration"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"path/filepath"
 
@@ -71,14 +72,6 @@ func StartServices(ctx context.Context, path string) (*App, error) {
 		fs:     afero.NewOsFs(),
 	}
 
-	//app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
-	//app.Config, err = config.FromFile(app.fs, app.configFilename())
-	//if err != nil {
-	//	return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
-	//}
-	//
-	//app.Logger.Debugf("Current configuration: %s", app.Config.SafePrint())
-
 	if err := app.startServices(); err != nil {
 		return nil, err
 	}
@@ -95,7 +88,7 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 		fs:     fs,
 	}
 
-	app.Logger.Infof("Using application data at '%s'.", app.appDir)
+	logrus.Infof("Using application data at '%s'.", app.appDir)
 
 	return app, nil
 }
@@ -103,22 +96,22 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 // Stop stops the application releasing all service resources.
 func (app *App) Stop() error {
 	// Close already uploaded file tracker
-	app.Logger.Debug("Shutting down File Tracker service...")
+	logrus.Debug("Shutting down File Tracker service...")
 	if err := app.FileTracker.Close(); err != nil {
 		return err
 	}
 
 	// Close upload session tracker
-	app.Logger.Debug("Shutting down Upload Tracker service...")
+	logrus.Debug("Shutting down Upload Tracker service...")
 	app.UploadSessionTracker.Close()
 
 	// Close token manager
-	app.Logger.Debug("Shutting down Token Manager service...")
+	logrus.Debug("Shutting down Token Manager service...")
 	if err := app.TokenManager.Close(); err != nil {
 		return err
 	}
 
-	app.Logger.Debug("All services have been shut down successfully")
+	logrus.Debug("All services have been shut down successfully")
 	return nil
 }
 
@@ -153,18 +146,18 @@ func (app *App) startServices() error {
 	var err error
 	app.FileTracker, err = app.defaultFileTracker()
 	if err != nil {
-		app.Logger.Errorf("File tracker could not be started, err: %s", err)
+		logrus.Errorf("File tracker could not be started, err: %s", err)
 		return fmt.Errorf("file tracker could not be started, err: %s", err)
 	}
 	secretsManagerType := configuration.Settings.GetString("auth.secrets_type")
 	app.TokenManager, err = app.defaultTokenManager(secretsManagerType)
 	if err != nil {
-		app.Logger.Errorf("Token manager could not be started, err: %s", err)
+		logrus.Errorf("Token manager could not be started, err: %s", err)
 		return fmt.Errorf("token manager could not be started, type:%s, err: %s", secretsManagerType, err)
 	}
 	app.UploadSessionTracker, err = app.defaultUploadsSessionTracker()
 	if err != nil {
-		app.Logger.Errorf("Uploads session tracker could not be started, err: %s", err)
+		logrus.Errorf("Uploads session tracker could not be started, err: %s", err)
 		return fmt.Errorf("uploads session tracker could not be started, err:%s", err)
 	}
 	return nil

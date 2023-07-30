@@ -19,7 +19,7 @@ func TestNewVersionCommand(t *testing.T) {
 
 	actual := new(bytes.Buffer)
 	configuration.Settings = configuration.Init("")
-	rootCommand := cli.NewCommand()
+	rootCommand := cli.New()
 	rootCommand.SetOut(actual)
 	rootCommand.SetArgs([]string{"version"})
 

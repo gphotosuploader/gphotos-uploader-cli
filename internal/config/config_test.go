@@ -89,31 +89,6 @@ func TestFromFile(t *testing.T) {
 	}
 }
 
-func TestConfig_SafePrint(t *testing.T) {
-	cfg := config.Config{
-		APIAppCredentials: config.APIAppCredentials{
-			ClientID:     "client-id",
-			ClientSecret: "client-secret",
-		},
-		Account:            "account",
-		SecretsBackendType: "auto",
-		Jobs: []config.FolderUploadJob{
-			{
-				SourceFolder:      "foo",
-				CreateAlbums:      "folderPath",
-				DeleteAfterUpload: false,
-				IncludePatterns:   []string{},
-				ExcludePatterns:   []string{},
-			},
-		},
-	}
-	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
-
-	if want != cfg.SafePrint() {
-		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())
-	}
-}
-
 func createTestConfigurationFile(t *testing.T, fs afero.Fs, path string) {
 	if path == "" {
 		return

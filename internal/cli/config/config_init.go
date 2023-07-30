@@ -19,7 +19,7 @@ type InitCommandOptions struct {
 
 const defaultFileName = "config.toml"
 
-func initInitCommand() *cobra.Command {
+func newConfigInitCommand() *cobra.Command {
 	o := &InitCommandOptions{}
 
 	initCmd := &cobra.Command{
