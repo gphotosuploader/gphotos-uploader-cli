@@ -8,11 +8,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Support for the latest published Go version (1.21). This project will maintain compatibility with the latest **two major versions** published.
 
 ### Changed
+- Bump `github.com/sirupsen/logrus` from 1.9.0 to 1.9.3 ([#378][i378])
+- Bump `github.com/spf13/afero` from 1.9.5 to 1.10.0 ([#379][i379])
+- Bump `github.com/gphotosuploader/google-photos-api-client-go/v3` from 3.0.1 to 3.0.2
+- Bump `golang.org/x/oauth2` from 0.12.0 to 0.13.0 
+- Bump `golang.org/x/sync` from 0.3.0 to 0.4.0 ([#377][i377])
+- Bump `golang.org/x/term` from 0.10.0 to 0.13.0 ([#376][i376])
+- [CI] Bump `github.com/stretchr/testify` from 1.7.0 to 1.8.4 ([#380][i380])
+- [CI] Bump `actions/checkout` from 3 to 4 ([#375][i375])
+- [CI] Bump `goreleaser/goreleaser-action` from 4 to 5 ([#374][i374])
 
 
 ### Removed
 - Support for previous Go version (1.19).
 
+[i374]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/374
+[i375]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/375
+[i376]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/376
+[i377]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/377
+[i378]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/378
+[i379]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/379
+[i380]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/380
 
 ## 4.0.0
 ### Changed
