@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - [CI] Bump `github.com/stretchr/testify` from 1.7.0 to 1.8.4 ([#380][i380])
 - [CI] Bump `actions/checkout` from 3 to 4 ([#375][i375])
 - [CI] Bump `goreleaser/goreleaser-action` from 4 to 5 ([#374][i374])
+- [CI] Bump `golangci` from 1.52.1 to 1.54.2
 
 
 ### Removed
