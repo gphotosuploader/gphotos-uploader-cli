@@ -1,0 +1,21 @@
+version: 2
+updates:
+    -   package-ecosystem: 'gomod'
+        directory: '/'
+        schedule:
+            interval: 'weekly'
+        labels:
+            - 'dependencies'
+        commit-message:
+            prefix: 'Bump'
+            include: 'scope'
+    
+    -   package-ecosystem: 'github-actions'
+        directory: '/'
+        schedule:
+            interval: 'weekly'
+        labels:
+            - 'dependencies'
+        commit-message:
+            prefix: '[CI]'
+            include: 'scope'
