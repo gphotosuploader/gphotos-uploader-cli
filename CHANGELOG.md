@@ -3,6 +3,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.5.2
+### Added
+- Support for the latest published Go version (1.21). This project will maintain compatibility with the latest two major versions published.
+- Client cache for albums to reduce the number of requests to Google Photos API
+
+
+### Changed
+- Bump `github.com/sirupsen/logrus` from 1.8.1 to 1.9.3
+- Bump `github.com/spf13/afero` from 1.8.2 to 1.10.0 
+- Bump `golang.org/x/oauth2` from 0.12.0 to 0.13.0
+- Bump `golang.org/x/sync` from 0.3.0 to 0.4.0 
+- Bump `golang.org/x/term` from 0.10.0 to 0.13.0
+- Bump `github.com/99designs/keyring` from 1.2.1 to 1.2.2
+- Bump `github.com/gphotosuploader/google-photos-api-client-go/v2` from 2.4.0 to 2.4.2
+- Bump `github.com/schollz/progressbar/v3` from 3.8.6 to 3.13.1
+- Bump `github.com/spf13/cobra` from 1.4.0 to 1.7.0
+- Bump `golang.org/x/oauth2` from v0.0.0-20220309155454-6242fa91716a to 0.13.0
+- Bump `golang.org/x/sync` from v0.0.0-20210220032951-036812b2e83c to 0.4.0
+- Bump `golang.org/x/term` v0.0.0-20210927222741-03fcf44c2211 to 0.13.0
+- Bump `google.golang.org/api` from v0.74.0 to 0.148.0
+
 ## 3.5.1
 ### Added
 - Support for the latest published Go version (1.20). This project will maintain compatibility with the latest two major versions published.
