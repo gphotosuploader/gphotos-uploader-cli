@@ -43,11 +43,10 @@ Before you can use `gphotos-uploader-cli`, you must enable the Photos Library AP
 1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
 
 ## Account
-(For versions >= v3.0.0)
 It's the Google Account identity (e-mail address) where the files are going to be uploaded.
 
 ### SecretsBackendType <!-- {docsify-ignore} -->
-This option allows you to choose which backend will be used for secrets storage. You set `auto` to allow the application decide which one will be used given your environment.
+This option allows you to choose which backend will be used for secret storage. You set `auto` to allow the application to decide which one will be used given your environment.
 
 Available options for secrets backend are:
 
@@ -59,7 +58,7 @@ Available options for secrets backend are:
 "file"              For encrypted file support - needs interaction to supply a symetric encryption key
 ```
 
-Most of the times `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
+Most of the time `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
 
 ```
 // This order makes sure the OS-specific backends
@@ -78,18 +77,11 @@ var backendOrder = []BackendType{
 ## Jobs <!-- {docsify-ignore} -->
 List of folders to upload and upload options for each folder.
 
-### Account - DEPRECATED
-(For versions < v3.0.0)
-
-It's the Google Account identity (e-mail address) where the files are going to be uploaded.
-
 ### SourceFolder
 The folder to upload from. Must be an absolute path. Can expand the home folder tilde shorthand `~`.
 > The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
 ### CreateAlbums
-(For versions >= v3.0.0)
-
 It controls how uploaded files will be organized into albums in Google Photos.
 
 There are three options:
@@ -108,19 +100,8 @@ CreateAlbums: folderPath
 # album name would be: bar_xyz
 ```
 
-### MakeAlbums - DEPRECATED
-(For versions < v3.0.0)
-
-If `MakeAlbums.Enabled` set to true, use the last folder path component as album name. You can customize the name of the created albums with `MakeAlbums.Use`. 
-
-Available options are:
-* `folderName` will use the name of the item's containing folder as album name.
-* `folderPath` will use the full path of the item's containing folder as album name.
-
 ### DeleteAfterUpload
-(Only for versions >= v0.6.0)
-
-If set to true, media will be deleted from local disk after completing the upload. 
+If set to true, media will be deleted from the local disk after completing the upload. 
 
 ## Including and Excluding files
 You can include and exclude files by specifying the `includePatterns` and `excludePatterns` options. You can add one or more patterns separated by commas `,`. These patterns are always applied to `sourceFolder`.
@@ -163,7 +144,7 @@ Class      | Meaning
 `[^class]` | matches any single character which does *not* match the class
 
 #### Tagged patterns
-There are some common patterns that has been tagged, you can use them to simplify your configuration.
+There are some common patterns that have been tagged, you can use them to simplify your configuration.
 
 > Tagged patterns matches file extensions case insensitively.
 

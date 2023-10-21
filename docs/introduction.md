@@ -12,7 +12,7 @@ While the official tool only supports Mac OS and Windows, this brings an uploade
 - **Resumable uploads**: Uploads can be resumed, saving time and bandwidth. 
 - **File deletion after uploading**: Clean up local files after being uploaded.
 - **Track already uploaded files**: uploads only new files to save bandwidth.
-- **Caches request results**: keep a local cache to reduce number of queries to Google Photos.
+- **Cache request results**: keep a local cache to reduce number of queries to Google Photos.
 - **Secure**: logs you into Google using OAuth (so this app doesn't have to know your password), and stores your temporary access code in your OS's secure storage (keyring/keychain).
 - **Retryable**: all the requests are retried using exponential back-off as is recommended by [Google Photos best practices](https://developers.google.com/photos/library/guides/best-practices#error-handling).
 
@@ -23,7 +23,7 @@ Only images and videos can be uploaded. If you attempt to upload non videos or i
 All media items uploaded to Google Photos using the API [are stored in full resolution](https://support.google.com/photos/answer/6220791) at original quality. **They count toward the user’s storage**. The API does not offer a way to upload in "high quality" mode.
 
 ### Duplicates
-If you upload the same image (with the same binary data) twice then Google Photos will deduplicate it. However it will retain the filename from the first upload which may be confusing. In practise this shouldn't cause too many problems.
+If you upload the same image (with the same binary data), twice then Google Photos will deduplicate it. However it will retain the filename from the first upload which may be confusing. In practise this shouldn't cause too many problems.
 
 ### Modified time
 The date shown of media in Google Photos is the creation date as determined by the EXIF information, or the upload date if that is not known.
