@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## 4.0.0
 ### Added
 - Support for the latest published Go version (1.21). This project will maintain compatibility with the latest **two major versions** published.
+- Implement a cache to reduce the number of requests to Google Photos API and reduce the risk of being quota limited.
+- Implement **a new command to list albums** (`list albums`) created by this CLI.
+- Implement **a new command to list media items** (`list media-items`) uploaded by this CLI. It offers the possibility of filtering by album.
+- Progress bars to provide feedback to users on very long transactions. 
 
 ### Changed
 - Bump `github.com/sirupsen/logrus` from 1.9.0 to 1.9.3 ([#378][i378])
