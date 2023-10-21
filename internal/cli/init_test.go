@@ -1,4 +1,4 @@
-package cmd_test
+package cli_test
 
 import (
 	"path/filepath"
@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/afero"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 )
 
 func TestNewInitCmd(t *testing.T) {
@@ -24,15 +24,15 @@ func TestNewInitCmd(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		cmd.Os = afero.NewOsFs()
+		cli.Os = afero.NewOsFs()
 	})
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			cmd.Os = afero.NewMemMapFs()
-			createTestConfigurationFile(t, cmd.Os, tc.input)
+			cli.Os = afero.NewMemMapFs()
+			createTestConfigurationFile(t, cli.Os, tc.input)
 
-			c := cmd.NewInitCmd(&flags.GlobalFlags{CfgDir: tc.input})
+			c := cli.NewInitCmd(&flags.GlobalFlags{CfgDir: tc.input})
 			c.SetArgs(tc.args)
 
 			err := c.Execute()

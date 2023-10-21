@@ -1,6 +1,9 @@
 package upload_test
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
@@ -11,100 +14,68 @@ import (
 func TestWalker_GetAllFiles(t *testing.T) {
 	var includePatterns = []string{"_ALL_FILES_"}
 	var excludePatterns = []string{""}
-
-	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":                   true,
-		"testdata/SampleJPGImage.jpg":                true,
-		"testdata/SamplePNGImage.png":                true,
-		"testdata/SampleSVGImage.svg":                true,
-		"testdata/SampleText.txt":                    true,
-		"testdata/SampleVideo.mp4":                   true,
-		"testdata/ScreenShotJPG.jpg":                 true,
-		"testdata/ScreenShotPNG.png":                 true,
-		"testdata/folder1/SamplePNGImage.png":        true,
-		"testdata/folder1/SampleJPGImage.jpg":        true,
-		"testdata/folder2/SamplePNGImage.png":        true,
-		"testdata/folder2/SampleJPGImage.jpg":        true,
-		"testdata/folder-symlink/SamplePNGImage.png": true,
-		"testdata/folder-symlink/SampleJPGImage.jpg": true,
+	var expected = []string{
+		"testdata/SampleAudio.mp3",
+		"testdata/SampleJPGImage.jpg",
+		"testdata/SamplePNGImage.png",
+		"testdata/SampleSVGImage.svg",
+		"testdata/SampleText.txt",
+		"testdata/SampleVideo.mp4",
+		"testdata/ScreenShotJPG.jpg",
+		"testdata/ScreenShotPNG.png",
+		"testdata/folder1/SamplePNGImage.png",
+		"testdata/folder1/SampleJPGImage.jpg",
+		"testdata/folder2/SamplePNGImage.png",
+		"testdata/folder2/SampleJPGImage.jpg",
+		"testdata/folder-symlink/SamplePNGImage.png",
+		"testdata/folder-symlink/SampleJPGImage.jpg",
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns)
-	if err != nil {
-		t.Fatal(err)
-	}
+	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)
 
-	for i := range want {
-		if got[i] != want[i] {
-			t.Errorf("want: %v, got: %v, file: %s", want[i], got[i], i)
-		}
-	}
+	require.NoError(t, err)
+	assert.ElementsMatch(t, expected, got)
 }
 
 func TestWalker_GetAllPNGFiles(t *testing.T) {
 	var includePatterns = []string{"**/*.png"}
 	var excludePatterns = []string{""}
-
-	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":                   false,
-		"testdata/SampleJPGImage.jpg":                false,
-		"testdata/SamplePNGImage.png":                true,
-		"testdata/SampleSVGImage.svg":                false,
-		"testdata/SampleText.txt":                    false,
-		"testdata/SampleVideo.mp4":                   false,
-		"testdata/ScreenShotJPG.jpg":                 false,
-		"testdata/ScreenShotPNG.png":                 true,
-		"testdata/folder1/SamplePNGImage.png":        true,
-		"testdata/folder1/SampleJPGImage.jpg":        false,
-		"testdata/folder2/SamplePNGImage.png":        true,
-		"testdata/folder2/SampleJPGImage.jpg":        false,
-		"testdata/folder-symlink/SamplePNGImage.png": true,
-		"testdata/folder-symlink/SampleJPGImage.jpg": false,
+	var expected = []string{
+		"testdata/SamplePNGImage.png",
+		"testdata/ScreenShotPNG.png",
+		"testdata/folder1/SamplePNGImage.png",
+		"testdata/folder2/SamplePNGImage.png",
+		"testdata/folder-symlink/SamplePNGImage.png",
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns)
-	if err != nil {
-		t.Fatal(err)
-	}
+	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)
 
-	for i := range want {
-		if got[i] != want[i] {
-			t.Errorf("want: %v, got: %v, file: %s", want[i], got[i], i)
-		}
-	}
+	require.NoError(t, err)
+	assert.ElementsMatch(t, expected, got)
 }
 
 func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 	var includePatterns = []string{"_ALL_FILES_"}
 	var excludePatterns = []string{"folder1"}
-
-	var want = map[string]bool{
-		"testdata/SampleAudio.mp3":                   true,
-		"testdata/SampleJPGImage.jpg":                true,
-		"testdata/SamplePNGImage.png":                true,
-		"testdata/SampleSVGImage.svg":                true,
-		"testdata/SampleText.txt":                    true,
-		"testdata/SampleVideo.mp4":                   true,
-		"testdata/ScreenShotJPG.jpg":                 true,
-		"testdata/ScreenShotPNG.png":                 true,
-		"testdata/folder1/SamplePNGImage.png":        false,
-		"testdata/folder1/SampleJPGImage.jpg":        false,
-		"testdata/folder2/SamplePNGImage.png":        true,
-		"testdata/folder2/SampleJPGImage.jpg":        true,
-		"testdata/folder-symlink/SamplePNGImage.png": true,
-		"testdata/folder-symlink/SampleJPGImage.jpg": true,
+	var expected = []string{
+		"testdata/SampleAudio.mp3",
+		"testdata/SampleJPGImage.jpg",
+		"testdata/SamplePNGImage.png",
+		"testdata/SampleSVGImage.svg",
+		"testdata/SampleText.txt",
+		"testdata/SampleVideo.mp4",
+		"testdata/ScreenShotJPG.jpg",
+		"testdata/ScreenShotPNG.png",
+		"testdata/folder2/SamplePNGImage.png",
+		"testdata/folder2/SampleJPGImage.jpg",
+		"testdata/folder-symlink/SamplePNGImage.png",
+		"testdata/folder-symlink/SampleJPGImage.jpg",
 	}
 
-	got, err := getScanFolderResult(includePatterns, excludePatterns)
-	if err != nil {
-		t.Fatalf("no error was expected at this point: err=%s", err)
-	}
+	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)
 
-	for i := range want {
-		if got[i] != want[i] {
-			t.Errorf("want: %v, got: %v, file: %s", want[i], got[i], i)
-		}
-	}
+	require.NoError(t, err)
+	assert.ElementsMatch(t, expected, got)
 }
 
 func TestRelativePath(t *testing.T) {
@@ -123,25 +94,21 @@ func TestRelativePath(t *testing.T) {
 		{base: "", in: "/foo/bar", want: "/foo/bar"},
 		{base: "/foo/bar", in: "/abc/def", want: "/abc/def"},
 	}
-	for _, tc := range objectsTest {
 
-		got := upload.RelativePath(tc.base, tc.in)
-		if got != tc.want {
-			t.Errorf("Test Case (%s), basepath '%s': want '%s', got '%s'", tc.base, tc.in, tc.want, got)
-		}
+	for _, tc := range objectsTest {
+		assert.Equal(t, tc.want, upload.RelativePath(tc.base, tc.in))
 	}
 }
 
-func getScanFolderResult(includePatterns []string, excludePatterns []string) (map[string]bool, error) {
-	var results = map[string]bool{}
+func getIncludedFilesByScanFolder(includePatterns []string, excludePatterns []string) ([]string, error) {
 	ft := &mock.FileTracker{
-		PutFn: func(path string) error {
+		MarkAsUploadedFn: func(path string) error {
 			return nil
 		},
-		ExistFn: func(path string) bool {
-			return false
+		IsUploadedFn: func(path string) bool {
+			return strings.Contains(path, "AlreadyUploaded")
 		},
-		DeleteFn: func(path string) error {
+		UnmarkAsUploadedFn: func(path string) error {
 			return nil
 		},
 	}
@@ -159,8 +126,9 @@ func getScanFolderResult(includePatterns []string, excludePatterns []string) (ma
 		return nil, err
 	}
 
+	var results []string
 	for _, i := range foundItems {
-		results[i.Path] = true
+		results = append(results, i.Path)
 	}
 
 	return results, nil

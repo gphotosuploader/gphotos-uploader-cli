@@ -1,4 +1,4 @@
-package cmd
+package auth
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
 )
 
 // AuthCmd holds the required data for the init cmd
@@ -14,7 +14,7 @@ type AuthCmd struct {
 	*flags.GlobalFlags
 }
 
-func NewAuthCmd(globalFlags *flags.GlobalFlags) *cobra.Command {
+func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 	cmd := &AuthCmd{GlobalFlags: globalFlags}
 
 	authCmd := &cobra.Command{

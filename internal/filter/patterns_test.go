@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"reflect"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -18,18 +18,12 @@ func Test_DeleteEmpty(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := deleteEmpty(tc.input)
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Errorf("want: %#v, got: %#v", tc.want, got)
-			}
+			assert.Equal(t, tc.want, deleteEmpty(tc.input))
 		})
 	}
 
 	t.Run("empty input array", func(t *testing.T) {
-		got := deleteEmpty([]string{})
-		if nil != got {
-			t.Errorf("want: []string{nil}, got: %#v", got)
-		}
+		assert.Nil(t, deleteEmpty([]string{}))
 	})
 }
 
@@ -47,9 +41,11 @@ func Test_ValidatePatterns(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := validatePatternList(tc.input)
-			if got != nil && !tc.errExpected {
-				t.Errorf("error was not expected, got: %v", got)
+			err := validatePatternList(tc.input)
+			if tc.errExpected {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
 		})
 	}
@@ -71,8 +67,10 @@ func Test_Match(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			got, err := match(tc.patterns, tc.input)
-			if tc.shouldMatch != got || (err != nil && !tc.errExpected) {
-				t.Errorf("want: %v, got: %v, err: %v", tc.shouldMatch, got, err)
+			if tc.errExpected {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, tc.shouldMatch, got)
 			}
 		})
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// fs represents the filesystem to use. By default it uses functions based on `os` package.
+	// fs represents the filesystem to use. By default, it uses functions based on the `os` package.
 	// In testing, it uses a memory file system.
 	appFS = afero.NewOsFs()
 )
@@ -19,43 +19,60 @@ type FileItem struct {
 	AlbumName string
 }
 
+// NewFileItem creates a new instance of FileItem.
 func NewFileItem(path string) FileItem {
 	return FileItem{
 		Path: path,
 	}
 }
 
-// Open returns a stream.
-// Caller should close it finally.
-func (m FileItem) Open() (io.ReadSeeker, int64, error) {
-	f, err := appFS.Stat(m.Path)
+// Open opens the file and returns a stream.
+// The caller should close it finally.
+func (f FileItem) Open() (io.ReadSeeker, int64, error) {
+	fileInfo, err := appFS.Stat(f.Path)
 	if err != nil {
 		return nil, 0, err
 	}
-	r, err := appFS.Open(m.Path)
+
+	file, err := appFS.Open(f.Path)
 	if err != nil {
 		return nil, 0, err
 	}
-	return r, f.Size(), nil
+
+	return file, fileInfo.Size(), nil
 }
 
 // Name returns the filename.
-func (m FileItem) Name() string {
-	return path.Base(m.Path)
+func (f FileItem) Name() string {
+	return path.Base(f.Path)
 }
 
-func (m FileItem) String() string {
-	return m.Path
+// String returns the string representation of the FileItem.
+func (f FileItem) String() string {
+	return f.Path
 }
 
-func (m FileItem) Size() int64 {
-	f, err := appFS.Stat(m.Path)
+// Size returns the file size.
+func (f FileItem) Size() int64 {
+	fileInfo, err := appFS.Stat(f.Path)
 	if err != nil {
 		return 0
 	}
-	return f.Size()
+	return fileInfo.Size()
 }
 
-func (m FileItem) Remove() error {
-	return appFS.Remove(m.Path)
+// Remove removes the file from the file system.
+func (f FileItem) Remove() error {
+	return appFS.Remove(f.Path)
+}
+
+// GroupByAlbum groups FileItem objects by their AlbumName.
+func GroupByAlbum(items []FileItem) map[string][]FileItem {
+	groups := make(map[string][]FileItem)
+
+	for _, item := range items {
+		groups[item.AlbumName] = append(groups[item.AlbumName], item)
+	}
+
+	return groups
 }

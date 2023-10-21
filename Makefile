@@ -1,10 +1,12 @@
+# Use linker flags to provide version/build settings to the target
+CONFIGURATION_PACKAGE := github.com/gphotosuploader/gphotos-uploader-cli/version
+
 # This VERSION could be set calling `make VERSION=0.2.0`
 VERSION ?= $(shell git describe --tags --always --dirty)
+LDFLAGS=-ldflags "-X ${CONFIGURATION_PACKAGE}.versionString=$(VERSION)"
 
-# Use linker flags to provide version/build settings to the target
-VERSION_IMPORT_PATH := github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd
-RELEASE_VERSION_FLAGS=-X=${VERSION_IMPORT_PATH}.version=$(VERSION)
-LDFLAGS=-ldflags "$(RELEASE_VERSION_FLAGS)"
+TEST_VERSION="0.0.0-test.preview"
+TEST_LDFLAGS=-ldflags "-X ${CONFIGURATION_PACKAGE}.versionString=$(TEST_VERSION)"
 
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
@@ -16,7 +18,7 @@ TMP_DIR ?= .tmp
 COVERAGE_FILE := $(TMP_DIR)/coverage.txt
 COVERAGE_HTML_FILE := $(TMP_DIR)/coverage.html
 GOLANGCI := $(TMP_DIR)/golangci-lint
-GOLANGCI_VERSION := 1.55.5
+GOLANGCI_VERSION := 1.55.0
 
 # set how to open files based on OS and ARCH.
 UNAME_OS := $(shell uname -s)
@@ -35,7 +37,7 @@ endif
 test: ## Run all the tests
 	@echo "--> Running tests..."
 	@mkdir -p $(dir $(COVERAGE_FILE))
-	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -race -failfast -timeout=30s $(PKGS)
+	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -race -failfast -timeout=30s ${TEST_LDFLAGS} $(PKGS)
 
 .PHONY: cover
 cover: test ## Run all the tests and opens the coverage report

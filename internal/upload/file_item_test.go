@@ -1,6 +1,8 @@
 package upload
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -18,9 +20,8 @@ func TestFileItem_Name(t *testing.T) {
 
 	for _, tc := range testCases {
 		f := NewFileItem(tc.in)
-		if got := f.Name(); got != tc.want {
-			t.Errorf("TestCase(%s), want: %s, got: %s", tc.in, tc.want, got)
-		}
+
+		assert.Equal(t, tc.want, f.Name())
 	}
 }
 
@@ -36,9 +37,8 @@ func TestFileItem_String(t *testing.T) {
 
 	for _, tc := range testCases {
 		f := NewFileItem(tc.in)
-		if got := f.String(); got != tc.want {
-			t.Errorf("TestCase(%s), want: %s, got: %s", tc.in, tc.want, got)
-		}
+
+		assert.Equal(t, tc.want, f.String())
 	}
 }
 
@@ -55,23 +55,21 @@ func TestFileItem_Open(t *testing.T) {
 
 	appFS = afero.NewMemMapFs()
 	// create test files and directories
-	if err := appFS.MkdirAll("src/", 0755); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
-	if err := afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
+	err := appFS.MkdirAll("src/", 0755)
+	require.NoError(t, err)
+
+	err = afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644)
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		f := NewFileItem(tc.in)
 		_, size, err := f.Open()
-		switch {
-		case tc.errExpected && err == nil:
-			t.Errorf("TestCase(%s), error was expected, but not happened", tc.name)
-		case !tc.errExpected && err != nil:
-			t.Errorf("TestCase(%s), error was not expected: err=%s", tc.name, err)
-		case size != tc.wantSize:
-			t.Errorf("TestCase(%s), want: %d, got: %d", tc.name, tc.wantSize, size)
+
+		if tc.errExpected {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tc.wantSize, size)
 		}
 	}
 }
@@ -88,18 +86,16 @@ func TestFileItem_Size(t *testing.T) {
 
 	appFS = afero.NewMemMapFs()
 	// create test files and directories
-	if err := appFS.MkdirAll("src/", 0755); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
-	if err := afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
+	err := appFS.MkdirAll("src/", 0755)
+	require.NoError(t, err)
+
+	err = afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644)
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		f := NewFileItem(tc.in)
-		if got := f.Size(); got != tc.want {
-			t.Errorf("Test Case(%s), want: %d, got: %d", tc.in, tc.want, got)
-		}
+
+		assert.Equal(t, tc.want, f.Size())
 	}
 }
 
@@ -115,21 +111,54 @@ func TestFileItem_Remove(t *testing.T) {
 
 	appFS = afero.NewMemMapFs()
 	// create test files and directories
-	if err := appFS.MkdirAll("src/", 0755); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
-	if err := afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644); err != nil {
-		t.Fatalf("error was not expected at this point: err=%s", err)
-	}
+	err := appFS.MkdirAll("src/", 0755)
+	require.NoError(t, err)
+
+	err = afero.WriteFile(appFS, "src/existent", []byte("this is content of existing file"), 0644)
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		f := NewFileItem(tc.in)
 		err := f.Remove()
-		switch {
-		case tc.errExpected && err == nil:
-			t.Errorf("TestCase(%s), error was expected, but not happened", tc.name)
-		case !tc.errExpected && err != nil:
-			t.Errorf("TestCase(%s), error was not expected: err=%s", tc.name, err)
+
+		if tc.errExpected {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
 		}
+	}
+}
+
+func TestFileItem_GroupByAlbum(t *testing.T) {
+	items := []FileItem{
+		{Path: "file1.jpg", AlbumName: "Album 1"},
+		{Path: "file2.jpg", AlbumName: "Album 2"},
+		{Path: "file3.jpg", AlbumName: "Album 1"},
+		{Path: "file4.jpg", AlbumName: "Album 2"},
+		{Path: "file5.jpg", AlbumName: "Album 3"},
+	}
+
+	expectedGroups := map[string][]FileItem{
+		"Album 1": {
+			{Path: "file1.jpg", AlbumName: "Album 1"},
+			{Path: "file3.jpg", AlbumName: "Album 1"},
+		},
+		"Album 2": {
+			{Path: "file2.jpg", AlbumName: "Album 2"},
+			{Path: "file4.jpg", AlbumName: "Album 2"},
+		},
+		"Album 3": {
+			{Path: "file5.jpg", AlbumName: "Album 3"},
+		},
+	}
+
+	groupedItems := GroupByAlbum(items)
+
+	assert.Len(t, groupedItems, len(expectedGroups))
+
+	for albumName, expectedItems := range expectedGroups {
+
+		assert.Contains(t, groupedItems, albumName)
+		assert.Equal(t, expectedItems, groupedItems[albumName])
 	}
 }

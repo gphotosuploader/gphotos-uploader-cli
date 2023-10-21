@@ -1,10 +1,9 @@
 package filetracker_test
 
 import (
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"testing"
 	"time"
-
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 )
 
 func TestTrackedFile_Hash(t *testing.T) {

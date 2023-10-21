@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -37,13 +38,23 @@ func TestAlbumName(t *testing.T) {
 			job := UploadFolderJob{
 				CreateAlbums: tt.createAlbums,
 			}
-			got := job.albumName(tt.in)
-			if got != tt.want {
-				t.Errorf("albumName for '%s' failed: expected '%s', got '%s'", tt.in, tt.want, got)
-			}
+
+			assert.Equal(t, tt.want, job.albumName(tt.in))
 		})
 
 	}
+}
+
+func TestAlbumNameWithInvalidParameter(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("A Panic was expected but not reached.")
+		}
+	}()
+	job := UploadFolderJob{
+		CreateAlbums: "FooBar",
+	}
+	_ = job.albumName("/foo/bar/file.jpg")
 }
 
 func TestAlbumNameUsingFolderPath(t *testing.T) {
@@ -60,10 +71,7 @@ func TestAlbumNameUsingFolderPath(t *testing.T) {
 		{in: "/foo/bar/", out: "foo_bar"},
 	}
 	for _, tt := range testData {
-		got := albumNameUsingFolderPath(tt.in)
-		if got != tt.out {
-			t.Errorf("albumNameUsingFolderPath for '%s' failed: expected '%s', got '%s'", tt.in, tt.out, got)
-		}
+		assert.Equal(t, tt.out, albumNameUsingFolderPath(tt.in))
 	}
 }
 
@@ -81,9 +89,6 @@ func TestAlbumNameUsingFolderName(t *testing.T) {
 		{in: "/foo/bar/", out: "bar"},
 	}
 	for _, tt := range testData {
-		got := albumNameUsingFolderName(tt.in)
-		if got != tt.out {
-			t.Errorf("albumNameUsingFolderName for '%s' failed: expected '%s', got '%s'", tt.in, tt.out, got)
-		}
+		assert.Equal(t, tt.out, albumNameUsingFolderName(tt.in))
 	}
 }

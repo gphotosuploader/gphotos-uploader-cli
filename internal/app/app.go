@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"net/http"
 	"path/filepath"
 
@@ -10,9 +11,8 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/config"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
-	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/leveldbstore"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/tokenmanager"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/upload_tracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -103,7 +103,7 @@ func StartWithoutConfig(fs afero.Fs, path string) (*App, error) {
 }
 
 // Stop stops the application releasing all service resources.
-func (app App) Stop() error {
+func (app *App) Stop() error {
 	// Close already uploaded file tracker
 	app.Logger.Debug("Shutting down File Tracker service...")
 	if err := app.FileTracker.Close(); err != nil {
@@ -112,9 +112,7 @@ func (app App) Stop() error {
 
 	// Close upload session tracker
 	app.Logger.Debug("Shutting down Upload Tracker service...")
-	if err := app.UploadSessionTracker.Close(); err != nil {
-		return err
-	}
+	app.UploadSessionTracker.Close()
 
 	// Close token manager
 	app.Logger.Debug("Shutting down Token Manager service...")
@@ -128,7 +126,7 @@ func (app App) Stop() error {
 
 // CreateAppDataDir return the filename after creating the application directory and the configuration file with defaults.
 // CreateAppDataDir destroys previous application directory.
-func (app App) CreateAppDataDir() (string, error) {
+func (app *App) CreateAppDataDir() (string, error) {
 	if err := app.emptyDir(app.appDir); err != nil {
 		return "", err
 	}
@@ -141,7 +139,7 @@ func (app App) CreateAppDataDir() (string, error) {
 }
 
 // AppDataDirExists return true if the application data dir exists.
-func (app App) AppDataDirExists() bool {
+func (app *App) AppDataDirExists() bool {
 	exist, err := afero.Exists(app.fs, app.configFilename())
 	if err != nil {
 		return false
@@ -149,7 +147,7 @@ func (app App) AppDataDirExists() bool {
 	return exist
 }
 
-func (app App) configFilename() string {
+func (app *App) configFilename() string {
 	return filepath.Join(app.appDir, DefaultConfigFilename)
 }
 
@@ -173,27 +171,30 @@ func (app *App) startServices() error {
 	return nil
 }
 
-func (app App) defaultFileTracker() (*filetracker.FileTracker, error) {
-	repo, err := filetracker.NewLevelDBRepository(filepath.Join(app.appDir, "uploads.db"))
+func (app *App) defaultFileTracker() (*filetracker.FileTracker, error) {
+	fileTrackerFolder := filepath.Join(app.appDir, "uploaded_files")
+	repo, err := filetracker.NewLevelDBRepository(fileTrackerFolder)
 	if err != nil {
 		return nil, err
 	}
 	return filetracker.New(repo), nil
 }
 
-func (app App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
-	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, app.appDir)
+func (app *App) defaultTokenManager(backendType string) (*tokenmanager.TokenManager, error) {
+	tokensFolder := filepath.Join(app.appDir, "tokens")
+	kr, err := tokenmanager.NewKeyringRepository(backendType, nil, tokensFolder)
 	if err != nil {
 		return nil, err
 	}
 	return tokenmanager.New(kr), nil
 }
 
-func (app App) defaultUploadsSessionTracker() (*leveldbstore.LevelDBStore, error) {
-	return leveldbstore.NewStore(filepath.Join(app.appDir, "resumable_uploads.db"))
+func (app *App) defaultUploadsSessionTracker() (*upload_tracker.LevelDBStore, error) {
+	ongoingUploadsTrackerFolder := filepath.Join(app.appDir, "ongoing_uploads")
+	return upload_tracker.NewStore(ongoingUploadsTrackerFolder)
 }
 
-func (app App) emptyDir(path string) error {
+func (app *App) emptyDir(path string) error {
 	if err := app.fs.RemoveAll(path); err != nil {
 		return err
 	}
@@ -202,9 +203,9 @@ func (app App) emptyDir(path string) error {
 
 // FileTracker represents a service to track file already uploaded.
 type FileTracker interface {
-	Put(file string) error
-	Exist(file string) bool
-	Delete(file string) error
+	MarkAsUploaded(file string) error
+	IsUploaded(file string) bool
+	UnmarkAsUploaded(file string) error
 	Close() error
 }
 
@@ -216,9 +217,11 @@ type TokenManager interface {
 }
 
 // UploadSessionTracker represents a service to keep resumable upload sessions.
+//
+// See [gphotosuploader/google-photos-api-client-go] Store interface.
 type UploadSessionTracker interface {
-	Get(fingerprint string) []byte
-	Set(fingerprint string, url []byte)
+	Get(fingerprint string) (string, bool)
+	Set(fingerprint string, url string)
 	Delete(fingerprint string)
-	Close() error
+	Close()
 }

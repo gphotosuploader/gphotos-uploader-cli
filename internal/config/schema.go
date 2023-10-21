@@ -26,9 +26,6 @@ type APIAppCredentials struct {
 
 // FolderUploadJob represents configuration for a folder to be uploaded
 type FolderUploadJob struct {
-	// DEPRECATED: Account is deprecated, use Config.Account instead.
-	Account string `json:"-"`
-
 	// SourceFolder is the folder containing the objects to be uploaded.
 	SourceFolder string `json:"SourceFolder"`
 
@@ -39,10 +36,6 @@ type FolderUploadJob struct {
 	// folderName: Creates album with the name based on the folder name.
 	CreateAlbums string `json:"CreateAlbums,omitempty"`
 
-	// MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead.
-	// DEPRECATED
-	MakeAlbums MakeAlbums `json:"-"`
-
 	// DeleteAfterUpload if it is true, the app will remove files after upload them.
 	DeleteAfterUpload bool `json:"DeleteAfterUpload"`
 
@@ -51,16 +44,4 @@ type FolderUploadJob struct {
 
 	// ExcludePatterns are the patterns to exclude files.
 	ExcludePatterns []string `json:"ExcludePatterns"`
-}
-
-// MakeAlbums is deprecated, use Config.Jobs.CreateAlbums instead
-// DEPRECATED
-type MakeAlbums struct {
-	// Enabled is deprecated, use Config.Jobs.CreateAlbums instead.
-	// DEPRECATED
-	Enabled bool `json:"-"`
-
-	// Use is deprecated, use Config.Jobs.CreateAlbums instead.
-	// DEPRECATED
-	Use string `json:"-"`
 }
