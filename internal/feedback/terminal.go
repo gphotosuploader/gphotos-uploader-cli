@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/term"
 	"os"
+	"strings"
 )
 
 func isTerminal() bool {
@@ -31,4 +32,30 @@ func InputUserField(prompt string, secret bool) (string, error) {
 	sc := bufio.NewScanner(os.Stdin)
 	sc.Scan()
 	return sc.Text(), sc.Err()
+}
+
+func YesNoPrompt(prompt string, def bool) (bool, error) {
+	choices := "Y/n"
+	if !def {
+		choices = "y/N"
+	}
+
+	prompt = fmt.Sprintf("%s (%s)", prompt, choices)
+
+	for {
+		s, err := InputUserField(prompt, false)
+		if err != nil {
+			return def, err
+		}
+		if s == "" {
+			return def, nil
+		}
+		s = strings.ToLower(s)
+		if s == "y" || s == "yes" {
+			return true, nil
+		}
+		if s == "n" || s == "no" {
+			return false, nil
+		}
+	}
 }
