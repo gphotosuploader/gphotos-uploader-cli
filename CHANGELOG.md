@@ -31,6 +31,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 [i379]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/379
 [i380]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/380
 
+## 3.5.2
+### Added
+- Support for the latest published Go version (1.21). This project will maintain compatibility with the latest two major versions published.
+- Client cache for albums to reduce the number of requests to Google Photos API
+
+
+### Changed
+- Bump `github.com/sirupsen/logrus` from 1.8.1 to 1.9.3
+- Bump `github.com/spf13/afero` from 1.8.2 to 1.10.0 
+- Bump `golang.org/x/oauth2` from 0.12.0 to 0.13.0
+- Bump `golang.org/x/sync` from 0.3.0 to 0.4.0 
+- Bump `golang.org/x/term` from 0.10.0 to 0.13.0
+- Bump `github.com/99designs/keyring` from 1.2.1 to 1.2.2
+- Bump `github.com/gphotosuploader/google-photos-api-client-go/v2` from 2.4.0 to 2.4.2
+- Bump `github.com/schollz/progressbar/v3` from 3.8.6 to 3.13.1
+- Bump `github.com/spf13/cobra` from 1.4.0 to 1.7.0
+- Bump `golang.org/x/oauth2` from v0.0.0-20220309155454-6242fa91716a to 0.13.0
+- Bump `golang.org/x/sync` from v0.0.0-20210220032951-036812b2e83c to 0.4.0
+- Bump `golang.org/x/term` v0.0.0-20210927222741-03fcf44c2211 to 0.13.0
+- Bump `google.golang.org/api` from v0.74.0 to 0.148.0
+
 ## 3.5.1
 ### Added
 - Support for the latest published Go version (1.20). This project will maintain compatibility with the latest two major versions published.
@@ -57,7 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Changed
 - The command `auth` initiates the [Google authentication to get an OAuth 2.0 token](https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started?id=authentication). **It should be used the first time that the CLI is configured**. See [documentation](https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started?id=authentication).
 ### Deprecated 
-- The OAuth 2.0 authentication based in out-of-band tokens is deprecated by Google. ([#326][i326])
+- Google deprecates the OAuth 2.0 authentication based on out-of-band tokens. ([#326][i326])
 
 [i326]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/326
 
@@ -65,7 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - Support for the latest published Go version (1.18). This project will maintain compatibility with the latest two major versions published.
 ### Changed
-- Dependency has been updated, so potential bugs has been fixed.
+- Dependency has been updated, so potential bugs have been fixed.
 ### Deprecated
 - Once Go 1.18 has been published, previous Go 1.16 support is deprecated.
 ### Removed
@@ -126,10 +147,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Configuration validation. The cli validates the configuration data at starting time.
 - Information messages to bring more context at runtime. ([#260][i260]) 
 ### Changed
-- `Jobs.MakeAlbums` configuration setting has changed to `Jobs.CreateAlbums`. Valid values are "Off", "folderName" and "folderPath".
-- **Reduced the number of calls to the API when uploading files**. It's using less than 50% of calls than before.
+- `Jobs.MakeAlbums` configuration setting has changed to `Jobs.CreateAlbums`. Valid values are `Off`,`folderName` and `folderPath`.
+- **Reduce the number of calls to the API when uploading files**. It's using less than 50% of calls than before.
 - Move to `golang.org/x/term` from `golang.org/x/crypto/ssh/terminal`, due to deprecation.
-- Some parts of the code has been refactored to make cleaner code and increase testability.
+- Some parts of the code have been refactored to make cleaner code and increase testability.
 - `Jobs.Account` configuration setting has been changed to `Account`. Multiple Google Photos accounts are not supported. ([#231][i231]) 
 - Bump `google-photos-api-client-go` from `v2.0.0` to `v2.1.3`. It improves performance. ([#259][i259])
 - Bump `golangci-lint` from `1.30.0` to `1.34.1`.
@@ -157,14 +178,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 2.0.0
 > This is a **major upgrade**, and it has some **non-backwards compatible changes**:
-> - `includePatterns` & `excludePatterns` configuration options has changed.
+> - `includePatterns` & `excludePatterns` configuration options have changed.
 > - `includePatterns` has a new default (`_IMAGE_EXTENSIONS_`).
 > - `uploadVideos` configuration option has been removed.
 ### Added
-- Two new tagged patterns has been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249])
-- Retries management. It's implementing exponential back-off with a maximum of 4 retries by default.  ([#253][i253]) 
+- Two new tagged patterns have been added: `_IMAGE_EXTENSIONS_`, matching [supported image file types](https://support.google.com/googleone/answer/6193313), and `_RAW_EXTENSIONS_`, matching [supported RAW file types](https://support.google.com/googleone/answer/6193313). ([#249][i249])
+- Retry management. It's implementing exponential back-off with a maximum of 4 retries by default.  ([#253][i253]) 
 ### Changed
-- `includePatterns` & `excludePatterns` configuration options has changed. It's using a new format, please review de [configuration documentation][idocumentation].
+- `includePatterns` & `excludePatterns` configuration options have changed. It's using a new format, please review de [configuration documentation][idocumentation].
 - By default, if `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used. ([#249][i249])  
 - Bump `google-photos-api-client-go` from `v2.0.0-beta-1` to `v2.0.0`.
 ### Fixed
@@ -299,7 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.8.6
 ### Changed
-- Remove `build` from version. Now `version` has all the tag+build information.
+- Remove `build` from a version. Now `version` has all the tag+build information.
 ### Fixed
 - Fix duplicated album creation. ([#135][i135])
 
@@ -311,7 +332,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.8.4
 ### Fixed
-- Fix panic when a unexpected error on media item creation was raised. (#110)
+- Fix panic when an unexpected error on media item creation was raised. (#110)
 ### Changed
 - Update `gphotosuploader/google-photos-api-client-go` to v1.0.7.
 
@@ -335,11 +356,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Updated `google-photos-api-client` to version v1.0.4 to help with broken album creation. (#19)
 
 ### Fixed
-- Fix duplicated album creation due to concurrency problem. (#19)
+- Fix duplicated album creation due to a concurrency problem. (#19)
 
 ## 0.8.0
 ### Added
-- Uploads can be resumed. This will help uploading large files or when connection has fails. Thanks to @pdecat.
+- Uploads can be resumed. This will help upload large files or when connection has fails. Thanks to @pdecat.
 
 ## 0.7.2
 ### Fixed
@@ -351,15 +372,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Google Auth expired token refresh. Once token is expired, `gphotos-uploader-cli` will try to refresh the token without user intervention. **NOTE**: First time you use this version, you should re-authenticate in order to get the token that allows token refresh. (#103)
 - Add `--config` flag to specify the folder where configuration is kept. (#104)
 ### Changed
-- Moved CI/CD platform from Travis to [Drone.io](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli). It has reduce the time to CI by a half.
+- Moved CI/CD platform from Travis to [Drone.io](https://cloud.drone.io/gphotosuploader/gphotos-uploader-cli). It has reduced the time to CI by a half.
 
 ## 0.6.0
 ### Added
 - `deleteAfterUpload` option has been reactivated, it was removed on v0.4.0. If you use this option in [config file][idocumentation] files will be deleted from local repository after being uploaded to Google Photos. (#25)
 ### Changed
-- This repository has transferred to [GPhotos Uploaders organization](https://github.com/gphotosuploader), so all imports has been updated to the new organization's URL.
+- This repository has transferred to [GPhotos Uploaders organization](https://github.com/gphotosuploader), so all imports have been updated to the new organization's URL.
 ### Removed
-- Removed some useless log lines. There are still too much.
+- Removed some useless log lines. There is still too much.
 
 ## 0.5.0
 ### Changed
@@ -367,14 +388,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.4.2
 ### Fixed
-- Fix CI release pipeline to fix application version (#94). Last version was still broken on CI.
+- Fix CI release pipeline to fix an application version (#94). The Last version was still broken on CI.
 
 ## 0.4.1
 ### Added
 - Add Homebrew tap to allow users to install `gphotos-uploader-cli` using Homebrew. See [install](README.md) section.
  
 ### Fixed
-- Fix CI release pipeline to fix application version (#94)
+- Fix CI release pipeline to fix an application version (#94)
 
 ## 0.4.0
 ### Added
@@ -405,7 +426,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## 0.3.1
 ### Changed
 - Move some dependencies to the new [gphotosuploader](https://github.com/gphotosuploader) organization
-- `make test` is not as verbose as before. To make easier to see if there is an error
+- `make test` is not as verbose as before. To make it easier to see if there is an error
 ### Removed
 - Removed some useless and local vendor files
 
@@ -440,7 +461,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.1.16 - 2019-06-16
 ### Fixed
-- Fix goreleaser configuration (remove deprecated statement)
+- Fix goreleaser configuration (remove a deprecated statement)
 - Update [Getting started](README.md) documentation
 
 ### Removed
@@ -448,6 +469,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## 0.1.11 - 2018-09-20
 ### Added
-- [goreleaser](https://goreleaser.com/) will be on charge of publishing [binaries](https://github.com/gphotosuploader/gphotos-uploader-cli/releases) after new release is done
+- [goreleaser](https://goreleaser.com/) will be in charge of publishing [binaries](https://github.com/gphotosuploader/gphotos-uploader-cli/releases) after the new release is done
 
 [idocumentation]: https://gphotosuploader.github.io/gphotos-uploader-cli/
