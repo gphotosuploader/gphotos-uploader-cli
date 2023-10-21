@@ -28,7 +28,7 @@ type Info struct {
 
 func NewInfo() *Info {
 	return &Info{
-		Application:   "gphotos-cli",
+		Application:   "gphotos-uploader-cli",
 		VersionString: versionString,
 	}
 }

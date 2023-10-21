@@ -7,7 +7,7 @@ import (
 
 const (
 	// defaultApplicationDataFolder is the default folder where to store application data.
-	defaultApplicationDataFolder = "~/.gphotos-cli"
+	defaultApplicationDataFolder = "~/.gphotos-uploader-cli"
 )
 
 // GlobalFlags is the flags that contain the global flags
