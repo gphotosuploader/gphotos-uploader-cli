@@ -29,6 +29,7 @@ type FileRepository interface {
 	Put(key string, item TrackedFile) error
 	Delete(key string) error
 	Close() error
+	Destroy() error
 }
 
 // New returns a FileTracker using specified repo.
@@ -109,4 +110,9 @@ func (ft FileTracker) UnmarkAsUploaded(file string) error {
 // No operation could be done after that.
 func (ft FileTracker) Close() error {
 	return ft.repo.Close()
+}
+
+// Destroy completely remove an existing FileTracker database.
+func (ft FileTracker) Destroy() error {
+	return ft.repo.Destroy()
 }

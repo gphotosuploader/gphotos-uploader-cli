@@ -135,6 +135,10 @@ func (m mockedRepository) Close() error {
 	return nil
 }
 
+func (m mockedRepository) Destroy() error {
+	return nil
+}
+
 type mockedHasher struct {
 	hash string
 }

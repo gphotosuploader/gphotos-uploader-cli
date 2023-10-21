@@ -3,10 +3,12 @@ package upload_tracker
 
 import (
 	"github.com/syndtr/goleveldb/leveldb"
+	"os"
 )
 
 type LevelDBStore struct {
-	db *leveldb.DB
+	db   *leveldb.DB
+	path string
 }
 
 // NewStore create a new Store implemented by LevelDB
@@ -16,7 +18,10 @@ func NewStore(path string) (*LevelDBStore, error) {
 		return nil, err
 	}
 
-	s := &LevelDBStore{db: db}
+	s := &LevelDBStore{
+		db:   db,
+		path: path,
+	}
 	return s, err
 }
 
@@ -41,4 +46,10 @@ func (s *LevelDBStore) Delete(key string) {
 // Close closes the service
 func (s *LevelDBStore) Close() {
 	_ = s.db.Close()
+}
+
+// Destroy completely remove an existing LevelDB database directory.
+func (s *LevelDBStore) Destroy() error {
+	_ = s.db.Close()
+	return os.RemoveAll(s.path)
 }

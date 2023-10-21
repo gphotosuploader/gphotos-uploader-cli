@@ -207,6 +207,8 @@ type FileTracker interface {
 	IsUploaded(file string) bool
 	UnmarkAsUploaded(file string) error
 	Close() error
+
+	Destroy() error
 }
 
 // TokenManager represents a service to keep and read secrets (like passwords, tokens...)
