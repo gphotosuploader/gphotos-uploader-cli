@@ -1,6 +1,6 @@
 ![logo](docs/images/gphotos-uploader-cli-logo.png)
 
-Command line tool to mass upload media folders to your Google Photos account.
+Tool to mass upload media folders to your Google Photos account and manage it using a CLI.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/gphotosuploader/gphotos-uploader-cli)](https://goreportcard.com/report/github.com/gphotosuploader/gphotos-uploader-cli)
 [![codebeat badge](https://codebeat.co/badges/9f3561ad-2838-456e-bc92-68988eeb376b)](https://codebeat.co/projects/github-com-gphotosuploader-gphotos-uploader-cli-main)
@@ -11,7 +11,7 @@ Command line tool to mass upload media folders to your Google Photos account.
 
 # Google Photos uploader CLI   
 
-While the official tool only supports Mac OS and Windows, this brings an uploader to Linux too. Lets you upload photos from, in theory, any OS for which you can compile a Go program.     
+While the official tool only supports macOS and Windows, this brings an uploader to Linux too. Lets you upload photos from, in theory, any OS for which you can compile a Go program.     
 
 See the [documentation site](https://gphotosuploader.github.io/gphotos-uploader-cli) for more information about this CLI.
 

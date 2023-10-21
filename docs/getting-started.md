@@ -63,7 +63,7 @@ gphotos-uploader-cli init
 You must review the [documentation](configuration.md) to specify your **Google Photos API credentials**, `APIAppCredentials`. You should tune your `jobs` configuration also.
 
 ## Authentication
-Once it's configured you need to authenticate your CLI against Google Photos:
+Once it's configured, you need to authenticate your CLI against Google Photos:
 ```bash 
 gphotos-uploader-cli auth
 ```
@@ -74,7 +74,7 @@ Few manual steps are needed:
 
 ![Run gphotos-uploader-cli auth](images/run_gphotos_uploader_cli_with_auth.jpeg)
 
-!> **Reaching the `localhost` in headless environments:** Even that the CLI is not intended to be used in headless setups, several users have confirmed that it's possible to set it up. You can forward one port from your real host to the remote host, In order to connect to the remote host, create an SSH tunnel to the remote machine:
+> **Reaching the `localhost` in headless environments:** Even that the CLI is not intended to be used in headless setups, several users have confirmed that it's possible to set it up. You can forward one port from your real host to the remote host, In order to connect to the remote host, create an SSH tunnel to the remote machine:
 
 ```bash
 # Only for headless setups
