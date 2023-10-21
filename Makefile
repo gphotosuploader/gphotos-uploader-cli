@@ -11,7 +11,7 @@ TEST_LDFLAGS=-ldflags "-X ${CONFIGURATION_PACKAGE}.versionString=$(TEST_VERSION)
 # go source files, ignore vendor directory
 PKGS = $(shell go list ./... | grep -v /vendor)
 SRC := main.go
-BINARY := gphotos-cli
+BINARY := gphotos-uploader-cli
 
 # Temporary files to be used, you can changed it calling `make TMP_DIR=/tmp`
 TMP_DIR ?= .tmp

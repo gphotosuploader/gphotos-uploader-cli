@@ -21,13 +21,13 @@ Google Photos Command Line Interface (CLI)
 This CLI application allows you to upload pictures and videos to Google Photos. You can upload folders to your Google Photos account and organize them in albums automatically. Additionally, you can list albums and media items already uploaded to Google Photos.
 
 To get started, initialize your settings by running the following command:
-$ gphotos-cli init
+$ gphotos-uploader-cli init
 
 Once configured, you can uploading your files with this command:
-$ gphotos-cli push
+$ gphotos-uploder-cli push
 
 Or you can list your albums in Google Photos by running:
-$ gphotos-cli list albums
+$ gphotos-uploader-cli list albums
 
 For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-cli.
 `
@@ -42,7 +42,7 @@ For more information, visit: https://gphotosuploader.github.io/gphotos-uploader-
 func NewCommand() *cobra.Command {
 	// ArduinoCli is the root command
 	gphotosCLI := &cobra.Command{
-		Use:               "gphotos-cli",
+		Use:               "gphotos-uploader-cli",
 		Short:             "Google Photos CLI.",
 		Long:              longCommandDescription,
 		PersistentPreRunE: preRun,

@@ -137,5 +137,5 @@ func getDefaultToken() *oauth2.Token {
 }
 
 func tempDir() string {
-	return filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-cli.%d", time.Now().UnixNano()))
+	return filepath.Join(os.TempDir(), fmt.Sprintf("gphotos-uploader-cli.%d", time.Now().UnixNano()))
 }
