@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.1.0
+### Added
+- Flag `--port` to configure the port where the authentication server will listen to when using the `auth` command ([#370][i370])
+
+[i370]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/370
+
 ## 4.0.0
 ### Added
 - Support for the latest published Go version (1.21). This project will maintain compatibility with the latest **two major versions** published.

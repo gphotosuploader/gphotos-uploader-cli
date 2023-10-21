@@ -41,7 +41,7 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 
 // AuthenticateFromWeb returns an HTTP client authenticated in Google Photos.
 // AuthenticateFromWeb will create a new token after completing the OAuth 2.0 flow.
-func (app *App) AuthenticateFromWeb(ctx context.Context) (*http.Client, error) {
+func (app *App) AuthenticateFromWeb(ctx context.Context, port int) (*http.Client, error) {
 	account := app.Config.Account
 	app.Logger.Infof("Getting authentication token for '%s'", account)
 
@@ -49,6 +49,7 @@ func (app *App) AuthenticateFromWeb(ctx context.Context) (*http.Client, error) {
 		ClientID:     app.Config.APIAppCredentials.ClientID,
 		ClientSecret: app.Config.APIAppCredentials.ClientSecret,
 		Logf:         app.Logger.Debugf,
+		Port:         port,
 	}
 
 	token, err := oauth.GetToken(ctx, cfg)
