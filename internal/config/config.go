@@ -153,6 +153,19 @@ func (c Config) validateJobs(fs afero.Fs) error {
 	return nil
 }
 
+// GetJobs returns the configured Jobs without deprecated options.
+func (c Config) GetJobs() []FolderUploadJob {
+	jobs := c.Jobs
+
+	// TODO: Translate the deprecated CreateAlbums into the Albums option for backwards compatibility
+	for _, j := range jobs {
+		if j.Album == "" && j.CreateAlbums != "" && j.CreateAlbums != "Off" {
+			j.Album = "auto:" + j.CreateAlbums
+		}
+	}
+	return jobs
+}
+
 func (c Config) validateSecretsBackendType() error {
 	switch c.SecretsBackendType {
 	case "auto", "secret-service", "keychain", "kwallet", "file":
@@ -249,7 +262,6 @@ func defaultSettings() Config {
 			{
 				SourceFolder:      "YOUR_FOLDER_PATH",
 				Album:             "",
-				CreateAlbums:      "folderName",
 				DeleteAfterUpload: false,
 			},
 		},
