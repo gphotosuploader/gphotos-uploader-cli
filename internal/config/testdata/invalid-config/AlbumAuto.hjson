@@ -9,7 +9,8 @@
   Jobs:
   [
     {
-      SourceFolder: ./testdata/valid-config
+      SourceFolder: ./testdata
+      Album: auto:invalid
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

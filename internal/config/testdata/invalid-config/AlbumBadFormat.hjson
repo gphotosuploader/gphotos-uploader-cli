@@ -5,12 +5,12 @@
     ClientSecret: client-secret
   }
   Account: youremail@domain.com
-  SecretsBackendType: "invalid"
+  SecretsBackendType: auto
   Jobs:
   [
     {
       SourceFolder: ./testdata
-      CreateAlbums: folderName
+      Album: invalid
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

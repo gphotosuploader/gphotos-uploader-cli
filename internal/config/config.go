@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 
 	"github.com/hjson/hjson-go/v4"
 	"github.com/mitchellh/go-homedir"
@@ -106,7 +107,7 @@ func readFile(fs afero.Fs, filename string) (*Config, error) {
 		return nil, err
 	}
 
-	// convert all path to absolute paths.
+	// convert all paths to absolute paths.
 	if err := config.ensureSourceFolderAbsolutePaths(); err != nil {
 		return nil, err
 	}
@@ -141,7 +142,11 @@ func (c Config) validateJobs(fs afero.Fs) error {
 		if !exist {
 			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
-		if !isValidCreateAlbums(job.CreateAlbums) {
+		if job.Album != "" && !isValidAlbum(job.Album) {
+			return fmt.Errorf("option Album is invalid, '%s", job.Album)
+		}
+		// TODO: Check CreateAlbums for backwards compatibility. It should be removed on version 5.x
+		if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
 			return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
 		}
 	}
@@ -159,7 +164,7 @@ func (c Config) validateSecretsBackendType() error {
 
 func (c Config) ensureSourceFolderAbsolutePaths() error {
 	for i := range c.Jobs {
-		item := &c.Jobs[i] // we do that way to modify original object while iterating.
+		item := &c.Jobs[i] // we do that way to modify an original object while iterating.
 		src, err := homedir.Expand(item.SourceFolder)
 		if err != nil {
 			return err
@@ -167,6 +172,31 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 		item.SourceFolder = normalizePath(src)
 	}
 	return nil
+}
+
+func isValidAlbumGenerationMethod(method string) bool {
+	if method != "folderPath" && method != "folderName" {
+		return false
+	}
+	return true
+}
+
+// isValidAlbum checks if the value is a valid Album option.
+func isValidAlbum(value string) bool {
+	before, after, found := strings.Cut(value, ":")
+	if !found {
+		return false
+	}
+	if after == "" {
+		return false
+	}
+	switch before {
+	case "name":
+		return true
+	case "auto":
+		return isValidAlbumGenerationMethod(after)
+	}
+	return false
 }
 
 // isValidCreateAlbums checks if the value is a valid CreateAlbums option.
@@ -218,7 +248,7 @@ func defaultSettings() Config {
 		Jobs: []FolderUploadJob{
 			{
 				SourceFolder:      "YOUR_FOLDER_PATH",
-				CreateAlbums:      "folderName",
+				Album:             "",
 				DeleteAfterUpload: false,
 			},
 		},

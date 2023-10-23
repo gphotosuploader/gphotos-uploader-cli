@@ -117,7 +117,6 @@ func getIncludedFilesByScanFolder(includePatterns []string, excludePatterns []st
 	u := upload.UploadFolderJob{
 		FileTracker:  ft,
 		SourceFolder: "testdata",
-		CreateAlbums: "Off",
 		Filter:       filterFiles,
 	}
 

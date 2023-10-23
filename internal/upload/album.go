@@ -5,18 +5,26 @@ import (
 	"strings"
 )
 
-// albumName returns Album name based on the configured parameter.
-// If configuration option is "Off" or "", it returns empty string.
+// albumName returns the album name based on the configured parameter.
 func (job *UploadFolderJob) albumName(path string) string {
-	switch job.CreateAlbums {
-	case "Off":
+	before, after, found := strings.Cut(job.Album, ":")
+	if !found {
 		return ""
+	}
+	if before == "name" {
+		return after
+	}
+	if before != "auto" {
+		return ""
+	}
+
+	switch after {
 	case "folderPath":
 		return albumNameUsingFolderPath(path)
 	case "folderName":
 		return albumNameUsingFolderName(path)
 	default:
-		panic("invalid CreateAlbums parameter")
+		panic("invalid Albums parameter")
 	}
 }
 

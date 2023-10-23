@@ -4,13 +4,13 @@
     ClientID: client-id
     ClientSecret: client-secret
   }
-  Account: ""
+  Account: youremail@domain.com
   SecretsBackendType: auto
   Jobs:
   [
     {
-      SourceFolder: ./testdata
-      CreateAlbums: folderName
+      SourceFolder: ./testdata/valid-config
+      Album: auto:folderPath
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

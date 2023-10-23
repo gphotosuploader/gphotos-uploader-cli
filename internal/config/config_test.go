@@ -63,14 +63,22 @@ func TestFromFile(t *testing.T) {
 		want          string
 		isErrExpected bool
 	}{
-		{"Should success", "testdata/valid-config/config.hjson", "youremail@domain.com", false},
-		{"Should fail if dir does not exist", "testdata/non-existent/config.hjson", "", true},
-		{"Should fail if Account is invalid", "testdata/invalid-config/Account.hjson", "", true},
-		{"Should fail if SourceFolder does not exist", "testdata/invalid-config/SourceFolder.hjson", "", true},
-		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/SecretsBackendType.hjson", "", true},
-		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/AppAPICredentials.hjson", "", true},
-		{"Should fail if CreateAlbums is invalid", "testdata/invalid-config/CreateAlbums.hjson", "", true},
+		{"Should success with Album's name option", "testdata/valid-config/configWithAlbumNameOption.hjson", "youremail@domain.com", false},
+		{"Should success with Album's auto folderName option", "testdata/valid-config/configWithAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
+		{"Should success with Album's auto folderPath option", "testdata/valid-config/configWithAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
+		{"Should success with deprecated CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "youremail@domain.com", false},
+
+		{"Should fail if config dir does not exist", "testdata/non-existent/config.hjson", "", true},
+		{"Should fail if Account is invalid", "testdata/invalid-config/EmptyAccount.hjson", "", true},
+		{"Should fail if SourceFolder does not exist", "testdata/invalid-config/NonExistentSourceFolder.hjson", "", true},
+		{"Should fail if SecretsBackendType is invalid", "testdata/invalid-config/BadSecretsBackendType.hjson", "", true},
+		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/EmptyAppAPICredentials.hjson", "", true},
 		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
+		{"Should fail if Album's format is invalid", "testdata/invalid-config/AlbumBadFormat.hjson", "", true},
+		{"Should fail if Album's key is invalid", "testdata/invalid-config/AlbumBadKey.hjson", "", true},
+		{"Should fail if Album's name is invalid", "testdata/invalid-config/AlbumEmptyName.hjson", "", true},
+		{"Should fail if Album's auto value is invalid", "testdata/invalid-config/AlbumBadAutoValue.hjson", "", true},
+		{"Should fail if deprecated CreateAlbums is invalid", "testdata/invalid-config/DeprecatedCreateAlbums.hjson", "", true},
 	}
 
 	for _, tc := range testCases {
@@ -100,6 +108,7 @@ func TestConfig_SafePrint(t *testing.T) {
 		Jobs: []config.FolderUploadJob{
 			{
 				SourceFolder:      "foo",
+				Album:             "name:albumName",
 				CreateAlbums:      "folderPath",
 				DeleteAfterUpload: false,
 				IncludePatterns:   []string{},
@@ -107,7 +116,7 @@ func TestConfig_SafePrint(t *testing.T) {
 			},
 		},
 	}
-	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","Album":"name:albumName","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
 
 	if want != cfg.SafePrint() {
 		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())
