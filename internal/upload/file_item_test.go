@@ -131,24 +131,24 @@ func TestFileItem_Remove(t *testing.T) {
 
 func TestFileItem_GroupByAlbum(t *testing.T) {
 	items := []FileItem{
-		{Path: "file1.jpg", AlbumName: "Album 1"},
-		{Path: "file2.jpg", AlbumName: "Album 2"},
-		{Path: "file3.jpg", AlbumName: "Album 1"},
-		{Path: "file4.jpg", AlbumName: "Album 2"},
-		{Path: "file5.jpg", AlbumName: "Album 3"},
+		{Path: "file1.jpg", AlbumName: "album 1"},
+		{Path: "file2.jpg", AlbumName: "album 2"},
+		{Path: "file3.jpg", AlbumName: "album 1"},
+		{Path: "file4.jpg", AlbumName: "album 2"},
+		{Path: "file5.jpg", AlbumName: "album 3"},
 	}
 
 	expectedGroups := map[string][]FileItem{
-		"Album 1": {
-			{Path: "file1.jpg", AlbumName: "Album 1"},
-			{Path: "file3.jpg", AlbumName: "Album 1"},
+		"album 1": {
+			{Path: "file1.jpg", AlbumName: "album 1"},
+			{Path: "file3.jpg", AlbumName: "album 1"},
 		},
-		"Album 2": {
-			{Path: "file2.jpg", AlbumName: "Album 2"},
-			{Path: "file4.jpg", AlbumName: "Album 2"},
+		"album 2": {
+			{Path: "file2.jpg", AlbumName: "album 2"},
+			{Path: "file4.jpg", AlbumName: "album 2"},
 		},
-		"Album 3": {
-			{Path: "file5.jpg", AlbumName: "Album 3"},
+		"album 3": {
+			{Path: "file5.jpg", AlbumName: "album 3"},
 		},
 	}
 

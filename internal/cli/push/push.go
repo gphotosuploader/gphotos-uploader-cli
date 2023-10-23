@@ -60,6 +60,14 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	// launch all folder upload jobs
 	for _, config := range cli.Config.Jobs {
+
+		// TODO: CreateAlbums is maintained to ensure backwards compatibility.
+		//nolint:staticcheck // I want to use deprecated method.
+		if config.Album == "" && config.CreateAlbums != "" && config.CreateAlbums != "Off" {
+			//nolint:staticcheck // I want to use deprecated method.
+			config.Album = "auto:" + config.CreateAlbums
+		}
+
 		sourceFolder := config.SourceFolder
 
 		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
@@ -71,7 +79,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			FileTracker: cli.FileTracker,
 
 			SourceFolder: sourceFolder,
-			CreateAlbums: config.CreateAlbums,
+			Album:        config.Album,
 			Filter:       filterFiles,
 		}
 

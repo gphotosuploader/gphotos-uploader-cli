@@ -7,36 +7,42 @@ import (
 
 func TestAlbumName(t *testing.T) {
 	var testData = []struct {
-		name         string
-		createAlbums string
+		name  string
+		album string
 
 		in   string
 		want string
 	}{
 		{
-			name:         "createAlbumDisabled_With_Off",
-			createAlbums: "Off",
-			in:           "/foo/bar/file.jpg",
-			want:         "",
+			name:  "album set an album's name",
+			album: "name:albumName",
+			in:    "/foo/bar/file.jpg",
+			want:  "albumName",
 		},
 		{
-			name:         "createAlbum_With_folderName",
-			createAlbums: "folderName",
-			in:           "/foo/bar/file.jpg",
-			want:         "bar",
+			name:  "album set an album's name based on folder path",
+			album: "auto:folderPath",
+			in:    "/foo/bar/file.jpg",
+			want:  "foo_bar",
 		},
 		{
-			name:         "createAlbum_With_folderPath",
-			createAlbums: "folderPath",
-			in:           "/foo/bar/file.jpg",
-			want:         "foo_bar",
+			name:  "album set an album's name based on folder name",
+			album: "auto:folderName",
+			in:    "/foo/bar/file.jpg",
+			want:  "bar",
+		},
+		{
+			name:  "album set an album's name with unexpected key (not `name` or `auto`)",
+			album: "foo:bar",
+			in:    "/foo/bar/file.jpg",
+			want:  "",
 		},
 	}
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job := UploadFolderJob{
-				CreateAlbums: tt.createAlbums,
+				Album: tt.album,
 			}
 
 			assert.Equal(t, tt.want, job.albumName(tt.in))
@@ -52,7 +58,7 @@ func TestAlbumNameWithInvalidParameter(t *testing.T) {
 		}
 	}()
 	job := UploadFolderJob{
-		CreateAlbums: "FooBar",
+		Album: "auto:fooBar",
 	}
 	_ = job.albumName("/foo/bar/file.jpg")
 }

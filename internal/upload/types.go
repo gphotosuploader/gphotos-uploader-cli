@@ -5,7 +5,7 @@ type UploadFolderJob struct {
 	FileTracker FileTracker
 
 	SourceFolder string
-	CreateAlbums string
+	Album        string
 	Filter       FileFilterer
 }
 
