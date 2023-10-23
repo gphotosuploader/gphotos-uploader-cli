@@ -191,7 +191,7 @@ func isValidAlbum(value string) bool {
 		return false
 	}
 	switch before {
-	case "name", "id":
+	case "name":
 		return true
 	case "auto":
 		return isValidAlbumGenerationMethod(after)

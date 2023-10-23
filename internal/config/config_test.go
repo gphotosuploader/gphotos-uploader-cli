@@ -64,7 +64,6 @@ func TestFromFile(t *testing.T) {
 		isErrExpected bool
 	}{
 		{"Should success with Album's name option", "testdata/valid-config/configWithAlbumNameOption.hjson", "youremail@domain.com", false},
-		{"Should success with Album's id option", "testdata/valid-config/configWithAlbumIdOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's auto folderName option", "testdata/valid-config/configWithAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's auto folderPath option", "testdata/valid-config/configWithAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
 		{"Should success with deprecated CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "youremail@domain.com", false},
