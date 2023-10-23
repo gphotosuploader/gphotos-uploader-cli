@@ -19,7 +19,7 @@ Example configuration file:
   [
     {
       SourceFolder: YOUR_FOLDER_PATH
-      CreateAlbums: Off
+      Album: "auto:folderName"
       DeleteAfterUpload: false
       IncludePatterns: [ "**/*.jpg", "**/*.png" ]
       ExcludePatterns: [ "**/ScreenShot*" ]
@@ -81,22 +81,25 @@ List of folders to upload and upload options for each folder.
 The folder to upload from. Must be an absolute path. Can expand the home folder tilde shorthand `~`.
 > The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
-### CreateAlbums
+### Album
 It controls how uploaded files will be organized into albums in Google Photos.
 
-There are three options:
-* `Off` will not create any album.
-* `folderName` will use the name of the folder (within `SourceFolder`), where the item is uploaded from, to set the album name.
-* `folderPath` will use the full path of the folder (relative to `SourceFolder`), where the item is uploaded from, to set the album name.
+There are several options:
+* `name:` followed by an album's name, will upload objects to an album with the specified name. *ex. `Album: name:fooBar`*
+* `auto:folderName` will use the name of the folder (within `SourceFolder`), where the item is uploaded from, to set the album name.
+* `auto:folderPath` will use the full path of the folder (relative to `SourceFolder`), where the item is uploaded from, to set the album name.
 
 ```
 # Given SouceFolder: /foo
 # and file: /foo/bar/xyz/file.jpg
 
-CreateAlbums: folderName
+Album: name:myAlbum
+# album name would be: myAlbum
+
+Album: auto:folderName
 # album name would be: xyz
 
-CreateAlbums: folderPath
+Album: auto:folderPath
 # album name would be: bar_xyz
 ```
 
