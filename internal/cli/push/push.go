@@ -59,7 +59,19 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	// launch all folder upload jobs
-	for _, config := range cli.Config.GetJobs() {
+	for _, config := range cli.Config.Jobs {
+
+		//nolint:staticcheck // CreateAlbums is maintained for backwards compatibility
+		if config.CreateAlbums != "" {
+			cli.Logger.Warn("Deprecated 'CreateAlbums' option is used in configuration. Please, use the 'Album' option instead.")
+		}
+
+		// TODO: Translate the deprecated CreateAlbums into the Albums option for backwards compatibility
+		//nolint:staticcheck // CreateAlbums is maintained for backwards compatibility
+		if config.Album == "" && config.CreateAlbums != "" && config.CreateAlbums != "Off" {
+			config.Album = "auto:" + config.CreateAlbums
+		}
+
 		sourceFolder := config.SourceFolder
 
 		filterFiles, err := filter.Compile(config.IncludePatterns, config.ExcludePatterns)
