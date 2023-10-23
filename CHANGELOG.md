@@ -7,9 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - Flag `--port` to configure the port where the authentication server will listen to when using the `auth` command ([#370][i370])
 - **New command to reset the already uploaded file tracker** (`reset file-tracker`), which removes the internal database ([#182][i182])
+- New **`Album` option in Job's configuration** which allows to set a fixed album's name to upload objects to. ([#393][i393])
+
+### Deprecated
+- The `CreateAlbums` option in Job's configuration is deprecated in favor of a new `Album` option.
 
 [i370]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/370
 [i182]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/182
+[i393]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/393
 
 ## 4.0.0
 ### Added
