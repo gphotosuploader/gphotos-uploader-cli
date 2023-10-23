@@ -9,7 +9,7 @@
   Jobs:
   [
     {
-      SourceFolder: ./testdata/non-existent
+      SourceFolder: ./testdata/valid-config
       CreateAlbums: folderName
       DeleteAfterUpload: false
       IncludePatterns: []

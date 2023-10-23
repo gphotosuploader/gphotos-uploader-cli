@@ -4,12 +4,12 @@
     ClientID: client-id
     ClientSecret: client-secret
   }
-  Account: youremail@domain.com
+  Account: ""
   SecretsBackendType: auto
   Jobs:
   [
     {
-      SourceFolder: ./testdata/valid-config
+      SourceFolder: ./testdata
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

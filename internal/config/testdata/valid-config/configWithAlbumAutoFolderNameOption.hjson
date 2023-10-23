@@ -1,16 +1,16 @@
 {
   APIAppCredentials:
   {
-    ClientID: ""
-    ClientSecret: ""
+    ClientID: client-id
+    ClientSecret: client-secret
   }
   Account: youremail@domain.com
   SecretsBackendType: auto
   Jobs:
   [
     {
-      SourceFolder: ./testdata
-      CreateAlbums: folderName
+      SourceFolder: ./testdata/valid-config
+      Album: auto:folderName
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []

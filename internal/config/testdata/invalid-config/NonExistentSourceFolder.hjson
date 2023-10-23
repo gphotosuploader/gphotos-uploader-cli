@@ -9,7 +9,7 @@
   Jobs:
   [
     {
-      SourceFolder: ./testdata/valid-config
+      SourceFolder: ./testdata/non-existent
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []
