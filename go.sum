@@ -153,6 +153,8 @@ github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5m
 github.com/googleapis/google-cloud-go-testing v0.0.0-20200911160855-bcd43fbb19e8/go.mod h1:dvDLG8qkwmyD9a/MJJN3XJcT3xFxOKAvTZGvuZmac9g=
 github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.2 h1:kWLV6kXJWvpJguNL9LN6Qd5OJayHHq9uG0zgRkp9EuU=
 github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.2/go.mod h1:/QFXDvwMbVxJ94sZGLsBS+7QMxhb2H3h23E+4kul/jA=
+github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.3 h1:rD4R/DgYXLKqbwlei5Yxj4bDHfWM9quPEo3GKdJwdc0=
+github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.3/go.mod h1:uiA46b1K4jkI5wBxW2Sm7rAxEKgjFW8sa1RJP07CMdk=
 github.com/gphotosuploader/googlemirror v0.5.0 h1:9a9CCUnAFo3qHp7U/epmdTiOvAzXCkVq5AQLo8PWBns=
 github.com/gphotosuploader/googlemirror v0.5.0/go.mod h1:L6A+2KW6d/OwjZ5QH2fGXJXsOtR115tj9w+YxdyjfUI=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c h1:6rhixN/i8ZofjG1Y75iExal34USq5p+wiN1tpie8IrU=
