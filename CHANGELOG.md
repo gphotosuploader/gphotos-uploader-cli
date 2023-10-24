@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.1.1
+### Fixed
+- Uploads are showing the data of upload instead of the filename in the Google Photos UI.  Thanks [@mikebilly](https://github.com/mikebilly) ([#398][i398])
+
+[i398]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/398
+
 ## 4.1.0
 ### Added
 - Flag `--port` to configure the port where the authentication server will listen to when using the `auth` command ([#370][i370])
