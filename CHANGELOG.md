@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.2.0
+### Added
+- New parameter `--redirect-url-hostname` to the `auth` command in order to set the URL to use after the Google Photos authentication ([#402][i402])
+
+[i402]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/402
+
 ## 4.1.1
 ### Fixed
 - Uploads are showing the data of upload instead of the filename in the Google Photos UI.  Thanks [@mikebilly](https://github.com/mikebilly) ([#398][i398])
