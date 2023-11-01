@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 - New parameter `--redirect-url-hostname` to the `auth` command in order to set the URL to use after the Google Photos authentication ([#402][i402])
 
+### Changed
+- Bump `github.com/hjson/hjson-go/v4` from 4.3.0 to 4.3.1 ([#400][i400])
+
+
+[i400]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/400
 [i402]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/402
 
 ## 4.1.1
