@@ -32,8 +32,16 @@ type Config struct {
 	// Logger function for debug.
 	Logf func(format string, args ...interface{})
 
-	// Port to bind the local authenticator
-	Port int
+	// Candidates of hostname and port which the local server binds to.
+	// You can set port number to 0 to allocate a free port.
+	// If multiple addresses are given, it will try the ports in order.
+	// If nil or an empty slice is given, it defaults to "127.0.0.1:0" i.e., a free port.
+	LocalServerBindAddress []string
+
+	// Hostname of the redirect URL.
+	// You can set this if your provider does not accept localhost.
+	// Default to localhost.
+	RedirectURLHostname string
 
 	oAuth2Config *oauth2.Config
 }
@@ -69,10 +77,6 @@ func (c *Config) validateAndSetDefaults() error {
 		return fmt.Errorf("both ClientID and ClientSecret must be set")
 	}
 
-	if c.Port < 0 || c.Port > 65535 {
-		return fmt.Errorf("invalid port, must be in the range [0-65535]")
-	}
-
 	if c.Logf == nil {
 		c.Logf = func(string, ...interface{}) {}
 	}
@@ -82,6 +86,7 @@ func (c *Config) validateAndSetDefaults() error {
 		ClientSecret: c.ClientSecret,
 		Scopes:       []string{PhotosLibraryScope},
 		Endpoint:     GoogleAuthEndpoint,
+		RedirectURL:  c.RedirectURLHostname,
 	}
 
 	return nil
@@ -91,12 +96,12 @@ func (c *Config) validateAndSetDefaults() error {
 // flow, blocks until the user completes authorization and is redirected back, and returns the access token.
 func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 	ready := make(chan string, 1)
-	localServerBindAddress := fmt.Sprintf("127.0.0.1:%d", c.Port)
 	cfg := oauth2cli.Config{
 		OAuth2Config:           *c.oAuth2Config,
 		LocalServerReadyChan:   ready,
 		Logf:                   c.Logf,
-		LocalServerBindAddress: []string{localServerBindAddress},
+		LocalServerBindAddress: c.LocalServerBindAddress,
+		RedirectURLHostname:    c.RedirectURLHostname,
 	}
 
 	var token *oauth2.Token

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
@@ -14,7 +15,8 @@ type AuthCmd struct {
 	*flags.GlobalFlags
 
 	// command flags
-	Port int
+	Port                int
+	RedirectURLHostname string
 }
 
 func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
@@ -28,7 +30,8 @@ func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 		RunE:  cmd.Run,
 	}
 
-	authCmd.Flags().IntVarP(&cmd.Port, "port", "p", 0, "port on which the auth server will listen (default 0)")
+	authCmd.Flags().IntVar(&cmd.Port, "port", 0, "port on which the auth server will listen (default 0)")
+	authCmd.Flags().StringVar(&cmd.RedirectURLHostname, "redirect-url-hostname", "", "hostname of the redirect URL (default localhost)")
 
 	return authCmd
 }
@@ -43,7 +46,16 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		_ = cli.Stop()
 	}()
 
-	_, err = cli.AuthenticateFromWeb(ctx, cmd.Port)
+	// customize authentication options based on the command line parameters
+	authOptions := app.AuthenticationOptions{}
+	if cmd.Port != 0 {
+		authOptions.LocalServerBindAddress = fmt.Sprintf("127.0.0.1:%d", cmd.Port)
+	}
+	if cmd.RedirectURLHostname != "" {
+		authOptions.RedirectURLHostname = cmd.RedirectURLHostname
+	}
+
+	_, err = cli.AuthenticateFromWeb(ctx, authOptions)
 	if err == nil {
 		cli.Logger.Donef("Successful authentication for account '%s'", cli.Config.Account)
 	}
