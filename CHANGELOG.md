@@ -8,8 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Fix versioning on releases since the publication of 4.x version. ([#413][i413])
 - Small typos in messages. Thanks, [@tbm](https://github.com/tbm) ([#414][i414])
 
+### Changed
+- Bump `github.com/schollz/progressbar/v3` from 3.13.1 to 3.14.1 ([#411][i411])
+- Bump `golang.org/x/oauth2` from 0.13.0 to 0.14.0 ([#409][i409])
+- Bump `golang.org/x/sync` from 0.4.0 to 0.5.0 ([#408][i408])
+- Bump `github.com/spf13/cobra` from 1.7.0 to 1.8.0 ([#407][i407])
+
 [i413]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/413
 [i414]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/414
+[i411]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/411
+[i409]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/409
+[i408]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/408
+[i407]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/407
 
 ## 4.2.0
 ### Added
