@@ -11,7 +11,7 @@ builds:
       - linux
     goarch:
       - amd64
-    ldflags: -s -w -X=github.com/gphotosuploader/gphotos-uploader-cli/internal/cmd.version={{ .Version }}
+    ldflags: -s -w -X=github.com/gphotosuploader/gphotos-uploader-cli/version.versionString={{ .Version }}
 checksum:
   name_template: 'checksums.txt'
 brews:
