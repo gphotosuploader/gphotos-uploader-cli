@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.2.1
+### Fixed
+- Fix versioning on releases since the publication of 4.x version. ([#413][i413])
+- Small typos in messages. Thanks, [@tbm](https://github.com/tbm) ([#414][i414])
+
+[i413]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/413
+[i414]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/414
+
 ## 4.2.0
 ### Added
 - New parameter `--redirect-url-hostname` to the `auth` command in order to set the URL to use after the Google Photos authentication ([#402][i402])
