@@ -55,7 +55,7 @@ Available options for secrets backend are:
 "secret-service"    For gnome-keyring support
 "keychain"          For OS X keychain support
 "kwallet"           For KDE Secrets Manager support
-"file"              For encrypted file support - needs interaction to supply a symetric encryption key
+"file"              For encrypted file support - needs interaction to supply a symmetric encryption key
 ```
 
 Most of the time `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):

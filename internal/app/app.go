@@ -21,7 +21,7 @@ const (
 	DefaultConfigFilename = "config.hjson"
 )
 
-// App represents a running application with all the dependant services.
+// App represents a running application with all the dependent services.
 type App struct {
 	// FileTracker tracks local files already uploaded.
 	FileTracker FileTracker

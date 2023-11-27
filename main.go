@@ -11,7 +11,7 @@ import (
 func main() {
 	gphotosCmd := cli.NewCommand()
 	if err := gphotosCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error ocurred: %s", err)
+		fmt.Fprintf(os.Stderr, "Error occurred: %s", err)
 		os.Exit(int(feedback.ErrGeneric))
 	}
 	os.Exit(int(feedback.Success))
