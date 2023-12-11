@@ -7,7 +7,7 @@ require (
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.3
-	github.com/hjson/hjson-go/v4 v4.3.1
+	github.com/hjson/hjson-go/v4 v4.4.0
 	github.com/int128/oauth2cli v1.14.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
