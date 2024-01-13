@@ -110,7 +110,7 @@ func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 		select {
 		case url := <-ready:
 			fmt.Printf("\nVisit the URL below in a browser:\n\n%s\n\n", url)
-			fmt.Printf("If you are opening the url manually on a different machine you will need to curl the result URL on this machine manually.\n\n")
+			fmt.Printf("If you need to open the URL from another machine, you should use the --local-bind-address and --redirect-url-hostname flags.\n\n")
 			return nil
 		case <-ctx.Done():
 			return fmt.Errorf("context done while waiting for authorization: %w", ctx.Err())

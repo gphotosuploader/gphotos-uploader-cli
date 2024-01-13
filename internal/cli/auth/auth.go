@@ -16,6 +16,7 @@ type AuthCmd struct {
 
 	// command flags
 	Port                int
+	LocalBindAddress    string
 	RedirectURLHostname string
 }
 
@@ -31,7 +32,8 @@ func NewCommand(globalFlags *flags.GlobalFlags) *cobra.Command {
 	}
 
 	authCmd.Flags().IntVar(&cmd.Port, "port", 0, "port on which the auth server will listen (default 0)")
-	authCmd.Flags().StringVar(&cmd.RedirectURLHostname, "redirect-url-hostname", "", "hostname of the redirect URL (default localhost)")
+	authCmd.Flags().StringVar(&cmd.LocalBindAddress, "local-bind-address", "127.0.0.1", "local address on which the auth server will listen")
+	authCmd.Flags().StringVar(&cmd.RedirectURLHostname, "redirect-url-hostname", "localhost", "hostname of the redirect URL")
 
 	return authCmd
 }
@@ -48,9 +50,8 @@ func (cmd *AuthCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 	// customize authentication options based on the command line parameters
 	authOptions := app.AuthenticationOptions{}
-	if cmd.Port != 0 {
-		authOptions.LocalServerBindAddress = fmt.Sprintf("127.0.0.1:%d", cmd.Port)
-	}
+	authOptions.LocalServerBindAddress = fmt.Sprintf("%s:%d", cmd.LocalBindAddress, cmd.Port)
+
 	if cmd.RedirectURLHostname != "" {
 		authOptions.RedirectURLHostname = cmd.RedirectURLHostname
 	}
