@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.3.0
+### Added
+- Option to bind the HTTP server to address other than local ([#426][i426])
+
+### Changed
+- Bump `golang.org/x/term` to version 0.16.0
+- Bump `golang.org/x/sync` to version 0.6.0
+- Bump `github.com/dvsekhvalnov/jose2go` to version 1.6.0
+- Bump `github.com/hjson/hjson-go/v4` to version 4.4.0
+- Bump `golang.org/x/oauth2` to version 0.16.0
+- Bump `github.com/spf13/afero` to version 1.11.0
+- Bump `github.com/gphotosuploader/google-photos-api-client-go/v3` to version 3.0.4
+
+[i426]: https://github.com/gphotosuploader/gphotos-uploader-cli/pulls/426
+
 ## 4.2.1
 ### Fixed
 - Fix versioning on releases since the publication of 4.x version. ([#413][i413])
