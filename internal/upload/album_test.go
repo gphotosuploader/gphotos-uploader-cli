@@ -118,8 +118,8 @@ func TestGetTemplateFunctionName(t *testing.T) {
 	}
 }
 
-func TestParseAlbumNameTample(t *testing.T) {
-	timeObj := time.Date(2034, time.December, 31, 0, 0, 0, 0, time.UTC)
+func TestParseAlbumNameTampleWithTokens(t *testing.T) {
+	timeObj := time.Date(2034, time.December, 31, 16, 5, 59, 0, time.UTC)
 	filePath := "/foo/bar/file.jpg"
 
 	var testData = []struct {
@@ -129,8 +129,44 @@ func TestParseAlbumNameTample(t *testing.T) {
 		{in: "%_year%", out: "2034"},
 		{in: "%_day%", out: "31"},
 		{in: "%_month%", out: "12"},
+
+		{in: "%_folderpath%", out: "foo_bar"},
+		{in: "%_directory%", out: "bar"},
+		{in: "%_parent_directory%", out: "foo"},
+
+		{in: "%_time%", out: "16:05:59"},
+		{in: "%_time_en%", out: "04:05:59 PM"},
 		{in: "%_year%_%_year%", out: "2034_2034"},
+	}
+
+	for _, tt := range testData {
+		val, err := parseAlbumNameTemplate(tt.in, filePath, timeObj)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
+		assert.Equal(t, tt.out, val)
+	}
+}
+
+func TestParseAlbumNameTampleWithFunctions(t *testing.T) {
+	timeObj := time.Date(2034, time.December, 31, 16, 5, 59, 0, time.UTC)
+	filePath := "/foo/bar/file.jpg"
+
+	var testData = []struct {
+		in  string
+		out string
+	}{
 		{in: "$cutLeft(%_year%, 2)", out: "34"},
+		{in: "$cutLeft(%_year%, 5)", out: ""},
+		{in: "$cutRight(%_year%, 2)", out: "20"},
+		{in: "$cutRight(%_year%, 5)", out: ""},
+
+		{in: "$lower(Hello World!)", out: "hello world!"},
+		{in: "$upper(Hello World!)", out: "HELLO WORLD!"},
+		{in: "$sentence(Hello World!)", out: "Hello world!"},
+		{in: "$sentence(Hello World!)", out: "Hello world!"},
+		{in: "$title(Title of a Set of Photos)", out: "Title Of A Set Of Photos"},
 	}
 
 	for _, tt := range testData {
@@ -153,11 +189,13 @@ func TestParseAlbumNameTampleWithInvalidParameter(t *testing.T) {
 	}{
 		{in: "%_ABC%", err: "invalid token: ABC"},
 		{in: "$ABC(Z)", err: "unknown function: ABC"},
-		{in: "$cutLeft(Z,Z)", err: "cutLeft/cutRight requires a number as second argument"},
-		{in: "$cutLeft(Z,Z, Z)", err: "cutLeft/cutRight requires 2 arguments"},
-		{in: "$cutLeft(Z)", err: "cutLeft/cutRight requires 2 arguments"},
+		{in: "$cutLeft(Z,Z)", err: "cutLeft requires a number as second argument"},
+		{in: "$cutLeft(Z,Z, Z)", err: "cutLeft requires 2 arguments"},
+		{in: "$cutLeft(Z)", err: "cutLeft requires 2 arguments"},
 		{in: "$cutLeft($cutLeft(Z)", err: "function missing closing parenthesis"},
-		{in: "$cutLeft($cutLeft(Z), 2)", err: "cutLeft/cutRight requires 2 arguments"},
+		{in: "$cutLeft($cutLeft(Z), 2)", err: "cutLeft requires 2 arguments"},
+		{in: "$cutLeft($cutRight(Z), 2)", err: "cutRight requires 2 arguments"},
+		{in: "$lower()", err: "lower requires 1 argument"},
 	}
 
 	for _, tt := range testData {

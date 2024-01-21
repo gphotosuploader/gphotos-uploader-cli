@@ -7,6 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // albumName returns the album name based on the configured parameter.
@@ -121,6 +124,10 @@ func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time)
 
 				i++
 				if functionDepth == 0 {
+					//empty first argument is 0 args
+					if len(args) == 1 && args[0] == "" {
+						args = []string{}
+					}
 					val, err := runTemplateFunction(functionName, args)
 					if err != nil {
 						return "", err
@@ -166,7 +173,7 @@ func getTokenName(template string) string {
 		return ""
 	}
 
-	re := regexp.MustCompile(`^%_([a-zA-Z]+)%`)
+	re := regexp.MustCompile(`^%_([a-zA-Z_]+)%`)
 	match := re.FindStringSubmatch(template)
 	if len(match) > 1 {
 		return match[1]
@@ -176,15 +183,15 @@ func getTokenName(template string) string {
 
 func runTemplateFunction(name string, args []string) (string, error) {
 	switch name {
-	case "cutLeft":
+	case "cutLeft", "cutRight":
 		if len(args) != 2 {
-			return "", fmt.Errorf("cutLeft/cutRight requires 2 arguments")
+			return "", fmt.Errorf("%s requires 2 arguments", name)
 		}
 
 		cutN, err := strconv.Atoi(strings.TrimSpace(args[1]))
 
 		if err != nil {
-			return "", fmt.Errorf("cutLeft/cutRight requires a number as second argument")
+			return "", fmt.Errorf("%s requires a number as second argument", name)
 		}
 
 		if cutN >= len(args[0]) {
@@ -198,6 +205,27 @@ func runTemplateFunction(name string, args []string) (string, error) {
 		if name == "cutRight" {
 			return args[0][:len(args[0])-cutN], nil
 		}
+	case "lower", "upper", "sentence", "title":
+		if len(args) != 1 {
+			return "", fmt.Errorf("%s requires 1 argument", name)
+		}
+
+		if len(args[0]) == 0 {
+			return "", nil
+		}
+		switch name {
+		case "lower":
+			return strings.ToLower(args[0]), nil
+		case "upper":
+			return strings.ToUpper(args[0]), nil
+		case "sentence":
+			runes := []rune(strings.ToLower(args[0]))
+			return strings.ToUpper(string(runes[0])) + string(runes[1:]), nil
+		case "title":
+			caser := cases.Title(language.English)
+			titleStr := caser.String(args[0])
+			return titleStr, nil
+		}
 	default:
 		return "", fmt.Errorf("unknown function: " + name)
 	}
@@ -206,15 +234,13 @@ func runTemplateFunction(name string, args []string) (string, error) {
 }
 
 func replaceTemplateToken(token, filePath string, fileCreateTime time.Time) (string, error) {
-	dir := filepath.Dir(filePath)
-
 	switch token {
 	case "folderpath":
-		return albumNameUsingFolderPath(dir), nil
+		return albumNameUsingFolderPath(filePath), nil
 	case "directory":
-		return albumNameUsingFolderName(dir), nil
+		return albumNameUsingFolderName(filePath), nil
 	case "parent_directory":
-		return albumNameUsingFolderName(filepath.Dir(dir)), nil
+		return albumNameUsingFolderName(filepath.Dir(filePath)), nil
 	case "month":
 		return fileCreateTime.Format("01"), nil
 	case "day":
