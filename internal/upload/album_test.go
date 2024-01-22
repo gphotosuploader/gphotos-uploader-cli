@@ -167,6 +167,10 @@ func TestParseAlbumNameTampleWithFunctions(t *testing.T) {
 		{in: "$sentence(Hello World!)", out: "Hello world!"},
 		{in: "$sentence(Hello World!)", out: "Hello world!"},
 		{in: "$title(Title of a Set of Photos)", out: "Title Of A Set Of Photos"},
+
+		{in: "$regexp(Hello World!, World, Universe)", out: "Hello Universe!"},
+		{in: "$regexp(Hello _World!,_, ',')", out: "Hello ,World!"},
+		{in: "$regexp(Hello _World!,'[_!]', ',')", out: "Hello ,World,"},
 	}
 
 	for _, tt := range testData {
@@ -196,6 +200,9 @@ func TestParseAlbumNameTampleWithInvalidParameter(t *testing.T) {
 		{in: "$cutLeft($cutLeft(Z), 2)", err: "cutLeft requires 2 arguments"},
 		{in: "$cutLeft($cutRight(Z), 2)", err: "cutRight requires 2 arguments"},
 		{in: "$lower()", err: "lower requires 1 argument"},
+		{in: "$regexp(Hello World!, ^[a-z+\\[$, Universe)", err: "invalid regexp pattern: ^[a-z+\\[$"},
+		{in: "$regexp(Hello World!, _, ABC'()')", err: "Can't mix quoted & unquoted content in function arg: regexp"},
+		{in: "$regexp(Hello World!, _, ')", err: "string missing closing quote"},
 	}
 
 	for _, tt := range testData {

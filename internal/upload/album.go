@@ -94,22 +94,39 @@ func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time)
 			functionDepth := 1
 			args := []string{}
 			currentArg := ""
+			inQuotes := false
+			hasQuotes := false
 			for i < len(template) {
-				if template[i] == '(' {
+				if template[i] == '\'' {
+					hasQuotes = true
+					inQuotes = !inQuotes
+				}
+
+				if !inQuotes && template[i] == '(' {
 					functionDepth++
 				}
 
-				if template[i] == ')' {
+				if !inQuotes && template[i] == ')' {
 					functionDepth--
 				}
 
-				if (template[i] == ',' && functionDepth == 1) || functionDepth == 0 {
-					val, err := parseAlbumNameTemplate(currentArg, filePath, fileCreateTime)
-					if err != nil {
-						return "", err
-					}
+				if (!inQuotes && template[i] == ',' && functionDepth == 1) || functionDepth == 0 {
 
-					args = append(args, val)
+					if hasQuotes {
+						val := strings.TrimSpace(currentArg)
+						if val[0] != '\'' || val[len(val)-1] != '\'' {
+							return "", fmt.Errorf("Can't mix quoted & unquoted content in function arg: %s", functionName)
+						}
+						args = append(args, val[1:len(val)-1])
+					} else {
+						val, err := parseAlbumNameTemplate(currentArg, filePath, fileCreateTime)
+						if err != nil {
+							return "", err
+						}
+						args = append(args, val)
+					}
+					hasQuotes = false
+
 					currentArg = ""
 				} else {
 					currentArg += string(template[i])
@@ -129,6 +146,9 @@ func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time)
 					outputs += val
 					break
 				}
+			}
+			if inQuotes {
+				return "", fmt.Errorf("string missing closing quote")
 			}
 
 			if functionDepth != 0 {
@@ -219,11 +239,33 @@ func runTemplateFunction(name string, args []string) (string, error) {
 			titleStr := caser.String(args[0])
 			return titleStr, nil
 		}
+	case "regexp":
+		if len(args) != 3 {
+			return "", fmt.Errorf("%s requires 3 arguments", name)
+		}
+
+		if args[1] == "" {
+			return args[0], nil
+		}
+
+		return regexpReplace(args[0], args[1], args[2])
 	default:
 		return "", fmt.Errorf("unknown function: " + name)
 	}
 
 	return "", nil
+}
+
+func regexpReplace(str, pattern, replace string) (result string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("invalid regexp pattern:%s", pattern)
+		}
+	}()
+
+	re := regexp.MustCompile(pattern)
+	result = re.ReplaceAllString(str, replace)
+	return
 }
 
 func replaceTemplateToken(token, filePath string, fileCreateTime time.Time) (string, error) {
