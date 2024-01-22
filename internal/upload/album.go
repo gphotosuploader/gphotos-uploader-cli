@@ -13,8 +13,7 @@ import (
 )
 
 // albumName returns the album name based on the configured parameter.
-// albumName returns the album name based on the configured parameter.
-func (job *UploadFolderJob) albumName(filePath, absoluteFilePath string) string {
+func (job *UploadFolderJob) albumName(filePath string, fileCreateTime time.Time) string {
 	before, after, found := strings.Cut(job.Album, ":")
 	if !found {
 		return ""
@@ -24,7 +23,7 @@ func (job *UploadFolderJob) albumName(filePath, absoluteFilePath string) string 
 	}
 
 	if before == "template" {
-		val, err := albumNameUsingTemplate(after, filePath, absoluteFilePath)
+		val, err := parseAlbumNameTemplate(after, filePath, fileCreateTime)
 		if err != nil {
 			panic("invalid Albums name template format - " + err.Error())
 		}
@@ -69,12 +68,6 @@ func albumNameUsingFolderName(path string) string {
 		return ""
 	}
 	return filepath.Base(p)
-}
-
-// albumNameUsingTemplate returns an AlbumID name using the given template.
-func albumNameUsingTemplate(template, filePath, absoluteFilePath string) (string, error) {
-	//TODO: implement pass time creation
-	return parseAlbumNameTemplate(template, filePath, time.Now())
 }
 
 // Recursively parse the template and replace the tokens with the corresponding values.
