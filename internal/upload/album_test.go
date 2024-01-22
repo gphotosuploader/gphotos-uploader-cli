@@ -8,6 +8,7 @@ import (
 )
 
 func TestAlbumName(t *testing.T) {
+	timeObj := time.Date(2034, time.December, 31, 16, 5, 59, 0, time.UTC)
 	var testData = []struct {
 		name  string
 		album string
@@ -39,15 +40,20 @@ func TestAlbumName(t *testing.T) {
 			in:    "/foo/bar/file.jpg",
 			want:  "",
 		},
+		{
+			name:  "album set an album's name using template",
+			album: "template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)",
+			in:    "/foo/bar/file.jpg",
+			want:  "bar - 12.31.34",
+		},
 	}
-
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
 			job := UploadFolderJob{
 				Album: tt.album,
 			}
 
-			assert.Equal(t, tt.want, job.albumName(tt.in, ""))
+			assert.Equal(t, tt.want, job.albumName(tt.in, timeObj))
 		})
 
 	}
@@ -62,7 +68,7 @@ func TestAlbumNameWithInvalidParameter(t *testing.T) {
 	job := UploadFolderJob{
 		Album: "auto:fooBar",
 	}
-	_ = job.albumName("/foo/bar/file.jpg", "")
+	_ = job.albumName("/foo/bar/file.jpg", time.Now())
 }
 
 func TestAlbumNameUsingFolderPath(t *testing.T) {

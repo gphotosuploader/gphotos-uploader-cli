@@ -70,6 +70,12 @@ func albumNameUsingFolderName(path string) string {
 	return filepath.Base(p)
 }
 
+// ValidateAlbumNameTemplate validates the given template.
+func ValidateAlbumNameTemplate(template string) error {
+	_, err := parseAlbumNameTemplate(template, "", time.Now())
+	return err
+}
+
 // Recursively parse the template and replace the tokens with the corresponding values.
 func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time) (string, error) {
 	outputs := ""
