@@ -50,13 +50,7 @@ func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logge
 			return nil
 		}
 
-		info, err := os.Stat(fp)
-		if err != nil {
-			logger.Failf("Error getting file info for '%s': %s", fp, err)
-			return nil
-		}
-
-		albumName := job.albumName(relativePath, info.ModTime())
+		albumName := job.albumName(relativePath, fi.ModTime())
 		logger.Debugf("Adding file '%s' to the upload list for album '%s'.", fp, albumName)
 
 		// set file upload Options depending on folder upload Options
