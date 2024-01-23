@@ -71,6 +71,18 @@ func TestAlbumNameWithInvalidParameter(t *testing.T) {
 	_ = job.albumName("/foo/bar/file.jpg", time.Now())
 }
 
+func TestAlbumNameWithInvalidTemplate(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("A Panic was expected but not reached.")
+		}
+	}()
+	job := UploadFolderJob{
+		Album: "template:%_ABC%",
+	}
+	_ = job.albumName("/foo/bar/file.jpg", time.Now())
+}
+
 func TestAlbumNameUsingFolderPath(t *testing.T) {
 	var testData = []struct {
 		in  string
@@ -176,7 +188,8 @@ func TestParseAlbumNameTampleWithFunctions(t *testing.T) {
 
 		{in: "$regexp(Hello World!, World, Universe)", out: "Hello Universe!"},
 		{in: "$regexp(Hello _World!,_, ',')", out: "Hello ,World!"},
-		{in: "$regexp(Hello _World!,'[_!]', ',')", out: "Hello ,World,"},
+		{in: "$regexp(Hello _World!,'[_!]', ',' )", out: "Hello ,World,"},
+		{in: "$regexp(Hello World!,, )", out: "Hello World!"},
 	}
 
 	for _, tt := range testData {
@@ -206,13 +219,20 @@ func TestParseAlbumNameTampleWithInvalidParameter(t *testing.T) {
 		{in: "$cutLeft($cutLeft(Z), 2)", err: "cutLeft requires 2 arguments"},
 		{in: "$cutLeft($cutRight(Z), 2)", err: "cutRight requires 2 arguments"},
 		{in: "$lower()", err: "lower requires 1 argument"},
+
 		{in: "$regexp(Hello World!, ^[a-z+\\[$, Universe)", err: "invalid regexp pattern: ^[a-z+\\[$"},
 		{in: "$regexp(Hello World!, _, ABC'()')", err: "Can't mix quoted & unquoted content in function arg: regexp"},
 		{in: "$regexp(Hello World!, _, ')", err: "string missing closing quote"},
+		{in: "$regexp(Hello World!, _)", err: "regexp requires 3 arguments"},
 	}
 
 	for _, tt := range testData {
 		_, err := parseAlbumNameTemplate(tt.in, "", timeObj)
 		assert.EqualError(t, err, tt.err)
 	}
+}
+
+func TestValidateAlbumNameTemplate(t *testing.T) {
+	err := ValidateAlbumNameTemplate("$lower(Hello World")
+	assert.Error(t, err)
 }

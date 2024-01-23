@@ -81,95 +81,95 @@ func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time)
 	outputs := ""
 	i := 0
 	for {
-		tokenName := getTokenName(template[i:])
-		if tokenName != "" {
-			tokenNameLen := len(tokenName) + 3
-			val, err := replaceTemplateToken(tokenName, filePath, fileCreateTime)
-			if err != nil {
-				return "", err
-			}
-
-			outputs += val
-			i += tokenNameLen
+		parserOutput, tokenLen, err := handleTokenParsing(template[i:], filePath, fileCreateTime)
+		if err != nil {
+			return "", err
+		}
+		if tokenLen > 0 {
+			outputs += parserOutput
+			i += tokenLen
 		}
 
-		functionName := getTemplateFunctionName(template[i:])
-		if functionName != "" {
-			functionArgStart := i + len(functionName) + 2
-			i = functionArgStart
-			functionDepth := 1
-			args := []string{}
-			currentArg := ""
-			inQuotes := false
-			hasQuotes := false
-			for i < len(template) {
-				if template[i] == '\'' {
-					hasQuotes = true
-					inQuotes = !inQuotes
-				}
-
-				if !inQuotes && template[i] == '(' {
-					functionDepth++
-				}
-
-				if !inQuotes && template[i] == ')' {
-					functionDepth--
-				}
-
-				if (!inQuotes && template[i] == ',' && functionDepth == 1) || functionDepth == 0 {
-
-					if hasQuotes {
-						val := strings.TrimSpace(currentArg)
-						if val[0] != '\'' || val[len(val)-1] != '\'' {
-							return "", fmt.Errorf("Can't mix quoted & unquoted content in function arg: %s", functionName)
-						}
-						args = append(args, val[1:len(val)-1])
-					} else {
-						val, err := parseAlbumNameTemplate(currentArg, filePath, fileCreateTime)
-						if err != nil {
-							return "", err
-						}
-						args = append(args, val)
-					}
-					hasQuotes = false
-
-					currentArg = ""
-				} else {
-					currentArg += string(template[i])
-				}
-
-				i++
-				if functionDepth == 0 {
-					//empty first argument is 0 args
-					if len(args) == 1 && args[0] == "" {
-						args = []string{}
-					}
-					val, err := runTemplateFunction(functionName, args)
-					if err != nil {
-						return "", err
-					}
-
-					outputs += val
-					break
-				}
-			}
-			if inQuotes {
-				return "", fmt.Errorf("string missing closing quote")
-			}
-
-			if functionDepth != 0 {
-				return "", fmt.Errorf("function missing closing parenthesis")
-			}
+		parserOutput, functionLen, err := handleFunctionParsing(template[i:], filePath, fileCreateTime)
+		if err != nil {
+			return "", err
+		}
+		if functionLen > 0 {
+			outputs += parserOutput
+			i += functionLen
 		}
 
 		if i == len(template) {
 			break
 		}
+
 		outputs += string(template[i])
 		i++
 	}
 
 	return outputs, nil
+}
+
+// Recursively parse the template and replace the functions with the corresponding values.
+// int result is the number of characters parsed
+func handleFunctionParsing(template string, filePath string, fileCreateTime time.Time) (string, int, error) {
+	functionName := getTemplateFunctionName(template)
+	if functionName == "" {
+		return "", 0, nil
+	}
+	i := len(functionName) + 2
+	functionDepth := 1
+	args := []string{}
+	currentArg := ""
+	for i < len(template) {
+		argInQuotes, quotesLenght, err := handleQuotesParsing(currentArg, template[i:], functionName)
+		if err != nil {
+			return "", 0, err
+		}
+
+		if quotesLenght > 0 {
+			i += quotesLenght
+			args = append(args, argInQuotes)
+		}
+
+		if template[i] == '(' {
+			functionDepth++
+		}
+
+		if template[i] == ')' {
+			functionDepth--
+		}
+
+		if (template[i] == ',' && functionDepth == 1) || functionDepth == 0 {
+			if quotesLenght == 0 {
+				val, err := parseAlbumNameTemplate(currentArg, filePath, fileCreateTime)
+				if err != nil {
+					return "", 0, err
+				}
+				args = append(args, val)
+			}
+
+			currentArg = ""
+		} else {
+			currentArg += string(template[i])
+		}
+
+		i++
+		if functionDepth == 0 {
+			break
+		}
+	}
+
+	if functionDepth != 0 {
+		return "", 0, fmt.Errorf("function missing closing parenthesis")
+	}
+
+	val, err := runTemplateFunction(functionName, args)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return val, i, err
 }
 
 func getTemplateFunctionName(template string) string {
@@ -184,6 +184,62 @@ func getTemplateFunctionName(template string) string {
 		return match[1]
 	}
 	return ""
+}
+
+// Parse functon argument with quotes
+// int result is the number of characters parsed
+func handleQuotesParsing(preFix, template, functionName string) (string, int, error) {
+	if template[0] != '\'' {
+		return "", 0, nil
+	}
+
+	postFix := ""
+	output := ""
+	isOpen := true
+	length := 0
+	for i, v := range template[1:] {
+		length = i
+		if isOpen {
+			if v == '\'' {
+				isOpen = false
+				continue
+			}
+
+			output += string(v)
+		} else {
+			if v == ')' || v == ',' {
+				break
+			}
+			postFix += string(v)
+		}
+	}
+
+	if isOpen {
+		return "", 0, fmt.Errorf("string missing closing quote")
+	}
+
+	if strings.TrimSpace(postFix) != "" || strings.TrimSpace(preFix) != "" {
+		return "", 0, fmt.Errorf("Can't mix quoted & unquoted content in function arg: %s", functionName)
+	}
+
+	return output, length + 1, nil
+}
+
+// Recursively parse the template and replace the tokens with the corresponding values.
+// int result is the number of characters parsed
+func handleTokenParsing(template string, filePath string, fileCreateTime time.Time) (string, int, error) {
+	tokenName := getTokenName(template)
+	if tokenName == "" {
+		return "", 0, nil
+	}
+
+	tokenNameLen := len(tokenName) + 3
+	val, err := replaceTemplateToken(tokenName, filePath, fileCreateTime)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return val, tokenNameLen, nil
 }
 
 func getTokenName(template string) string {
@@ -201,6 +257,11 @@ func getTokenName(template string) string {
 }
 
 func runTemplateFunction(name string, args []string) (string, error) {
+	//empty first argument is 0 args
+	if len(args) == 1 && args[0] == "" {
+		args = []string{}
+	}
+
 	switch name {
 	case "cutLeft", "cutRight":
 		if len(args) != 2 {
@@ -229,9 +290,6 @@ func runTemplateFunction(name string, args []string) (string, error) {
 			return "", fmt.Errorf("%s requires 1 argument", name)
 		}
 
-		if len(args[0]) == 0 {
-			return "", nil
-		}
 		switch name {
 		case "lower":
 			return strings.ToLower(args[0]), nil
