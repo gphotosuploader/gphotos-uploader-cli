@@ -179,15 +179,15 @@ Using `template:` followed by a template string that can contain the following p
 
 ##### Functions
 
-| Placeholder         | Description                                                                                                                                                                                                                                                           |
-|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| $cutLeft(x,n)       | Removes the first n characters of string x and returns the result.                                                                                                                                                                                                    |
-| $cutRight(x,n)      | Removes the last n characters of string x and returns the result.                                                                                                                                                                                                     |
-| $regex(x,expr,repl) | Replaces the pattern specified by the regular expression expr in the string x by repl. The fourth optional parameter enables ignore case (1) or disables the ignore case setting (0). Please note that you have to escape comma and other special characters in expr. |
-| $sentence(x)        | Converts the given string to sentence case.                                                                                                                                                                                                                           |
-| $title(x)           | Converts the given string to title case.                                                                                                                                                                                                                              |
-| $upper(x)           | Converts the given string to upper case.                                                                                                                                                                                                                              |
-| $lower(x)           | Converts the given string to lower case.                                                                                                                                                                                                                              |
+| Placeholder         | Description                                                                            |
+|---------------------|----------------------------------------------------------------------------------------|
+| $cutLeft(x,n)       | Removes the first n characters of string x and returns the result.                     |
+| $cutRight(x,n)      | Removes the last n characters of string x and returns the result.                      |
+| $regex(x,expr,repl) | Replaces the pattern specified by the regular expression expr in the string x by repl. |
+| $sentence(x)        | Converts the given string to sentence case.                                            |
+| $title(x)           | Converts the given string to title case.                                               |
+| $upper(x)           | Converts the given string to upper case.                                               |
+| $lower(x)           | Converts the given string to lower case.                                               |
 
 ##### Examples
 
