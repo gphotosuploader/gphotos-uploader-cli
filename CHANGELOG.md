@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.4.0
+### Added
+- Option to customize Album names by introducing `template`. Thanks to [@WACKYprog](https://github.com/WACKYprog) ([#431][i431])
+
+[i431]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/431
+
 ## 4.3.0
 ### Added
 - Option to bind the HTTP server to address other than local ([#426][i426])
