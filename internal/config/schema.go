@@ -44,19 +44,19 @@ type FolderUploadJob struct {
 	//                 %_parent_directory% - Replaced with the name of the parent folder of the file.
 	//                 %_day% - day of the month the file was created (in "DD" format).
 	//                 %_month% -month the file was created (in "MM" format).
-	//				   %_year% - year the file was created (in "YYYY" format).
-	//				   %_time% - time the file was created (in "HH:MM:SS" 24-hour format).
+	//                 %_year% - year the file was created (in "YYYY" format).
+	//                 %_time% - time the file was created (in "HH:MM:SS" 24-hour format).
 	//                 %_time_en% - time the file was created (in "HH:MM:SS AM/PM" 12-hour format).
-	//              Funcations:
-	//				   $lower(string) - converts the string to lowercase.
-	//				   $upper(string) - converts the string to uppercase.
-	//				   $sentence(string) - converts the string to sentence case.
-	//				   $title(string) - converts the string to title case.
-	//			       $regex(string, regex, replacement) - replaces the string with the regex replacement.
-	//			       $cutLeft(string, length) - cuts the string from the left.
-	//			       $cutRight(string, length) - cuts the string from the right.
+	//              Functions:
+	//                 $lower(string) - converts the string to lowercase.
+	//                 $upper(string) - converts the string to uppercase.
+	//                 $sentence(string) - converts the string to sentence case.
+	//                 $title(string) - converts the string to title case.
+	//                 $regex(string, regex, replacement) - replaces the string with the regex replacement.
+	//                 $cutLeft(string, length) - cuts the string from the left.
+	//                 $cutRight(string, length) - cuts the string from the right.
 	//
-	//			  Example:	"template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)"
+	//              Example: "template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)"
 
 	Album string `json:"Album,omitempty"`
 

@@ -136,7 +136,7 @@ func TestGetTemplateFunctionName(t *testing.T) {
 	}
 }
 
-func TestParseAlbumNameTampleWithTokens(t *testing.T) {
+func TestParseAlbumNameTemplateWithTokens(t *testing.T) {
 	timeObj := time.Date(2034, time.December, 31, 16, 5, 59, 0, time.UTC)
 	filePath := "/foo/bar/file.jpg"
 
@@ -167,7 +167,7 @@ func TestParseAlbumNameTampleWithTokens(t *testing.T) {
 	}
 }
 
-func TestParseAlbumNameTampleWithFunctions(t *testing.T) {
+func TestParseAlbumNameTemplateWithFunctions(t *testing.T) {
 	timeObj := time.Date(2034, time.December, 31, 16, 5, 59, 0, time.UTC)
 	filePath := "/foo/bar/file.jpg"
 
@@ -202,7 +202,7 @@ func TestParseAlbumNameTampleWithFunctions(t *testing.T) {
 	}
 }
 
-func TestParseAlbumNameTampleWithInvalidParameter(t *testing.T) {
+func TestParseAlbumNameTemplateWithInvalidParameter(t *testing.T) {
 	// testing  for Y2k bug ;)
 	timeObj := time.Date(1999, time.December, 31, 0, 0, 0, 0, time.UTC)
 

@@ -77,7 +77,7 @@ func TestFromFile(t *testing.T) {
 		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
 		{"Should fail if Album's format is invalid", "testdata/invalid-config/AlbumBadFormat.hjson", "", true},
 		{"Should fail if Album's format is invalid", "testdata/invalid-config/AlbumBadFormat.hjson", "", true},
-		{"Should fail if Album's name auto mathod is invalid", "testdata/invalid-config/AlbumBadAutoMethod.hjson", "", true},
+		{"Should fail if Album's name auto method is invalid", "testdata/invalid-config/AlbumBadAutoMethod.hjson", "", true},
 		{"Should fail if Album's name template is invalid", "testdata/invalid-config/AlbumBadNameTemplate.hjson", "", true},
 		{"Should fail if Album's key is invalid", "testdata/invalid-config/AlbumBadKey.hjson", "", true},
 		{"Should fail if Album's name is invalid", "testdata/invalid-config/AlbumEmptyName.hjson", "", true},
