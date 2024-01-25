@@ -66,6 +66,7 @@ func TestFromFile(t *testing.T) {
 		{"Should success with Album's name option", "testdata/valid-config/configWithAlbumNameOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's auto folderName option", "testdata/valid-config/configWithAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's auto folderPath option", "testdata/valid-config/configWithAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
+		{"Should success with Album's template containing token", "testdata/valid-config/configWithAlbumTemplateToken.hjson", "youremail@domain.com", false},
 		{"Should success with deprecated CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "youremail@domain.com", false},
 
 		{"Should fail if config dir does not exist", "testdata/non-existent/config.hjson", "", true},
@@ -75,6 +76,9 @@ func TestFromFile(t *testing.T) {
 		{"Should fail if AppAPICredentials are invalid", "testdata/invalid-config/EmptyAppAPICredentials.hjson", "", true},
 		{"Should fail if Jobs is empty", "testdata/invalid-config/NoJobs.hjson", "", true},
 		{"Should fail if Album's format is invalid", "testdata/invalid-config/AlbumBadFormat.hjson", "", true},
+		{"Should fail if Album's format is invalid", "testdata/invalid-config/AlbumBadFormat.hjson", "", true},
+		{"Should fail if Album's name auto method is invalid", "testdata/invalid-config/AlbumBadAutoMethod.hjson", "", true},
+		{"Should fail if Album's name template is invalid", "testdata/invalid-config/AlbumBadNameTemplate.hjson", "", true},
 		{"Should fail if Album's key is invalid", "testdata/invalid-config/AlbumBadKey.hjson", "", true},
 		{"Should fail if Album's name is invalid", "testdata/invalid-config/AlbumEmptyName.hjson", "", true},
 		{"Should fail if Album's auto value is invalid", "testdata/invalid-config/AlbumBadAutoValue.hjson", "", true},

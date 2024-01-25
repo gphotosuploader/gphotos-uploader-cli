@@ -1,6 +1,8 @@
 # IDE configuration
 /.idea/
 .history
+.vscode/
+.devcontainer/
 
 # Binary releases
 /dist/

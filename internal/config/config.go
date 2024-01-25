@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/upload"
 	"github.com/hjson/hjson-go/v4"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/afero"
@@ -142,8 +143,10 @@ func (c Config) validateJobs(fs afero.Fs) error {
 		if !exist {
 			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 		}
-		if job.Album != "" && !isValidAlbum(job.Album) {
-			return fmt.Errorf("option Album is invalid, '%s", job.Album)
+
+		albumErr := ValidateAlbumOption(job.Album)
+		if job.Album != "" && albumErr != nil {
+			return albumErr
 		}
 		// TODO: Check CreateAlbums for backwards compatibility. It should be removed on version 5.x
 		if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
@@ -182,21 +185,32 @@ func isValidAlbumGenerationMethod(method string) bool {
 }
 
 // isValidAlbum checks if the value is a valid Album option.
-func isValidAlbum(value string) bool {
+func ValidateAlbumOption(value string) error {
+	if value == "" {
+		return fmt.Errorf("option Album could not be empty")
+	}
+
 	before, after, found := strings.Cut(value, ":")
-	if !found {
-		return false
+	if !found || after == "" {
+		return fmt.Errorf("option Album is invalid, '%s.", value)
 	}
-	if after == "" {
-		return false
-	}
+
 	switch before {
 	case "name":
-		return true
+		return nil
 	case "auto":
-		return isValidAlbumGenerationMethod(after)
+		if !isValidAlbumGenerationMethod(after) {
+			return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
+		}
+		return nil
+	case "template":
+		err := upload.ValidateAlbumNameTemplate(after)
+		if err != nil {
+			return fmt.Errorf("invalid template format: %s", err)
+		}
+		return nil
 	}
-	return false
+	return fmt.Errorf("option Album is invalid, '%s", value)
 }
 
 // isValidCreateAlbums checks if the value is a valid CreateAlbums option.
