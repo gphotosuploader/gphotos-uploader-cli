@@ -74,7 +74,7 @@ func StartServices(ctx context.Context, path string) (*App, error) {
 	}
 
 	app.Logger.Infof("Reading configuration from '%s'", app.configFilename())
-	app.Config, err = config.FromFile(app.fs, app.configFilename())
+	app.Config, err = config.FromFile(app.fs, app.configFilename(), app.Logger)
 	if err != nil {
 		return nil, fmt.Errorf("invalid configuration at '%s': %s", app.configFilename(), err)
 	}

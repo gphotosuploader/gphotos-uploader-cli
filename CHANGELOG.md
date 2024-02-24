@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.5.0
+### Added
+- Support for the latest published Go version (1.22). This project will maintain compatibility with the latest **two major versions** published.
+
+### Changed
+- Bump `golang.org/x/oauth2` to version 0.17.0
+- Bump `gphotosuploader/google-photos-api-client-go/v3` to version 3.0.5
+
+### Deprecated
+- The `auto:folderName` and `auto:folderPath` options are deprecated in favor of the `template:%_directory%` and `template:%_folderpath%` options. See [documentation](https://gphotosuploader.github.io/gphotos-uploader-cli/#/configuration?id=customized-template-template).
+
+
 ## 4.4.0
 ### Added
 - Option to customize Album names by introducing `template`. Thanks to [@WACKYprog](https://github.com/WACKYprog) ([#431][i431])

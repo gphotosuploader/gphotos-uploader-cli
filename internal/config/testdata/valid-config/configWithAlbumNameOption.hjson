@@ -10,7 +10,7 @@
   [
     {
       SourceFolder: ./testdata/valid-config
-      Album: auto:folderPath
+      Album: name:albumName
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []
