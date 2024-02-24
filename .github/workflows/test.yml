@@ -28,4 +28,4 @@ jobs:
       - name: Run tests
         run: make test
       - name: Send code coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
