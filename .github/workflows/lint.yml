@@ -9,6 +9,11 @@ on:
   pull_request:
     paths:
       - '**.go'
+
+env:
+    # it should match the version in the Makefile file.
+    GOLANGCI_LINT_VERSION: 'v1.56.2'
+
 jobs:
   golangci:
     name: Linter code
@@ -21,4 +26,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.55.0
+            version: ${{ env.GOLANGCI_LINT_VERSION }}

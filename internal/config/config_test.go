@@ -1,7 +1,10 @@
 package config_test
 
 import (
+	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -64,9 +67,9 @@ func TestFromFile(t *testing.T) {
 		isErrExpected bool
 	}{
 		{"Should success with Album's name option", "testdata/valid-config/configWithAlbumNameOption.hjson", "youremail@domain.com", false},
-		{"Should success with Album's auto folderName option", "testdata/valid-config/configWithAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
-		{"Should success with Album's auto folderPath option", "testdata/valid-config/configWithAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's template containing token", "testdata/valid-config/configWithAlbumTemplateToken.hjson", "youremail@domain.com", false},
+		{"Should success with deprecated Album's auto folderName option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
+		{"Should success with deprecated Album's auto folderPath option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
 		{"Should success with deprecated CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "youremail@domain.com", false},
 
 		{"Should fail if config dir does not exist", "testdata/non-existent/config.hjson", "", true},
@@ -88,7 +91,7 @@ func TestFromFile(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fs := afero.OsFs{}
-			got, err := config.FromFile(fs, tc.path)
+			got, err := config.FromFile(fs, tc.path, log.Discard)
 			if err != nil {
 				t.Log(err)
 			}
@@ -99,6 +102,52 @@ func TestFromFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+type mockLogger struct {
+	log.Logger
+	messages []string
+}
+
+func (m *mockLogger) Warnf(format string, args ...interface{}) {
+	m.messages = append(m.messages, fmt.Sprintf(format, args...))
+}
+
+func TestDeprecationNotices(t *testing.T) {
+	testCases := []struct {
+		name string
+		path string
+		want string
+	}{
+		{"CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "CreateAlbums"},
+		{"auto:folderPath option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderPathOption.hjson", "auto:folderPath"},
+		{"auto:folderName option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderNameOption.hjson", "auto:folderName"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := afero.OsFs{}
+			logger := &mockLogger{}
+			_, err := config.FromFile(fs, tc.path, logger)
+			if err != nil {
+				t.Fatalf("Expected no error, got %v", err)
+			}
+			// Check that the deprecation notice was logged
+			if !contains(logger.messages, tc.want) {
+				t.Errorf("Expected deprecation notice for '%s', got %v", tc.want, logger.messages)
+			}
+		})
+	}
+}
+
+// contains checks if a slice contains a string
+func contains(slice []string, str string) bool {
+	for _, v := range slice {
+		if strings.Contains(v, str) {
+			return true
+		}
+	}
+	return false
 }
 
 func TestConfig_SafePrint(t *testing.T) {

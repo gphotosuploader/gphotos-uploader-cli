@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"io"
 	"path/filepath"
 	"strings"
@@ -26,12 +27,12 @@ func Create(fs afero.Fs, filename string) (*Config, error) {
 
 // FromFile returns the configuration data read from the specified file.
 // FromFile returns a ParseError{} if the configuration validation fails.
-func FromFile(fs afero.Fs, filename string) (*Config, error) {
+func FromFile(fs afero.Fs, filename string, logger log.Logger) (*Config, error) {
 	cfg, err := readFile(fs, filename)
 	if err != nil {
 		return nil, err
 	}
-	if err := cfg.validate(fs); err != nil {
+	if err := cfg.validate(fs, logger); err != nil {
 		return cfg, err
 	}
 
@@ -68,7 +69,7 @@ func (c Config) SafePrint() string {
 }
 
 // validate validates the current configuration.
-func (c Config) validate(fs afero.Fs) error {
+func (c Config) validate(fs afero.Fs, logger log.Logger) error {
 	if err := c.validateSecretsBackendType(); err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func (c Config) validate(fs afero.Fs) error {
 	if err := c.validateAccount(); err != nil {
 		return err
 	}
-	if err := c.validateJobs(fs); err != nil {
+	if err := c.validateJobs(fs, logger); err != nil {
 		return err
 	}
 	return nil
@@ -130,28 +131,60 @@ func (c Config) validateAccount() error {
 	return nil
 }
 
-func (c Config) validateJobs(fs afero.Fs) error {
-	if len(c.Jobs) < 1 {
-		return errors.New("at least one Job must be configured")
+func (c Config) validateJobs(fs afero.Fs, logger log.Logger) error {
+	if err := c.checkJobsExistence(); err != nil {
+		return err
 	}
 
 	for _, job := range c.Jobs {
-		exist, err := afero.DirExists(fs, job.SourceFolder)
-		if err != nil {
-			return fmt.Errorf("option SourceFolder '%s' is invalid, err=%s", job.SourceFolder, err)
+		if err := c.validateJob(fs, job, logger); err != nil {
+			return err
 		}
-		if !exist {
-			return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
-		}
+	}
+	return nil
+}
 
-		albumErr := ValidateAlbumOption(job.Album)
-		if job.Album != "" && albumErr != nil {
-			return albumErr
-		}
-		// TODO: Check CreateAlbums for backwards compatibility. It should be removed on version 5.x
-		if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
-			return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
-		}
+func (c Config) checkJobsExistence() error {
+	if len(c.Jobs) < 1 {
+		return errors.New("at least one Job must be configured")
+	}
+	return nil
+}
+
+func (c Config) validateJob(fs afero.Fs, job FolderUploadJob, logger log.Logger) error {
+	if err := c.checkSourceFolder(fs, job); err != nil {
+		return err
+	}
+
+	if err := validateAlbumOption(job.Album, logger); err != nil {
+		return err
+	}
+
+	if err := c.checkDeprecatedCreateAlbums(job, logger); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c Config) checkDeprecatedCreateAlbums(job FolderUploadJob, logger log.Logger) error {
+	// TODO: 'CreateAlbums' is deprecated. It should be removed on version 5.x
+	if job.CreateAlbums != "" {
+		logger.Warnf("Deprecation Notice: The configuration option 'CreateAlbums' is deprecated and will be removed in a future version. Please update your configuration accordingly.")
+	}
+	if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
+		return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
+	}
+	return nil
+}
+
+func (c Config) checkSourceFolder(fs afero.Fs, job FolderUploadJob) error {
+	exist, err := afero.DirExists(fs, job.SourceFolder)
+	if err != nil {
+		return fmt.Errorf("option SourceFolder '%s' is invalid, err=%s", job.SourceFolder, err)
+	}
+	if !exist {
+		return fmt.Errorf("folder '%s' does not exist", job.SourceFolder)
 	}
 	return nil
 }
@@ -184,21 +217,23 @@ func isValidAlbumGenerationMethod(method string) bool {
 	return true
 }
 
-// isValidAlbum checks if the value is a valid Album option.
-func ValidateAlbumOption(value string) error {
+// ValidateAlbumOption checks if the value is a valid Album option.
+func validateAlbumOption(value string, logger log.Logger) error {
 	if value == "" {
-		return fmt.Errorf("option Album could not be empty")
+		return nil
 	}
 
 	before, after, found := strings.Cut(value, ":")
 	if !found || after == "" {
-		return fmt.Errorf("option Album is invalid, '%s.", value)
+		return fmt.Errorf("option Album is invalid, '%s", value)
 	}
 
 	switch before {
 	case "name":
 		return nil
 	case "auto":
+		// TODO: 'auto:' is deprecated. It should be removed on version 5.x
+		logger.Warnf("Deprecation Notice: The configuration option 'auto:%s' is deprecated and will be removed in a future version. Please update your configuration accordingly.", after)
 		if !isValidAlbumGenerationMethod(after) {
 			return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
 		}

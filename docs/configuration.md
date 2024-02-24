@@ -123,9 +123,11 @@ Google Photos
     └── image-album3-03.jpg
 ```
 
-#### Calculated name from a file path: `auto:`
+#### Calculated name from a file path: `auto:` (deprecated)
 
-##### From parent folder: `auto:folderName`
+This configuration option is deprecated and will be removed in future versions. Use `template:` instead.
+
+##### From parent folder: `auto:folderName` (deprecated)
 
 Setting `auto:folderName` and `SourceFolder: /home/my-user/pictures` will use the name of the folder (within `SourceFolder`), where the item is uploaded from, to set the album name.
 
@@ -142,7 +144,7 @@ Google Photos
     ├── image-album3-02.jpg
     └── image-album3-03.jpg
 ```
-##### From full path: `auto:folderPath` 
+##### From full path: `auto:folderPath` (deprectated)
 
 Setting `auto:folderPath` and `SourceFolder: /home/my-user/pictures` will use the full path of the folder (relative to `SourceFolder`), where the item is uploaded from, to set the album name.
 
