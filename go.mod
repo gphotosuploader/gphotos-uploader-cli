@@ -1,6 +1,6 @@
 module github.com/gphotosuploader/gphotos-uploader-cli
 
-go 1.20
+go 1.21
 
 require (
 	github.com/99designs/keyring v1.2.2
