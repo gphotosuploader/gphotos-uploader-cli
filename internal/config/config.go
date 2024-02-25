@@ -230,22 +230,34 @@ func validateAlbumOption(value string, logger log.Logger) error {
 
 	switch before {
 	case "name":
-		return nil
+		return validateNameOption()
 	case "auto":
-		// TODO: 'auto:' is deprecated. It should be removed on version 5.x
-		logger.Warnf("Deprecation Notice: The configuration option 'auto:%s' is deprecated and will be removed in a future version. Please update your configuration accordingly.", after)
-		if !isValidAlbumGenerationMethod(after) {
-			return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
-		}
-		return nil
+		return validateAutoOption(after, logger)
 	case "template":
-		err := upload.ValidateAlbumNameTemplate(after)
-		if err != nil {
-			return fmt.Errorf("invalid template format: %s", err)
-		}
-		return nil
+		return validateTemplateOption(after)
 	}
 	return fmt.Errorf("option Album is invalid, '%s", value)
+}
+
+func validateNameOption() error {
+	return nil
+}
+
+func validateAutoOption(after string, logger log.Logger) error {
+	// TODO: 'auto:' is deprecated. It should be removed on version 5.x
+	logger.Warnf("Deprecation Notice: The configuration option 'auto:%s' is deprecated and will be removed in a future version. Please update your configuration accordingly.", after)
+	if !isValidAlbumGenerationMethod(after) {
+		return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
+	}
+	return nil
+}
+
+func validateTemplateOption(after string) error {
+	err := upload.ValidateAlbumNameTemplate(after)
+	if err != nil {
+		return fmt.Errorf("invalid template format: %s", err)
+	}
+	return nil
 }
 
 // isValidCreateAlbums checks if the value is a valid CreateAlbums option.
