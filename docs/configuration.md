@@ -19,7 +19,7 @@ Example configuration file:
   [
     {
       SourceFolder: YOUR_FOLDER_PATH
-      Album: "auto:folderName"
+      Album: "template:%_directory%"
       DeleteAfterUpload: false
       IncludePatterns: [ "**/*.jpg", "**/*.png" ]
       ExcludePatterns: [ "**/ScreenShot*" ]
