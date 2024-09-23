@@ -12,12 +12,30 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	// Library API scopes.
+	// See https://developers.google.com/photos/overview/authorization
+	// for more information about the scopes.
+
+	// PhotosLibraryAppendOnlyScope is Google Photos OAuth2 scope.
+	// Access to upload bytes, create media items, create albums, and add enrichments. It only allows new media to be created in the user's library and in albums created by the app.
+	PhotosLibraryAppendOnlyScope = "https://www.googleapis.com/auth/photoslibrary.appendonly"
+
+	// PhotosLibraryEditAppCreatedDataScope is Google Photos OAuth2 scope.
+	// Access to change these details for albums and media items created by the application:
+	//    Organize the photos and videos in your albums (Add to albums, remove from albums, and update position).
+	//    Album titles and cover photos
+	//    Media item descriptions
+	PhotosLibraryEditAppCreatedDataScope = "https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata"
+
+	// PhotosLibraryReadOnlyAppCreateDataScope is Google Photos OAuth2 scope.
+	// Read access to media items and albums created by the application.
+	PhotosLibraryReadOnlyAppCreateDataScope = "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata"
+)
+
 var (
 	// GoogleAuthEndpoint is the Google authentication endpoint.
 	GoogleAuthEndpoint = google.Endpoint
-
-	// PhotosLibraryScope is Google Photos OAuth2 scope.
-	PhotosLibraryScope = "https://www.googleapis.com/auth/photoslibrary"
 
 	ErrTokenIsNil = errors.New("OAuth 2.0 token is nil")
 )
@@ -84,9 +102,13 @@ func (c *Config) validateAndSetDefaults() error {
 	c.oAuth2Config = &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
-		Scopes:       []string{PhotosLibraryScope},
-		Endpoint:     GoogleAuthEndpoint,
-		RedirectURL:  c.RedirectURLHostname,
+		Scopes: []string{
+			PhotosLibraryReadOnlyAppCreateDataScope,
+			PhotosLibraryAppendOnlyScope,
+			PhotosLibraryEditAppCreatedDataScope,
+		},
+		Endpoint:    GoogleAuthEndpoint,
+		RedirectURL: c.RedirectURLHostname,
 	}
 
 	return nil
