@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.6.0
+### Added
+- Support for the latest published Go version (1.23). This project will maintain compatibility with the latest **two major versions** published.
+
+### Changed
+- Bump `gphotosuploader/google-photos-api-client-go/v3` to version 3.0.6
+- Bump `schollz/progressbar/v3` to version 3.15.0
+- Bump `spf13/cobra` to version 1.8.1
+
+
 ## 4.5.0
 ### Added
 - Support for the latest published Go version (1.22). This project will maintain compatibility with the latest **two major versions** published.
