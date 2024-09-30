@@ -1,6 +1,7 @@
 module github.com/gphotosuploader/gphotos-uploader-cli
 
 go 1.21
+toolchain go1.22.5
 
 require (
 	github.com/99designs/keyring v1.2.2
@@ -14,7 +15,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pierrec/xxHash v0.1.5
 	github.com/pkg/errors v0.9.1
-	github.com/schollz/progressbar/v3 v3.15.0
+	github.com/schollz/progressbar/v3 v3.16.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.1
