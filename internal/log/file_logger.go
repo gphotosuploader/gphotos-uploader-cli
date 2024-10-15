@@ -33,7 +33,7 @@ func GetFileLogger(filename string) Logger {
 
 		logFile, err := os.OpenFile(Logdir+filename+".log", os.O_APPEND|os.O_CREATE|os.O_RDWR, os.ModePerm)
 		if err != nil {
-			newLogger.Warnf("Unable to open " + filename + " log file. Will log to stdout.")
+			newLogger.Warnf("Unable to open %s log file. Will log to stdout.", filename)
 		} else {
 			newLogger.logger.SetOutput(logFile)
 		}

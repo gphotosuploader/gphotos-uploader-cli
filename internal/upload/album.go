@@ -314,7 +314,7 @@ func runTemplateFunction(name string, args []string) (string, error) {
 
 		return regexpReplace(args[0], args[1], args[2])
 	default:
-		return "", fmt.Errorf("unknown function: " + name)
+		return "", fmt.Errorf("unknown function: %s", name)
 	}
 
 	return "", nil
