@@ -82,7 +82,8 @@ The folder to upload from. Must be an absolute path. Can expand the home folder 
 > The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
 
 ### Album
-It controls how uploaded files will be organized into albums in Google Photos.
+
+The `Album` parameter controls how uploaded files will be organized into albums in Google Photos. If omitted, files will be uploaded directly to Google Photos without being placed in an album.
 
 Given the local tree of folders and files:
 
@@ -101,15 +102,27 @@ Given the local tree of folders and files:
         └── image-album3-03.jpg
 ```
 
-These are several options: `name:`, `auto:`, `template:`:
+You can set the `Album` parameter using one of the following options:
 
-#### Fixed name: `name:`
+* **Omit the `Album` parameter**: If you do not include the `Album` parameter in a job configuration, files will be uploaded without creating or adding to an album. The files will be available in your Google Photos library but not grouped into any specific album.
 
-The `name:` option followed by an album's name, will upload objects to an album with the specified name. 
+* **[Fixed Album Name: `name:`](#fixed-album-name-name)** 
 
-The album name in Google Photos is not unique, so the first to match to the name will be selected.
+* **[Template-Based Album Names: `template:`](#template-based-album-names-template)** 
 
-Setting `Album: name:fooBar` will create and upload objects to an album named `fooBar`:
+* **[Deprecated `auto:` Option](#deprecated-auto-option)**
+
+#### Fixed Album Name: `name:`
+
+Specify `name:` followed by an album's name to upload objects to an album with the specified name. The album name in Google Photos is not unique, so the first match will be used, or a new album will be created if none exists.
+
+##### Example
+
+ ```hjson
+  Album: name:fooBar
+ ``` 
+
+will create and upload objects to an album named `fooBar`:
 
 ```shell
 Google Photos
@@ -123,9 +136,61 @@ Google Photos
     └── image-album3-03.jpg
 ```
 
-#### Calculated name from a file path: `auto:` (deprecated)
+#### Template-Based Album Names: `template:`
 
-This configuration option is deprecated and will be removed in future versions. Use `template:` instead.
+Use `template:` followed by a template string with placeholders to dynamically generate album names based on file properties like date or folder names.
+
+##### Tokens
+
+| Placeholder         | Description                                                              |
+|---------------------|--------------------------------------------------------------------------|
+| %_directory%        | Name of the folder containing the file (same as `auto:folderName`).      |
+| %_parent_directory% | Name of the grandparent folder of the file.                              |
+| %_folderpath%       | Full path of the folder containing the file (same as `auto:folderPath`). |
+| %_day%              | Day of the month the file was created (in "DD" format).                  |
+| %_month%            | Month the file was created (in "MM" format).                             |
+| %_year%             | Year the file was created (in "YYYY" format).                            |
+| %_time%             | Time the file was created (in "HH:MM:SS" 24-hour format).                |
+| %_time_en%          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).          |
+
+##### Functions
+
+| Placeholder         | Description                                                                            |
+|---------------------|----------------------------------------------------------------------------------------|
+| $cutLeft(x,n)       | Removes the first n characters of string x and returns the result.                     |
+| $cutRight(x,n)      | Removes the last n characters of string x and returns the result.                      |
+| $regex(x,expr,repl) | Replaces the pattern specified by the regular expression expr in the string x by repl. |
+| $sentence(x)        | Converts the given string to sentence case.                                            |
+| $title(x)           | Converts the given string to title case.                                               |
+| $upper(x)           | Converts the given string to upper case.                                               |
+| $lower(x)           | Converts the given string to lower case.                                               |
+
+##### Example 
+
+ ```hjson
+  Album: template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)
+  ```
+
+will calculate the album name based on the template for each file.
+
+```shell
+Google Photos
+├── album-1 - 11.21.23
+│   ├── image-album1-01.jpg
+│   └── image-album1-02.jpeg
+├── album-2 - 10.20.23
+│   └── image-album2-01.jpg
+├── album-2 - 10.22.23
+│   └── image-album2-02.jpg
+└── album-3 - 09.12.23
+    ├── image-album3-01.jpg
+    ├── image-album3-02.jpg
+    └── image-album3-03.jpg
+```
+
+#### Deprecated `auto:` Option
+
+For legacy support, the `auto:` options `auto:folderName` and `auto:folderPath` are available but will be removed in future versions. It is recommended to use `template:` instead.
 
 ##### From parent folder: `auto:folderName` (deprecated)
 
@@ -157,54 +222,6 @@ Google Photos
 │   ├── image-album2-01.jpg
 │   └── image-album2-02.jpg
 └── upload_album-3
-    ├── image-album3-01.jpg
-    ├── image-album3-02.jpg
-    └── image-album3-03.jpg
-```
-
-#### Customized template: `template:`
-
-Using `template:` followed by a template string that can contain the following predefined tokens and functions:
-
-##### Tokens
-
-| Placeholder         | Description                                                              |
-|---------------------|--------------------------------------------------------------------------|
-| %_directory%        | Name of the folder containing the file (same as `auto:folderName`).      |
-| %_parent_directory% | Name of the grandparent folder of the file.                              |
-| %_folderpath%       | Full path of the folder containing the file (same as `auto:folderPath`). |
-| %_day%              | Day of the month the file was created (in "DD" format).                  |
-| %_month%            | Month the file was created (in "MM" format).                             |
-| %_year%             | Year the file was created (in "YYYY" format).                            |
-| %_time%             | Time the file was created (in "HH:MM:SS" 24-hour format).                |
-| %_time_en%          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).          |
-
-##### Functions
-
-| Placeholder         | Description                                                                            |
-|---------------------|----------------------------------------------------------------------------------------|
-| $cutLeft(x,n)       | Removes the first n characters of string x and returns the result.                     |
-| $cutRight(x,n)      | Removes the last n characters of string x and returns the result.                      |
-| $regex(x,expr,repl) | Replaces the pattern specified by the regular expression expr in the string x by repl. |
-| $sentence(x)        | Converts the given string to sentence case.                                            |
-| $title(x)           | Converts the given string to title case.                                               |
-| $upper(x)           | Converts the given string to upper case.                                               |
-| $lower(x)           | Converts the given string to lower case.                                               |
-
-##### Examples
-
-Setting `template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)` will calculate the album name based on the template for each file.
-
-```shell
-Google Photos
-├── album-1 - 11.21.23
-│   ├── image-album1-01.jpg
-│   └── image-album1-02.jpeg
-├── album-2 - 10.20.23
-│   └── image-album2-01.jpg
-├── album-2 - 10.22.23
-│   └── image-album2-02.jpg
-└── album-3 - 09.12.23
     ├── image-album3-01.jpg
     ├── image-album3-02.jpg
     └── image-album3-03.jpg
