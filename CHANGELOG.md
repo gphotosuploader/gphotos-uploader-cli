@@ -4,10 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## 5.0.0
+### Added
+- Google Photos scopes have changed, some of them have been removed. The CLI will use the new ones. ([#474][i474])
+
+### Changed
+- Bump `golang.org/x/text` to 0.19.0 ([#479][i479])
+- Bump `golang.org/x/term` to 0.25.0 ([#478][i478])
+- Bump `github.com/schollz/progressbar/v3` to 3.16.1 ([#477][i477])
+
 ### Removed
 - The deprecated `Album: auto:folderName` and `Album: auto:folderPath` options have been removed. Use the `Album: template:%_directory%` and `Album: template:%_folderpath%` options instead.
 - The deprecated `Jobs: CreateAlbums` option has been removed. Use the `Jobs: Album` option instead.
-- 
+
+[i474]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/474
+[i479]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/479
+[i478]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/478
+[i477]: https://github.com/gphotosuploader/gphotos-uploader-cli/pull/477
 
 ## 4.6.0
 ### Added
