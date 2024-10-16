@@ -110,8 +110,6 @@ You can set the `Album` parameter using one of the following options:
 
 * **[Template-Based Album Names: `template:`](#template-based-album-names-template)** 
 
-* **[Deprecated `auto:` Option](#deprecated-auto-option)**
-
 #### Fixed Album Name: `name:`
 
 Specify `name:` followed by an album's name to upload objects to an album with the specified name. The album name in Google Photos is not unique, so the first match will be used, or a new album will be created if none exists.
@@ -183,45 +181,6 @@ Google Photos
 ├── album-2 - 10.22.23
 │   └── image-album2-02.jpg
 └── album-3 - 09.12.23
-    ├── image-album3-01.jpg
-    ├── image-album3-02.jpg
-    └── image-album3-03.jpg
-```
-
-#### Deprecated `auto:` Option
-
-For legacy support, the `auto:` options `auto:folderName` and `auto:folderPath` are available but will be removed in future versions. It is recommended to use `template:` instead.
-
-##### From parent folder: `auto:folderName` (deprecated)
-
-Setting `auto:folderName` and `SourceFolder: /home/my-user/pictures` will use the name of the folder (within `SourceFolder`), where the item is uploaded from, to set the album name.
-
-```shell
-Google Photos
-├── album-1
-│   ├── image-album1-01.jpg
-│   ├── image-album1-02.jpeg
-├── album-2
-│   ├── image-album2-01.jpg
-│   └── image-album2-02.jpg
-└── album-3
-    ├── image-album3-01.jpg
-    ├── image-album3-02.jpg
-    └── image-album3-03.jpg
-```
-##### From full path: `auto:folderPath` (deprectated)
-
-Setting `auto:folderPath` and `SourceFolder: /home/my-user/pictures` will use the full path of the folder (relative to `SourceFolder`), where the item is uploaded from, to set the album name.
-
-```shell
-Google Photos
-├── upload_album-1
-│   ├── image-album1-01.jpg
-│   ├── image-album1-02.jpeg
-├── upload_album-2
-│   ├── image-album2-01.jpg
-│   └── image-album2-02.jpg
-└── upload_album-3
     ├── image-album3-01.jpg
     ├── image-album3-02.jpg
     └── image-album3-03.jpg
