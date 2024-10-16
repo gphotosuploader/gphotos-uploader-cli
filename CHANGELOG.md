@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.0.0
+### Removed
+- The deprecated `Album: auto:folderName` and `Album: auto:folderPath` options have been removed. Use the `Album: template:%_directory%` and `Album: template:%_folderpath%` options instead.
+- The deprecated `Jobs: CreateAlbums` option has been removed. Use the `Jobs: Album` option instead.
+- 
+
 ## 4.6.0
 ### Added
 - Support for the latest published Go version (1.23). This project will maintain compatibility with the latest **two major versions** published.

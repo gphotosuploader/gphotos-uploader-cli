@@ -168,11 +168,8 @@ func (c Config) validateJob(fs afero.Fs, job FolderUploadJob, logger log.Logger)
 }
 
 func (c Config) checkDeprecatedCreateAlbums(job FolderUploadJob, logger log.Logger) error {
-	// TODO: 'CreateAlbums' is deprecated. It should be removed on version 5.x
+	// 'CreateAlbums' is deprecated and it should not be used.
 	if job.CreateAlbums != "" {
-		logger.Warnf("Deprecation Notice: The configuration option 'CreateAlbums' is deprecated and will be removed in a future version. Please update your configuration accordingly.")
-	}
-	if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
 		return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
 	}
 	return nil
@@ -232,7 +229,7 @@ func validateAlbumOption(value string, logger log.Logger) error {
 	case "name":
 		return validateNameOption()
 	case "auto":
-		return validateAutoOption(after, logger)
+		return fmt.Errorf("option Album is invalid, '%s", value)
 	case "template":
 		return validateTemplateOption(after)
 	}
@@ -240,15 +237,6 @@ func validateAlbumOption(value string, logger log.Logger) error {
 }
 
 func validateNameOption() error {
-	return nil
-}
-
-func validateAutoOption(after string, logger log.Logger) error {
-	// TODO: 'auto:' is deprecated. It should be removed on version 5.x
-	logger.Warnf("Deprecation Notice: The configuration option 'auto:%s' is deprecated and will be removed in a future version. Please update your configuration accordingly.", after)
-	if !isValidAlbumGenerationMethod(after) {
-		return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
-	}
 	return nil
 }
 

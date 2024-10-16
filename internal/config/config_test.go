@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -68,9 +67,7 @@ func TestFromFile(t *testing.T) {
 	}{
 		{"Should success with Album's name option", "testdata/valid-config/configWithAlbumNameOption.hjson", "youremail@domain.com", false},
 		{"Should success with Album's template containing token", "testdata/valid-config/configWithAlbumTemplateToken.hjson", "youremail@domain.com", false},
-		{"Should success with deprecated Album's auto folderName option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderNameOption.hjson", "youremail@domain.com", false},
-		{"Should success with deprecated Album's auto folderPath option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderPathOption.hjson", "youremail@domain.com", false},
-		{"Should success with deprecated CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "youremail@domain.com", false},
+		{"Should success without Album option", "testdata/valid-config/configWithoutAlbumOption.hjson", "youremail@domain.com", false},
 
 		{"Should fail if config dir does not exist", "testdata/non-existent/config.hjson", "", true},
 		{"Should fail if Account is invalid", "testdata/invalid-config/EmptyAccount.hjson", "", true},
@@ -85,7 +82,9 @@ func TestFromFile(t *testing.T) {
 		{"Should fail if Album's key is invalid", "testdata/invalid-config/AlbumBadKey.hjson", "", true},
 		{"Should fail if Album's name is invalid", "testdata/invalid-config/AlbumEmptyName.hjson", "", true},
 		{"Should fail if Album's auto value is invalid", "testdata/invalid-config/AlbumBadAutoValue.hjson", "", true},
-		{"Should fail if deprecated CreateAlbums is invalid", "testdata/invalid-config/DeprecatedCreateAlbums.hjson", "", true},
+		{"Should fail if deprecated CreateAlbums option is used", "testdata/invalid-config/DeprecatedCreateAlbumsOption.hjson", "", true},
+		{"Should fail if deprecated Album's auto folderName option is used", "testdata/invalid-config/DeprecatedAlbumAutoFolderNameOption.hjson", "", true},
+		{"Should fail if deprecated Album's auto folderPath option is used", "testdata/invalid-config/DeprecatedAlbumAutoFolderPathOption.hjson", "", true},
 	}
 
 	for _, tc := range testCases {
@@ -113,43 +112,6 @@ func (m *mockLogger) Warnf(format string, args ...interface{}) {
 	m.messages = append(m.messages, fmt.Sprintf(format, args...))
 }
 
-func TestDeprecationNotices(t *testing.T) {
-	testCases := []struct {
-		name string
-		path string
-		want string
-	}{
-		{"CreateAlbums option", "testdata/valid-config/configWithDeprecatedCreateAlbumsOption.hjson", "CreateAlbums"},
-		{"auto:folderPath option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderPathOption.hjson", "auto:folderPath"},
-		{"auto:folderName option", "testdata/valid-config/configWithDeprecatedAlbumAutoFolderNameOption.hjson", "auto:folderName"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			fs := afero.OsFs{}
-			logger := &mockLogger{}
-			_, err := config.FromFile(fs, tc.path, logger)
-			if err != nil {
-				t.Fatalf("Expected no error, got %v", err)
-			}
-			// Check that the deprecation notice was logged
-			if !contains(logger.messages, tc.want) {
-				t.Errorf("Expected deprecation notice for '%s', got %v", tc.want, logger.messages)
-			}
-		})
-	}
-}
-
-// contains checks if a slice contains a string
-func contains(slice []string, str string) bool {
-	for _, v := range slice {
-		if strings.Contains(v, str) {
-			return true
-		}
-	}
-	return false
-}
-
 func TestConfig_SafePrint(t *testing.T) {
 	cfg := config.Config{
 		APIAppCredentials: config.APIAppCredentials{
@@ -162,14 +124,13 @@ func TestConfig_SafePrint(t *testing.T) {
 			{
 				SourceFolder:      "foo",
 				Album:             "name:albumName",
-				CreateAlbums:      "folderPath",
 				DeleteAfterUpload: false,
 				IncludePatterns:   []string{},
 				ExcludePatterns:   []string{},
 			},
 		},
 	}
-	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","Album":"name:albumName","CreateAlbums":"folderPath","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
+	want := `{"APIAppCredentials":{"ClientID":"client-id","ClientSecret":"REMOVED"},"Account":"account","SecretsBackendType":"auto","Jobs":[{"SourceFolder":"foo","Album":"name:albumName","DeleteAfterUpload":false,"IncludePatterns":[],"ExcludePatterns":[]}]}`
 
 	if want != cfg.SafePrint() {
 		t.Errorf("want: %s, got: %s", want, cfg.SafePrint())

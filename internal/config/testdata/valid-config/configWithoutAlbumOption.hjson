@@ -10,7 +10,6 @@
   [
     {
       SourceFolder: ./testdata
-      CreateAlbums: invalid
       DeleteAfterUpload: false
       IncludePatterns: []
       ExcludePatterns: []
