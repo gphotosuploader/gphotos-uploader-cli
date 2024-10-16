@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"fmt"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"path/filepath"
 	"testing"
@@ -101,15 +100,6 @@ func TestFromFile(t *testing.T) {
 			}
 		})
 	}
-}
-
-type mockLogger struct {
-	log.Logger
-	messages []string
-}
-
-func (m *mockLogger) Warnf(format string, args ...interface{}) {
-	m.messages = append(m.messages, fmt.Sprintf(format, args...))
 }
 
 func TestConfig_SafePrint(t *testing.T) {

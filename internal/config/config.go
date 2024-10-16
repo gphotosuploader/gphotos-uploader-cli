@@ -207,13 +207,6 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 	return nil
 }
 
-func isValidAlbumGenerationMethod(method string) bool {
-	if method != "folderPath" && method != "folderName" {
-		return false
-	}
-	return true
-}
-
 // ValidateAlbumOption checks if the value is a valid Album option.
 func validateAlbumOption(value string, logger log.Logger) error {
 	if value == "" {
@@ -246,16 +239,6 @@ func validateTemplateOption(after string) error {
 		return fmt.Errorf("invalid template format: %s", err)
 	}
 	return nil
-}
-
-// isValidCreateAlbums checks if the value is a valid CreateAlbums option.
-func isValidCreateAlbums(value string) bool {
-	switch value {
-	case "Off", "folderPath", "folderName":
-		return true
-	default:
-	}
-	return false
 }
 
 // unmarshalReader unmarshal HJSON data into the provided interface.
