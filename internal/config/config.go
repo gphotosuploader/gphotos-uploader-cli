@@ -168,11 +168,8 @@ func (c Config) validateJob(fs afero.Fs, job FolderUploadJob, logger log.Logger)
 }
 
 func (c Config) checkDeprecatedCreateAlbums(job FolderUploadJob, logger log.Logger) error {
-	// TODO: 'CreateAlbums' is deprecated. It should be removed on version 5.x
+	// 'CreateAlbums' is deprecated and it should not be used.
 	if job.CreateAlbums != "" {
-		logger.Warnf("Deprecation Notice: The configuration option 'CreateAlbums' is deprecated and will be removed in a future version. Please update your configuration accordingly.")
-	}
-	if job.Album == "" && !isValidCreateAlbums(job.CreateAlbums) {
 		return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
 	}
 	return nil
@@ -210,13 +207,6 @@ func (c Config) ensureSourceFolderAbsolutePaths() error {
 	return nil
 }
 
-func isValidAlbumGenerationMethod(method string) bool {
-	if method != "folderPath" && method != "folderName" {
-		return false
-	}
-	return true
-}
-
 // ValidateAlbumOption checks if the value is a valid Album option.
 func validateAlbumOption(value string, logger log.Logger) error {
 	if value == "" {
@@ -232,7 +222,7 @@ func validateAlbumOption(value string, logger log.Logger) error {
 	case "name":
 		return validateNameOption()
 	case "auto":
-		return validateAutoOption(after, logger)
+		return fmt.Errorf("option Album is invalid, '%s", value)
 	case "template":
 		return validateTemplateOption(after)
 	}
@@ -243,31 +233,12 @@ func validateNameOption() error {
 	return nil
 }
 
-func validateAutoOption(after string, logger log.Logger) error {
-	// TODO: 'auto:' is deprecated. It should be removed on version 5.x
-	logger.Warnf("Deprecation Notice: The configuration option 'auto:%s' is deprecated and will be removed in a future version. Please update your configuration accordingly.", after)
-	if !isValidAlbumGenerationMethod(after) {
-		return fmt.Errorf("option Album is invalid: unknown album generation method '%s'", after)
-	}
-	return nil
-}
-
 func validateTemplateOption(after string) error {
 	err := upload.ValidateAlbumNameTemplate(after)
 	if err != nil {
 		return fmt.Errorf("invalid template format: %s", err)
 	}
 	return nil
-}
-
-// isValidCreateAlbums checks if the value is a valid CreateAlbums option.
-func isValidCreateAlbums(value string) bool {
-	switch value {
-	case "Off", "folderPath", "folderName":
-		return true
-	default:
-	}
-	return false
 }
 
 // unmarshalReader unmarshal HJSON data into the provided interface.
