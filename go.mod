@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pierrec/xxHash v0.1.5
 	github.com/pkg/errors v0.9.1
-	github.com/schollz/progressbar/v3 v3.16.1
+	github.com/schollz/progressbar/v3 v3.17.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.1
