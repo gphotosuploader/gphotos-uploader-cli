@@ -14,13 +14,13 @@ on:
 
 env:
     # run coverage only with the latest Go version
-    LATEST_GO_VERSION: '1.23'
+    LATEST_GO_VERSION: '1.24'
 
 jobs:
   test-matrix:
     strategy:
       matrix:
-        go-version: ['1.22', '1.23']
+        go-version: ['1.23', '1.24']
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -34,7 +34,7 @@ jobs:
         run: make test
       - name: Send code coverage
         if: success() && matrix.go == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         

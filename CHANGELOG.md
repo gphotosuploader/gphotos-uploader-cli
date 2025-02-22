@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.0.1
+### Added
+- Support for go v1.24
+
+### Changed
+- Bump several dependencies
+
+### Removed
+- Support for go v1.22
+
 ## 5.0.0
 ### Added
 - Google Photos scopes have changed, some of them have been removed. The CLI will use the new ones. ([#474][i474])
