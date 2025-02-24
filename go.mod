@@ -1,14 +1,13 @@
 module github.com/gphotosuploader/gphotos-uploader-cli
 
 go 1.23
-
 toolchain go1.24.0
 
 require (
 	github.com/99designs/keyring v1.2.2
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
-	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.6
+	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.7
 	github.com/hjson/hjson-go/v4 v4.4.0
 	github.com/int128/oauth2cli v1.15.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
@@ -54,7 +53,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/sys v0.30.0 // indirect
-	google.golang.org/api v0.215.0 // indirect
+	google.golang.org/api v0.222.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
