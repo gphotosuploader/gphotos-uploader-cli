@@ -1,7 +1,6 @@
 module github.com/gphotosuploader/gphotos-uploader-cli
 
 go 1.23
-
 toolchain go1.24.0
 
 require (
@@ -24,9 +23,9 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/oauth2 v0.26.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 	golang.org/x/term v0.29.0
-	golang.org/x/text v0.22.0
+	golang.org/x/text v0.23.0
 )
 
 require (
