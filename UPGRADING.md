@@ -5,6 +5,8 @@
 > **Attention**: Due to the deprecation of some scopes in the Google Photos API, this is the only version which works
 > with Google Photos. **Previous versions will not work anymore.**
 
+### Configuration settings
+
 - `Album: auto:folderName` and `Album: auto:folderPath` options have been **removed**. Use the
   `Album: template:%_directory%` and `Album: template:%_folderpath%` options instead.
 - `Jobs: CreateAlbums` option has been **removed**. Use the `Jobs: Album` option instead.
