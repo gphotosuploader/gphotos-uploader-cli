@@ -1,10 +1,11 @@
 # Configuration
 
-## Configuration options
+## Overview
 
-> The configuration is kept in the file `config.hjson` inside the configuration folder. You can specify your own folder using `--config /my/config/dir` otherwise default configuration folder is `~/.gphotos-uploader-cli`.
+The configuration file (`config.hjson`) controls how `gphotos-uploader-cli` works. By default, it is located in
+`~/.gphotos-uploader-cli`, but you can specify a custom folder with `--config /my/config/dir`.
 
-Example configuration file:    
+## Example Configuration
 
 ```hjson
 {
@@ -28,62 +29,64 @@ Example configuration file:
 }
 ```
 
-## APIAppCredentials <!-- {docsify-ignore} -->
+## Configuration Options
 
-Given that `gphotos-uploader-cli` uses OAuth 2 to access Google APIs, authentication is a bit tricky and involves a few manual steps. Please follow the guide below carefully, to give `gphotos-uploader-cli` the required access to your Google Photos account.
+### APIAppCredentials
 
-Before you can use `gphotos-uploader-cli`, you must enable the Photos Library API and request an OAuth 2.0 Client ID.
+OAuth 2.0 credentials for Google Photos API access.
 
-1. Make sure you're logged in into the Google Account where your photos should be uploaded to.
-1. Start by [creating a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (example: _Google Photos Uploader_).
-1. Enable the [Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com) by clicking the <kbd>ENABLE</kbd> button.
-1. Configure the [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
-1. Create [credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials → OAuth client ID** option, then pick **Desktop app** as the application type and give it a name (example: _gphotos-uploader-cli_).
-1. Copy the **Client ID** and the **Client Secret** and keep them ready to use in the next step.
-1. Open the *config file* and set both the `ClientID` and `ClientSecret` options to the ones generated on the previous step.
+**Setup Steps:**
 
-## Account
-It's the Google Account identity (e-mail address) where the files are going to be uploaded.
+1. Log in to your Google Account.
+1. [Create a new project](https://console.cloud.google.com/projectcreate) in Google Cloud Platform and give it a name (
+   example: _Google Photos Uploader_).
+1. [Enable the Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com).
+1. [Configure the OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the
+   application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
+1. [Create OAuth credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials →
+   OAuth client ID** option, then choose **Desktop app** as the application type and give it a name (example:
+   _gphotos-uploader-cli_).
+1. Copy the **Client ID** and the **Client Secret** into your configuration file.
 
-### SecretsBackendType <!-- {docsify-ignore} -->
-This option allows you to choose which backend will be used for secret storage. You set `auto` to allow the application to decide which one will be used given your environment.
+### Account
+
+The Google Account (email) where files will be uploaded.
+
+#### SecretsBackendType
+
+Choose where secrets (tokens) are stored. Recommended: `auto`.
 
 Available options for secrets backend are:
 
-```
-"auto"              For auto backend selection
-"secret-service"    For gnome-keyring support
-"keychain"          For OS X keychain support
-"kwallet"           For KDE Secrets Manager support
-"file"              For encrypted file support - needs interaction to supply a symmetric encryption key
-```
+| Option           | Description                                  |
+|------------------|----------------------------------------------|
+| `auto`           | Auto-select based on OS                      |
+| `secret-service` | GNOME Keyring (Linux)                        |
+| `keychain`       | macOS Keychain (macOS)                       |
+| `kwallet`        | KDE Secrets Manager                          |
+| `file`           | Encrypted file storage (requires passphrase) |
 
-Most of the time `auto` is the proper one. The application will try to use the existing backends in the order [defined by the library](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
+The application tries backends
+in [this order](https://github.com/99designs/keyring/blob/2c916c935b9f0286ed72c22a3ccddb491c01c620/keyring.go#L28):
+Keychain, SecretService, KWallet, File.
 
-```
-// This order makes sure the OS-specific backends
-// are picked over the more generic backends.
-var backendOrder = []BackendType{
-	// MacOS
-	KeychainBackend,
-	// Linux
-	SecretServiceBackend,
-	KWalletBackend,
-	// General
-	FileBackend,
-}
-```
+### Jobs
 
-## Jobs <!-- {docsify-ignore} -->
-List of folders to upload and upload options for each folder.
+A list of upload jobs, each with its own options.
 
-### SourceFolder
-The folder to upload from. Must be an absolute path. Can expand the home folder tilde shorthand `~`.
-> The application will follow any symlink it finds, it does not terminate if there are any non-terminating loops in the file structure.
+#### SourceFolder
 
-### Album
+Absolute path to the folder to upload. `~` is expanded to your home directory.
 
-The `Album` parameter controls how uploaded files will be organized into albums in Google Photos. If omitted, files will be uploaded directly to Google Photos without being placed in an album.
+Symlinks are followed. Infinite loops are not detected.
+
+#### Album
+
+Controls album organization in Google Photos.
+
+- **Omit**: Files are uploaded without an album. It's the default option.
+- **Fixed Name**: `name:<AlbumName<` (uploads to the specific album _<AlbumName>_).
+- **Template**: `template:...` (dynamic album names using placeholders, see below).
 
 Given the local tree of folders and files:
 
@@ -102,19 +105,12 @@ Given the local tree of folders and files:
         └── image-album3-03.jpg
 ```
 
-You can set the `Album` parameter using one of the following options:
+##### Fixed Album Name: `name:`
 
-* **Omit the `Album` parameter**: If you do not include the `Album` parameter in a job configuration, files will be uploaded without creating or adding to an album. The files will be available in your Google Photos library but not grouped into any specific album.
+Specify `name:` followed by an album's name to upload objects to an album with the specified name. The album name in
+Google Photos is not unique, so the first match will be used, or a new album will be created if none exists.
 
-* **[Fixed Album Name: `name:`](#fixed-album-name-name)** 
-
-* **[Template-Based Album Names: `template:`](#template-based-album-names-template)** 
-
-#### Fixed Album Name: `name:`
-
-Specify `name:` followed by an album's name to upload objects to an album with the specified name. The album name in Google Photos is not unique, so the first match will be used, or a new album will be created if none exists.
-
-##### Example
+Example:
 
  ```hjson
   Album: name:fooBar
@@ -134,36 +130,37 @@ Google Photos
     └── image-album3-03.jpg
 ```
 
-#### Template-Based Album Names: `template:`
+##### Template-Based Album Names: `template:`
 
-Use `template:` followed by a template string with placeholders to dynamically generate album names based on file properties like date or folder names.
+Use `template:` followed by a template string with placeholders to dynamically generate album names based on file
+properties like date or folder names.
 
-##### Tokens
+Template Placeholders:
 
-| Placeholder         | Description                                                              |
-|---------------------|--------------------------------------------------------------------------|
-| %_directory%        | Name of the folder containing the file (same as `auto:folderName`).      |
-| %_parent_directory% | Name of the grandparent folder of the file.                              |
-| %_folderpath%       | Full path of the folder containing the file (same as `auto:folderPath`). |
-| %_day%              | Day of the month the file was created (in "DD" format).                  |
-| %_month%            | Month the file was created (in "MM" format).                             |
-| %_year%             | Year the file was created (in "YYYY" format).                            |
-| %_time%             | Time the file was created (in "HH:MM:SS" 24-hour format).                |
-| %_time_en%          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).          |
+| Placeholder           | Description                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------|
+| `%_directory%`        | Name of the containing folder (same as the **deprecated** `auto:folderName` option) |
+| `%_parent_directory%` | Name of the parent folder                                                           |
+| `%_folderpath%`       | Full path of the folder (same as the **deprecated** `auto:folderPath` option).      |
+| `%_day%`              | Day of the month the file was created (in "DD" format).                             |
+| `%_month%`            | Month the file was created (in "MM" format).                                        |
+| `%_year%`             | Year the file was created (in "YYYY" format).                                       |
+| `%_time%`             | Time the file was created (in "HH:MM:SS" 24-hour format).                           |
+| `%_time_en%`          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).                     |
 
-##### Functions
+Template Functions:
 
-| Placeholder         | Description                                                                            |
-|---------------------|----------------------------------------------------------------------------------------|
-| $cutLeft(x,n)       | Removes the first n characters of string x and returns the result.                     |
-| $cutRight(x,n)      | Removes the last n characters of string x and returns the result.                      |
-| $regex(x,expr,repl) | Replaces the pattern specified by the regular expression expr in the string x by repl. |
-| $sentence(x)        | Converts the given string to sentence case.                                            |
-| $title(x)           | Converts the given string to title case.                                               |
-| $upper(x)           | Converts the given string to upper case.                                               |
-| $lower(x)           | Converts the given string to lower case.                                               |
+| Function            | Description               |
+|---------------------|---------------------------|
+| $cutLeft(x,n)       | Remove first n characters |
+| $cutRight(x,n)      | Remove last n characters  |
+| $regex(x,expr,repl) | Regex replace             |
+| $sentence(x)        | Sentence case             |
+| $title(x)           | Title case                |
+| $upper(x)           | Uppercase                 |
+| $lower(x)           | Lowercase                 |
 
-##### Example 
+Example:
 
  ```hjson
   Album: template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)
@@ -186,19 +183,24 @@ Google Photos
     └── image-album3-03.jpg
 ```
 
-### DeleteAfterUpload
-If set to true, media will be deleted from the local disk after completing the upload. 
+#### DeleteAfterUpload
+
+If `true`, deletes local files after upload.
 
 ## Including and Excluding files
-You can include and exclude files by specifying the `includePatterns` and `excludePatterns` options. You can add one or more patterns separated by commas `,`. These patterns are always applied to `sourceFolder`.
+
+Use `includePatterns` and `excludePatterns` options to filter files. You can add one or more patterns separated by
+commas `,`. These patterns are always applied to `sourceFolder`.
 
 For example, to upload all _JPG and PNG files_ that are not named _*ScreenShots*_ you can configure it like this:
+
 ```
 includePatterns: [ "**/*.jpg", "**/*.png" ]
 excludePatterns: [ "**/ScreenShot*" ]
 ```
 
 Another example excluding a specific directory (and folders inside it):
+
 ```
 includePatterns: [ "_ALL_FILES_" ]
 excludePatterns: [ "**/Temp/**" ]
@@ -206,44 +208,32 @@ excludePatterns: [ "**/Temp/**" ]
 
 > If `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used.
 
-### Patterns
-Supports the following special terms in the patterns:
+Special Patterns:
 
-Special Terms | Meaning
-------------- | -------
-`*`           | matches any sequence of non-path-separators
-`**`          | matches any sequence of characters, including path separators
-`?`           | matches any single non-path-separator character
-`[class]`     | matches any single non-path-separator character against a class of characters ([see below](#character-classes))
-`{alt1,...}`  | matches a sequence of characters if one of the comma-separated alternatives matches
+| Pattern              | Description                                                                  |
+|----------------------|------------------------------------------------------------------------------|
+| `_ALL_FILES_`        | All files (**)                                                               |
+| `_IMAGE_EXTENSIONS_` | [Supported image types](https://support.google.com/googleone/answer/6193313) |
+| `_RAW_EXTENSIONS_`   | [Supported RAW types](https://support.google.com/googleone/answer/6193313)   |
+| `_ALL_VIDEO_FILES_`  | [Supported video types](https://support.google.com/googleone/answer/6193313) |
 
-Any character with a special meaning can be escaped with a backslash (`\`).
+Pattern Syntax:
 
-#### Character Classes
-
-Character classes support the following:
-
-Class      | Meaning
----------- | -------
-`[abc]`    | matches any single character within the set
-`[a-z]`    | matches any single character in the range
-`[^class]` | matches any single character which does *not* match the class
-
-#### Tagged patterns
-There are some common patterns that have been tagged, you can use them to simplify your configuration.
-
-> Tagged patterns matches file extensions case insensitively.
-
-* `_ALL_FILES_`: Matches all files, is the same as using `**`. 
-* `_IMAGE_EXTENSIONS_`: Matches [Google Photos supported image file types](https://support.google.com/googleone/answer/6193313) and it includes: `jpg, jpeg, png, webp, gif` file extensions case in-sensitively.
-* `_RAW_EXTENSIONS_`: Matches [Google Photos supported RAW file types](https://support.google.com/googleone/answer/6193313) and it includes `arw, srf, sr2, crw, cr2, cr3, dng, nef, nrw, orf, raf, raw, rw2` file extensions case in-sensitively.
-* `_ALL_VIDEO_FILES_`: Matches [Google Photos supported video file types](https://support.google.com/googleone/answer/6193313) and it includes `mpg, mod, mmv, tod, wmv, asf, avi, divx, mov, m4v, 3gp, 3g2, mp4, m2t, m2ts, mts, mkv` file extensions case in-sensitively.
+- `*` matches any sequence of non-path-separators
+- `**` matches any sequence, including path separators
+- `?` matches a single non-path-separator
+- `[class]` character classes
+    - `[abc]` matches any single character within the set
+    - `[a-z]` matches any single character in the range
+    - `[^class]` matches any single character which does *not* match the class
+- `{alt1,alt2}` alternatives
+- Any character with a special meaning can be escaped with a backslash (`\`).
 
 ## Environment variables
 
 ### GPHOTOS_CLI_TOKENSTORE_KEY
 
-This variable is used to read the token store key for opening the secrets storage. It works when `SecretsBackendType: file` and it is intended to be used by headless runners.
+Set this variable to provide the token store key when using SecretsBackendType: file (for headless runners).
 
 ```bash
 GPHOTOS_CLI_TOKENSTORE_KEY=my-super-secret gphotos-uploader-cli push
