@@ -52,7 +52,7 @@ OAuth 2.0 credentials for Google Photos API access.
 
 The Google Account (email) where files will be uploaded.
 
-#### SecretsBackendType
+### SecretsBackendType
 
 Choose where secrets (tokens) are stored. Recommended: `auto`.
 
@@ -135,7 +135,7 @@ Google Photos
 Use `template:` followed by a template string with placeholders to dynamically generate album names based on file
 properties like date or folder names.
 
-Template Placeholders:
+**Template Placeholders:**
 
 | Placeholder           | Description                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------|
@@ -148,7 +148,7 @@ Template Placeholders:
 | `%_time%`             | Time the file was created (in "HH:MM:SS" 24-hour format).                           |
 | `%_time_en%`          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).                     |
 
-Template Functions:
+**Template Functions:**
 
 | Function            | Description               |
 |---------------------|---------------------------|
@@ -160,7 +160,7 @@ Template Functions:
 | $upper(x)           | Uppercase                 |
 | $lower(x)           | Lowercase                 |
 
-Example:
+**Example:**
 
  ```hjson
   Album: template:%_directory% - %_month%.%_day%.$cutLeft(%_year%,2)
@@ -187,7 +187,7 @@ Google Photos
 
 If `true`, deletes local files after upload.
 
-## Including and Excluding files
+#### Including and Excluding files
 
 Use `includePatterns` and `excludePatterns` options to filter files. You can add one or more patterns separated by
 commas `,`. These patterns are always applied to `sourceFolder`.
@@ -208,7 +208,7 @@ excludePatterns: [ "**/Temp/**" ]
 
 > If `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used.
 
-Special Patterns:
+**Special Patterns:**
 
 | Pattern              | Description                                                                  |
 |----------------------|------------------------------------------------------------------------------|
@@ -217,7 +217,7 @@ Special Patterns:
 | `_RAW_EXTENSIONS_`   | [Supported RAW types](https://support.google.com/googleone/answer/6193313)   |
 | `_ALL_VIDEO_FILES_`  | [Supported video types](https://support.google.com/googleone/answer/6193313) |
 
-Pattern Syntax:
+**Pattern Syntax:**
 
 - `*` matches any sequence of non-path-separators
 - `**` matches any sequence, including path separators
