@@ -233,7 +233,7 @@ excludePatterns: [ "**/Temp/**" ]
 
 ### GPHOTOS_CLI_TOKENSTORE_KEY
 
-Set this variable to provide the token store key when using SecretsBackendType: file (for headless runners).
+Set this variable to provide the token store key when using `SecretsBackendType: file` (for headless runners).
 
 ```bash
 GPHOTOS_CLI_TOKENSTORE_KEY=my-super-secret gphotos-uploader-cli push
