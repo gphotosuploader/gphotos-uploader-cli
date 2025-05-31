@@ -1,5 +1,14 @@
 # Upgrading notes
 
+## Upgrading To 5.x from 4.x
+
+> **Attention**: Due to the deprecation of some scopes in the Google Photos API, this is the only version which works with Google Photos. **Previous versions will not work anymore.**
+
+- `Album: auto:folderName` and `Album: auto:folderPath` options have been removed. Use the `Album: template:%_directory%` and `Album: template:%_folderpath%` options instead. 
+- `Jobs: CreateAlbums` option has been removed. Use the `Jobs: Album` option instead.
+- Read the [configuration documentation](https://gphotosuploader.github.io/gphotos-uploader-cli/#/configuration?id=album) for more information.
+
+
 ## Upgrading To 4.x from 3.x
 
 ### Data folders
