@@ -219,7 +219,7 @@ func handleQuotesParsing(preFix, template, functionName string) (string, int, er
 	}
 
 	if strings.TrimSpace(postFix) != "" || strings.TrimSpace(preFix) != "" {
-		return "", 0, fmt.Errorf("Can't mix quoted & unquoted content in function arg: %s", functionName)
+		return "", 0, fmt.Errorf("can't mix quoted & unquoted content in function arg: %s", functionName)
 	}
 
 	return output, length + 1, nil

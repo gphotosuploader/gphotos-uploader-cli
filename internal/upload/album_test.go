@@ -221,7 +221,7 @@ func TestParseAlbumNameTemplateWithInvalidParameter(t *testing.T) {
 		{in: "$lower()", err: "lower requires 1 argument"},
 
 		{in: "$regexp(Hello World!, ^[a-z+\\[$, Universe)", err: "invalid regexp pattern: ^[a-z+\\[$"},
-		{in: "$regexp(Hello World!, _, ABC'()')", err: "Can't mix quoted & unquoted content in function arg: regexp"},
+		{in: "$regexp(Hello World!, _, ABC'()')", err: "can't mix quoted & unquoted content in function arg: regexp"},
 		{in: "$regexp(Hello World!, _, ')", err: "string missing closing quote"},
 		{in: "$regexp(Hello World!, _)", err: "regexp requires 3 arguments"},
 	}

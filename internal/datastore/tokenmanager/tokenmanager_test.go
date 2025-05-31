@@ -130,7 +130,7 @@ func equalTokens(want, in oauth2.Token) bool {
 	if want.AccessToken == in.AccessToken &&
 		want.RefreshToken == in.RefreshToken &&
 		want.TokenType == in.TokenType &&
-		want.Expiry == in.Expiry {
+		want.Expiry.Equal(in.Expiry) {
 		return true
 	}
 	return false
