@@ -54,7 +54,7 @@ func TestLevelDBStore_GetSet(t *testing.T) {
 
 		got, found := store.Get("fooKey")
 
-		if !found || "fooValue" != got {
+		if !found || got != "fooValue" {
 			t.Errorf("want: %s, got: %s", "fooValue", got)
 		}
 	})

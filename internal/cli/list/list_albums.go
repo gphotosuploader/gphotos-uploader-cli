@@ -107,7 +107,7 @@ func (o *ListAlbumsCommandOptions) Run(cobraCmd *cobra.Command, args []string) e
 
 func (o *ListAlbumsCommandOptions) printAlbumsList(a []albums.Album, writer io.Writer) {
 	if len(a) == 0 {
-		fmt.Fprintln(writer, "No albums were found!")
+		fmt.Fprintln(writer, "No albums were found!") //nolint:errcheck
 		return
 	}
 
@@ -118,16 +118,16 @@ func (o *ListAlbumsCommandOptions) printAsTable(a []albums.Album, writer io.Writ
 	w := tabwriter.NewWriter(writer, 0, 0, 1, ' ', 0)
 
 	if !o.NoHeaders {
-		fmt.Fprintln(w, "TITLE\t ITEMS\t ID\t")
+		fmt.Fprintln(w, "TITLE\t ITEMS\t ID\t") //nolint:errcheck
 	}
 
 	for _, album := range a {
-		fmt.Fprintf(w, "%s\t %d\t %s\t\n", album.Title, album.TotalMediaItems, album.ID)
+		fmt.Fprintf(w, "%s\t %d\t %s\t\n", album.Title, album.TotalMediaItems, album.ID) //nolint:errcheck
 	}
 
 	if !o.NoHeaders {
-		fmt.Fprintf(w, "Total: %d albums.\n", len(a))
+		fmt.Fprintf(w, "Total: %d albums.\n", len(a)) //nolint:errcheck
 	}
 
-	w.Flush()
+	w.Flush() //nolint:errcheck
 }

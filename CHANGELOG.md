@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.0.2
+### Changed
+- Bump `github.com/spf13/afero` to v1.14.0
+- Bump `github.com/gphotosuploader/google-photos-api-client-go/v3` to v3.0.8
+- Bump `github.com/hjson/hjson-go/v4` to v4.5.0
+- Bump `github.com/int128/oauth2cli` to v1.17.0
+- Bump `golang.org/x/oauth2` to v0.30.0
+- Bump `golang.org/x/sync` to v0.14.0
+- Bump `golang.org/x/term` to v0.32.0
+- Bump `golang.org/x/text` to v0.25.0
+- [CI] Bump `golangci-lint` to v2.1.6
+
 ## 5.0.1
 ### Added
 - Support for go v1.24

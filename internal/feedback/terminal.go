@@ -30,13 +30,13 @@ func InputUserField(prompt string, secret bool) (string, error) {
 
 // printPrompt prints the prompt to the user.
 func printPrompt(prompt string) {
-	fmt.Fprintf(stdOut, "%s: ", prompt)
+	fmt.Fprintf(stdOut, "%s: ", prompt) //nolint:errcheck
 }
 
 // readPassword reads and returns a password from the user.
 func readPassword() (string, error) {
 	value, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Fprintln(stdOut)
+	fmt.Fprintln(stdOut) //nolint:errcheck
 	return string(value), err
 }
 

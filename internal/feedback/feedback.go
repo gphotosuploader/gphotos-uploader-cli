@@ -64,12 +64,12 @@ func Printf(format string, v ...interface{}) {
 
 // Print behaves like fmt.Print but writes on the out writer and adds a newline.
 func Print(v string) {
-	fmt.Fprintln(feedbackOut, v)
+	fmt.Fprintln(feedbackOut, v) //nolint:errcheck
 }
 
 // Warning outputs a warning message.
 func Warning(msg string) {
-	fmt.Fprintln(feedbackErr, msg)
+	fmt.Fprintln(feedbackErr, msg) //nolint:errcheck
 	logrus.Warning(msg)
 }
 
@@ -86,7 +86,7 @@ func FatalResult(res ErrorResult, exitCode ExitCode) {
 
 // Fatal outputs the errorMsg and exits with status exitCode.
 func Fatal(errorMsg string, exitCode ExitCode) {
-	fmt.Fprintln(stdErr, errorMsg)
+	fmt.Fprintln(stdErr, errorMsg) //nolint:errcheck
 	os.Exit(int(exitCode))
 }
 
@@ -99,9 +99,9 @@ func PrintResult(res Result) {
 		dataErr = resErr.ErrorString()
 	}
 	if data != "" {
-		fmt.Fprintln(stdOut, data)
+		fmt.Fprintln(stdOut, data) //nolint:errcheck
 	}
 	if dataErr != "" {
-		fmt.Fprintln(stdErr, dataErr)
+		fmt.Fprintln(stdErr, dataErr) //nolint:errcheck
 	}
 }

@@ -118,11 +118,11 @@ func (o *ListMediaItemsCommandOptions) Run(cobraCmd *cobra.Command, args []strin
 
 func (o *ListMediaItemsCommandOptions) printMediaItemsList(mi []media_items.MediaItem, writer io.Writer) {
 	if o.AlbumID != "" {
-		fmt.Fprintf(writer, "Listing media items for album ID: %s\n", o.AlbumID)
+		fmt.Fprintf(writer, "Listing media items for album ID: %s\n", o.AlbumID) //nolint:errcheck
 	}
 
 	if len(mi) == 0 {
-		fmt.Fprintln(writer, "No media items were found!")
+		fmt.Fprintln(writer, "No media items were found!") //nolint:errcheck
 		return
 	}
 
@@ -133,16 +133,16 @@ func (o *ListMediaItemsCommandOptions) printAsTable(mi []media_items.MediaItem, 
 	w := tabwriter.NewWriter(writer, 0, 0, 1, ' ', 0)
 
 	if !o.NoHeaders {
-		fmt.Fprintln(w, "FILENAME\t MIME-TYPE\t ID\t")
+		fmt.Fprintln(w, "FILENAME\t MIME-TYPE\t ID\t") //nolint:errcheck
 	}
 
 	for _, mediaItem := range mi {
-		fmt.Fprintf(w, "%s\t %s\t %s\t\n", mediaItem.Filename, mediaItem.MimeType, mediaItem.ID)
+		fmt.Fprintf(w, "%s\t %s\t %s\t\n", mediaItem.Filename, mediaItem.MimeType, mediaItem.ID) //nolint:errcheck
 	}
 
 	if !o.NoHeaders {
-		fmt.Fprintf(w, "Total: %d media items.\n", len(mi))
+		fmt.Fprintf(w, "Total: %d media items.\n", len(mi)) //nolint:errcheck
 	}
 
-	w.Flush()
+	w.Flush() //nolint:errcheck
 }
