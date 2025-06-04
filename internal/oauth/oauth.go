@@ -42,24 +42,22 @@ var (
 
 // Config represents a config for the OAuth 2.0 flow.
 type Config struct {
-	// OAuth's application ID.
+	// ClientID is the application's ID.
 	ClientID string
-	// OAuth's application secret.
+	// ClientSecret is the application's secret.
 	ClientSecret string
 
 	// Logger function for debug.
 	Logf func(format string, args ...interface{})
 
-	// Candidates of hostname and port which the local server binds to.
+	// LocalServerBindAddress is a list of candidates of hostname and port which the local server binds to.
 	// You can set port number to 0 to allocate a free port.
 	// If multiple addresses are given, it will try the ports in order.
 	// If nil or an empty slice is given, it defaults to "127.0.0.1:0" i.e., a free port.
 	LocalServerBindAddress []string
 
-	// Hostname of the redirect URL.
-	// You can set this if your provider does not accept localhost.
-	// Default to localhost.
-	RedirectURLHostname string
+	// RedirectURL is the URL to redirect users going through the OAuth flow, after the resource owner's URLs.
+	RedirectURL string
 
 	oAuth2Config *oauth2.Config
 }
@@ -108,7 +106,7 @@ func (c *Config) validateAndSetDefaults() error {
 			PhotosLibraryEditAppCreatedDataScope,
 		},
 		Endpoint:    GoogleAuthEndpoint,
-		RedirectURL: c.RedirectURLHostname,
+		RedirectURL: c.RedirectURL,
 	}
 
 	return nil
@@ -123,7 +121,6 @@ func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 		LocalServerReadyChan:   ready,
 		Logf:                   c.Logf,
 		LocalServerBindAddress: c.LocalServerBindAddress,
-		RedirectURLHostname:    c.RedirectURLHostname,
 	}
 
 	var token *oauth2.Token
@@ -132,7 +129,7 @@ func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 		select {
 		case url := <-ready:
 			fmt.Printf("\nVisit the URL below in a browser:\n\n%s\n\n", url)
-			fmt.Printf("If you need to open the URL from another machine, you should use the --local-bind-address and --redirect-url-hostname flags.\n\n")
+			fmt.Printf("To connect from another machine, use --local-bind-address, --port and --redirect-url.\n\n")
 			return nil
 		case <-ctx.Done():
 			return fmt.Errorf("context done while waiting for authorization: %w", ctx.Err())
