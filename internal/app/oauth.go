@@ -40,10 +40,9 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 }
 
 type AuthenticationOptions struct {
-	// Hostname of the redirect URL.
-	// You can set this if your provider does not accept localhost.
-	// Default to localhost.
-	RedirectURLHostname string
+	// URL of the redirect URL to use for authentication.
+	// It has the form of "http://localhost:12345".
+	RedirectURL string
 
 	// Hostname and port which the local server binds to.
 	// You can set port number to 0 to allocate a free port.
@@ -62,7 +61,7 @@ func (app *App) AuthenticateFromWeb(ctx context.Context, authOptions Authenticat
 		ClientSecret:           app.Config.APIAppCredentials.ClientSecret,
 		Logf:                   app.Logger.Debugf,
 		LocalServerBindAddress: []string{authOptions.LocalServerBindAddress},
-		RedirectURLHostname:    authOptions.RedirectURLHostname,
+		RedirectURL:            authOptions.RedirectURL,
 	}
 
 	token, err := oauth.GetToken(ctx, cfg)

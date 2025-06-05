@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.1.0
+### Added 
+- The `--redirect-url` flag in the `auth` command allows you to set the URL to use after the Google Photos authentication. ([#522][i522])
+
+### Deprecated
+> Deprecated flags will be removed in the next major release.
+- The `--redirect-url-hostname` flag in the `auth` command is deprecated. Use the `--redirect-url` flag instead. ([#522][i522])
+
+### Fixed
+- Fix empty URL when running the `auth` command. ([#521][i521])
+- Fix 'authorization errors' when running the `auth` command. ([#522][i522])
+
+[i522]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/522
+[i521]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/521
+
 ## 5.0.2
 ### Changed
 - Bump `github.com/spf13/afero` to v1.14.0
