@@ -2,7 +2,6 @@
 
 Tool to mass upload media folders to your Google Photos account and manage it using a CLI.
 
-[![codebeat badge](https://codebeat.co/badges/534fbb3c-03fd-4cf1-882c-1d7389c32ab6)](https://codebeat.co/projects/github-com-gphotosuploader-gphotos-uploader-cli-main)
 [![codecov](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli/branch/main/graph/badge.svg)](https://codecov.io/gh/gphotosuploader/gphotos-uploader-cli)
 [![GitHub release](https://img.shields.io/github/release/gphotosuploader/gphotos-uploader-cli.svg)](https://github.com/gphotosuploader/gphotos-uploader-cli/releases/latest)
 [![GitHub](https://img.shields.io/github/license/gphotosuploader/gphotos-uploader-cli.svg)](LICENSE)
