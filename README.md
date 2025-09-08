@@ -16,7 +16,7 @@ See the [documentation site](https://gphotosuploader.github.io/gphotos-uploader-
 
 Since the original author is no longer using Google Photos, ongoing maintenance is at risk. We’re looking for experienced developers (macOS/Linux, Go) to join the core team, review pull requests, triage issues, and help release updates.
 
-If you’re interested in becoming a maintainer read the full announcement #539. Your contribution will keep the project alive and improve it for the whole community.
+If you’re interested in becoming a maintainer [read the full announcement](https://github.com/gphotosuploader/gphotos-uploader-cli/issues/539). Your contribution will keep the project alive and improve it for the whole community.
 
 # Contributing
 Help us make `gphotos-uploader-cli` the best tool for uploading your local pictures to Google Photos.
