@@ -10,7 +10,7 @@ require (
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.9
 	github.com/hjson/hjson-go/v4 v4.5.0
-	github.com/int128/oauth2cli v1.17.0
+	github.com/int128/oauth2cli v1.18.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
@@ -23,8 +23,8 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/syndtr/goleveldb v1.0.0
-	golang.org/x/oauth2 v0.32.0
-	golang.org/x/sync v0.17.0
+	golang.org/x/oauth2 v0.33.0
+	golang.org/x/sync v0.18.0
 	golang.org/x/term v0.36.0
 	golang.org/x/text v0.30.0
 )
