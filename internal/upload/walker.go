@@ -5,8 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/facebookgo/symwalk"
-
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 )
 
@@ -14,13 +12,17 @@ import (
 // non allowed files (includePatterns & excludePattens).
 func (job *UploadFolderJob) ScanFolder(logger log.Logger) ([]FileItem, error) {
 	var result []FileItem
-	err := symwalk.Walk(job.SourceFolder, job.getItemToUploadFn(&result, logger))
+	err := filepath.Walk(job.SourceFolder, job.getItemToUploadFn(&result, logger))
 	return result, err
 }
 
 func (job *UploadFolderJob) getItemToUploadFn(reqs *[]FileItem, logger log.Logger) filepath.WalkFunc {
 	return func(fp string, fi os.FileInfo, errP error) error {
 		if fi == nil {
+			return nil
+		}
+		if fi.Mode()&os.ModeSymlink != 0 {
+			logger.Warnf("Skipping symbolic link '%s'.", fp)
 			return nil
 		}
 

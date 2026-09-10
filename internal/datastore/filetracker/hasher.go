@@ -1,18 +1,17 @@
 package filetracker
 
 import (
-	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"os"
-
-	"github.com/pierrec/xxHash/xxHash32"
 )
 
-// XXHash32Hasher implements a Hasher using xxHash32 package.
-type XXHash32Hasher struct{}
+// SHA256Hasher computes a cryptographic digest suitable for backup verification.
+type SHA256Hasher struct{}
 
-// Hash returns the xxHash32 of the file specified by filename.
-func (h XXHash32Hasher) Hash(filename string) (string, error) {
+// Hash returns the SHA-256 of the file specified by filename.
+func (h SHA256Hasher) Hash(filename string) (string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return "", err
@@ -21,12 +20,11 @@ func (h XXHash32Hasher) Hash(filename string) (string, error) {
 		_ = file.Close()
 	}()
 
-	hasher := xxHash32.New(0xCAFE)
-	defer hasher.Reset()
+	hasher := sha256.New()
 	_, err = io.Copy(hasher, file)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprint(hasher.Sum32()), nil
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

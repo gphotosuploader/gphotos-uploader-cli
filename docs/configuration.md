@@ -16,6 +16,7 @@ The configuration file (`config.hjson`) controls how `gphotos-uploader-cli` work
   }
   Account: YOUR_GOOGLE_PHOTOS_ACCOUNT
   SecretsBackendType: file
+  UploadBytesPerSecond: 3000000
   Jobs:
   [
     {
@@ -78,7 +79,11 @@ A list of upload jobs, each with its own options.
 
 Absolute path to the folder to upload. `~` is expanded to your home directory.
 
-Symlinks are followed. Infinite loops are not detected.
+Symbolic links are skipped. This prevents a configured source from escaping into another filesystem tree.
+
+### UploadBytesPerSecond
+
+Maximum upload throughput in bytes per second. `3000000` is approximately 24 Mbit/s. Set it to `0` for no limit.
 
 #### Album
 
@@ -185,7 +190,13 @@ Google Photos
 
 #### DeleteAfterUpload
 
-If `true`, deletes local files after upload.
+Local deletion is disabled for backup safety. Configuration validation fails when this option is `true`.
+
+### Verifying a backup
+
+Run `gphotos-uploader-cli verify` after an upload. It compares every eligible local file's exact byte size and SHA-256
+against the durable receipt written only after Google returns a non-empty media item ID. The command prints a JSON
+report and exits non-zero when an item is pending, changed, missing, or has an orphaned receipt.
 
 #### Including and Excluding files
 
@@ -238,3 +249,6 @@ Set this variable to provide the token store key when using `SecretsBackendType:
 ```bash
 GPHOTOS_CLI_TOKENSTORE_KEY=my-super-secret gphotos-uploader-cli push
 ```
+
+For containers, set `GPHOTOS_CLI_TOKENSTORE_KEY_FILE` to a mounted secret file instead. The file takes precedence over
+the environment value and its trailing newline is removed.

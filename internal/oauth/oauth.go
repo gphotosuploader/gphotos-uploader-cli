@@ -101,9 +101,7 @@ func (c *Config) validateAndSetDefaults() error {
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
 		Scopes: []string{
-			PhotosLibraryReadOnlyAppCreateDataScope,
 			PhotosLibraryAppendOnlyScope,
-			PhotosLibraryEditAppCreatedDataScope,
 		},
 		Endpoint:    GoogleAuthEndpoint,
 		RedirectURL: c.RedirectURL,
@@ -116,12 +114,8 @@ func (c *Config) validateAndSetDefaults() error {
 // flow, blocks until the user completes authorization and is redirected back, and returns the access token.
 func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 	ready := make(chan string, 1)
-	cfg := oauth2cli.Config{
-		OAuth2Config:           *c.oAuth2Config,
-		LocalServerReadyChan:   ready,
-		Logf:                   c.Logf,
-		LocalServerBindAddress: c.LocalServerBindAddress,
-	}
+	pkceVerifier := oauth2.GenerateVerifier()
+	cfg := c.webConfig(ready, pkceVerifier)
 
 	var token *oauth2.Token
 	eg, ctx := errgroup.WithContext(ctx)
@@ -145,6 +139,23 @@ func (c *Config) getTokenFromWeb(ctx context.Context) (*oauth2.Token, error) {
 	})
 
 	return token, eg.Wait()
+}
+
+func (c *Config) webConfig(ready chan string, pkceVerifier string) oauth2cli.Config {
+	return oauth2cli.Config{
+		OAuth2Config:           *c.oAuth2Config,
+		LocalServerReadyChan:   ready,
+		Logf:                   c.Logf,
+		LocalServerBindAddress: c.LocalServerBindAddress,
+		AuthCodeOptions: []oauth2.AuthCodeOption{
+			oauth2.AccessTypeOffline,
+			oauth2.SetAuthURLParam("prompt", "consent"),
+			oauth2.S256ChallengeOption(pkceVerifier),
+		},
+		TokenRequestOptions: []oauth2.AuthCodeOption{
+			oauth2.VerifierOption(pkceVerifier),
+		},
+	}
 }
 
 // refreshToken refresh the OAuth 2.0 token.

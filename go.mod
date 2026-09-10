@@ -7,14 +7,12 @@ toolchain go1.24.1
 require (
 	github.com/99designs/keyring v1.2.2
 	github.com/bmatcuk/doublestar/v2 v2.0.4
-	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.9
 	github.com/hjson/hjson-go/v4 v4.5.0
 	github.com/int128/oauth2cli v1.17.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pierrec/xxHash v0.1.5
 	github.com/pkg/errors v0.9.1
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/sirupsen/logrus v1.9.3
@@ -35,10 +33,6 @@ require (
 	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.8.0 // indirect
-	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
-	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
-	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
-	github.com/facebookgo/testname v0.0.0-20150612200628-5443337c3a12 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/gphotosuploader/googlemirror v0.5.0 // indirect

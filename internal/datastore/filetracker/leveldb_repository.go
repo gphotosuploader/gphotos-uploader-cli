@@ -1,8 +1,11 @@
 package filetracker
 
 import (
+	"fmt"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 	"os"
 )
 
@@ -47,6 +50,23 @@ func (r LevelDBRepository) Put(key string, item TrackedFile) error {
 // Delete removes the item specified by key.
 func (r LevelDBRepository) Delete(key string) error {
 	return r.DB.Delete([]byte(key), nil)
+}
+
+// All returns a consistent snapshot of every tracked upload receipt.
+func (r LevelDBRepository) All() (map[string]TrackedFile, error) {
+	result := make(map[string]TrackedFile)
+	db, ok := r.DB.(interface {
+		NewIterator(*util.Range, *opt.ReadOptions) iterator.Iterator
+	})
+	if !ok {
+		return nil, fmt.Errorf("repository does not support iteration")
+	}
+	iter := db.NewIterator(nil, nil)
+	defer iter.Release()
+	for iter.Next() {
+		result[string(iter.Key())] = NewTrackedFile(string(iter.Value()))
+	}
+	return result, iter.Error()
 }
 
 // Close closes the DB.

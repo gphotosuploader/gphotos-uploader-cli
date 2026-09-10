@@ -14,6 +14,9 @@ type Config struct {
 
 	// Jobs are the source folders to work with.
 	Jobs []FolderUploadJob `json:"Jobs"`
+
+	// UploadBytesPerSecond caps upload throughput. Zero means unlimited.
+	UploadBytesPerSecond int64 `json:"UploadBytesPerSecond,omitempty"`
 }
 
 // APIAppCredentials represents Google Photos API credentials for OAuth.

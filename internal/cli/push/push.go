@@ -2,10 +2,12 @@ package push
 
 import (
 	"context"
+	"fmt"
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v3"
 	"github.com/gphotosuploader/google-photos-api-client-go/v3/uploader"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/app"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/flags"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/filter"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
@@ -13,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"net/http"
+	"os"
+	"time"
 )
 
 // PushCmd holds the required data for the push cmd
@@ -53,11 +57,15 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	if limiter, ok := photosService.Uploader.(interface{ SetBytesPerSecond(int64) }); ok {
+		limiter.SetBytesPerSecond(cli.Config.UploadBytesPerSecond)
+	}
 
 	if cmd.DryRunMode {
 		cli.Logger.Info("[DRY-RUN] Running in dry run mode. No file will be uploaded.")
 	}
 
+	var failedItems int
 	// launch all folder upload jobs
 	for _, config := range cli.Config.Jobs {
 
@@ -106,6 +114,7 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 			albumId, err := getOrCreateAlbum(ctx, photosService.Albums, albumName)
 			if err != nil {
 				cli.Logger.Failf("Unable to create album '%s': %s", albumName, err)
+				failedItems += len(files)
 				continue
 			}
 
@@ -113,8 +122,14 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 				cli.Logger.Debugf("Processing (%d/%d): %s", uploadedItems+1, totalItems, file)
 
 				if !cmd.DryRunMode {
+					before, err := verifiedFile(file.Path)
+					if err != nil {
+						cli.Logger.Failf("Cannot verify %s: %s", file, err)
+						failedItems++
+						continue
+					}
 					// Upload the file and add it to PhotosService.
-					_, err := photosService.UploadToAlbum(ctx, albumId, file.Path)
+					mediaItem, err := photosService.UploadToAlbum(ctx, albumId, file.Path)
 
 					// Check if the Google Photos daily quota has been exceeded.
 					var e *gphotos.ErrDailyQuotaExceeded
@@ -125,12 +140,25 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 					if err != nil {
 						cli.Logger.Failf("Error processing %s: %s", file, err)
+						failedItems++
+						continue
+					}
+					if mediaItem == nil || mediaItem.ID == "" {
+						cli.Logger.Failf("Error processing %s: %s", file, "Google returned no media item ID")
+						failedItems++
+						continue
+					}
+					after, err := verifiedFile(file.Path)
+					if err != nil || before != after {
+						cli.Logger.Failf("Source changed while uploading %s", file)
+						failedItems++
 						continue
 					}
 
 					// Mark the file as uploaded in the FileTracker.
-					if err := cli.FileTracker.MarkAsUploaded(file.Path); err != nil {
-						cli.Logger.Warnf("Tracking file as uploaded failed: file=%s, error=%v", file, err)
+					if err := cli.FileTracker.RecordUpload(file.Path, filetracker.UploadReceipt{MediaItemID: mediaItem.ID, ProductURL: mediaItem.ProductURL, SHA256: before.sha256, Size: before.size, UploadedAt: time.Now().UTC()}); err != nil {
+						cli.Logger.Failf("Tracking file as uploaded failed: file=%s, error=%v", file, err)
+						return fmt.Errorf("Google accepted %s as media item %s but the durable local record failed: %w", file, mediaItem.ID, err)
 					}
 
 					if config.DeleteAfterUpload {
@@ -149,7 +177,27 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 
 		cli.Logger.Donef("%d processed files: %d successfully, %d with errors", totalItems, uploadedItems, totalItems-uploadedItems)
 	}
+	if failedItems > 0 {
+		return fmt.Errorf("%d upload(s) failed verification", failedItems)
+	}
 	return nil
+}
+
+type fileVerification struct {
+	sha256 string
+	size   int64
+}
+
+func verifiedFile(path string) (fileVerification, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fileVerification{}, err
+	}
+	hash, err := (filetracker.SHA256Hasher{}).Hash(path)
+	if err != nil {
+		return fileVerification{}, err
+	}
+	return fileVerification{sha256: hash, size: info.Size()}, nil
 }
 
 func newPhotosService(client *http.Client, sessionTracker app.UploadSessionTracker, logger log.Logger) (*gphotos.Client, error) {

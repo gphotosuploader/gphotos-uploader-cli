@@ -2,10 +2,12 @@ package tokenmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/99designs/keyring"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/feedback"
 	"golang.org/x/oauth2"
 	"os"
+	"strings"
 )
 
 // KeyringRepository represents a repository provided by different secrets
@@ -104,6 +106,17 @@ func (r *KeyringRepository) Close() error {
 // It will read it from an environment var if it's set, or read from the terminal otherwise.
 func getPassphraseFromEnvOrUserInputFn() func(string) (string, error) {
 	return func(_ string) (string, error) {
+		if filename, ok := os.LookupEnv("GPHOTOS_CLI_TOKENSTORE_KEY_FILE"); ok {
+			value, err := os.ReadFile(filename)
+			if err != nil {
+				return "", fmt.Errorf("reading token-store key file: %w", err)
+			}
+			key := strings.TrimSuffix(strings.TrimSuffix(string(value), "\n"), "\r")
+			if key == "" {
+				return "", fmt.Errorf("token-store key file is empty")
+			}
+			return key, nil
+		}
 		// TODO: Use the configuration package to gather this env var.
 		if key, ok := os.LookupEnv("GPHOTOS_CLI_TOKENSTORE_KEY"); ok {
 			return key, nil

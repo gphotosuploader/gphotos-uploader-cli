@@ -3,8 +3,28 @@ package filetracker_test
 import (
 	"errors"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/datastore/filetracker"
+	"os"
 	"testing"
 )
+
+func TestFileTracker_RecordUploadFailsClosed(t *testing.T) {
+	repo := &mockedRepository{}
+	ft := filetracker.New(repo)
+	hash, err := ft.Hasher.Hash(ShouldSuccess)
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(ShouldSuccess)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ft.RecordUpload(ShouldSuccess, filetracker.UploadReceipt{SHA256: hash, Size: info.Size()}); err == nil {
+		t.Fatal("missing Google media ID was recorded")
+	}
+	if err := ft.RecordUpload(ShouldSuccess, filetracker.UploadReceipt{MediaItemID: "id", SHA256: "wrong", Size: info.Size()}); err == nil {
+		t.Fatal("wrong source hash was recorded")
+	}
+}
 
 const (
 	ShouldSuccess      = "testdata/image.jpg"
@@ -129,6 +149,10 @@ func (m mockedRepository) Delete(key string) error {
 		return ErrTestError
 	}
 	return nil
+}
+
+func (m mockedRepository) All() (map[string]filetracker.TrackedFile, error) {
+	return map[string]filetracker.TrackedFile{}, nil
 }
 
 func (m mockedRepository) Close() error {

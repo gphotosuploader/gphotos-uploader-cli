@@ -7,6 +7,7 @@ import (
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/list"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/push"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/reset"
+	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/verify"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/cli/version"
 	"github.com/gphotosuploader/gphotos-uploader-cli/internal/log"
 	"github.com/mgutz/ansi"
@@ -66,6 +67,7 @@ func createCliCommandTree(cmd *cobra.Command) {
 	cmd.AddCommand(auth.NewCommand(globalFlags))
 	cmd.AddCommand(list.NewCommand(globalFlags))
 	cmd.AddCommand(reset.NewCommand(globalFlags))
+	cmd.AddCommand(verify.NewCommand(globalFlags))
 
 	// TODO: Set flags here instead of passing globalFlags to all commands.
 	// See: https://github.com/arduino/arduino-cli/blob/master/internal/cli/cli.go

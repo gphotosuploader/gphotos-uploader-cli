@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
-func TestXXHash32Hasher_Hash(t *testing.T) {
+func TestSHA256Hasher_Hash(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         string
 		want          string
 		isErrExpected bool
 	}{
-		{"Should success", "testdata/image.jpg", "1127908779", false},
+		{"Should success", "testdata/image.jpg", "b554e7ea1a1485c86e6c97c387d4f0f13a08114502e71bddad5482e6fa53cbae", false},
 		{"Should fail", "testdata/non-existent", "", true},
 	}
 
-	hasher := filetracker.XXHash32Hasher{}
+	hasher := filetracker.SHA256Hasher{}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -204,6 +204,7 @@ func (app *App) emptyDir(path string) error {
 // FileTracker represents a service to track file already uploaded.
 type FileTracker interface {
 	MarkAsUploaded(file string) error
+	RecordUpload(file string, receipt filetracker.UploadReceipt) error
 	IsUploaded(file string) bool
 	UnmarkAsUploaded(file string) error
 	Close() error

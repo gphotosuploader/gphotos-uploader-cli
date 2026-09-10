@@ -124,6 +124,18 @@ func TestGetPassphraseFromEnvOrUserInputFn(t *testing.T) {
 		assert.Equal(t, "This-key-comes-from-env-var", got)
 
 	})
+
+	t.Run("Should return the passphrase from a secret file", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "token-key")
+		if err := os.WriteFile(path, []byte("file-secret\n"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		t.Setenv("GPHOTOS_CLI_TOKENSTORE_KEY_FILE", path)
+		t.Setenv("GPHOTOS_CLI_TOKENSTORE_KEY", "environment-secret")
+		got, err := getPassphraseFromEnvOrUserInputFn()("")
+		assert.NoError(t, err)
+		assert.Equal(t, "file-secret", got)
+	})
 }
 
 // getDefaultToken return a token to complete tests

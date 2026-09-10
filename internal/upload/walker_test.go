@@ -27,8 +27,6 @@ func TestWalker_GetAllFiles(t *testing.T) {
 		"testdata/folder1/SampleJPGImage.jpg",
 		"testdata/folder2/SamplePNGImage.png",
 		"testdata/folder2/SampleJPGImage.jpg",
-		"testdata/folder-symlink/SamplePNGImage.png",
-		"testdata/folder-symlink/SampleJPGImage.jpg",
 	}
 
 	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)
@@ -45,7 +43,6 @@ func TestWalker_GetAllPNGFiles(t *testing.T) {
 		"testdata/ScreenShotPNG.png",
 		"testdata/folder1/SamplePNGImage.png",
 		"testdata/folder2/SamplePNGImage.png",
-		"testdata/folder-symlink/SamplePNGImage.png",
 	}
 
 	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)
@@ -68,8 +65,6 @@ func TestWalker_GetAllFilesExcludeFolder1(t *testing.T) {
 		"testdata/ScreenShotPNG.png",
 		"testdata/folder2/SamplePNGImage.png",
 		"testdata/folder2/SampleJPGImage.jpg",
-		"testdata/folder-symlink/SamplePNGImage.png",
-		"testdata/folder-symlink/SampleJPGImage.jpg",
 	}
 
 	got, err := getIncludedFilesByScanFolder(includePatterns, excludePatterns)

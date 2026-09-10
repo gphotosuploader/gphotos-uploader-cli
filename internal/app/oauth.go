@@ -33,7 +33,7 @@ func (app *App) AuthenticateFromToken(ctx context.Context) (*http.Client, error)
 	app.Logger.Donef("Token is valid, expires at %s", token.Expiry)
 
 	if err := app.TokenManager.Put(account, token); err != nil {
-		app.Logger.Debugf("Failed to store token into token manager: %s", err)
+		return nil, fmt.Errorf("failed to store refreshed token: %w", err)
 	}
 
 	return oauth.Client(ctx, cfg, token)
@@ -72,7 +72,7 @@ func (app *App) AuthenticateFromWeb(ctx context.Context, authOptions Authenticat
 	app.Logger.Donef("Token obtained, expires at %s", token.Expiry)
 
 	if err := app.TokenManager.Put(account, token); err != nil {
-		app.Logger.Debugf("Failed to store token into token manager: %s", err)
+		return nil, fmt.Errorf("failed to store OAuth token: %w", err)
 	}
 
 	return oauth.Client(ctx, cfg, token)

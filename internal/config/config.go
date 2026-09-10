@@ -51,18 +51,20 @@ func Exists(fs afero.Fs, filename string) bool {
 // SafePrint returns the configuration, removing sensible fields.
 func (c Config) SafePrint() string {
 	printableConfig := struct {
-		APIAppCredentials  APIAppCredentials
-		Account            string
-		SecretsBackendType string
-		Jobs               []FolderUploadJob
+		APIAppCredentials    APIAppCredentials
+		Account              string
+		SecretsBackendType   string
+		Jobs                 []FolderUploadJob
+		UploadBytesPerSecond int64 `json:"UploadBytesPerSecond,omitempty"`
 	}{
 		APIAppCredentials: APIAppCredentials{
 			ClientID:     c.APIAppCredentials.ClientID,
 			ClientSecret: "REMOVED",
 		},
-		Account:            c.Account,
-		SecretsBackendType: c.SecretsBackendType,
-		Jobs:               c.Jobs,
+		Account:              c.Account,
+		SecretsBackendType:   c.SecretsBackendType,
+		Jobs:                 c.Jobs,
+		UploadBytesPerSecond: c.UploadBytesPerSecond,
 	}
 	b, _ := json.Marshal(printableConfig)
 	return fmt.Sprint(string(b))
@@ -70,6 +72,9 @@ func (c Config) SafePrint() string {
 
 // validate validates the current configuration.
 func (c Config) validate(fs afero.Fs, logger log.Logger) error {
+	if c.UploadBytesPerSecond < 0 {
+		return errors.New("option UploadBytesPerSecond cannot be negative")
+	}
 	if err := c.validateSecretsBackendType(); err != nil {
 		return err
 	}
@@ -152,6 +157,9 @@ func (c Config) checkJobsExistence() error {
 }
 
 func (c Config) validateJob(fs afero.Fs, job FolderUploadJob, logger log.Logger) error {
+	if job.DeleteAfterUpload {
+		return errors.New("DeleteAfterUpload is disabled for backup safety")
+	}
 	if err := c.checkSourceFolder(fs, job); err != nil {
 		return err
 	}
@@ -276,7 +284,8 @@ func defaultSettings() Config {
 			ClientID:     "YOUR_APP_CLIENT_ID",
 			ClientSecret: "YOUR_APP_CLIENT_SECRET",
 		},
-		Account: "YOUR_GOOGLE_PHOTOS_ACCOUNT",
+		Account:              "YOUR_GOOGLE_PHOTOS_ACCOUNT",
+		UploadBytesPerSecond: 3000000,
 		Jobs: []FolderUploadJob{
 			{
 				SourceFolder:      "YOUR_FOLDER_PATH",
