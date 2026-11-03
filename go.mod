@@ -23,7 +23,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/oauth2 v0.33.0
 	golang.org/x/sync v0.18.0
-	golang.org/x/term v0.36.0
+	golang.org/x/term v0.47.0
 	golang.org/x/text v0.30.0
 )
 
@@ -51,7 +51,7 @@ require (
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 	google.golang.org/api v0.248.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
