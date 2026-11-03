@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+### Added
+- Support for the latest published Go version (1.27). This project will maintain compatibility with the latest two major versions published.
+### Changed
+- The minimum required Go version is now 1.26.
+### Removed
+- Once Go 1.27 has been published, previous Go 1.24 and Go 1.25 support is deprecated.
+
 ## 5.1.0
 ### Added 
 - The `--redirect-url` flag in the `auth` command allows you to set the URL to use after the Google Photos authentication. ([#522][i522])
