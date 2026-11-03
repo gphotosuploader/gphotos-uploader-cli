@@ -103,7 +103,7 @@ func parseAlbumNameTemplate(template, filePath string, fileCreateTime time.Time)
 			break
 		}
 
-		outputs += string(template[i])
+		outputs += template[i : i+1]
 		i++
 	}
 
@@ -151,7 +151,7 @@ func handleFunctionParsing(template string, filePath string, fileCreateTime time
 
 			currentArg = ""
 		} else {
-			currentArg += string(template[i])
+			currentArg += template[i : i+1]
 		}
 
 		i++

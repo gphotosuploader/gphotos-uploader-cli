@@ -155,6 +155,7 @@ func TestParseAlbumNameTemplateWithTokens(t *testing.T) {
 		{in: "%_time%", out: "16:05:59"},
 		{in: "%_time_en%", out: "04:05:59 PM"},
 		{in: "%_year%_%_year%", out: "2034_2034"},
+		{in: "日本語 - %_directory%", out: "日本語 - bar"},
 	}
 
 	for _, tt := range testData {
@@ -185,6 +186,7 @@ func TestParseAlbumNameTemplateWithFunctions(t *testing.T) {
 		{in: "$sentence(Hello World!)", out: "Hello world!"},
 		{in: "$sentence(Hello World!)", out: "Hello world!"},
 		{in: "$title(Title of a Set of Photos)", out: "Title Of A Set Of Photos"},
+		{in: "$upper(café)", out: "CAFÉ"},
 
 		{in: "$regexp(Hello World!, World, Universe)", out: "Hello Universe!"},
 		{in: "$regexp(Hello _World!,_, ',')", out: "Hello ,World!"},
