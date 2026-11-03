@@ -32,7 +32,7 @@ type FolderUploadJob struct {
 	// Album is the album where objects will be uploaded.
 	// If the Album option is not set, the objects will not be associated with an album in Google Photos.
 	//
-	// These are the valid values: "name:", "auto:", "template".
+	// These are the valid values: "name:", "template:".
 	//   "name:" : Followed by the album name in Google Photos (album names are not unique, so the first to match
 	//             will be selected)
 	//   "template": Followed by a template string that can contain the following predefine tokens and functions:
