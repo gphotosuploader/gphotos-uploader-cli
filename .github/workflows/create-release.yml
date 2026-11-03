@@ -3,10 +3,13 @@ on:
   push:
     tags:
       - v*
+permissions:
+  contents: write
 jobs:
   create-release:
     name: GoReleaser
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
