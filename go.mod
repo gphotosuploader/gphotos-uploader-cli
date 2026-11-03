@@ -7,19 +7,19 @@ require (
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/gphotosuploader/google-photos-api-client-go/v3 v3.0.9
-	github.com/hjson/hjson-go/v4 v4.5.0
+	github.com/hjson/hjson-go/v4 v4.7.1
 	github.com/int128/oauth2cli v1.18.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pierrec/xxHash v0.1.5
 	github.com/pkg/errors v0.9.1
-	github.com/schollz/progressbar/v3 v3.18.0
-	github.com/sirupsen/logrus v1.9.3
+	github.com/schollz/progressbar/v3 v3.19.1
+	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/afero v1.15.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.24.0
@@ -31,7 +31,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.8.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.8.0 // indirect
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
@@ -46,13 +45,12 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/int128/listener v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	google.golang.org/api v0.248.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
