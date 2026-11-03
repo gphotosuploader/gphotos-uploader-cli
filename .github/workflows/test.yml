@@ -2,38 +2,46 @@ name: Test, build and coverage
 on:
   push:
     branches:
-      - 'main'
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
+      - "main"
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
+
+permissions:
+  contents: read
 
 env:
-    # run coverage only with the latest Go version
-    LATEST_GO_VERSION: '1.27'
+  # run coverage only with the latest Go version
+  LATEST_GO_VERSION: "1.27"
 
 jobs:
   test-matrix:
     strategy:
       matrix:
-        go-version: ['1.26', '1.27']
+        go-version: ["1.26", "1.27"]
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version: ${{ matrix.go-version }}      
+          go-version: ${{ matrix.go-version }}
       - name: Build binary
         run: make build
       - name: Run tests
         run: make test
       - name: Send code coverage
-        if: success() && matrix.go == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
+        if: success() && matrix.go-version == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        
+
+  # single, stable check name to use as a required status check in branch protection.
+  tests-passed:
+    name: Tests passed
+    needs: test-matrix
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check test-matrix result
+        env:
+          RESULT: ${{ needs.test-matrix.result }}
+        run: test "$RESULT" = "success"
