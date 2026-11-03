@@ -170,9 +170,22 @@ func (c Config) validateJob(fs afero.Fs, job FolderUploadJob, logger log.Logger)
 func (c Config) checkDeprecatedCreateAlbums(job FolderUploadJob, logger log.Logger) error {
 	// 'CreateAlbums' is deprecated and it should not be used.
 	if job.CreateAlbums != "" {
-		return fmt.Errorf("option CreateAlbums is invalid, '%s", job.CreateAlbums)
+		return fmt.Errorf("option CreateAlbums has been removed, %s", createAlbumsMigrationHint(job.CreateAlbums))
 	}
 	return nil
+}
+
+// createAlbumsMigrationHint returns how to replace a removed CreateAlbums value with the Album option.
+func createAlbumsMigrationHint(value string) string {
+	switch strings.ToLower(value) {
+	case "off":
+		return "remove it and omit the 'Album' option to upload files without an album"
+	case "foldername":
+		return "replace it with 'Album: template:%_directory%'"
+	case "folderpath":
+		return "replace it with 'Album: template:%_folderpath%'"
+	}
+	return "remove it and use the 'Album' option instead"
 }
 
 func (c Config) checkSourceFolder(fs afero.Fs, job FolderUploadJob) error {

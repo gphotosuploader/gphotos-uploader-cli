@@ -85,7 +85,7 @@ Symlinks are followed. Infinite loops are not detected.
 Controls album organization in Google Photos.
 
 - **Omit**: Files are uploaded without an album. It's the default option.
-- **Fixed Name**: `name:<AlbumName<` (uploads to the specific album _<AlbumName>_).
+- **Fixed Name**: `name:<AlbumName>` (uploads to the specific album _<AlbumName>_).
 - **Template**: `template:...` (dynamic album names using placeholders, see below).
 
 Given the local tree of folders and files:
@@ -141,7 +141,7 @@ properties like date or folder names.
 |-----------------------|-------------------------------------------------------------------------------------|
 | `%_directory%`        | Name of the containing folder (same as the **deprecated** `auto:folderName` option) |
 | `%_parent_directory%` | Name of the parent folder                                                           |
-| `%_folderpath%`       | Full path of the folder (same as the **deprecated** `auto:folderPath` option).      |
+| `%_folderpath%`       | Path of the containing folder relative to `SourceFolder`, with `/` replaced by `_` (same as the **deprecated** `auto:folderPath` option). |
 | `%_day%`              | Day of the month the file was created (in "DD" format).                             |
 | `%_month%`            | Month the file was created (in "MM" format).                                        |
 | `%_year%`             | Year the file was created (in "YYYY" format).                                       |
