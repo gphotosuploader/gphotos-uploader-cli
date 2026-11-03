@@ -1,3 +1,4 @@
+version: 2
 project_name: gphotos-uploader-cli
 env:
   - GO111MODULE=on
@@ -15,11 +16,11 @@ builds:
 checksum:
   name_template: 'checksums.txt'
 brews:
-  - tap:
+  - repository:
       owner: gphotosuploader
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    folder: Formula
+    directory: Formula
     commit_author:
       name: pacoorozco
       email: paco@pacoorozco.info
