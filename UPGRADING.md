@@ -9,7 +9,10 @@
 
 - `Album: auto:folderName` and `Album: auto:folderPath` options have been **removed**. Use the
   `Album: template:%_directory%` and `Album: template:%_folderpath%` options instead.
-- `Jobs: CreateAlbums` option has been **removed**. Use the `Jobs: Album` option instead.
+- `Jobs: CreateAlbums` option has been **removed** and must be deleted from your configuration:
+  - `CreateAlbums: Off`: remove it and don't set `Album`. Files are uploaded without an album by default.
+  - `CreateAlbums: folderName`: replace it with `Album: template:%_directory%`.
+  - `CreateAlbums: folderPath`: replace it with `Album: template:%_folderpath%`.
 - Read
   the [configuration documentation](https://gphotosuploader.github.io/gphotos-uploader-cli/#/configuration?id=album) for
   more information.
