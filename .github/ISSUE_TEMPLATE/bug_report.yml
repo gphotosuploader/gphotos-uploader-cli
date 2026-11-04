@@ -1,0 +1,86 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please check the [documentation](https://github.com/gphotosuploader/gphotos-uploader-cli/blob/main/docs/getting-started.md) and [existing issues](https://github.com/gphotosuploader/gphotos-uploader-cli/issues?q=is%3Aissue) first.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the exact command you ran.
+      placeholder: |
+        1. gphotos-uploader-cli push --debug
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: Output of the failing command, run with `--debug`. It will be formatted as code automatically.
+      render: shell
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: The relevant part of your `config.hjson`. **Remove `ClientSecret` and any other secrets before pasting.**
+      render: json5
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `gphotos-uploader-cli version`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - Homebrew
+        - Pre-compiled binary from releases
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: E.g. running on a headless or remote machine, inside Docker, behind a proxy.
+
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have removed secrets (e.g. `ClientSecret`, tokens) from everything pasted above.
+          required: true
