@@ -8,10 +8,6 @@ on:
 permissions:
   contents: read
 
-env:
-  # run coverage only with the latest Go version
-  LATEST_GO_VERSION: "1.27"
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -20,7 +16,8 @@ jobs:
   test-matrix:
     strategy:
       matrix:
-        go-version: ["1.26", "1.27"]
+        # minimum: the `go` version in go.mod. latest: the version in .go-version.
+        go: [minimum, latest]
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
@@ -30,13 +27,13 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: ${{ matrix.go == 'minimum' && 'go.mod' || '.go-version' }}
       - name: Build binary
         run: make build
       - name: Run tests
         run: make test
       - name: Send code coverage
-        if: success() && matrix.go-version == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
+        if: success() && matrix.go == 'latest' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
