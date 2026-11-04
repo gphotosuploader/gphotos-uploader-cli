@@ -2,3 +2,4 @@
 
 /.github/            @pacoorozco
 /.goreleaser.yml     @pacoorozco
+/.go-version         @pacoorozco
