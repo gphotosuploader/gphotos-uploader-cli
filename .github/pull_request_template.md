@@ -1,17 +1,12 @@
-<!-- PRs are squash-merged using the PR title as the commit message, so the title must follow
-     Conventional Commits, e.g. `fix: keep non-ASCII characters in album names`. -->
+<!-- The PR title becomes the squash commit message, so it must follow Conventional Commits,
+     e.g. `fix: keep non-ASCII characters in album names`. -->
 
-**What issue type does this pull request address?** (keep at least one, remove the others)  
-/kind bug
-/kind enhancement
-/kind feature
-/kind documentation
+## What and why
 
-**What is this pull request for? Which issues does it resolve?** (use `resolves #<issue_number>` if possible)  
-resolves #
+<!-- What does this change, and why? Link the issue it resolves: `resolves #123` -->
 
-**Does this pull request has user-facing changes?** (e.g. config changes, new/modified commands, new/modified flags)  
+## User-facing changes
 
-**Does this pull request add new dependencies?**  
+<!-- Config, commands, flags or behaviour users will notice. Write "None" if there are none. -->
 
-**What else do we need to know?**  
+## How was this tested?
