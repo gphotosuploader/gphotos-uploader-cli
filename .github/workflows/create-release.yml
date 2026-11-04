@@ -29,6 +29,8 @@ jobs:
           go-version: "1.27"
           # don't restore a cache that other workflows could have populated into release artifacts.
           cache: false
+      - name: Run tests
+        run: make test
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
