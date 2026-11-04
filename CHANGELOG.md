@@ -8,8 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Support for the latest published Go version (1.27). This project will maintain compatibility with the latest two major versions published.
 ### Changed
 - The minimum required Go version is now 1.26.
+- The error for the removed `CreateAlbums` option now tells you which `Album` value to use instead. ([#480][i480])
 ### Removed
 - Once Go 1.27 has been published, previous Go 1.24 and Go 1.25 support is deprecated.
+### Fixed
+- Fix garbled album names when an album name template contains non-ASCII characters, e.g. `template:日本語 - %_directory%`. ([#556][i556])
+
+[i556]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/556
+[i480]: https://github.com/gphotosuploader/gphotos-uploader-cli/issues/480
 
 ## 5.1.0
 ### Added 
