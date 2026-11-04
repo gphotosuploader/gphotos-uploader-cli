@@ -42,7 +42,7 @@ Pushing a `v*` tag runs the [Create Release](.github/workflows/create-release.ym
 
 ## Release candidates
 
-To test a release before publishing it, tag a release candidate such as `vX.Y.Z-rc1` (message `Version X.Y.Z RC1`). Then edit the GitHub release and tick **Set as a pre-release**, so it isn't shown as the latest release.
+To test a release before publishing it, tag a release candidate such as `vX.Y.Z-rc1` (message `Version X.Y.Z RC1`). GoReleaser marks it as a pre-release, so it isn't shown as the latest release, and doesn't update the Homebrew formula.
 
 ## If something goes wrong
 

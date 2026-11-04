@@ -15,12 +15,17 @@ builds:
     ldflags: -s -w -X=github.com/gphotosuploader/gphotos-uploader-cli/version.versionString={{ .Version }}
 checksum:
   name_template: 'checksums.txt'
+release:
+  # mark tags like v1.2.3-rc1 as pre-releases.
+  prerelease: auto
 brews:
   - repository:
       owner: gphotosuploader
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
+    # don't publish pre-releases to Homebrew users.
+    skip_upload: auto
     commit_author:
       name: pacoorozco
       email: paco@pacoorozco.info
