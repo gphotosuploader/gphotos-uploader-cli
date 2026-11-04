@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Getting started and configuration
+    url: https://gphotosuploader.github.io/gphotos-uploader-cli/#/getting-started
+    about: Installation, authentication and configuration guide.
+  - name: Upgrading from a previous version
+    url: https://gphotosuploader.github.io/gphotos-uploader-cli/#/upgrading
+    about: Breaking changes and migration steps between major versions.
