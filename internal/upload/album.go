@@ -31,17 +31,6 @@ func (job *UploadFolderJob) albumName(filePath string, fileCreateTime time.Time)
 		return val
 	}
 
-	if before == "auto" {
-		switch after {
-		case "folderPath":
-			return albumNameUsingFolderPath(filePath)
-		case "folderName":
-			return albumNameUsingFolderName(filePath)
-		default:
-			panic("invalid Albums parameter")
-		}
-	}
-
 	return ""
 }
 

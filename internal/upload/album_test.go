@@ -23,19 +23,7 @@ func TestAlbumName(t *testing.T) {
 			want:  "albumName",
 		},
 		{
-			name:  "album set an album's name based on folder path",
-			album: "auto:folderPath",
-			in:    "/foo/bar/file.jpg",
-			want:  "foo_bar",
-		},
-		{
-			name:  "album set an album's name based on folder name",
-			album: "auto:folderName",
-			in:    "/foo/bar/file.jpg",
-			want:  "bar",
-		},
-		{
-			name:  "album set an album's name with unexpected key (not `name` or `auto`)",
+			name:  "album set an album's name with unexpected key (not `name` or `template`)",
 			album: "foo:bar",
 			in:    "/foo/bar/file.jpg",
 			want:  "",
@@ -57,18 +45,6 @@ func TestAlbumName(t *testing.T) {
 		})
 
 	}
-}
-
-func TestAlbumNameWithInvalidParameter(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("A Panic was expected but not reached.")
-		}
-	}()
-	job := UploadFolderJob{
-		Album: "auto:fooBar",
-	}
-	_ = job.albumName("/foo/bar/file.jpg", time.Now())
 }
 
 func TestAlbumNameWithInvalidTemplate(t *testing.T) {
