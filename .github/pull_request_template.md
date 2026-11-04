@@ -7,6 +7,7 @@
 
 ## User-facing changes
 
-<!-- Config, commands, flags or behaviour users will notice. Write "None" if there are none. -->
+<!-- Config, commands, flags or behaviour users will notice. Write "None" if there are none.
+     Otherwise, add an entry under "## Unreleased" in CHANGELOG.md. -->
 
 ## How was this tested?
