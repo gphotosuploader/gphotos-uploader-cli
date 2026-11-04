@@ -1,5 +1,13 @@
 # Upgrading notes
 
+## Upgrading from 5.x to 6.x
+
+### Command line flags
+
+- The `--redirect-url-hostname` flag of the `auth` command has been **removed**. Use the `--redirect-url` flag instead,
+  with the full URL, and keep `--port` so the local server listens on the port of that URL. For example,
+  `--redirect-url-hostname myhost --port 8080` becomes `--redirect-url http://myhost:8080 --port 8080`.
+
 ## Upgrading from 4.x to 5.x
 
 > **Attention**: Due to the deprecation of some scopes in the Google Photos API, this is the only version which works
@@ -94,4 +102,3 @@ sourceFolder
 | Include all files                 | `includePatterns: "**"}`        | `includePatterns: {"*"}`                                     |
 | Include only PNG files            | `includePatterns: "**/*.png"}`  | `includePatterns: {"*.png"}`                                 |
 | Include PNG files in `foo` folder | `includePatterns: "foo/*.png"}` | `includePatterns: {"*.png"}` <br> `excludePatterns: {"bar"}` |
- 
