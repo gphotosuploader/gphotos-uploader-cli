@@ -1,0 +1,4 @@
+# Release pipeline and CI — changes need maintainer review
+
+/.github/            @pacoorozco
+/.goreleaser.yml     @pacoorozco
