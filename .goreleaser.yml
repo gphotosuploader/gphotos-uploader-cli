@@ -29,13 +29,25 @@ brews:
     test: system "#{bin}/gphotos-uploader-cli --help"
     install: bin.install "gphotos-uploader-cli"
 changelog:
+  # PRs are squash-merged with the PR title as the commit subject, so each entry is a PR title.
+  use: github
   sort: asc
+  abbrev: -1
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^dev:'
-      - 'README'
-      - 'CHANGELOG'
-      - 'Merge pull request'
-      - 'Merge branch'
+      - '^(docs|ci|test)(\(.+\))?!?:'
+      - '^\[CI\]'
+      - '^Merge pull request'
+      - '^Merge branch'
+  groups:
+    - title: Features
+      regexp: '^feat(\(.+\))?!?:'
+      order: 0
+    - title: Bug fixes
+      regexp: '^fix(\(.+\))?!?:'
+      order: 1
+    - title: Dependencies
+      regexp: '^[^:]*\(deps\)!?:'
+      order: 2
+    - title: Other changes
+      order: 999
