@@ -15,7 +15,7 @@ updates:
         labels:
             - 'dependencies'
         commit-message:
-            prefix: 'Bump'
+            prefix: 'chore'
             include: 'scope'
 
     -   package-ecosystem: 'github-actions'
@@ -31,5 +31,5 @@ updates:
         labels:
             - 'dependencies'
         commit-message:
-            prefix: '[CI]'
+            prefix: 'ci'
             include: 'scope'
