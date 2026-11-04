@@ -14,7 +14,7 @@ builds:
       - amd64
     ldflags: -s -w -X=github.com/gphotosuploader/gphotos-uploader-cli/version.versionString={{ .Version }}
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 release:
   # mark tags like v1.2.3-rc1 as pre-releases.
   prerelease: auto
@@ -37,22 +37,25 @@ changelog:
   # PRs are squash-merged with the PR title as the commit subject, so each entry is a PR title.
   use: github
   sort: asc
-  abbrev: -1
+  format: "{{ .Message }} ({{ with .AuthorUsername }}@{{ . }}{{ else }}{{ .AuthorName }}{{ end }})"
   filters:
     exclude:
       - '^(docs|ci|test)(\(.+\))?!?:'
       - '^\[CI\]'
-      - '^Merge pull request'
-      - '^Merge branch'
+      - "^Merge pull request"
+      - "^Merge branch"
   groups:
-    - title: Features
-      regexp: '^feat(\(.+\))?!?:'
+    - title: Breaking changes
+      regexp: '^\w+(\(.+\))?!:'
       order: 0
-    - title: Bug fixes
-      regexp: '^fix(\(.+\))?!?:'
+    - title: Features
+      regexp: '^feat(\(.+\))?:'
       order: 1
-    - title: Dependencies
-      regexp: '^[^:]*\(deps\)!?:'
+    - title: Bug fixes
+      regexp: '^fix(\(.+\))?:'
       order: 2
+    - title: Dependencies
+      regexp: '^[^:]*\(deps\):'
+      order: 3
     - title: Other changes
       order: 999
