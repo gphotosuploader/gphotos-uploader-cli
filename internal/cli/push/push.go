@@ -54,6 +54,11 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	return cmd.push(ctx, cli, photosService)
+}
+
+// push uploads the files of every configured job using the provided Google Photos client.
+func (cmd *PushCmd) push(ctx context.Context, cli *app.App, photosService *gphotos.Client) error {
 	if cmd.DryRunMode {
 		cli.Logger.Info("[DRY-RUN] Running in dry run mode. No file will be uploaded.")
 	}
