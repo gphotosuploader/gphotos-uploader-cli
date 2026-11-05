@@ -129,3 +129,57 @@ gphotos-uploader-cli auth --local-bind-address 0.0.0.0 --port 8080 --redirect-ur
 | `--redirect-url`       |             | URL Google redirects to after authentication, e.g. `http://myhost:8080`. Requires `--port`.  |
 
 > Since v6.0.0, `--redirect-url-hostname` has been removed. Use `--redirect-url` with the full URL instead. See [UPGRADING](upgrading).
+
+## Upload your files
+
+Once you are authenticated, upload your files with:
+
+```bash
+gphotos-uploader-cli push
+```
+
+The CLI processes every job in your [configuration](configuration.md#jobs), one after another. For each job it:
+
+1. Scans the `SourceFolder` and picks the files that match your [include and exclude patterns](configuration.md#including-and-excluding-files).
+1. Skips files that were already uploaded on a previous run.
+1. Creates the destination [album](configuration.md#album) if it doesn't exist yet, then uploads the files to it.
+1. Deletes each local file after a successful upload, but only if [`DeleteAfterUpload`](configuration.md#deleteafterupload) is enabled.
+
+At the end of each job, it prints how many files were processed and how many failed. If one file fails, the CLI logs the error and moves on to the next one.
+
+### Preview what will be uploaded
+
+Use `--dry-run` to see what `push` would do without uploading or deleting anything:
+
+```bash
+gphotos-uploader-cli push --dry-run
+```
+
+> Albums are still created in dry-run mode. Add `--debug` to list each file that would be uploaded.
+
+### Running push again
+
+Run `push` as often as you like, for example from a cron job. Files that were already uploaded are skipped, so only new or modified files are sent to Google Photos.
+
+The CLI keeps track of uploaded files in a local database in your configuration folder. A file counts as already uploaded if its modification time hasn't changed or, if it has, its content is still the same.
+
+To upload everything again, reset that database:
+
+```bash
+gphotos-uploader-cli reset file-tracker
+```
+
+Large uploads resume where they stopped if a run is interrupted.
+
+### Google Photos daily quota
+
+The Google Photos API limits how many requests you can make per day. When that limit is reached, `push` stops with a "quota exceeded" error. Run it again later (the quota resets daily) and it continues with the files that weren't uploaded yet.
+
+### Flags
+
+| Flag        | Default                   | Description                                                      |
+|-------------|---------------------------|------------------------------------------------------------------|
+| `--dry-run` | `false`                   | Show what would be uploaded without uploading or deleting files. |
+| `--config`  | `~/.gphotos-uploader-cli` | Configuration folder to use.                                     |
+| `--debug`   | `false`                   | Log very verbose information, one line per file.                 |
+| `--silent`  | `false`                   | Hide all log output except panics.                               |
