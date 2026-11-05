@@ -35,8 +35,6 @@ jobs:
       - name: Send code coverage
         if: success() && matrix.go == 'latest' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # single, stable check name to use as a required status check in branch protection.
   tests-passed:
