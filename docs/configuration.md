@@ -42,7 +42,7 @@ OAuth 2.0 credentials for Google Photos API access.
    example: _Google Photos Uploader_).
 1. [Enable the Google Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com).
 1. [Configure the OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent) by setting the
-   application name (example: _gphotos-uploader-cli_) and then click the <kbd>Save</kbd> button on the bottom.
+   application name (example: _gphotos-uploader-cli_) and then click the **Save** button on the bottom.
 1. [Create OAuth credentials](https://console.cloud.google.com/apis/credentials) by clicking the **Create credentials →
    OAuth client ID** option, then choose **Desktop app** as the application type and give it a name (example:
    _gphotos-uploader-cli_).
@@ -54,7 +54,9 @@ The Google Account (email) where files will be uploaded.
 
 ### SecretsBackendType
 
-Choose where secrets (tokens) are stored. Recommended: `auto`.
+Choose where secrets (tokens) are stored. The `init` command sets it to `file`, which works everywhere but asks for a
+passphrase (see [GPHOTOS_CLI_TOKENSTORE_KEY](#gphotos_cli_tokenstore_key)). On a desktop with a keyring available,
+`auto` is usually more convenient.
 
 Available options for secrets backend are:
 
@@ -85,7 +87,7 @@ Symlinks are followed. Infinite loops are not detected.
 Controls album organization in Google Photos.
 
 - **Omit**: Files are uploaded without an album. It's the default option.
-- **Fixed Name**: `name:<AlbumName>` (uploads to the specific album _<AlbumName>_).
+- **Fixed Name**: `name:AlbumName` (uploads to the specific album _AlbumName_).
 - **Template**: `template:...` (dynamic album names using placeholders, see below).
 
 Given the local tree of folders and files:
@@ -114,7 +116,7 @@ Example:
 
  ```hjson
   Album: name:fooBar
- ``` 
+ ```
 
 will create and upload objects to an album named `fooBar`:
 
@@ -141,12 +143,15 @@ properties like date or folder names.
 |-----------------------|-------------------------------------------------------------------------------------|
 | `%_directory%`        | Name of the containing folder (same as the **deprecated** `auto:folderName` option) |
 | `%_parent_directory%` | Name of the parent folder                                                           |
-| `%_folderpath%`       | Path of the containing folder relative to `SourceFolder`, with `/` replaced by `_` (same as the **deprecated** `auto:folderPath` option). |
-| `%_day%`              | Day of the month the file was created (in "DD" format).                             |
-| `%_month%`            | Month the file was created (in "MM" format).                                        |
-| `%_year%`             | Year the file was created (in "YYYY" format).                                       |
-| `%_time%`             | Time the file was created (in "HH:MM:SS" 24-hour format).                           |
-| `%_time_en%`          | Time the file was created (in "HH:MM:SS AM/PM" 12-hour format).                     |
+| `%_folderpath%`       | Path of the containing folder relative to `SourceFolder`, with `/` replaced by `_`. |
+| `%_day%`              | Day of the month the file was last modified (in "DD" format).                       |
+| `%_month%`            | Month the file was last modified (in "MM" format).                                  |
+| `%_year%`             | Year the file was last modified (in "YYYY" format).                                 |
+| `%_time%`             | Time the file was last modified (in "HH:MM:SS" 24-hour format).                     |
+| `%_time_en%`          | Time the file was last modified (in "HH:MM:SS AM/PM" 12-hour format).               |
+
+> Date and time placeholders use the local file's **modification time**, not its EXIF date. This only affects the
+> album name: the date shown for each item in Google Photos is still taken from its EXIF data (or the upload date).
 
 **Template Functions:**
 
@@ -189,24 +194,24 @@ If `true`, deletes local files after upload.
 
 #### Including and Excluding files
 
-Use `includePatterns` and `excludePatterns` options to filter files. You can add one or more patterns separated by
-commas `,`. These patterns are always applied to `sourceFolder`.
+Use the `IncludePatterns` and `ExcludePatterns` options to filter files. Each option is a list of one or more
+patterns. Patterns are matched against paths relative to `SourceFolder`.
 
 For example, to upload all _JPG and PNG files_ that are not named _*ScreenShots*_ you can configure it like this:
 
-```
-includePatterns: [ "**/*.jpg", "**/*.png" ]
-excludePatterns: [ "**/ScreenShot*" ]
+```hjson
+IncludePatterns: [ "**/*.jpg", "**/*.png" ]
+ExcludePatterns: [ "**/ScreenShot*" ]
 ```
 
 Another example excluding a specific directory (and folders inside it):
 
-```
-includePatterns: [ "_ALL_FILES_" ]
-excludePatterns: [ "**/Temp/**" ]
+```hjson
+IncludePatterns: [ "_ALL_FILES_" ]
+ExcludePatterns: [ "**/Temp/**" ]
 ```
 
-> If `includePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used.
+> If `IncludePatterns` is empty, `_IMAGE_EXTENSIONS_` will be used.
 
 **Special Patterns:**
 
@@ -223,9 +228,9 @@ excludePatterns: [ "**/Temp/**" ]
 - `**` matches any sequence, including path separators
 - `?` matches a single non-path-separator
 - `[class]` character classes
-    - `[abc]` matches any single character within the set
-    - `[a-z]` matches any single character in the range
-    - `[^class]` matches any single character which does *not* match the class
+  - `[abc]` matches any single character within the set
+  - `[a-z]` matches any single character in the range
+  - `[^class]` matches any single character which does **not** match the class
 - `{alt1,alt2}` alternatives
 - Any character with a special meaning can be escaped with a backslash (`\`).
 
