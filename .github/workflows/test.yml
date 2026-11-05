@@ -31,7 +31,7 @@ jobs:
       - name: Build binary
         run: make build
       - name: Run tests
-        run: make test
+        run: make cover
       - name: Send code coverage
         if: success() && matrix.go == 'latest' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1

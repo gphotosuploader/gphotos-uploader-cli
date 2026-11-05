@@ -3,13 +3,13 @@ CONFIGURATION_PACKAGE := github.com/gphotosuploader/gphotos-uploader-cli/version
 
 # This VERSION could be set calling `make VERSION=0.2.0`
 VERSION ?= $(shell git describe --tags --always --dirty)
-LDFLAGS=-ldflags "-X ${CONFIGURATION_PACKAGE}.versionString=$(VERSION)"
+LDFLAGS := -ldflags "-X $(CONFIGURATION_PACKAGE).versionString=$(VERSION)"
 
-TEST_VERSION="0.0.0-test.preview"
-TEST_LDFLAGS=-ldflags "-X ${CONFIGURATION_PACKAGE}.versionString=$(TEST_VERSION)"
+TEST_VERSION := 0.0.0-test.preview
+TEST_LDFLAGS := -ldflags "-X $(CONFIGURATION_PACKAGE).versionString=$(TEST_VERSION)"
+TEST_FLAGS := -race -failfast -timeout=2m $(TEST_LDFLAGS)
 
-# go source files, ignore vendor directory
-PKGS = $(shell go list ./... | grep -v /vendor)
+PKGS := ./...
 SRC := main.go
 BINARY := gphotos-uploader-cli
 
@@ -17,63 +17,67 @@ BINARY := gphotos-uploader-cli
 TMP_DIR ?= .tmp
 COVERAGE_FILE := $(TMP_DIR)/coverage.txt
 COVERAGE_HTML_FILE := $(TMP_DIR)/coverage.html
-GOLANGCI := $(TMP_DIR)/golangci-lint
-GOLANGCI_VERSION := 2.15.0
 
-# set how to open files based on OS and ARCH.
+# Keep in sync with GOLANGCI_LINT_VERSION in .github/workflows/lint.yml.
+GOLANGCI_VERSION := 2.15.0
+# The version is part of the path, so bumping GOLANGCI_VERSION triggers a reinstall.
+GOLANGCI := $(TMP_DIR)/golangci-lint-v$(GOLANGCI_VERSION)/golangci-lint
+
+# How to open the HTML coverage report (`make cover OPEN=1`).
 UNAME_OS := $(shell uname -s)
-UNAME_ARCH := $(shell uname -m)
-ifeq ($(UNAME_ARCH),x86_64)
 ifeq ($(UNAME_OS),Darwin)
 OPEN_CMD := open
-endif
-ifeq ($(UNAME_OS),Linux)
+else
 OPEN_CMD := xdg-open
-endif
 endif
 
 .DEFAULT_GOAL := help
+
 .PHONY: test
 test: ## Run all the tests
 	@echo "--> Running tests..."
-	@mkdir -p $(dir $(COVERAGE_FILE))
-	@go test -covermode=atomic -coverprofile=$(COVERAGE_FILE) -race -failfast -timeout=30s ${TEST_LDFLAGS} $(PKGS)
+	@go test $(TEST_FLAGS) $(PKGS)
 
 .PHONY: cover
-cover: test ## Run all the tests and opens the coverage report
-	@echo "--> Creating HTML coverage report at $(COVERAGE_HTML_FILE)..."
-	@mkdir -p $(dir $(COVERAGE_FILE)) $(dir $(COVERAGE_HTML_FILE))
+cover: ## Run all the tests with coverage and create an HTML report (OPEN=1 to open it)
+	@echo "--> Running tests with coverage..."
+	@mkdir -p $(TMP_DIR)
+	@go test $(TEST_FLAGS) -covermode=atomic -coverprofile=$(COVERAGE_FILE) $(PKGS)
+	@go tool cover -func=$(COVERAGE_FILE) | tail -n 1
 	@go tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML_FILE)
-ifndef COVEROPEN
-	@echo "--> Open HTML coverage report: $(OPEN_CMD) $(COVERAGE_HTML_FILE)"
-else
-	$(OPEN_CMD) $(COVERAGE_HTML_FILE)
+	@echo "--> HTML coverage report created at $(COVERAGE_HTML_FILE)"
+ifdef OPEN
+	@$(OPEN_CMD) $(COVERAGE_HTML_FILE)
 endif
 
+.PHONY: build
 build: ## Build the app
 	@echo "--> Building binary artifact ($(BINARY) $(VERSION))..."
-	@go build ${LDFLAGS} -o $(BINARY) $(SRC)
+	@go build $(LDFLAGS) -o $(BINARY) $(SRC)
 
 .PHONY: clean
 clean: ## Clean all built artifacts
 	@echo "--> Cleaning all built artifacts..."
-	@rm -f $(GOLANGCI) $(COVERAGE_FILE) $(COVERAGE_HTML_FILE)
-	@rm -rf dist
+	@rm -rf $(BINARY) $(TMP_DIR) dist
 	@go clean
-	@go mod tidy -v
 
 $(GOLANGCI):
-	@echo "--> Installing golangci v$(GOLANGCI_VERSION)..."
+	@echo "--> Installing golangci-lint v$(GOLANGCI_VERSION)..."
 	@mkdir -p $(dir $(GOLANGCI))
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh  | sh -s -- -b $(dir $(GOLANGCI)) v$(GOLANGCI_VERSION)
+	@# Use the install script from the release tag, not master, so it matches the release assets.
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v$(GOLANGCI_VERSION)/install.sh | sh -s -- -b $(dir $(GOLANGCI)) v$(GOLANGCI_VERSION)
 
 .PHONY: lint
 lint: $(GOLANGCI) ## Run linter
-	@echo "--> Running linter golangci v$(GOLANGCI_VERSION)..."
+	@echo "--> Running linter golangci-lint v$(GOLANGCI_VERSION)..."
 	@$(GOLANGCI) run
 
+.PHONY: tidy
+tidy: ## Tidy go.mod and go.sum
+	@go mod tidy -v
+
 .PHONY: ci
-ci: lint test cover build ## Run all the tests and code checks
+ci: lint cover build ## Run all the tests and code checks
 
 .PHONY: version
 version: ## Show current version
