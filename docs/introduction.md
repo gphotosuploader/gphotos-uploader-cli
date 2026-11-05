@@ -6,9 +6,9 @@ While the official Google Photos uploader only supports macOS and Windows, this 
 
 Some notes before you start:
 
-* This tool is not affiliated with Google. It is an independent project that uses the [Google Photos API](https://developers.google.com/photos).
-* The Google Photos API has several limitations which this tool can solve. Please read the [Limitations](#limitations) section to ensure it meets your needs.
-* By the nature of how this CLI has been designed, **it is not suitable to be used inside a Docker container**. It is designed to run on a local machine with a persistent filesystem and access to the interactive terminal for authentication.
+- This tool is not affiliated with Google. It is an independent project that uses the [Google Photos API](https://developers.google.com/photos).
+- The Google Photos API has several limitations which this tool cannot work around. Please read the [Limitations](#limitations) section to ensure it meets your needs.
+- By the nature of how this CLI has been designed, **it is not suitable to be used inside a Docker container** (see [Limitations](#limitations)).
 
 ## Features
 

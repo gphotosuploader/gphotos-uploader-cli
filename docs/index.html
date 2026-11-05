@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Document</title>
-  <meta name="description" content="Description">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gphotos-uploader-cli</title>
+  <meta name="description" content="Command-line tool to mass upload media folders to your Google Photos account.">
+  <!-- Core Theme -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
+  <!-- Dark Mode Support -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/core-dark.min.css"
+    media="(prefers-color-scheme: dark)" />
 </head>
-<body>
+
+<body class="sidebar-chevron-right">
   <div id="app"></div>
   <script>
     window.$docsify = {
@@ -14,10 +21,9 @@
       repo: 'gphotosuploader/gphotos-uploader-cli',
       auto2top: true,
       coverpage: true,
-      loadNavbar: true,
+      loadNavbar: false,
       loadSidebar: true,
       subMaxLevel: 2,
-      search: 'auto',
       search: {
         noData: {
           '/': 'No results!'
@@ -27,15 +33,15 @@
       },
       alias: {
         '.*?/changelog':
-                'https://raw.githubusercontent.com/gphotosuploader/gphotos-uploader-cli/master/CHANGELOG.md', 
+          'https://raw.githubusercontent.com/gphotosuploader/gphotos-uploader-cli/main/CHANGELOG.md',
         '.*?/upgrading':
-                'https://raw.githubusercontent.com/gphotosuploader/gphotos-uploader-cli/master/UPGRADING.md',
+          'https://raw.githubusercontent.com/gphotosuploader/gphotos-uploader-cli/main/UPGRADING.md',
       }
     }
   </script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/docsify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@5/dist/docsify-copy-code.min.js"></script>
 </body>
+
 </html>
