@@ -107,7 +107,7 @@ func (cmd *PushCmd) push(ctx context.Context, cli *app.App, photosService *gphot
 
 				if !cmd.DryRunMode {
 					// Upload the file and add it to PhotosService.
-					_, err := photosService.UploadToAlbum(ctx, albumId, file.Path)
+					item, err := photosService.UploadToAlbum(ctx, albumId, file.Path)
 
 					// Check if the Google Photos daily quota has been exceeded.
 					var e *gphotos.ErrDailyQuotaExceeded
@@ -118,6 +118,14 @@ func (cmd *PushCmd) push(ctx context.Context, cli *app.App, photosService *gphot
 
 					if err != nil {
 						cli.Logger.Failf("Error processing %s: %s", file, err)
+						continue
+					}
+
+					// The API can reject an item without returning an error, in
+					// which case no media item is created. Do not track it as
+					// uploaded so a later run retries it.
+					if item == nil {
+						cli.Logger.Failf("Error processing %s: the API did not create a media item", file)
 						continue
 					}
 
