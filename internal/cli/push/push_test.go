@@ -162,6 +162,19 @@ func TestPushCmd_push(t *testing.T) {
 		assert.True(t, env.logger.FailfInvoked)
 	})
 
+	t.Run("Should not track a file as uploaded when the API creates no media item", func(t *testing.T) {
+		env := newPushEnv(t, config.FolderUploadJob{DeleteAfterUpload: true}, "rejected.jpg", "good.jpg")
+		rejected := env.path("rejected.jpg")
+		env.media.missing = map[string]bool{rejected: true}
+
+		require.NoError(t, env.run(false))
+
+		assert.Equal(t, env.paths("good.jpg"), env.tracker.uploadedPaths())
+		assert.FileExists(t, rejected, "rejected uploads must not be deleted")
+		assert.NoFileExists(t, env.path("good.jpg"))
+		assert.True(t, env.logger.FailfInvoked)
+	})
+
 	t.Run("Should delete files after upload when configured", func(t *testing.T) {
 		env := newPushEnv(t, config.FolderUploadJob{DeleteAfterUpload: true}, "a.jpg")
 
@@ -360,6 +373,9 @@ func (f *fakeAlbums) PaginatedList(context.Context, *albums.PaginatedListOptions
 // fakeMediaItems implements gphotos.MediaItemsService, recording created items.
 type fakeMediaItems struct {
 	created []createdItem
+	// missing lists the file paths for which the API reports success while
+	// creating no media item, mimicking a rejected batch item.
+	missing map[string]bool
 }
 
 type createdItem struct {
@@ -369,6 +385,9 @@ type createdItem struct {
 
 func (f *fakeMediaItems) CreateToAlbum(_ context.Context, albumID string, item media_items.SimpleMediaItem) (*media_items.MediaItem, error) {
 	f.created = append(f.created, createdItem{albumID: albumID, filename: item.Filename})
+	if f.missing[item.Filename] {
+		return nil, nil
+	}
 	return &media_items.MediaItem{ID: "media-" + item.Filename, Filename: item.Filename}, nil
 }
 
