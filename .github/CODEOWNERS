@@ -1,5 +1,5 @@
 # Release pipeline and CI — changes need maintainer review
 
-/.github/            @pacoorozco
-/.goreleaser.yml     @pacoorozco
-/.go-version         @pacoorozco
+/.github/            @gphotosuploader/maintainers
+/.goreleaser.yml     @gphotosuploader/maintainers
+/.go-version         @gphotosuploader/maintainers
